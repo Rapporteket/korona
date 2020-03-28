@@ -1,15 +1,42 @@
 Package: korona
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Resultattjeneste for registrering av Korona-pandemi
+Version: 0.1.0
+Date: 2020-03-28
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Lena Ringstad",
+           family = "Olsen",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
+           email = "lenaringstado@gmail.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: Resultater fra koronaregistrering i Norsk Intensivregister.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 3.5.0),
+    rapbase (>= 1.0.0)
+Remotes: 
+      Rapporteket/rapbase,
+      Rapporteket/rapFigurer,
+      Rapporteket/raplog,
+Imports:
+    digest,
+    DT,
+    kableExtra,
+    knitr,
+    lifecycle,
+    lubridate,
+    plyr,
+    rapbase,
+    rapFigurer,
+    raplog,
+    shiny,
+    shinyalert,
+    shinyjs,
+    xtable,
+    zoo
+VignetteBuilder: knitr
 Suggests: 
-    MASS
+    testthat (>= 2.1.0)
+RoxygenNote: 7.1.0
+
