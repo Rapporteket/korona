@@ -6,10 +6,11 @@
 \usage{
 oppsumFerdigeRegTab(
   RegData,
-  valgtRHF = "Alle",
+  valgtEnhet = "Alle",
+  enhetsNivaa = "RHF",
   bekr = 9,
   erMann = 9,
-  dodInt = 9
+  dodSh = 9
 )
 }
 \arguments{
@@ -19,7 +20,7 @@ oppsumFerdigeRegTab(
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
-\item{dodInt}{død på intensiv 0-nei, 1-ja}
+\item{dodSh}{død på sykehus 0-nei, 1-ja}
 }
 \value{
 

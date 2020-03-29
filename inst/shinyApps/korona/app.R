@@ -76,7 +76,7 @@ ui <- tagList(
               #                            value = Sys.Date(), max = Sys.Date())
               # ),
 #MÅ HA ET VALG SOM ENDRER SEG AVHENGIG AV ROLLE, DVS. Velg RHF/HF/ingen valg?
-              selectInput(inputId = "valgtRHF", label="Velg RHF",
+              selectInput(inputId = "valgtEnhet", label="Velg RHF",
                           choices = rhfNavn
               ),
 # selectInput(inputId = 'enhetsGruppe', label='Enhetgruppe',
@@ -122,6 +122,9 @@ ui <- tagList(
                       br(),
                       fluidRow(
                         column(width = 4,
+                               h4('Innlagte på sykehus nå'),
+                               uiOutput('statusNaaShTab'),
+                               br(),
                                h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
                                h5('Kommer...'),
                         ),
@@ -160,7 +163,7 @@ tabPanel(p('Intensivpasienter',
                                h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
                                    Gå til fanen "Abonnement" for å bestille dette.'),
                                downloadButton(outputId = 'KoroRappInt.pdf',
-                                              label=HTML('Last ned Koronarapport <br /> fra intensiv'), class = "butt"),
+                                              label=HTML('Last ned Koronarapport <br /> for intensivopphold'), class = "butt"),
                                tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                br(),
                                br(),
@@ -193,7 +196,8 @@ tabPanel(p('Intensivpasienter',
                                      tableOutput('tabFerdigeRegInt')
                               )),
 
-                            h3('Antall intensivopphold - vise per uke? (evt. velge dag/uke)'),
+                            h3('Antall intensivopphold'),
+                            h5('Innleggelser siste to uker, samt totalt siden 10.mars'),
                             uiOutput('utvalgAntRegInt'),
                             tableOutput('tabAntRegInt'),
                             br(),
@@ -222,7 +226,7 @@ tabPanel(p('Intensivpasienter',
                                    Ukentlig="Ukentlig-week",
                                    Daglig="Daglig-DSTday"),
                              selected = "Ukentlig-week"),
-                 selectInput(inputId = "valgtRHFabb", label="Velg RHF",
+                 selectInput(inputId = "valgtEnhetabb", label="Velg RHF",
                              choices = rhfNavn
                  ),
                  actionButton("subscribe", "Bestill!")
@@ -274,11 +278,11 @@ server <- function(input, output, session) {
   }
   })
     if (rolle != 'SC') {
-    updateSelectInput(session, "valgtRHF",
+    updateSelectInput(session, "valgtEnhet",
                       choices = unique(c('Alle', ifelse(egetRHF=='Ukjent', 'Alle',
                                                         egetRHF))))
                                   #KoroData$RHF[match(reshID, KoroData$ReshId)]))
-    updateSelectInput(session, "valgtRHFabb",
+    updateSelectInput(session, "valgtEnhetabb",
                         choices = egetRHF) #unique(c('Alle', egetRHF)))
                                     #KoroData$RHF[match(reshID, KoroData$ReshId)]))
     }
@@ -304,14 +308,14 @@ server <- function(input, output, session) {
 
   #-------- Laste ned Samlerapporter------------
   observe({
-  valgtRHF <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtRHF))
+  valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
   output$KoroRapp.pdf <- downloadHandler(
       filename = function(){
       paste0('KoronaRapport', Sys.time(), '.pdf')},
     content = function(file){
       henteSamlerapporterBered(file, rnwFil="KoroRapp.Rnw",
                                #rolle = rolle,
-                               valgtRHF = valgtRHF, #as.character(input$valgtRHF),
+                               valgtEnhet = valgtEnhet, #as.character(input$valgtEnhet),
                           reshID = reshID) #Vurder å ta med tidsinndeling eller startdato
     }
   )
@@ -329,18 +333,18 @@ server <- function(input, output, session) {
 
 observe({
 
-  valgtRHF <- ifelse(rolle == 'SC', as.character(input$valgtRHF), egetRHF)
+  valgtEnhet <- ifelse(rolle == 'SC', as.character(input$valgtEnhet), egetRHF)
 
   AntTab <- TabTidEnhet(RegData=KoroData, tidsenhet='dag',
-                      valgtRHF= valgtRHF,
+                      valgtEnhet= valgtEnhet,
                       skjemastatus=as.numeric(input$skjemastatus),
                       bekr=as.numeric(input$bekr),
                       #dodInt=as.numeric(input$dodInt),
                       erMann=as.numeric(input$erMann)
                       )
 
-      UtData <- NIRUtvalgBeredsk(RegData=KoroData,
-                                 valgtRHF= ifelse(valgtRHF=='Ukjent','Alle',valgtRHF),
+      UtData <- KoronaUtvalg(RegData=KoroData,
+                                 valgtEnhet= valgtEnhet,
                                  skjemastatus=as.numeric(input$skjemastatus),
                                  bekr=as.numeric(input$bekr),
                                  #dodInt=as.numeric(input$dodInt),
@@ -356,26 +360,26 @@ observe({
            sum(UtData$RegData$DischargedIntensivStatus==1))
     } else {''}
 
-  output$utvalgHoved <- renderUI({
+  output$utvalgAntOpph <- renderUI({
     UtTekst <- tagList(
       h5(HTML(paste0(utvalg, '<br />'))),
       h4(HTML(paste0(txt, '<br />')))
 
     )})
 
-  output$tabTidEnhet <- renderTable({AntTab$Tab}, rownames = T, digits=0, spacing="xs"
+  output$tabAntOpph <- renderTable({AntTab$Tab}, rownames = T, digits=0, spacing="xs"
   )
 
 #Tab status nå
-  statusNaaTab <- statusECMOrespTab(RegData=KoroData, valgtRHF=input$valgtRHF,
+  statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #valgtEnhet=input$valgtEnhet,
                                     erMann=as.numeric(input$erMann),
                                     bekr=as.numeric(input$bekr))
-  output$tabECMOrespirator <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
+  output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
   output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
   #Tab ferdigstilte
   TabFerdig <- oppsumFerdigeRegTab(RegData=KoroData,
-                                     valgtRHF=input$valgtRHF,
+                                     valgtEnhet=input$valgtEnhet,
                                    bekr = as.numeric(input$bekr),
                                      erMann=as.numeric(input$erMann))
 
@@ -387,28 +391,10 @@ observe({
   output$tittelFerdigeReg <- renderUI(
     h4(paste0('Fullførte registreringer (', TabFerdig$Ntest, ' skjema)')))
 
-  #Registreringer i limbo:
-  output$RegIlimbo <- renderUI({
-    finnBurdeFerdig <- function(RegData) {sum((!(is.na(RegData$DateDischargedIntensive)) & (RegData$FormStatus!=2)))}
-    valgtRHF <- input$valgtRHF
-    tittel <- 'Opphold registrert som utskrevet, uten ferdigstilt skjema: '
-
-    AntBurdeFerdig <-
-      c( #tittel,
-        if (rolle=='LU' & finnesEgenResh) {
-          paste0(finnBurdeFerdig(KoroData[(which(KoroData$ReshId==reshID)), ]),' skjema for ', egetShNavn)},
-      if (valgtRHF=='Alle') {
-        paste0(finnBurdeFerdig(KoroData), ' skjema for hele landet')
-        } else {
-          paste0(finnBurdeFerdig(KoroData[KoroData$RHF==valgtRHF, ]), ' skjema for ', valgtRHF)}
-      )
-    h5(HTML(paste0('&nbsp;&nbsp;&nbsp;', AntBurdeFerdig, '<br />')))
-    })
-
 
   #Tab risiko
   RisikoTab <- RisikofaktorerTab(RegData=KoroData, tidsenhet='Totalt',
-                                 valgtRHF= input$valgtRHF,
+                                 valgtEnhet= input$valgtEnhet,
                                  skjemastatus=as.numeric(input$skjemastatus),
                                  bekr=as.numeric(input$bekr),
                                  #dodInt=as.numeric(input$dodInt),
@@ -424,7 +410,7 @@ observe({
                          })
 
     TabAlder <- TabAlder(RegData=KoroData,
-                         valgtRHF= egetRHF, #input$valgtRHF,
+                         valgtEnhet= egetRHF, #input$valgtEnhet,
                          #dodInt=as.numeric(input$dodInt),
                          erMann=as.numeric(input$erMann),
                          bekr=as.numeric(input$bekr),
@@ -440,10 +426,7 @@ observe({
 
 observe({
 
-  valgtRHF <- ifelse(rolle == 'SC', as.character(input$valgtRHF), egetRHF)
-
-  AntTab <- intensivberedskap::TabTidEnhet(RegData=KoroDataInt, tidsenhet='dag',
-                        valgtRHF= 'Alle', #valgtRHF,
+  AntTab <- intensivberedskap::TabTidEnhet(RegData=KoroDataInt, tidsenhet='dag', #valgtRHF= 'Alle',
                         bekr=as.numeric(input$bekr)
   )
   UtData <- NIRUtvalgBeredsk(RegData=KoroDataInt,
@@ -461,19 +444,19 @@ observe({
       h4(HTML(paste0(txt, '<br />')))
 
     )})
-
-  output$tabAntRegInt <- renderTable({AntTab$Tab}, rownames = T, digits=0, spacing="xs"
+Nrader <- dim(AntTab$Tab)[1]
+  output$tabAntRegInt <- renderTable({AntTab$Tab[(Nrader-14):Nrader, ]}, rownames = T, digits=0, spacing="xs"
   )
 
+
   #Tab status nå
-  statusNaaTab <- intensivberedskap::statusECMOrespTab(RegData=KoroDataInt, #valgtRHF=input$valgtRHF,
+  statusNaaIntTab <- intensivberedskap::statusECMOrespTab(RegData=KoroDataInt,
                                     bekr=as.numeric(input$bekrInt))
-  output$tabIntensivNaa <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
-  output$utvalgIntensivNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
+  output$tabIntensivNaa <- renderTable({statusNaaIntTab$Tab}, rownames = T, digits=0, spacing="xs")
+  output$utvalgIntensivNaa <- renderUI({h5(HTML(paste0(statusNaaIntTab$utvalgTxt, '<br />'))) })
 
   #Tab ferdigstilte
   TabFerdigInt <- intensivberedskap::oppsumFerdigeRegTab(RegData=KoroDataInt,
-                                   #valgtRHF=input$valgtRHF,
                                    bekr = as.numeric(input$bekrInt))
 
   output$tabFerdigeRegInt <- if (TabFerdigInt$Ntest>2){
@@ -503,13 +486,10 @@ observe({
   })
 
   TabAlder <- intensivberedskap::TabAlder(RegData=KoroDataInt,
-                       #valgtRHF= egetRHF, #input$valgtRHF,
                        bekr=as.numeric(input$bekr)
   )
   output$tabAlderInt<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
   output$utvalgAlderInt <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })
-
-
 })
 
   #------------- Abonnement----------------
@@ -555,9 +535,9 @@ observe({
         rnwFil <- "KoronaRapp.Rnw" #Navn på fila
       }
       fun <- "abonnementKorona"
-      paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtRHF")
+      paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet")
 
-      paramValues <- c(rnwFil, brukernavn, reshID, as.character(input$valgtRHFabb)) #valgtRHF) #
+      paramValues <- c(rnwFil, brukernavn, reshID, as.character(input$valgtEnhetabb))
 
       #test <- abonnementBeredsk(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
       #                       reshID=105460)

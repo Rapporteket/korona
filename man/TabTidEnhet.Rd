@@ -8,10 +8,11 @@ TabTidEnhet(
   RegData,
   tidsenhet = "dag",
   erMann = 9,
+  enhetsNivaa = "RHF",
   bekr = 9,
   skjemastatus = 9,
-  dodInt = 9,
-  valgtRHF = "Alle",
+  dodSh = 9,
+  valgtEnhet = "Alle",
   velgAvd = 0
 )
 }
@@ -22,13 +23,13 @@ TabTidEnhet(
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
+\item{enhetsNivaa}{'RHF', 'HF', 'ShNavn'}
+
 \item{bekr}{1-bekreftet, 0-mistenkt tilfelle}
 
 \item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{dodInt}{død på intensiv 0-nei, 1-ja}
-
-\item{enhetsNivaa}{'RHF', 'HF', 'ShNavn'}
+\item{dodSh}{død på sykehus 0-nei, 1-ja}
 }
 \value{
 

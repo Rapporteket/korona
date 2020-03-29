@@ -13,9 +13,10 @@ KoronaUtvalg(
   maxald = 110,
   bekr = 9,
   skjemastatus = 9,
-  dodInt = 9,
+  dodSh = 9,
   reshID = 0,
-  valgtRHF = "Alle"
+  enhetsnivaa = "Totalt",
+  valgtEnhet = "Alle"
 )
 }
 \arguments{
@@ -31,7 +32,7 @@ KoronaUtvalg(
 
 \item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{dodInt}{død på intensiv 0-nei, 1-ja}
+\item{dodSh}{død på sykehus 0-nei, 1-ja}
 
 \item{reshID}{reshID fra innlogging}
 

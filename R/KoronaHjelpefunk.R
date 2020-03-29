@@ -53,7 +53,7 @@ valgtRHF <- valgtRHF[[1]]
   reshID <- reshID[[1]]
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = "starter Abonnement: Corona-rapport")
+                    msg = "starter Abonnement: Pandemi-rapport")
   # raplog::subLogger(author = author[[1]], registryName = registryName[[1]],
   #                     reshId = reshId[[1]],
   #                     msg = "Subscription report: stent/prosedyre")
