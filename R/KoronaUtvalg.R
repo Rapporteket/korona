@@ -49,7 +49,7 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
                                      c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatus+1])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
     if (dodInt %in% 0:1) {paste0('Status ut fra intensiv: ', c('Levende','Død')[as.numeric(dodInt)+1])},
-    if (valgtRHF != 'Alle'){paste('Valgt RHF:', valgtRHF)},
+    if (valgtRHF != 'Alle'){paste('Valgt RHF:', valgtRHF)}
   )
 
  UtData <- list(RegData=RegData, utvalgTxt=utvalgTxt) #ind=ind, medSml=medSml, smltxt=smltxt, hovedgrTxt=hovedgrTxt, grTypeTxt=grTypeTxt,
