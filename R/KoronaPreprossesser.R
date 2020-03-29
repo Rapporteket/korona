@@ -9,7 +9,7 @@
 #'
 #' @export
 #'
-KoronaPreprossesser <- function(RegData=RegData)	#, reshID=reshID)
+KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 {
 #MÅ OPPDATERES NÅR FÅR DATA!!!!
       #Kjønn

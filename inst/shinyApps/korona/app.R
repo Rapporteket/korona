@@ -12,8 +12,9 @@ library(shinyjs)
 library(magrittr)
 library(rapbase)
 library(korona)
+library(intensivberedskap)
 
-addResourcePath('rap', system.file('www', package='rapbase'))
+shiny::addResourcePath('rap', system.file('www', package='rapbase'))
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
 paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
@@ -23,15 +24,16 @@ regTitle <- ifelse(paaServer,
 
 #---------Hente data------------
 #NB Henter nå koronadata fra intensivregisteret !!!!!!!!!
+library(intensivberedskap)
 if (paaServer) {
   qCoro <- 'SELECT *  from ReadinessFormDataContract'
   KoroData <- rapbase::LoadRegData(registryName= "nir", query=qCoro, dbType="mysql")
+  KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 # } else {
 #   KoroData <- read.table('C:/ResultattjenesteGIT/XX.csv', sep=';',
 #                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 } #hente data
-
 
 KoroData <- KoronaPreprosesser(RegData = KoroData)
 
@@ -39,17 +41,11 @@ KoroData <- KoronaPreprosesser(RegData = KoroData)
 
 
 #Definere utvalgsinnhold
-#sykehusNavn <- sort(c('',unique(KoroData$ShNavn)), index.return=T)
-#sykehusValg <- c(0,unique(KoroData$ReshId))[sykehusNavn$ix]
 rhfNavn <- c('Alle', as.character(sort(unique(KoroData$RHF))))
 hfNavn <- sort(unique(KoroData$HF)) #, index.return=T)
-sykehusNavn <- sort(unique(KoroData$ShNavn), index.return=T)
-sykehusValg <- unique(KoroData$ReshId)[sykehusNavn$ix]
-sykehusValg <- c(0,sykehusValg)
-names(sykehusValg) <- c('Ikke valgt',sykehusNavn$x)
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som flge av et annet input.
-enhetsNivaa <- c('RHF', 'HF', 'ShNavn')
-names(enhetsNivaa) <- c('RHF', 'HF', 'Sykehus')
+#enhetsNivaa <- c('Alle', 'RHF', 'HF')
+#names(enhetsNivaa) <- c('RHF', 'HF')
 
 ui <- tagList(
   navbarPage(id='hovedark',
@@ -58,7 +54,7 @@ ui <- tagList(
     windowTitle = regTitle,
     theme = "rap/bootstrap.css",
 
-
+#-------------Startside--------------
     tabPanel("Oversikt",
              useShinyjs(),
              sidebarPanel(id = 'brukervalgStartside',
@@ -78,9 +74,14 @@ ui <- tagList(
               #                  dateInput(inputId = 'sluttDatoReg', label = 'Velg sluttdato', language="nb",
               #                            value = Sys.Date(), max = Sys.Date())
               # ),
+#MÅ HA ET VALG SOM ENDRER SEG AVHENGIG AV ROLLE, DVS. Velg RHF/HF/ingen valg?
               selectInput(inputId = "valgtRHF", label="Velg RHF",
                           choices = rhfNavn
               ),
+# selectInput(inputId = 'enhetsGruppe', label='Enhetgruppe',
+#             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
+# ),
+
 
               #br(),
               selectInput(inputId = "bekr", label="Bekreftet/Mistenkt",
@@ -104,9 +105,6 @@ ui <- tagList(
               br(),
               actionButton("tilbakestillValg", label="Tilbakestill valg")
 
-              # selectInput(inputId = 'enhetsGruppe', label='Enhetgruppe',
-              #             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
-              # ),
               # dateRangeInput(inputId = 'datovalg', start = startDato, end = idag,
               #                label = "Tidsperiode", separator="t.o.m.", language="nb" #)
               # ),
@@ -118,17 +116,16 @@ ui <- tagList(
                                            addUserInfo = TRUE),
                        tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
 
-                       h3('Resultater fra intensivregisterets beredskapsskjema for mistenkt/bekreftet
-                       Koronasmitte.'),
+                       h3('Resultater fra pandemiregistrering, korona.'),
                        h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
-                      #h5('Siden er under utvikling... ', style = "color:red"),
+                       h5('Siden er under utvikling... ', style = "color:red"),
                       br(),
                       fluidRow(
                         column(width = 4,
-                               h4('Opphold uten registrert ut-tid fra intensiv'), #, align='center'),
-                               uiOutput('liggetidNaa'),
+                               h4('Opphold uten registrert ut-tid fra INTENSIV'), #, align='center'),
+                               h5('Valg på Alle/mistenkt/bekreftet. Andre utvalg?', style = "color:red"),
                                uiOutput('utvalgNaa'),
-                               tableOutput('tabECMOrespirator'),
+                               tableOutput('tabIntensivNaa'),
                                br(),
                                h4('Opphold registrert som utskrevet, uten ferdigstilt skjema:'),
                                #h4('Antall opphold registrert som utskrevet, med ikke ferdigstilt skjema'),
@@ -155,7 +152,71 @@ ui <- tagList(
                                tableOutput('tabAlder')
                                ))
              ) #main
-    ), #tab Tabeller
+    ), #tab Startside
+
+#---------Intensivregistreringer--------------------------------
+tabPanel(p('Intensivpasienter',
+           title='Resultater fra koronaregistrering i intensivregisteret'),
+         value = 'Intensiv',
+
+                  sidebarPanel(id = 'intensiv',
+                               width = 3,
+                               uiOutput('KoroRappTxt'),
+                               h3('Koronarapport fra intensivregisteret'),
+                               h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
+                                   Gå til fanen "Abonnement" for å bestille dette.'),
+                               downloadButton(outputId = 'KoroRappInt.pdf',
+                                              label='Last ned Koronarapport fra intensivregisteret', class = "butt"),
+                               tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
+                               br(),
+                               br(),
+                               h3('Gjør filtreringer/utvalg:'),
+                               #br(),
+
+                               selectInput(inputId = "bekr", label="Bekreftet/Mistenkt",
+                                           choices = c("Alle"=9, "Bekreftet"=1, "Mistenkt"=0)
+                               ),
+                   ),
+                  mainPanel(width = 9,
+                            h3('Resultater fra koronaregistrering på INTENSIVavdelinger.'),
+                            h4('Mer spesifikke resultater fra intensivavdlingene
+                               finnes på Rapporteket-NIR-Beredskap'),
+                            h4('Husk at andre tilgangsnivåer/resh enn i Rapporteket-Beredskap', style = "color:red"),
+                            h5('Siden er under utvikling... ', style = "color:red"),
+                            br(),
+                            fluidRow(
+                              column(width = 4,
+                                     h4('Opphold uten registrert ut-tid fra intensiv'), #, align='center'),
+                                     h5('Valg på Alle/mistenkt/bekreftet. Andre utvalg?', style = "color:red"),
+                                     uiOutput('utvalgNaaInt'),
+                                     tableOutput('tabIntensivNaaInt'),
+                                     # br(),
+                                     # h4('Opphold registrert som utskrevet, uten ferdigstilt skjema:'),
+                                     # uiOutput('RegIlimbo')
+                              ),
+                              column(width=5, offset=1,
+                                     uiOutput('tittelFerdigeRegInt'), #Ta med utvalg i tittel?
+                                     uiOutput('utvalgFerdigeRegInt'),
+                                     tableOutput('tabFerdigeRegInt')
+                              )),
+
+                            h3('Antall intensivopphold'),
+
+                            uiOutput('utvalgHovedInt'),
+                            tableOutput('tabTidEnhetInt'),
+                            br(),
+                            fluidRow(
+                              column(width=3,
+                                     h3('RisikofaktorerInt'),
+                                     uiOutput('utvalgRisikoInt'),
+                                     tableOutput('tabRisikofaktorerInt')),
+                              column(width=5, offset=1,
+                                     h3('AldersfordelingInt'),
+                                     uiOutput('utvalgAlderInt'),
+                                     tableOutput('tabAlderInt')
+                              ))
+                            )
+         ), #Intensiv-side
 
 #-----------Abonnement--------------------------------
     tabPanel(p("Abonnement",
@@ -163,7 +224,7 @@ ui <- tagList(
              value = 'Abonnement',
              sidebarLayout(
                sidebarPanel(width = 3,
-                 selectInput("subscriptionRep", "Dokument:", c("Koronarapport")),
+                 selectInput("subscriptionRep", "Dokument:", c("Koronarapport")), #Evt legg til intensivrapport
                  selectInput("subscriptionFreq", "Frekvens:",
                              list(Månedlig="Månedlig-month",
                                    Ukentlig="Ukentlig-week",
@@ -199,7 +260,7 @@ server <- function(input, output, session) {
   reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 0)
 
   rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'SC')
-  brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavn')
+  brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
 
   finnesEgenResh <- reshID %in% unique(KoroData$ReshId)
   if (finnesEgenResh) {
@@ -207,7 +268,6 @@ server <- function(input, output, session) {
     egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
-    egenLokalitet <- c(0, 2, 4, 7)
     names(egenLokalitet) <- c('hele landet', egetShNavn, egetRHF)
   } else {
     egetRHF <- 'Ukjent'
@@ -215,6 +275,8 @@ server <- function(input, output, session) {
   egetRHF <- ifelse(rolle=='SC', 'Alle', egetRHF)
 
   observe({if ((rolle != 'SC') & !(finnesEgenResh)) { #
+    shinyjs::hide(id = 'KoroRappInt.pdf')
+    shinyjs::hide(id = 'KoroRappTxtInt')
     shinyjs::hide(id = 'KoroRapp.pdf')
     shinyjs::hide(id = 'KoroRappTxt')
     hideTab(inputId = "hovedark", target = "Abonnement")
@@ -250,7 +312,7 @@ server <- function(input, output, session) {
 
 
 
-  #-------- Laste ned Samlerapport------------
+  #-------- Laste ned Samlerapporter------------
   observe({
   valgtRHF <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtRHF))
   output$KoroRapp.pdf <- downloadHandler(
@@ -271,12 +333,7 @@ server <- function(input, output, session) {
                     Gå til fanen "Abonnement" for å bestille dette')))
   )
 
-   #----------Resultater som tekst--------------
-
-  output$liggetidNaa <- renderUI({
-  })
-
-  #----------Tabeller----------------------------
+  #----------Tabeller, Korona----------------------------
 
   observeEvent(input$tilbakestillValg, shinyjs::reset("brukervalgStartside"))
 
@@ -394,6 +451,126 @@ observe({
     )
     output$tabAlder<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
     output$utvalgAlder <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })
+
+
+})
+
+#-------------Intensivregistreringer------------------------
+
+observe({
+
+  valgtRHF <- ifelse(rolle == 'SC', as.character(input$valgtRHF), egetRHF)
+  # print(dim(KoroData)[1])
+  #       print(valgtRHF)
+
+  AntTab <- TabTidEnhet(RegData=KoroData, tidsenhet='dag',
+                        valgtRHF= valgtRHF,
+                        skjemastatus=as.numeric(input$skjemastatus),
+                        bekr=as.numeric(input$bekr),
+                        #dodInt=as.numeric(input$dodInt),
+                        erMann=as.numeric(input$erMann)
+  )
+
+  UtData <- NIRUtvalgBeredsk(RegData=KoroData,
+                             valgtRHF= ifelse(valgtRHF=='Ukjent','Alle',valgtRHF),
+                             skjemastatus=as.numeric(input$skjemastatus),
+                             bekr=as.numeric(input$bekr),
+                             #dodInt=as.numeric(input$dodInt),
+                             erMann=as.numeric(input$erMann)
+  )
+
+  utvalg <- if (length(UtData$utvalgTxt)>0) {
+    UtData$utvalgTxt
+  } else {'Alle registrerte '}
+  txt <- if(dim(UtData$RegData)[1]>2) {
+    paste0('Gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
+           round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn. Antall døde: ',
+           sum(UtData$RegData$DischargedIntensivStatus==1))
+  } else {''}
+
+  output$utvalgHoved <- renderUI({
+    UtTekst <- tagList(
+      h5(HTML(paste0(utvalg, '<br />'))),
+      h4(HTML(paste0(txt, '<br />')))
+
+    )})
+
+  output$tabTidEnhet <- renderTable({AntTab$Tab}, rownames = T, digits=0, spacing="xs"
+  )
+
+  #Tab status nå
+  statusNaaTab <- statusECMOrespTab(RegData=KoroData, valgtRHF=input$valgtRHF,
+                                    erMann=as.numeric(input$erMann),
+                                    bekr=as.numeric(input$bekr))
+  output$tabECMOrespirator <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
+  output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
+
+  #Tab ferdigstilte
+  TabFerdig <- oppsumFerdigeRegTab(RegData=KoroData,
+                                   valgtRHF=input$valgtRHF,
+                                   bekr = as.numeric(input$bekr),
+                                   erMann=as.numeric(input$erMann))
+
+  output$tabFerdigeReg <- if (TabFerdig$Ntest>2){
+    renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
+      renderText('Få registreringer (N<3)')}
+
+  output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
+  output$tittelFerdigeReg <- renderUI(
+    h4(paste0('Fullførte registreringer (', TabFerdig$Ntest, ' skjema)')))
+
+  #Registreringer i limbo:
+  #Må ha egen funksjon for å få dette på sykehusnivå
+  output$RegIlimbo <- renderUI({
+    # AntIlibo <- AntTab$Ntest - (TabFerdig$Ntest + sum(is.na(KoroData$DateDischargedIntensive))) #RHF/alle
+    finnBurdeFerdig <- function(RegData) {sum((!(is.na(RegData$DateDischargedIntensive)) & (RegData$FormStatus!=2)))}
+    #RegData <- KoroData
+    valgtRHF <- input$valgtRHF
+    tittel <- 'Opphold registrert som utskrevet, uten ferdigstilt skjema: '
+    #'Antall opphold registrert som utskrevet, med ikke ferdigstilt skjema',
+
+    AntBurdeFerdig <-
+      c( #tittel,
+        if (rolle=='LU' & finnesEgenResh) {
+          paste0(finnBurdeFerdig(KoroData[(which(KoroData$ReshId==reshID)), ]),' skjema for ', egetShNavn)},
+        #paste0(egetShNavn, ': ', finnBurdeFerdig(KoroData[(which(KoroData$ReshId==reshID)), ]), ' skjema ')},
+        if (valgtRHF=='Alle') {
+          paste0(finnBurdeFerdig(KoroData), ' skjema for hele landet')
+          #paste0('Hele landet: ', finnBurdeFerdig(KoroData), ' skjema')
+        } else {
+          paste0(finnBurdeFerdig(KoroData[KoroData$RHF==valgtRHF, ]), ' skjema for ', valgtRHF)}
+        #paste0(valgtRHF, ': ', finnBurdeFerdig(KoroData[KoroData$RHF==valgtRHF, ]))},
+      )
+    h5(HTML(paste0('&nbsp;&nbsp;&nbsp;', AntBurdeFerdig, '<br />')))
+  })
+
+
+  #Tab risiko
+  RisikoTab <- RisikofaktorerTab(RegData=KoroData, tidsenhet='Totalt',
+                                 valgtRHF= input$valgtRHF,
+                                 skjemastatus=as.numeric(input$skjemastatus),
+                                 bekr=as.numeric(input$bekr),
+                                 #dodInt=as.numeric(input$dodInt),
+                                 erMann=as.numeric(input$erMann),
+                                 minald=as.numeric(input$alder[1]),
+                                 maxald=as.numeric(input$alder[2]))
+
+
+  output$tabRisikofaktorer <- if (RisikoTab$Ntest>2){
+    renderTable(RisikoTab$Tab, rownames = T, digits=0, spacing="xs") } else {
+      renderText('Få registreringer (N<3)')}
+  output$utvalgRisiko <- renderUI({h5(HTML(paste0(RisikoTab$utvalgTxt, '<br />'))) #tagList()
+  })
+
+  TabAlder <- TabAlder(RegData=KoroData,
+                       valgtRHF= egetRHF, #input$valgtRHF,
+                       #dodInt=as.numeric(input$dodInt),
+                       erMann=as.numeric(input$erMann),
+                       bekr=as.numeric(input$bekr),
+                       skjemastatus=as.numeric(input$skjemastatus)
+  )
+  output$tabAlder<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
+  output$utvalgAlder <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })
 
 
 })
