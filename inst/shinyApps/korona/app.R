@@ -11,8 +11,8 @@ library(shiny)
 library(shinyjs)
 library(magrittr)
 library(rapbase)
-library(korona)
 library(intensivberedskap)
+library(korona)
 
 shiny::addResourcePath('rap', system.file('www', package='rapbase'))
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
@@ -260,24 +260,27 @@ server <- function(input, output, session) {
 
   finnesEgenResh <- reshID %in% unique(KoroData$ReshId)
   if (finnesEgenResh) {
-    indReshEgen <- match(reshID, KoroData$ReshId)
+    indReshEgen <- match(reshID, KoroData$ReshId) #Her skal benyttes HF-resh
     egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
-  } else {
-    egetRHF <- 'Ukjent'
   }
-  egetRHF <- ifelse(rolle=='SC', 'Alle', egetRHF)
 
-  observe({if ((rolle != 'SC') & !(finnesEgenResh)) { #
-    shinyjs::hide(id = 'KoroRappInt.pdf')
-    shinyjs::hide(id = 'KoroRappTxtInt')
-    shinyjs::hide(id = 'KoroRapp.pdf')
-    shinyjs::hide(id = 'KoroRappTxt')
-    hideTab(inputId = "hovedark", target = "Abonnement")
-  }
-  })
-    if (rolle != 'SC') {
+  egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF)
+  #Filtreringsnivå for data:
+  enhetsNivaaRolle <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+
+  # observe({if ((rolle != 'SC') & !(finnesEgenResh)) {
+  #   shinyjs::hide(id = 'KoroRappInt.pdf')
+  #   shinyjs::hide(id = 'KoroRappTxtInt')
+  #   shinyjs::hide(id = 'KoroRapp.pdf')
+  #   shinyjs::hide(id = 'KoroRappTxt')
+  #   hideTab(inputId = "hovedark", target = "Abonnement")
+  # }
+  #})
+
+  # SC KAN VELGE BLANT ALLE RHF, DE ANDRE KAN BARE VELGE EGEN ENHET/ALLE
+  if (rolle != 'SC') {
     updateSelectInput(session, "valgtEnhet",
                       choices = unique(c('Alle', ifelse(egetRHF=='Ukjent', 'Alle',
                                                         egetRHF))))
@@ -333,27 +336,21 @@ server <- function(input, output, session) {
 
 observe({
 
-  valgtEnhet <- ifelse(rolle == 'SC', as.character(input$valgtEnhet), egetRHF)
-
-  AntTab <- TabTidEnhet(RegData=KoroData, tidsenhet='dag',
-                      valgtEnhet= valgtEnhet,
+    AntTab <- antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
+                      valgtEnhet= egenEnhet, #nivå avgjort av rolle
+                      tidsenhet='dag',
                       skjemastatus=as.numeric(input$skjemastatus),
                       bekr=as.numeric(input$bekr),
-                      #dodInt=as.numeric(input$dodInt),
                       erMann=as.numeric(input$erMann)
                       )
-
+#NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
       UtData <- KoronaUtvalg(RegData=KoroData,
-                                 valgtEnhet= valgtEnhet,
+                             enhetsNivaa=enhetsNivaaRolle, valgtEnhet=egenEnhet,
                                  skjemastatus=as.numeric(input$skjemastatus),
                                  bekr=as.numeric(input$bekr),
-                                 #dodInt=as.numeric(input$dodInt),
                                  erMann=as.numeric(input$erMann)
       )
 
-  utvalg <- if (length(UtData$utvalgTxt)>0) {
-    UtData$utvalgTxt
-    } else {'Alle registrerte '}
   txt <- if(dim(UtData$RegData)[1]>2) {
     paste0('Gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
                 round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn. Antall døde: ',
@@ -362,7 +359,7 @@ observe({
 
   output$utvalgAntOpph <- renderUI({
     UtTekst <- tagList(
-      h5(HTML(paste0(utvalg, '<br />'))),
+      h5(HTML(paste0(AntTab$utvalgTxt, '<br />'))),
       h4(HTML(paste0(txt, '<br />')))
 
     )})
@@ -378,8 +375,8 @@ observe({
   output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
   #Tab ferdigstilte
-  TabFerdig <- oppsumFerdigeRegTab(RegData=KoroData,
-                                     valgtEnhet=input$valgtEnhet,
+  TabFerdig <- FerdigeRegInnTab(RegData=KoroData,
+                                     #valgtEnhet=input$valgtEnhet,
                                    bekr = as.numeric(input$bekr),
                                      erMann=as.numeric(input$erMann))
 
@@ -393,7 +390,7 @@ observe({
 
 
   #Tab risiko
-  RisikoTab <- RisikofaktorerTab(RegData=KoroData, tidsenhet='Totalt',
+  RisikoTab <- RisikoInnTab(RegData=KoroData, tidsenhet='Totalt',
                                  valgtEnhet= input$valgtEnhet,
                                  skjemastatus=as.numeric(input$skjemastatus),
                                  bekr=as.numeric(input$bekr),
@@ -409,7 +406,7 @@ observe({
     output$utvalgRisiko <- renderUI({h5(HTML(paste0(RisikoTab$utvalgTxt, '<br />'))) #tagList()
                          })
 
-    TabAlder <- TabAlder(RegData=KoroData,
+    TabAlder <- AlderTab(RegData=KoroData,
                          valgtEnhet= egetRHF, #input$valgtEnhet,
                          #dodInt=as.numeric(input$dodInt),
                          erMann=as.numeric(input$erMann),

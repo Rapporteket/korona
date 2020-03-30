@@ -18,7 +18,7 @@
 #'
 KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
                              bekr=9, skjemastatus=9, dodSh=9, reshID=0,
-                         enhetsnivaa='Totalt', valgtEnhet='Alle') {
+                         enhetsNivaa='RHF', valgtEnhet='Alle') {
 
 
  if (bekr %in% 0:1){RegData <- subset(RegData, RegData$Bekreftet==bekr)}
@@ -27,7 +27,8 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
  if (erMann %in% 0:1){
    vec <- (RegData$erMann == erMann)
    RegData <- subset(RegData, vec)}
-  if (valgtEnhet != 'Alle'){RegData <- subset(RegData, RegData$RHF == valgtEnhet)}
+
+  if (valgtEnhet != 'Alle'){RegData <- subset(RegData, RegData[,enhetsNivaa] == valgtEnhet)}
 
   if(minald>0 | maxald<110) {RegData <- subset(RegData,
                                                RegData$Alder >= minald & RegData$Alder <= maxald)}
