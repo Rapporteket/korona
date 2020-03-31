@@ -19,6 +19,7 @@ Remotes:
       Rapporteket/rapbase,
       Rapporteket/rapFigurer,
       Rapporteket/raplog,
+      Rapporteket/intensivberedskap,
 Imports:
     digest,
     DT,

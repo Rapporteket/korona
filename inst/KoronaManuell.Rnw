@@ -1,0 +1,100 @@
+\documentclass[handout, xcolor=pdftex,dvipsnames,table]{beamer}  %presentation,
+\usetheme{Hannover}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english, norsk]{babel}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{graphicx}
+
+% \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{L}{>{\centering\arraybackslash}m{3cm}}
+
+
+<<'initOpts',include=FALSE>>=
+knitr::opts_chunk$set(warnings=FALSE,echo=FALSE)
+knitr::opts_knit$set(root.dir = './')
+library(intensivberedskap)
+library(lubridate)
+library(xtable)
+@
+
+
+
+\begin{document}
+
+\title[Koronadata]{Manuell rapportering av Koronainnlagte på sykehus \\\today}
+%\title[Norsk Intensivregister, Corona \\\today] {%\textit{Coronadata, NIR} \\}
+
+\maketitle
+
+Dette er en rapport basert på manuelt nedlastede data fra MRS/NHN.
+Dokumentet inneholder enkel oppsummering av Koronatilfeller registrert ved norske sykehus.
+\\
+
+
+\begin{tiny}
+
+\begin{frame}[fragile] {Antall registrerte}
+<<'hentDataOgTilrettelegg', results='asis' >>= #include=FALSE
+PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
+                       stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
+PandemiInn$InnDag <- format(PandemiInn$InnDato, '%d.%B')
+PandemiInn$UtDato <- as.Date(PandemiInn$Utskrivningsdato, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
+PandemiInn$UtDag <- format(PandemiInn$UtDato, '%d.%B')
+
+
+AntRegRHF <- table(PandemiInn$InnDag, PandemiInn$RHF)
+
+xtable::xtable(addmargins(AntRegRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Antall registrerte koronatilfeller.')
+
+@
+
+% \begin{itemize}
+% \item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke. Det er \Sexpr{N-antFerdig}
+% av de \Sexpr{N} skjemaene som ikke er ferdigstilt.
+% \item Skjema uten spesifikasjon av diagnose, er kategorisert som mistenkte Coronatilfeller.
+% \item Det er registrert \Sexpr{AntBekr} med bekreftet Corona. Av disse er \Sexpr{DodBekr} døde.
+% \item Rapporten er basert på alle registreringer gjort inntil 4 timer før rapporten ble lastet ned.
+% \Sexpr{RegILimboTxt}
+% \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile] {Antall som ligger på sykehus nå}
+
+<<'ShusNaa', results='asis'>>=
+# Antall som ligger på sykehus nå
+#AntReg <- dim(PandemiInn)[1]
+#AntPaaSh <- sum(is.na(PandemiInn$UtDato))
+indNaa <- which(is.na(PandemiInn$UtDato))
+AntPaaRHFnaa <- table(PandemiInn$InnDag[indNaa], PandemiInn$RHF[indNaa])
+
+xtable::xtable(addmargins(AntPaaRHFnaa), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Antall som ligger på sykehus (mangler utskrivingsdato)')
+
+@
+\end{frame}
+
+\begin{frame}[fragile] {Antall utskrevne}
+
+<<'Utskrevne', results='asis'>>=
+
+AntUtRHF <- table(PandemiInn$UtDag, PandemiInn$RHF)
+
+xtable::xtable(addmargins(AntUtRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Antall utskrevne pasienter.')
+
+@
+\end{frame}
+
+
+\end{tiny}
+\end{document}

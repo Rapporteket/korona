@@ -30,9 +30,9 @@ if (paaServer) {
   KoroData <- rapbase::LoadRegData(registryName= "nir", query=qCoro, dbType="mysql")
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
-# } else {
-#   KoroData <- read.table('C:/ResultattjenesteGIT/XX.csv', sep=';',
-#                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+} else {
+  KoroData <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
+                         stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 } #hente data
 
 KoroData <- KoronaPreprosesser(RegData = KoroData)
