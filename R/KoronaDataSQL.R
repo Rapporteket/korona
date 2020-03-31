@@ -69,7 +69,7 @@ KoronaDataSQL <- function(skjema=1) { #datoFra = '2020-03-01', datoTil = Sys.Dat
 
 varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,AceHemmerInnkomst
-  ,AddressQuality
+  -- ,AddressQuality
   ,AkuttNyresvikt
   ,AkuttRespirasjonsvikt
   ,AkuttSirkulasjonsvikt
