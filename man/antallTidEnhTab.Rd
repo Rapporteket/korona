@@ -9,11 +9,11 @@ antallTidEnhTab(
   RegData,
   tidsenhet = "dag",
   erMann = 9,
-  tilgangsNivaa,
+  tilgangsNivaa = "SC",
   bekr = 9,
   skjemastatus = 9,
   dodSh = 9,
-  valgtEnhet = NULL
+  valgtEnhet = "Alle"
 )
 }
 \arguments{

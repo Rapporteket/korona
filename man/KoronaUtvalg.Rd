@@ -15,7 +15,7 @@ KoronaUtvalg(
   skjemastatus = 9,
   dodSh = 9,
   reshID = 0,
-  enhetsnivaa = "Totalt",
+  enhetsNivaa = "RHF",
   valgtEnhet = "Alle"
 )
 }

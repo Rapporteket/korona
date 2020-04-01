@@ -10,8 +10,7 @@ dodSh=9
 valgtEnhet='Alle'
 tilgangsNivaa <- 'SC'
 
-table(RegData$RHF)
-reshID = 102090 #enhetsnivå
+AlderTab(RegData=RegData)$Tab
 
 antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNivaa,
                 bekr=1, skjemastatus=0, dodSh=9, valgtEnhet='Sør-Øst')
@@ -42,14 +41,28 @@ PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')
 
 # Antall med fristbrudd (24t) - også ferdigstilte? Kun fra 1.april? Spør
 
-
+library(korona)
 KoroData <- KoronaDataSQL()
 RegData <- KoronaPreprosesser(RegData=KoroData)
 
+#tidsenhet='Totalt'
 
+datoTil=Sys.Date()
+reshID=0
+erMann=''
+bekr=9
+skjemastatus=9
+dodSh=9
+valgtEnhet='Alle'
+enhetsNivaa='RHF'
+minald=0
+maxald=110
 
+RisikoInnTab(RegData, erMann='', skjemastatus=2, dodSh=9,
+                         valgtEnhet='Alle', enhetsNivaa='RHF',
+                         minald=0, maxald=110)
 
-
+AlderTab(RegData)
 
 
 
