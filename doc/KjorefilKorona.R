@@ -20,12 +20,19 @@ antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNi
 
 library(knitr)
 library(korona)
+library(tidyverse)
 setwd('C:/ResultattjenesteGIT/korona/inst')
 knitr::knit('KoronaManuell.Rnw', encoding = 'UTF-8')
 tools::texi2pdf(file='KoronaManuell.tex')
 knitr::knit2pdf('KoronaManuell.Rnw') #, encoding = 'UTF-8')
 
-PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
+
+unique(PandemiInn[,c("UnitId","HealthUnitShortName",'HF')])
+PandemiInn %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = length(unique(HealthUnitShortName)))
+PandemiInn %>% dplyr::group_by(RHF) %>% dplyr::summarise(Antall = length(unique(HF)))
+
+
+PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-04-01.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')
@@ -36,11 +43,11 @@ PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')
 # Antall med fristbrudd (24t) - også ferdigstilte? Kun fra 1.april? Spør
 
 
-Detaljeringsnivå? Nasjonalt og per RHF.
-Brukerveiledning for de som legger inn? Hvordan brukes skjemaene (også utda)
 
 
-Registrerer mye av det samme i begge skjema. Mer i det første
+
+
+
 
 Pandemiskjema:
 Utskrivningsdato
@@ -54,4 +61,6 @@ Utskrivningsdato
 TimerSidenRelevantDato
 RelevantDato
 FormDate
+
+
 

@@ -27,27 +27,31 @@ library(xtable)
 
 \begin{document}
 
-\title[Koronadata]{Manuell rapportering av Koronainnlagte på sykehus \\\today}
+\title[Koronadata]{Manuell rapportering av Koronainnlagte på sykehus} %\\\today}
 %\title[Norsk Intensivregister, Corona \\\today] {%\textit{Coronadata, NIR} \\}
 
 \maketitle
 
-Dette er en rapport basert på manuelt nedlastede data fra MRS/NHN.
-Dokumentet inneholder enkel oppsummering av Koronatilfeller registrert ved norske sykehus.
-\\
+% Dette er en rapport basert på manuelt nedlastede data fra MRS/NHN.
+% Dokumentet inneholder enkel oppsummering av Koronatilfeller registrert ved norske sykehus.
+% \\
 
 
 \begin{tiny}
 
 \begin{frame}[fragile] {Antall registrerte}
 <<'hentDataOgTilrettelegg', results='asis' >>= #include=FALSE
-PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
+PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-04-01.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 PandemiInn$InnDag <- format(PandemiInn$InnDato, '%d.%B')
 PandemiInn$UtDato <- as.Date(PandemiInn$Utskrivningsdato, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 PandemiInn$UtDag <- format(PandemiInn$UtDato, '%d.%B')
 
+PandemiUt <- read.table('A:/Pandemi/UtskrivningSkjema2020-04-01.csv', sep=';',
+                       stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+PandemiUt$UtDato <- as.Date(PandemiUt$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
+PandemiUt$UtDag <- format(PandemiUt$UtDato, '%d.%B')
 
 AntRegRHF <- table(PandemiInn$InnDag, PandemiInn$RHF)
 
@@ -67,6 +71,16 @@ xtable::xtable(addmargins(AntRegRHF), digits=0, #method='compact', #align=c('l',
 
 \end{frame}
 
+\begin{frame}[fragile] {Registereringer i hvert HF}
+<<'RegHF', results='asis'>>=
+RegHF <- PandemiInn %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
+#sort(table(PandemiInn$HF), decreasing = T)
+xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Antall registreringer i hvert HF)')
+
+@
+\end{frame}
+
 
 \begin{frame}[fragile] {Antall som ligger på sykehus nå}
 
@@ -84,16 +98,49 @@ xtable::xtable(addmargins(AntPaaRHFnaa), digits=0, #method='compact', #align=c('
 \end{frame}
 
 \begin{frame}[fragile] {Antall utskrevne}
-
 <<'Utskrevne', results='asis'>>=
-
 AntUtRHF <- table(PandemiInn$UtDag, PandemiInn$RHF)
-
 xtable::xtable(addmargins(AntUtRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall utskrevne pasienter.')
+                              caption='Antall med utskrivingsdato.')
+@
+\end{frame}
+
+% \begin{frame}[fragile] {Utskrivingsskjema}
+% <<'Utskrivingsskjema', results='asis'>>=
+% AntUtSkjemaRHF <- table(PandemiUt$UtDag, PandemiUt$RHF)
+% xtable::xtable(addmargins(AntUtRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+%                               caption='Antall utskrivingsskjema.')
+% @
+% \end{frame}
+%
+%
+
+\begin{frame}[fragile] {Pandemiskjema i kladd}
+Dette bør vel rapporteres på sykehusnivå slik at noen kan ta kontakt med de aktuelle?
+
+<<'Kladd', results='asis'>>=
+#Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
+
+indKladd <- which(PandemiInn$FormStatus==1)
+AntKladdRHF <- table(PandemiInn$InnDag[indKladd], PandemiInn$RHF[indKladd])
+AntKladdShus <- table(PandemiInn$InnDag[indKladd], PandemiInn$HealthUnitShortName[indKladd])
+
+xtable::xtable(addmargins(AntKladdRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Pandemiskjema i kladd, innleggelsesdato')
 
 @
 \end{frame}
+
+\begin{frame}[fragile] {Sykehus med pandemiskjema i kladd}
+
+<<'KladdSh', results='asis'>>=
+#Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
+AntKladdShus <- table(PandemiInn$HealthUnitShortName[indKladd])
+xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Pandemiskjema i kladd')
+@
+\end{frame}
+
 
 
 \end{tiny}
