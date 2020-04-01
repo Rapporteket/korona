@@ -187,31 +187,41 @@ RisikoInnTab <- function(RegData, tidsenhet='Totalt', datoTil=Sys.Date(), reshID
                          Dag = RegData$Dag,
                          Totalt = RegData$Aar)
 
+    ind <- RegData$Vekt>0 & RegData$Hoyde>0
+    Fedme <- 100^2*(RegData$Vekt/(RegData$Hoyde)^2)[ind]
 
+    N <- dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
+
+AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
+
+#KjentRisikofaktor # 1-ja, 2-nei, 3-ukjent, -1 velg verdi
+#NB: HER MÅ VI VELGE OM VI VIL HA ANDEL AV ALLE (UNDERESTIMAT) ELLER AV DE VI VET
   TabRisiko <- rbind(
-    Kreft = tapply(RegData$Kreft, Tidsvariabel, FUN=sum, na.rm = T),
-    'Nedsatt immunforsvar' = tapply(RegData$IsImpairedImmuneSystemIncludingHivPatient, Tidsvariabel, FUN=sum, na.rm = T),
-    Diabetes	= tapply(RegData$Diabetes, Tidsvariabel, FUN=sum, na.rm = T),
-    Hjertesykdom = tapply(RegData$IsHeartDiseaseIncludingHypertensionPatient, Tidsvariabel, FUN=sum, na.rm = T),
-    'Fedme (KMI>30)' =	tapply(RegData$IsObesePatient, Tidsvariabel, FUN=sum, na.rm = T),
-    Astma	= tapply(RegData$Astma, Tidsvariabel, FUN=sum, na.rm = T),
-    'Kronisk lungesykdom' = tapply(RegData$IsChronicLungDiseasePatient, Tidsvariabel, FUN=sum, na.rm = T),
-    Nyresykdom =	tapply(RegData$IsKidneyDiseaseIncludingFailurePatient, Tidsvariabel, FUN=sum, na.rm = T),
-    Leversykdom = tapply(RegData$IsLiverDiseaseIncludingFailurePatient, Tidsvariabel, FUN=sum, na.rm = T),
-    'Nevrologisk/nevromusk.' = tapply(RegData$IsChronicNeurologicNeuromuscularPatient, Tidsvariabel, FUN=sum, na.rm = T),
-    Graviditet	= tapply(RegData$Graviditet, Tidsvariabel, FUN=sum, na.rm = T),
-    'Røyker' =	tapply(RegData$IsActivSmoker, Tidsvariabel, FUN=sum, na.rm = T),
-    'Opphold med risikofaktorer' = tapply(RegData$IsRiskFactor, Tidsvariabel, FUN=sum, na.rm = T)
+    'Fedme (KMI>30), kjent' =	AntAndel(Fedme>30, sum(ind)),
+    'Fedme (KMI>30), alle' =	AntAndel(Fedme>30, N),
+    Kreft = AntAndel(RegData$Kreft, N),
+    'Nedsatt immunforsvar/HIV' = AntAndel(RegData$NedsattimmunHIV, N),
+    Diabetes	= AntAndel(RegData$Diabetes, N),
+    Hjertesykdom = AntAndel(RegData$Hjertesykdom, N),
+    Astma	= AntAndel(RegData$Astma, N),
+    'Kronisk lungesykdom' = AntAndel(RegData$KroniskLungesykdom, N),
+    Nyresykdom =	AntAndel(RegData$Nyresykdom, N),
+    Leversykdom = AntAndel(RegData$Leversykdom, N),
+    'Nevrologisk/nevromusk.' = AntAndel(RegData$KroniskNevro, N),
+    Gravid	= AntAndel(RegData$Gravid, N),
+    'Røyker' =	AntAndel(RegData$Royker, N),
+    'Risikofaktorer (av sikre)' = AntAndel(RegData$KjentRisikofaktor==1, sum(RegData$KjentRisikofaktor %in% 1:2)),
+    'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, N)
   )
 
-  if (Ntest>3){
-  TabRisiko <- as.table(addmargins(TabRisiko, margin = 2))
-  if (tidsenhet=='Totalt'){TabRisiko <- as.matrix(TabRisiko[,"Sum"], ncol=1)
-  colnames(TabRisiko) <- 'Sum'}
-  TabRisiko <- cbind(TabRisiko,
-                     'Andel' = paste0(sprintf('%.0f', 100*TabRisiko[,"Sum"]/dim(RegData)[1]),'%')
-  )
-  }
+  TabRisiko[,2] <- paste0(sprintf('%.0f', 100*(TabRisiko[ ,2])),'%')
+
+  #if (Ntest>3){
+
+  colnames(TabRisiko) <- c('Antall', 'Andel')
+  # TabRisiko <- cbind(TabRisiko,
+  #                    'Andel' = paste0(sprintf('%.0f', 100*TabRisiko[,"Sum"]/dim(RegData)[1]),'%')
+
   # xtable::xtable(TabRisiko,
   #                digits=0,
   #                align = c('l',rep('r',ncol(TabRisiko))),

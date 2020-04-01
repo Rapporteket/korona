@@ -43,6 +43,16 @@ PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')
 # Antall med fristbrudd (24t) - også ferdigstilte? Kun fra 1.april? Spør
 
 
+KoroData <- KoronaDataSQL()
+RegData <- KoronaPreprosesser(RegData=KoroData)
+
+
+
+
+
+
+
+
 
 
 

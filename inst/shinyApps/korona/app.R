@@ -269,6 +269,7 @@ server <- function(input, output, session) {
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF)
   #Filtreringsnivå for data:
   enhetsNivaaRolle <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+  print(rolle)
 
   # observe({if ((rolle != 'SC') & !(finnesEgenResh)) {
   #   shinyjs::hide(id = 'KoroRappInt.pdf')

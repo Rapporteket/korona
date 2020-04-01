@@ -19,52 +19,31 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       RegData$Kjonn <- factor(RegData$erMann, levels=0:1, labels=c('kvinner','menn'))
 
       #Diagnoser:
-      RegData$Bekreftet <- 0
-      RegData$Bekreftet[which(RegData$Diagnosis %in% 100:103)] <- 1
+      #RegData$Bekreftet <- 0
+      #RegData$Bekreftet[which(RegData$Diagnosis %in% 100:103)] <- 1
 
 
       # Endre variabelnavn:
-      # names(RegData)[which(names(RegData) == 'Saps2Score')] <- 'SMR' #Saps2Score er SAPS estimert mortalitet
-      # names(RegData)[which(names(RegData) == 'Saps2ScoreNumber')] <- 'SAPSII'
-      # names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
-      # names(RegData)[which(names(RegData) == 'Nems')] <- 'NEMS'
       names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
       #	names(RegData)[which(names(RegData) == 'ReAdmitted')] <- 'Reinn'
-      names(RegData)[which(names(RegData) == 'Respirator')] <- 'respiratortid'
-      names(RegData)[which(names(RegData) == 'TypeOfAdmission')] <- 'InnMaate'
       names(RegData)[which(names(RegData) == 'UnitId')] <- 'ReshId'
       #Avvik ml. test og prod-data:
       names(RegData)[
             names(RegData) %in% c('PatientInRegistryGuid', 'PasientGUID')] <- 'PasientID'
 
       # Enhetsnivånavn
-      RegData$ShNavn <- trimws(as.character(RegData$ShNavn)) #Fjerner mellomrom (før) og etter navn
+      RegData$ShNavn <- trimws(as.character(RegData$HelseenhetKortNavn)) #Fjerner mellomrom (før) og etter navn
       RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
       # Kode om fra Haraldsplass til RHF Vest og Lovisenberg diakonhjemmet til RHF Øst, fra priv
+      #FÅ PÅ PLASS OMKODING FOR ALLE
       RegData$RHF[RegData$ReshId == 100180] <- 'Vest' #Haraldsplass
       RegData$RHF[RegData$ReshId %in% c(42088921, 108897)] <- 'Sør-Øst' #Lovisenberg Diakonale
-      #RegData$RHF[RegData$ReshId == ] <- 'Sør-Øst' #Diakonhjemmet
 
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
       RegData$Innleggelsestidspunkt <- as.POSIXlt(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
-      RegData$DateDischargedIntensive <- as.POSIXlt(RegData$DateDischargedIntensive, tz= 'UTC',
-                                                    format="%Y-%m-%d %H:%M:%S" )
-      RegData$MechanicalRespiratorStart <- as.POSIXlt(RegData$MechanicalRespiratorStart,
-                                                      tz= 'UTC', format="%Y-%m-%d %H:%M:%S")
-      RegData$MechanicalRespiratorEnd <- as.POSIXlt(RegData$MechanicalRespiratorEnd,
-                                                      tz= 'UTC', format="%Y-%m-%d %H:%M:%S")
-
-      #Liggetider
-      names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
-      RegData$ECMOTid <- as.numeric(difftime(RegData$EcmoEnd,
-                                             RegData$EcmoStart,
-                                             units = 'days'))
-      RegData$RespTid <- as.numeric(difftime(RegData$MechanicalRespiratorEnd,
-                                  RegData$MechanicalRespiratorStart,
-                                  units = 'days'))
 
       # Nye tidsvariable:
       RegData$MndNum <- RegData$Innleggelsestidspunkt$mon +1
@@ -79,22 +58,15 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
       ##Kode om  pasienter som er overført til/fra egen avdeling til "ikke-overført"
       #1= ikke overført, 2= overført
-      names(RegData)[which(names(RegData) == 'TransferredStatus')] <- 'Overf'
-      ind <- union(which(RegData$ReshId == RegData$PatientTransferredFromHospital),
-                   which(RegData$ReshId == RegData$PatientTransferredToHospital))
-      RegData$Overf[ind] <- 1
+#KOMMER
+      # names(RegData)[which(names(RegData) == 'TransferredStatus')] <- 'Overf'
+      # ind <- union(which(RegData$ReshId == RegData$PatientTransferredFromHospital),
+      #              which(RegData$ReshId == RegData$PatientTransferredToHospital))
+      # RegData$Overf[ind] <- 1
 
       #De som har Morsdato før utskriving fra intensiv:
-      ind <- which(as.Date(RegData$Morsdato) <= as.Date(RegData$DateDischargedIntensive))
-      RegData$DischargedIntensivStatus[ind] <- 1
-
-      #En "overlever": Person som er i live 30 dager etter innleggelse.
-      RegData$Dod30 <- 0
-      RegData$Dod30[which(difftime(as.Date(RegData$Morsdato, format="%Y-%m-%d %H:%M:%S"),
-                                   as.Date(RegData$InnDato), units='days')< 30)] <- 1
-      RegData$Dod90 <- 0
-      RegData$Dod90[which(difftime(as.Date(RegData$Morsdato, format="%Y-%m-%d %H:%M:%S"),
-                                   as.Date(RegData$InnDato), units='days')< 90)] <- 1
+      #ind <- which(as.Date(RegData$Morsdato) <= as.Date(RegData$DateDischargedIntensive))
+      #RegData$DischargedIntensivStatus[ind] <- 1
 
 
       #Konvertere boolske variable fra tekst til boolske variable...
