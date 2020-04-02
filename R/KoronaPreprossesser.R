@@ -39,6 +39,10 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       RegData$RHF[RegData$ReshId == 100180] <- 'Vest' #Haraldsplass
       RegData$RHF[RegData$ReshId %in% c(42088921, 108897)] <- 'Sør-Øst' #Lovisenberg Diakonale
 
+      RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
+      RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
+      RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
+
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
