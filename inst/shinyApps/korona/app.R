@@ -23,11 +23,8 @@ regTitle <- ifelse(paaServer,
                    'FIKTIVE data')
 
 #---------Hente data------------
-#NB Henter nå koronadata fra intensivregisteret !!!!!!!!!
-library(intensivberedskap)
 if (paaServer) {
-  qCoro <- 'SELECT *  from ReadinessFormDataContract'
-  KoroData <- rapbase::LoadRegData(registryName= "nir", query=qCoro, dbType="mysql")
+  KoroData <- KoronaDataSQL() #rapbase::LoadRegData(registryName= "nir", query=qCoro, dbType="mysql")
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
@@ -120,19 +117,19 @@ ui <- tagList(
                        h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
                        h5('Siden er under utvikling... ', style = "color:red"),
                       br(),
-                      fluidRow(
-                        column(width = 4,
-                               h4('Innlagte på sykehus nå'),
-                               uiOutput('statusNaaShTab'),
-                               br(),
-                               h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
-                               h5('Kommer...'),
-                        ),
-                      column(width=5, offset=1,
-                             uiOutput('tittelFerdigeReg'),
-                             uiOutput('utvalgFerdigeReg'),
-                             tableOutput('tabFerdigeReg')
-                      )),
+                      # fluidRow(
+                      #   column(width = 4,
+                      #          h4('Innlagte på sykehus nå'),
+                      #          uiOutput('statusNaaShTab'),
+                      #          br(),
+                      #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
+                      #          h5('Kommer...'),
+                      #   ),
+                      # column(width=5, offset=1,
+                      #        uiOutput('tittelFerdigeReg'),
+                      #        uiOutput('utvalgFerdigeReg'),
+                      #        tableOutput('tabFerdigeReg')
+                      # )),
 
                       h3('Antall sykehusopphold'),
                       uiOutput('utvalgAntOpph'),
@@ -369,25 +366,25 @@ observe({
   )
 
 #Tab status nå
-  statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #valgtEnhet=input$valgtEnhet,
-                                    erMann=as.numeric(input$erMann),
-                                    bekr=as.numeric(input$bekr))
-  output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
-  output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
+  # statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #valgtEnhet=input$valgtEnhet,
+  #                                   erMann=as.numeric(input$erMann),
+  #                                   bekr=as.numeric(input$bekr))
+  # output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
+  # output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
   #Tab ferdigstilte
-  TabFerdig <- FerdigeRegInnTab(RegData=KoroData,
-                                     #valgtEnhet=input$valgtEnhet,
-                                   bekr = as.numeric(input$bekr),
-                                     erMann=as.numeric(input$erMann))
-
-  output$tabFerdigeReg <- if (TabFerdig$Ntest>2){
-    renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
-      renderText('Få registreringer (N<3)')}
-
-  output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
-  output$tittelFerdigeReg <- renderUI(
-    h4(paste0('Fullførte registreringer (', TabFerdig$Ntest, ' skjema)')))
+  # TabFerdig <- FerdigeRegInnTab(RegData=KoroData,
+  #                                    #valgtEnhet=input$valgtEnhet,
+  #                                  bekr = as.numeric(input$bekr),
+  #                                    erMann=as.numeric(input$erMann))
+  #
+  # output$tabFerdigeReg <- if (TabFerdig$Ntest>2){
+  #   renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
+  #     renderText('Få registreringer (N<3)')}
+  #
+  # output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
+  # output$tittelFerdigeReg <- renderUI(
+  #   h4(paste0('Fullførte registreringer (', TabFerdig$Ntest, ' skjema)')))
 
 
   #Tab risiko
@@ -408,7 +405,7 @@ observe({
                          })
 
     TabAlder <- AlderTab(RegData=KoroData,
-                         valgtEnhet= egetRHF, #input$valgtEnhet,
+                         valgtEnhet= input$valgtEnhet,
                          #dodInt=as.numeric(input$dodInt),
                          erMann=as.numeric(input$erMann),
                          bekr=as.numeric(input$bekr),
@@ -433,8 +430,8 @@ observe({
   utvalg <- UtData$utvalgTxt
   txt <- if(AntTab$Ntest>2) {
     paste0('Gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
-           round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn. Antall døde: ',
-           sum(UtData$RegData$DischargedIntensivStatus==1))
+           round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn.')
+           #Antall døde: ', sum(UtData$RegData$DischargedIntensivStatus==1))
   } else {''}
   output$utvalgAntRegInt <- renderUI({
     UtTekst <- tagList(

@@ -7,7 +7,7 @@
 AlderTab(
   RegData,
   valgtEnhet = "Alle",
-  enhetsNivaa = "RHF",
+  enhetsNivaa = "Alle",
   bekr = 9,
   skjemastatus = 9,
   dodSh = 9,
@@ -16,6 +16,8 @@ AlderTab(
 }
 \arguments{
 \item{RegData}{datatabell, beredskapsdata}
+
+\item{enhetsNivaa}{styres av tilgangsnivå 'Alle', 'RHF', 'HF'}
 
 \item{bekr}{1-bekreftet, 0-mistenkt tilfelle}
 
@@ -30,7 +32,4 @@ AlderTab(
 }
 \description{
 Aldersfordeling, tabell
-}
-\examples{
-TabAlder(RegData=CoroData, enhetsNivaa='HF')
 }

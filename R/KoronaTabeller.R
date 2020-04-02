@@ -12,7 +12,7 @@
 #'
 #' @return
 #' @export
-antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa, #enhetsNivaa='RHF',
+antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
                         bekr=9, skjemastatus=9, dodSh=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
@@ -70,13 +70,10 @@ if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
 
 
 
-#' Antall som er  i ECMO/respirator
-#'
-#' @param RegData beredskapsskjema
-#'
+#' Nøkkeltall
+#' @param RegData pandemiskjema
 #' @return
 #' @export
-#'
 statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, bekr=9){
 
   UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
@@ -111,13 +108,10 @@ return(UtData)
 
 
 #' Ferdigstilte registreringer
-#'
 #' @param RegData beredskapsskjema
 #' @inheritParams KoronaUtvalg
-#'
 #' @return
 #' @export
-#'
 FerdigeRegInnTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', bekr=9, erMann=9, dodSh=9){
 
 UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
@@ -159,48 +153,33 @@ TabFerdigeReg <- rbind(
 
 
 #' Tabell med oversikt over tilstander som medfører økt risiko ved Coronasmitte
-#'
 #' @param RegData data
-#' @param datoTil sluttdato
-#' @param reshID enhetens resh
-#' @param tidsenhet 'Dag', 'Uke' (standard)
-#' @param valgtEnhet 'Alle' (standard), RHF-navn uten 'Helse '
-#'
+#' @inheritParams KoronaUtvalg
 #' @export
 #' @return
 RisikoInnTab <- function(RegData, tidsenhet='Totalt', datoTil=Sys.Date(), reshID=0,
                               erMann='', bekr=9, skjemastatus=9, dodSh=9,
-                              valgtEnhet='Alle', enhetsNivaa='RHF',
-                              minald=0, maxald=110, velgAvd=0){
+                              valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #enhetsUtvalg=0, minald=0, maxald=110,
-                             bekr=bekr, skjemastatus=skjemastatus,dodSh=dodSh,
+                             bekr=bekr, skjemastatus=skjemastatus, dodSh=dodSh,
                              minald=minald, maxald=maxald,
                              reshID=reshID, valgtEnhet=valgtEnhet) #velgAvd=velgAvd
   Ntest <- dim(UtData$RegData)[1]
   RegData <- UtData$RegData
 
+    indBMI <- RegData$Vekt>0 & RegData$Hoyde>0
+    Fedme <- 100^2*(RegData$Vekt/(RegData$Hoyde)^2)[indBMI]
 
-  #Kvikk fix: Totalt gir nå totalen for 2020
-  Tidsvariabel <- switch(tidsenhet,
-                         Uke = paste0('uke',RegData$UkeNr),
-                         Dag = RegData$Dag,
-                         Totalt = RegData$Aar)
-
-    ind <- RegData$Vekt>0 & RegData$Hoyde>0
-    Fedme <- 100^2*(RegData$Vekt/(RegData$Hoyde)^2)[ind]
-
-    N <- dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
+    N <- sum(RegData$KjentRisikofaktor %in% 1:2) #dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
 
 AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
 
 #KjentRisikofaktor # 1-ja, 2-nei, 3-ukjent, -1 velg verdi
-#NB: HER MÅ VI VELGE OM VI VIL HA ANDEL AV ALLE (UNDERESTIMAT) ELLER AV DE VI VET
+
   TabRisiko <- rbind(
-    'Fedme (KMI>30), kjent' =	AntAndel(Fedme>30, sum(ind)),
-    'Fedme (KMI>30), alle' =	AntAndel(Fedme>30, N),
     Kreft = AntAndel(RegData$Kreft, N),
-    'Nedsatt immunforsvar/HIV' = AntAndel(RegData$NedsattimmunHIV, N),
+    'Nedsatt immunforsvar' = AntAndel(RegData$NedsattimmunHIV, N),
     Diabetes	= AntAndel(RegData$Diabetes, N),
     Hjertesykdom = AntAndel(RegData$Hjertesykdom, N),
     Astma	= AntAndel(RegData$Astma, N),
@@ -209,9 +188,10 @@ AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
     Leversykdom = AntAndel(RegData$Leversykdom, N),
     'Nevrologisk/nevromusk.' = AntAndel(RegData$KroniskNevro, N),
     Gravid	= AntAndel(RegData$Gravid, N),
+    'Fedme (KMI>30), kjent' =	AntAndel(Fedme>30, sum(indBMI)),
     'Røyker' =	AntAndel(RegData$Royker, N),
-    'Risikofaktorer (av sikre)' = AntAndel(RegData$KjentRisikofaktor==1, sum(RegData$KjentRisikofaktor %in% 1:2)),
-    'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, N)
+    'Risikofaktorer (av sikre)' = AntAndel(RegData$KjentRisikofaktor==1, N),
+    'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
   )
 
   TabRisiko[,2] <- paste0(sprintf('%.0f', 100*(TabRisiko[ ,2])),'%')
@@ -219,13 +199,11 @@ AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
   #if (Ntest>3){
 
   colnames(TabRisiko) <- c('Antall', 'Andel')
-  # TabRisiko <- cbind(TabRisiko,
-  #                    'Andel' = paste0(sprintf('%.0f', 100*TabRisiko[,"Sum"]/dim(RegData)[1]),'%')
 
-  # xtable::xtable(TabRisiko,
-  #                digits=0,
-  #                align = c('l',rep('r',ncol(TabRisiko))),
-  #                caption='Risikofaktorer')
+  xtable::xtable(TabRisiko,
+                 digits=0,
+                 align = c('l',rep('r',ncol(TabRisiko))),
+                 caption='Risikofaktorer')
   return(UtData <- list(Tab=TabRisiko, utvalgTxt=UtData$utvalgTxt, Ntest=Ntest))
 }
 
@@ -233,21 +211,27 @@ AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
 
 
 #' Aldersfordeling, tabell
-#'
 #' @param RegData datatabell, beredskapsdata
 #' @inheritParams KoronaUtvalg
-#'
+#' @param enhetsNivaa styres av tilgangsnivå 'Alle', 'RHF', 'HF'
 #' @return
 #' @export
-#'
-#' @examples TabAlder(RegData=CoroData, enhetsNivaa='HF')
-AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', bekr=9,
-                     skjemastatus=9, dodSh=9,erMann=9){
+AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNivaa='SC', #
+                     bekr=9, skjemastatus=9, dodSh=9, erMann=9){
 
-  #if (valgtEnhet != 'Alle'){RegData$RHF <- factor(RegData$RHF, levels=unique(c(levels(as.factor(RegData$RHF)), valgtEnhet)))}
-  RegData$RHF <- as.factor(RegData$RHF)
+    #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
+  # RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
+  #                               SC = RegData$RHF,
+  #                               LC = RegData$HF,
+  #                               LU = RegData$ShNavn)
+  #
+
+  #RegData$EnhetsNivaaVar <- RegData[ , enhetsNivaa]
+  # RegData$EnhetsNivaaVar <- as.factor(RegData$EnhetsNivaaVar)
+
+  #ENDRING KOMMER: Utvalg skal returnere både utvalg for alle og egen enhet. Som i andre registere
   UtData <- KoronaUtvalg(RegData=RegData,
-                             #valgtEnhet=valgtEnhet,
+                             valgtEnhet=valgtEnhet,
                              bekr=bekr,
                              dodSh = dodSh,
                              erMann = erMann,
@@ -255,7 +239,7 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', bekr=9,
                               )
   RegData <- UtData$RegData
 
- RegData$EnhetsNivaaVar <- RegData[ , enhetsNivaa]
+
 
 N <- dim(RegData)[1]
 gr <- seq(0, 90, ifelse(N<100, 25, 10) )
@@ -264,14 +248,38 @@ grtxt <- if(N<100){c('0-24', '25-49', "50-74", "75+")} else {
                 c('0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+')}
 #grtxt <- c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))#paste(gr,sep='-')
 levels(RegData$AldersGr) <- grtxt #c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))
-TabAlder <- table(RegData$AldersGr, RegData$EnhetsNivaaVar)
-TabAlder <- addmargins(TabAlder) #switch(enhetsNivaa, RHF = 'Totalt', HF = paste0(valgtEnhet, ', totalt'))
 
-if (valgtEnhet == 'Ukjent') {
-  TabAlder <- as.matrix(TabAlder[,ncol(TabAlder)], ncol=1) } else {
-    if (valgtEnhet != 'Alle') {TabAlder <- TabAlder[,c(valgtEnhet, 'Sum')]}}
-colnames(TabAlder)[ncol(TabAlder)] <- 'Hele landet'
+TabAlder <- table(RegData$AldersGr) #, RegData$EnhetsNivaaVar)
+#TabAlder <- addmargins(TabAlder) #switch(enhetsNivaa, RHF = 'Totalt', HF = paste0(valgtRHF, ', totalt'))
+TabAlderPst <-TabAlder/N*100 #[-nrow(TabAlder),]
+#paste0(sprintf('%.0f', as.numeric(TabHjelp[1:2,'Andel'])),'%')
 
-return(invisible(UtData <- list(Tab=TabAlder, utvalgTxt=UtData$utvalgTxt)))
+TabAlderAlle <- cbind(
+  'Antall' = c(TabAlder, N),#[,'Sum'],
+  'Andel' = paste0(sprintf('%.0f', c(TabAlderPst, 100)), ' %') #[,'Sum']
+)
+row.names(TabAlderAlle)[nrow(TabAlderAlle)] <- 'Totalt'
+TabAlderUt <-  TabAlderAlle
+#   if (valgtRHF %in% levels(RegData$RHF)){
+#   TabAlderUt <- cbind(
+#     'Antall, eget' = TabAlder[ ,valgtRHF],
+#     'Andel, eget' = paste0(sprintf('%.0f', c(TabAlderPst[ ,valgtRHF], 100)), ' %'),
+#     TabAlderAlle)
+# } else {TabAlderAlle}
+
+return(invisible(UtData <-
+                   list(Tab=TabAlderUt,
+                        utvalgTxt=UtData$utvalgTxt))) #c(UtData$utvalgTxt, paste0('Valgt RHF: ', valgtRHF)))))
+
+
+# TabAlder <- table(RegData$AldersGr, RegData$EnhetsNivaaVar)
+# TabAlder <- addmargins(TabAlder) #switch(enhetsNivaa, RHF = 'Totalt', HF = paste0(valgtEnhet, ', totalt'))
+#
+# if (valgtEnhet == 'Ukjent') {
+#   TabAlder <- as.matrix(TabAlder[,ncol(TabAlder)], ncol=1) } else {
+#     if (valgtEnhet != 'Alle') {TabAlder <- TabAlder[,c(valgtEnhet, 'Sum')]}}
+# colnames(TabAlder)[ncol(TabAlder)] <- 'Hele landet'
+#
+# return(invisible(UtData <- list(Tab=TabAlder, utvalgTxt=UtData$utvalgTxt)))
 }
 

@@ -16,20 +16,23 @@ RisikoInnTab(
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
   minald = 0,
-  maxald = 110,
-  velgAvd = 0
+  maxald = 110
 )
 }
 \arguments{
 \item{RegData}{data}
 
-\item{tidsenhet}{'Dag', 'Uke' (standard)}
+\item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
-\item{datoTil}{sluttdato}
+\item{reshID}{reshID fra innlogging}
 
-\item{reshID}{enhetens resh}
+\item{erMann}{kjønn, 0-kvinne, 1-mann}
 
-\item{valgtEnhet}{'Alle' (standard), RHF-navn uten 'Helse '}
+\item{bekr}{1-bekreftet, 0-mistenkt tilfelle}
+
+\item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
+
+\item{dodSh}{død på sykehus 0-nei, 1-ja}
 }
 \value{
 

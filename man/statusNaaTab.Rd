@@ -2,7 +2,7 @@
 % Please edit documentation in R/KoronaTabeller.R
 \name{statusNaaTab}
 \alias{statusNaaTab}
-\title{Antall som er  i ECMO/respirator}
+\title{Nøkkeltall}
 \usage{
 statusNaaTab(
   RegData,
@@ -13,11 +13,11 @@ statusNaaTab(
 )
 }
 \arguments{
-\item{RegData}{beredskapsskjema}
+\item{RegData}{pandemiskjema}
 }
 \value{
 
 }
 \description{
-Antall som er  i ECMO/respirator
+Nøkkeltall
 }
