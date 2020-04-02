@@ -13,7 +13,7 @@ antallTidEnhTab(
   bekr = 9,
   skjemastatus = 9,
   dodSh = 9,
-  valgtEnhet = NULL
+  valgtEnhet = "Alle"
 )
 }
 \arguments{

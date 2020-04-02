@@ -3,6 +3,7 @@
 
 ReshNivaa <- read.table('data-raw/EnhetsnivaaerResh.csv', sep=';',
                         stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+
 usethis::use_data(ReshNivaa, overwrite = TRUE, internal = TRUE)
 
 #IndBeskr <- readxl::read_excel("data-raw/Indikatorbeskrivelser.xlsx")
