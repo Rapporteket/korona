@@ -41,12 +41,14 @@ library(xtable)
 
 \begin{frame}[fragile] {Antall registrerte}
 <<'hentDataOgTilrettelegg', results='asis' >>= #include=FALSE
-PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-04-01.csv', sep=';',
+PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-04-02.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
-PandemiInn$InnDag <- format(PandemiInn$InnDato, '%d.%B')
+PandemiInn$InnDag <-  factor(format(PandemiInn$InnDato, '%d.%B'),
+                            levels = format(seq(min(PandemiInn$InnDato), max(PandemiInn$InnDato), by="day"), '%d.%B'))
 PandemiInn$UtDato <- as.Date(PandemiInn$Utskrivningsdato, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
-PandemiInn$UtDag <- format(PandemiInn$UtDato, '%d.%B')
+PandemiInn$UtDag <- factor(format(PandemiInn$UtDato, '%d.%B'),
+                            levels = format(seq(min(PandemiInn$UtDato, na.rm=T), max(PandemiInn$UtDato, na.rm=T), by="day"), '%d.%B'))
 
 PandemiUt <- read.table('A:/Pandemi/UtskrivningSkjema2020-04-01.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
