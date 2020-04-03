@@ -76,20 +76,23 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
 
       #Konvertere boolske variable fra tekst til boolske variable...
-      TilLogiskeVar <- function(Skjema){
-            verdiGML <- c('True','False')
-            verdiNY <- c(TRUE,FALSE)
-            mapping <- data.frame(verdiGML,verdiNY)
-            LogVar <- names(Skjema)[which(Skjema[1,] %in% verdiGML)]
-            if (length(LogVar)>0) {
-                  for (k in 1:length(LogVar)) {
-                        Skjema[,LogVar[k]] <- mapping$verdiNY[match(Skjema[,LogVar[k]], mapping$verdiGML)]
-                  }}
-            return(Skjema)
-      }
+      # TilLogiskeVar <- function(Skjema){
+      #       verdiGML <- c('True','False')
+      #       verdiNY <- c(TRUE,FALSE)
+      #       mapping <- data.frame(verdiGML,verdiNY)
+      #       LogVar <- names(Skjema)[which(Skjema[1,] %in% verdiGML)]
+      #       if (length(LogVar)>0) {
+      #             for (k in 1:length(LogVar)) {
+      #                   Skjema[,LogVar[k]] <- mapping$verdiNY[match(Skjema[,LogVar[k]], mapping$verdiGML)]
+      #             }}
+      #       return(Skjema)
+      # }
+      #
+      # RegData <- TilLogiskeVar(RegData)
 
-      RegData <- TilLogiskeVar(RegData)
-
+      boolske_var_inklusjon <- as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
+      RegData[, intersect(names(RegData), boolske_var_inklusjon)] <-
+         apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
 
       return(invisible(RegData))
 }

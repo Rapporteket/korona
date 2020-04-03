@@ -13,6 +13,8 @@ library(magrittr)
 library(rapbase)
 library(intensivberedskap)
 library(korona)
+library(tidyverse)
+library(lubridate)
 
 shiny::addResourcePath('rap', system.file('www', package='rapbase'))
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
@@ -30,9 +32,9 @@ if (paaServer) {
 } else {
   # KoroData <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
   #                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroData <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-02 10-03-16.txt', sep=';',
+  KoroData <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 10-59-33.txt', sep=';',
                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-01 12-36-02.txt', sep=';',
+  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 11-02-00.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 
 } #hente data
