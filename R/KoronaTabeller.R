@@ -190,8 +190,8 @@ AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
     Gravid	= AntAndel(RegData$Gravid, N),
     'Fedme (KMI>30), kjent' =	AntAndel(Fedme>30, sum(indBMI)),
     'Røyker' =	AntAndel(RegData$Royker, N),
-    'Risikofaktorer (av sikre)' = AntAndel(RegData$KjentRisikofaktor==1, N),
-    'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
+    'Risikofaktorer (av sikre)' = AntAndel(RegData$KjentRisikofaktor==1, N)
+    #'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
   )
 
   TabRisiko[,2] <- paste0(sprintf('%.0f', 100*(TabRisiko[ ,2])),'%')

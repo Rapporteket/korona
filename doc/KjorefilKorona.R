@@ -31,7 +31,7 @@ PandemiInn %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = length(uni
 PandemiInn %>% dplyr::group_by(RHF) %>% dplyr::summarise(Antall = length(unique(HF)))
 
 
-PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-04-01.csv', sep=';',
+PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-04-03.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')
