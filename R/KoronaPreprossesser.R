@@ -46,11 +46,12 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
-      RegData$Innleggelsestidspunkt <- as.POSIXlt(RegData$FormDate, tz= 'UTC',
+      RegData$Innleggelsestidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
 
       # Nye tidsvariable:
-      RegData$MndNum <- RegData$Innleggelsestidspunkt$mon +1
+      # RegData$MndNum <- RegData$Innleggelsestidspunkt$mon +1
+      RegData$MndNum <- as.numeric(format(RegData$Innleggelsestidspunkt, '%m'))
       RegData$MndAar <- format(RegData$Innleggelsestidspunkt, '%b%y')
       RegData$Kvartal <- ceiling(RegData$MndNum/3)
       RegData$Halvaar <- ceiling(RegData$MndNum/6)
