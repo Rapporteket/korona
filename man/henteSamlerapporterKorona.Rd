@@ -7,7 +7,6 @@
 henteSamlerapporterKorona(
   filnavn,
   rnwFil,
-  reshID = 0,
   Rpakke = "korona",
   valgtRHF = "Alle",
   datoFra = Sys.Date() - 180,
@@ -18,8 +17,6 @@ henteSamlerapporterKorona(
 \item{filnavn}{dummy}
 
 \item{rnwFil}{Navn på fila som skal kjøres. Angis uten ending (\emph{dvs uten  ".Rnw"})}
-
-\item{reshID}{Aktuell reshid}
 
 \item{Rpakke}{hvilken R-pakke fila som lager rapporten ligger i}
 

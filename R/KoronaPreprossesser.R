@@ -11,17 +11,11 @@
 #'
 KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 {
-#MÅ OPPDATERES NÅR FÅR DATA!!!!
       #Kjønn
       RegData$erMann <- NA #1=Mann, 2=Kvinne, 0=Ukjent
       RegData$erMann[RegData$PatientGender == 1] <- 1
       RegData$erMann[RegData$PatientGender == 2] <- 0
       RegData$Kjonn <- factor(RegData$erMann, levels=0:1, labels=c('kvinner','menn'))
-
-      #Diagnoser:
-      #RegData$Bekreftet <- 0
-      #RegData$Bekreftet[which(RegData$Diagnosis %in% 100:103)] <- 1
-
 
       # Endre variabelnavn:
       names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
@@ -33,23 +27,27 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
       # Enhetsnivånavn
       RegData$ShNavn <- trimws(as.character(RegData$HelseenhetKortNavn)) #Fjerner mellomrom (før) og etter navn
-      RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
       # Kode om fra Haraldsplass til RHF Vest og Lovisenberg diakonhjemmet til RHF Øst, fra priv
       #FÅ PÅ PLASS OMKODING FOR ALLE
-      RegData$RHF[RegData$ReshId == 100180] <- 'Vest' #Haraldsplass
-      RegData$RHF[RegData$ReshId %in% c(42088921, 108897)] <- 'Sør-Øst' #Lovisenberg Diakonale
+      # RegData$RHF[RegData$ReshId == 100180] <- 'Vest' #Haraldsplass
+      # RegData$RHF[RegData$ReshId %in% c(42088921, 108897)] <- 'Sør-Øst' #Lovisenberg Diakonale
 
       RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
+      #Får encoding-feil hvis bruker denne:
+      #RegData$RHF <- ReshNivaa$RHFnavn[match(RegData$HFresh, ReshNivaa$HFresh)]
+      RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
 
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
       RegData$Innleggelsestidspunkt <- as.POSIXlt(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
+#Fjerne feilregisteringer
+      RegData <- RegData[which(RegData$InnDato>'2020-02-15'),]
 
-      # Nye tidsvariable:
+# Nye tidsvariable:
       RegData$MndNum <- RegData$Innleggelsestidspunkt$mon +1
       RegData$MndAar <- format(RegData$Innleggelsestidspunkt, '%b%y')
       RegData$Kvartal <- ceiling(RegData$MndNum/3)
@@ -61,6 +59,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       #RegData$Dag <- format(RegData$InnDato, '%d.%B')
       RegData$Dag <- factor(format(RegData$InnDato, '%d.%B'),
                             levels = format(seq(min(RegData$InnDato), max(RegData$InnDato), by="day"), '%d.%B'))
+      RegData$InnDag <- RegData$InnDato
 
       ##Kode om  pasienter som er overført til/fra egen avdeling til "ikke-overført"
       #1= ikke overført, 2= overført
@@ -74,7 +73,8 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       #ind <- which(as.Date(RegData$Morsdato) <= as.Date(RegData$DateDischargedIntensive))
       #RegData$DischargedIntensivStatus[ind] <- 1
 
-
+#RIKTIG FORMAT PÅ VARIABLER
+      RegData$FormDate <- as.numeric(RegData$FormDate)
       #Konvertere boolske variable fra tekst til boolske variable...
       TilLogiskeVar <- function(Skjema){
             verdiGML <- c('True','False')

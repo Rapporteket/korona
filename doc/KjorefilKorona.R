@@ -19,11 +19,11 @@ antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNi
 
 library(knitr)
 library(korona)
-library(tidyverse)
-setwd('C:/ResultattjenesteGIT/korona/inst')
-knitr::knit('KoronaManuell.Rnw', encoding = 'UTF-8')
-tools::texi2pdf(file='KoronaManuell.tex')
-knitr::knit2pdf('KoronaManuell.Rnw') #, encoding = 'UTF-8')
+#setwd('C:/ResultattjenesteGIT/korona/inst')
+setwd('/home/rstudio/korona/inst')
+knitr::knit('KoronaRapport.Rnw', encoding = 'UTF-8')
+tools::texi2pdf(file='KoronaRapport.tex')
+knitr::knit2pdf('KoronaRapport.Rnw') #, encoding = 'UTF-8')
 
 
 unique(PandemiInn[,c("UnitId","HealthUnitShortName",'HF')])

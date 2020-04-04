@@ -12,8 +12,6 @@ abonnementKorona(
   brukernavn = "lluring",
   reshID = 0,
   valgtRHF = "Alle",
-  datoFra = Sys.Date() - 180,
-  datoTil = Sys.Date(),
   Rpakke = "korona"
 )
 }
@@ -22,9 +20,9 @@ abonnementKorona(
 
 \item{reshID}{Aktuell reshid}
 
-\item{datoFra}{dato}
-
 \item{Rpakke}{hvilken R-pakke fila som lager rapporten ligger i}
+
+\item{datoFra}{dato}
 
 \item{parametre}{Liste med valgfrie parametre, avhengig av type rapport}
 }

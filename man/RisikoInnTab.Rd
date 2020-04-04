@@ -35,7 +35,7 @@ RisikoInnTab(
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
 }
 \value{
-
+Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
 }
 \description{
 Tabell med oversikt over tilstander som medfører økt risiko ved Coronasmitte

@@ -10,6 +10,8 @@
 library(shiny)
 library(shinyjs)
 library(magrittr)
+library(lubridate)
+library(tidyverse)
 library(rapbase)
 library(intensivberedskap)
 library(korona)
@@ -85,10 +87,6 @@ ui <- tagList(
                                    #             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
                                    # ),
 
-                                   #br(),
-                                   selectInput(inputId = "bekr", label="Bekreftet/Mistenkt",
-                                               choices = c("Alle"=9, "Bekreftet"=1, "Mistenkt"=0)
-                                   ),
                                    selectInput(inputId = "skjemastatus", label="Skjemastatus",
                                                choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                    ),

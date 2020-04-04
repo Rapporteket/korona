@@ -1,0 +1,176 @@
+\documentclass[handout, xcolor=pdftex,dvipsnames,table]{beamer}  %presentation,
+\usetheme{Hannover}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english, norsk]{babel}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{graphicx}
+
+% \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{L}{>{\centering\arraybackslash}m{3cm}}
+
+
+<<'initOpts',include=FALSE>>=
+knitr::opts_chunk$set(warnings=FALSE,echo=FALSE)
+knitr::opts_knit$set(root.dir = './')
+library(intensivberedskap)
+library(tidyverse)
+library(lubridate)
+library(xtable)
+@
+
+
+
+\begin{document}
+
+\title[Pandemiregister]{Koronainnlagte på sykehus} %\\\today}
+%\title[Norsk Intensivregister, Corona \\\today] {%\textit{Coronadata, NIR} \\}
+
+\maketitle
+
+
+\begin{tiny}
+
+
+<<'hentDataOgTilrettelegg', results='asis' >>= #include=FALSE
+context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
+paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
+
+  if (paaServer) {
+    PandemiInn <- KoronaDataSQL()
+    } else {
+      PandemiInn <- read.table('A:/Pandemi/XX.csv', sep=';',
+                       stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+      }
+
+PandemiInn <- KoronaPreprosesser(PandemiInn)
+
+# PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
+# PandemiInn$InnDag <-  factor(format(PandemiInn$InnDato, '%d.%B'),
+#                             levels = format(seq(min(PandemiInn$InnDato), max(PandemiInn$InnDato), by="day"), '%d.%B'))
+# PandemiInn$UtDato <- as.Date(PandemiInn$Utskrivningsdato, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
+# PandemiInn$UtDag <- factor(format(PandemiInn$UtDato, '%d.%B'),
+#                             levels = format(seq(min(PandemiInn$UtDato, na.rm=T),
+#                                                 max(PandemiInn$UtDato, na.rm=T), by="day"), '%d.%B'))
+
+# PandemiUt <- read.table('A:/Pandemi/UtskrivningSkjema2020-04-01.csv', sep=';',
+#                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+# PandemiUt$UtDato <- as.Date(PandemiUt$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
+# PandemiUt$UtDag <- format(PandemiUt$UtDato, '%d.%B')
+@
+
+
+\begin{frame}[fragile] {Hva er dette?}
+Dette er en automatisk generert rapport fra pandemiregisteret for registerering av Covid-19 pasienter.
+Dokumentet inneholder oppsummering av disse registreringene.
+
+\begin{itemize}
+\item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke, med mindre dette er angitt
+%Det er \Sexpr{N-antFerdig} av de \Sexpr{N} skjemaene som ikke er ferdigstilt.
+\item For å luke bort feilregistreringer, er registrering av innleggelse før 15.februar, filtrert bort.
+%\item Det er registrert \Sexpr{DodBekr} døde.
+\item Rapporten er basert på alle registreringer gjort inntil 4 timer før rapporten ble lastet ned.
+%\Sexpr{RegILimboTxt}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile] {Antall registrerte}
+<<'RegRHF', results='asis'>>=
+AntRegRHF <- table(PandemiInn$InnDag, PandemiInn$RHF)
+AntRegRHF <- addmargins(AntRegRHF)
+xtable::xtable(AntRegRHF[(nrow(AntRegRHF)-20):nrow(AntRegRHF), ], digits=0,
+               #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+               caption='Antall registrerte koronainnleggelser siste 20 dager, samt totalt antall for hele pandemiperioden.')
+@
+\end{frame}
+
+
+\begin{frame}[fragile] {Registereringer i hvert HF}
+<<'RegHF', results='asis'>>=
+RegHF <- PandemiInn %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
+#sort(table(PandemiInn$HF), decreasing = T)
+xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Antall registreringer i hvert HF')
+@
+\end{frame}
+
+
+\begin{frame}[fragile] {Antall som ligger på sykehus nå}
+
+Kommer
+
+<<'ShusNaa', results='asis'>>=
+# Antall som ligger på sykehus nå
+#AntReg <- dim(PandemiInn)[1]
+#AntPaaSh <- sum(is.na(PandemiInn$UtDato))
+
+# indNaa <- which(is.na(PandemiInn$UtDato))
+# AntPaaRHFnaa <- table(PandemiInn$InnDag[indNaa], PandemiInn$RHF[indNaa])
+#
+# xtable::xtable(addmargins(AntPaaRHFnaa), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+#                               caption='Antall som ligger på sykehus (mangler utskrivingsdato)')
+
+@
+\end{frame}
+
+% \begin{frame}[fragile] {Antall utskrevne}
+% <<'Utskrevne', results='asis'>>=
+% AntUtRHF <- table(PandemiInn$UtDag, PandemiInn$RHF)
+% xtable::xtable(addmargins(AntUtRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+%                               caption='Antall med utskrivingsdato.')
+% @
+% \end{frame}
+
+% \begin{frame}[fragile] {Utskrivingsskjema}
+% <<'Utskrivingsskjema', results='asis'>>=
+% AntUtSkjemaRHF <- table(PandemiUt$UtDag, PandemiUt$RHF)
+% xtable::xtable(addmargins(AntUtRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+%                               caption='Antall utskrivingsskjema.')
+% @
+% \end{frame}
+%
+%
+
+\begin{frame}[fragile] {Pandemiskjema i kladd}
+
+<<'Kladd', results='asis'>>=
+#Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
+
+indKladd <- which(PandemiInn$FormStatus==1)
+AntKladdRHF <- table(PandemiInn$InnDag[indKladd], PandemiInn$RHF[indKladd])
+AntKladdShus <- table(PandemiInn$InnDag[indKladd], PandemiInn$ShNavn[indKladd])
+
+xtable::xtable(addmargins(AntKladdRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Pandemiskjema i kladd, innleggelsesdato')
+@
+\end{frame}
+
+
+\begin{frame}[fragile] {Sykehus med pandemiskjema i kladd}
+<<'KladdSh', results='asis'>>=
+#Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
+AntKladdShus <- table(PandemiInn$ShNavn[indKladd])
+xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Pandemiskjema i kladd')
+@
+\end{frame}
+
+\begin{frame}[fragile] {Risikofaktorer (ferdigstilte skjema)}
+<<'Risikofaktorer', results='asis'>>=
+#Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
+RisikoTab <- RisikoInnTab(RegData=PandemiInn, skjemastatus = 2)$Tab
+
+xtable::xtable(addmargins(RisikoTab), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Risikofaktorer ved innleggelse')
+@
+\end{frame}
+
+
+\end{tiny}
+\end{document}
