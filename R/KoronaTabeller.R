@@ -13,7 +13,7 @@
 #' @return
 #' @export
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
-                        bekr=9, skjemastatus=9, dodSh=9, valgtEnhet='Alle'){
+                        skjemastatus=9, dodSh=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
         RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
@@ -30,7 +30,7 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   #Benytter ikke utvalgsfila til enhetsfiltrering. Skal også ha oppsummering for hele landet
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
-                             bekr=bekr, skjemastatus=skjemastatus,
+                             skjemastatus=skjemastatus,
                              dodSh=dodSh)
 
 
@@ -74,10 +74,10 @@ if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
 #' @param RegData pandemiskjema
 #' @return
 #' @export
-statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, bekr=9){
+statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9){
 
   UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
-                               erMann=erMann, bekr=bekr)
+                               erMann=erMann)
                               # dodSh=dodSh)$RegData velgAvd=velgAvd
 RegData <- UtData$RegData
   N <- dim(RegData)[1]
@@ -112,10 +112,9 @@ return(UtData)
 #' @inheritParams KoronaUtvalg
 #' @return
 #' @export
-FerdigeRegInnTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', bekr=9, erMann=9, dodSh=9){
+FerdigeRegInnTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, dodSh=9){
 
 UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
-                             bekr = bekr,
                              erMann = erMann,
                               skjemastatus=2)
 RegData <- UtData$RegData
@@ -158,11 +157,11 @@ TabFerdigeReg <- rbind(
 #' @export
 #' @return
 RisikoInnTab <- function(RegData, tidsenhet='Totalt', datoTil=Sys.Date(), reshID=0,
-                              erMann='', bekr=9, skjemastatus=9, dodSh=9,
+                              erMann='', skjemastatus=9, dodSh=9,
                               valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #enhetsUtvalg=0, minald=0, maxald=110,
-                             bekr=bekr, skjemastatus=skjemastatus, dodSh=dodSh,
+                             skjemastatus=skjemastatus, dodSh=dodSh,
                              minald=minald, maxald=maxald,
                              reshID=reshID, valgtEnhet=valgtEnhet) #velgAvd=velgAvd
   Ntest <- dim(UtData$RegData)[1]
@@ -188,10 +187,10 @@ AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
     Leversykdom = AntAndel(RegData$Leversykdom, N),
     'Nevrologisk/nevromusk.' = AntAndel(RegData$KroniskNevro, N),
     Gravid	= AntAndel(RegData$Gravid, N),
-    'Fedme (KMI>30), kjent' =	AntAndel(Fedme>30, sum(indBMI)),
+    'Fedme (KMI>30)' =	AntAndel(Fedme>30, sum(indBMI)),
     'Røyker' =	AntAndel(RegData$Royker, N),
-    'Risikofaktorer (av sikre)' = AntAndel(RegData$KjentRisikofaktor==1, N),
-    'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
+    'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N)
+    #'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
   )
 
   TabRisiko[,2] <- paste0(sprintf('%.0f', 100*(TabRisiko[ ,2])),'%')
@@ -217,7 +216,7 @@ AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
 #' @return
 #' @export
 AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNivaa='SC', #
-                     bekr=9, skjemastatus=9, dodSh=9, erMann=9){
+                     skjemastatus=9, dodSh=9, erMann=9){
 
     #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   # RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
@@ -232,7 +231,6 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNi
   #ENDRING KOMMER: Utvalg skal returnere både utvalg for alle og egen enhet. Som i andre registere
   UtData <- KoronaUtvalg(RegData=RegData,
                              valgtEnhet=valgtEnhet,
-                             bekr=bekr,
                              dodSh = dodSh,
                              erMann = erMann,
                               skjemastatus=skjemastatus

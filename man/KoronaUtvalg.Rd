@@ -11,7 +11,6 @@ KoronaUtvalg(
   erMann = 9,
   minald = 0,
   maxald = 110,
-  bekr = 9,
   skjemastatus = 9,
   dodSh = 9,
   reshID = 0,
@@ -27,8 +26,6 @@ KoronaUtvalg(
 \item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
-
-\item{bekr}{1-bekreftet, 0-mistenkt tilfelle}
 
 \item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 

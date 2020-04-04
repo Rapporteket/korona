@@ -4,13 +4,7 @@
 \alias{statusNaaTab}
 \title{Nøkkeltall}
 \usage{
-statusNaaTab(
-  RegData,
-  valgtEnhet = "Alle",
-  enhetsNivaa = "RHF",
-  erMann = 9,
-  bekr = 9
-)
+statusNaaTab(RegData, valgtEnhet = "Alle", enhetsNivaa = "RHF", erMann = 9)
 }
 \arguments{
 \item{RegData}{pandemiskjema}

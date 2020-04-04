@@ -19,11 +19,11 @@ antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNi
 
 library(knitr)
 library(korona)
-library(tidyverse)
-setwd('C:/ResultattjenesteGIT/korona/inst')
-knitr::knit('KoronaManuell.Rnw', encoding = 'UTF-8')
-tools::texi2pdf(file='KoronaManuell.tex')
-knitr::knit2pdf('KoronaManuell.Rnw') #, encoding = 'UTF-8')
+#setwd('C:/ResultattjenesteGIT/korona/inst')
+setwd('/home/rstudio/korona/inst')
+knitr::knit('KoronaRapport.Rnw', encoding = 'UTF-8')
+tools::texi2pdf(file='KoronaRapport.tex')
+knitr::knit2pdf('KoronaRapport.Rnw') #, encoding = 'UTF-8')
 
 
 unique(PandemiInn[,c("UnitId","HealthUnitShortName",'HF')])
@@ -31,7 +31,7 @@ PandemiInn %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = length(uni
 PandemiInn %>% dplyr::group_by(RHF) %>% dplyr::summarise(Antall = length(unique(HF)))
 
 
-PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-04-01.csv', sep=';',
+PandemiInn <- read.table('A:/Pandemi/Pandemiskjema2020-04-03.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')

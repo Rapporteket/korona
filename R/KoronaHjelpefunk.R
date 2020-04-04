@@ -2,7 +2,6 @@
 #' Funksjon som produserer rapporten som skal sendes til mottager.
 #'
 #' @param rnwFil Navn på fila som skal kjøres. Angis uten ending (\emph{dvs uten  ".Rnw"})
-#' @param reshID Aktuell reshid
 #' @param filnavn dummy
 #' @param datoFra dato
 #' @param Rpakke hvilken R-pakke fila som lager rapporten ligger i
@@ -11,9 +10,10 @@
 #' @return Full path of file produced
 #' @export
 
-henteSamlerapporterKorona <- function(filnavn, rnwFil, reshID=0, Rpakke='korona',
-                                     valgtRHF = 'Alle', #rolle='LU',
-                                datoFra=Sys.Date()-180, datoTil=Sys.Date()) {
+henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona'
+                                 #    valgtRHF = 'Alle', #rolle='LU',
+                                #datoFra=Sys.Date()-180, datoTil=Sys.Date()
+                                ) {
   tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
   # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
@@ -42,15 +42,10 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, reshID=0, Rpakke='korona'
 #' @export
 
 abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
-                              valgtRHF = 'Alle',
-                       datoFra=Sys.Date()-180, datoTil=Sys.Date(),
-                       Rpakke='korona') {
+                              valgtRHF = 'Alle', Rpakke='korona') {
 
   #function(baseName, reshId, registryName,author, hospitalName, type) {
-valgtRHF <- valgtRHF[[1]]
-  datoFra <- datoFra[[1]]
-  datoTil <- datoTil[[1]]
-  reshID <- reshID[[1]]
+  valgtRHF <- valgtRHF[[1]]
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = "starter Abonnement: Pandemi-rapport")

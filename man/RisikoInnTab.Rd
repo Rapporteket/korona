@@ -10,7 +10,6 @@ RisikoInnTab(
   datoTil = Sys.Date(),
   reshID = 0,
   erMann = "",
-  bekr = 9,
   skjemastatus = 9,
   dodSh = 9,
   valgtEnhet = "Alle",
@@ -28,14 +27,12 @@ RisikoInnTab(
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
-\item{bekr}{1-bekreftet, 0-mistenkt tilfelle}
-
 \item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
 }
 \value{
-
+Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
 }
 \description{
 Tabell med oversikt over tilstander som medfører økt risiko ved Coronasmitte

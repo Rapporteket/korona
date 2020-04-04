@@ -8,15 +8,12 @@ FerdigeRegInnTab(
   RegData,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
-  bekr = 9,
   erMann = 9,
   dodSh = 9
 )
 }
 \arguments{
 \item{RegData}{beredskapsskjema}
-
-\item{bekr}{1-bekreftet, 0-mistenkt tilfelle}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 

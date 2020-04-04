@@ -10,7 +10,6 @@ antallTidEnhTab(
   tidsenhet = "dag",
   erMann = 9,
   tilgangsNivaa = "SC",
-  bekr = 9,
   skjemastatus = 9,
   dodSh = 9,
   valgtEnhet = "Alle"
@@ -25,8 +24,6 @@ antallTidEnhTab(
 
 \item{tilgangsNivaa}{SC, LC og LU bestemmer hvilket enhetsNivaa
 ('RHF', 'HF', 'ShNavn') resultatene skal vises for}
-
-\item{bekr}{1-bekreftet, 0-mistenkt tilfelle}
 
 \item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 

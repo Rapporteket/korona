@@ -8,7 +8,6 @@ AlderTab(
   RegData,
   valgtEnhet = "Alle",
   enhetsNivaa = "Alle",
-  bekr = 9,
   skjemastatus = 9,
   dodSh = 9,
   erMann = 9
@@ -18,8 +17,6 @@ AlderTab(
 \item{RegData}{datatabell, beredskapsdata}
 
 \item{enhetsNivaa}{styres av tilgangsnivå 'Alle', 'RHF', 'HF'}
-
-\item{bekr}{1-bekreftet, 0-mistenkt tilfelle}
 
 \item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
