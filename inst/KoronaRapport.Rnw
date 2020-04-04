@@ -62,6 +62,8 @@ PandemiInn <- KoronaPreprosesser(PandemiInn)
 #                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 # PandemiUt$UtDato <- as.Date(PandemiUt$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 # PandemiUt$UtDag <- format(PandemiUt$UtDato, '%d.%B')
+Ntot <- dim(PandemiInn)[1]
+andelMenn <- paste0(sprintf('%.0f', 100*sum(PandemiInn$erMann)/Ntot), ' \\%')
 @
 
 
@@ -73,6 +75,7 @@ Dokumentet inneholder oppsummering av disse registreringene.
 \item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke, med mindre dette er angitt
 %Det er \Sexpr{N-antFerdig} av de \Sexpr{N} skjemaene som ikke er ferdigstilt.
 \item For å luke bort feilregistreringer, er registrering av innleggelse før 15.februar, filtrert bort.
+\item Andelen menn er \Sexpr{andelMenn}.
 %\item Det er registrert \Sexpr{DodBekr} døde.
 \item Rapporten er basert på alle registreringer gjort inntil 4 timer før rapporten ble lastet ned.
 %\Sexpr{RegILimboTxt}
@@ -166,7 +169,7 @@ xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 RisikoTab <- RisikoInnTab(RegData=PandemiInn, skjemastatus = 2)$Tab
 
-xtable::xtable(addmargins(RisikoTab), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Risikofaktorer ved innleggelse')
 @
 \end{frame}

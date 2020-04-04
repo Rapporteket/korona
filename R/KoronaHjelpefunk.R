@@ -10,9 +10,10 @@
 #' @return Full path of file produced
 #' @export
 
-henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona',
-                                     valgtRHF = 'Alle', #rolle='LU',
-                                datoFra=Sys.Date()-180, datoTil=Sys.Date()) {
+henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona'
+                                 #    valgtRHF = 'Alle', #rolle='LU',
+                                #datoFra=Sys.Date()-180, datoTil=Sys.Date()
+                                ) {
   tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
   # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog

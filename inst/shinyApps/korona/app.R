@@ -317,18 +317,20 @@ server <- function(input, output, session) {
       filename = function(){
         paste0('KoronaRapport', Sys.time(), '.pdf')},
       content = function(file){
-        henteSamlerapporterBered(file, rnwFil="KoroRapp.Rnw",
+        henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw"
                                  #rolle = rolle,
-                                 valgtEnhet = valgtEnhet, #as.character(input$valgtEnhet),
-                                 reshID = reshID) #Vurder å ta med tidsinndeling eller startdato
+                                 #valgtEnhet = valgtEnhet, #as.character(input$valgtEnhet),
+                                 #reshID = reshID
+                                 ) #Vurder å ta med tidsinndeling eller startdato
       }
     )
   })
 
   output$KoroRappTxt <- renderUI(tagList(
-    h3(HTML('Koronarapport med samling av resultater')),
-    h5(HTML('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                    Gå til fanen "Abonnement" for å bestille dette')))
+    h3(HTML('Koronarapport med samling av resultater'))
+    # h5(HTML('Koronarapporten kan man få regelmessig tilsendt på e-post.
+    #                 Gå til fanen "Abonnement" for å bestille dette'))
+    )
   )
 
   #----------Tabeller, Korona----------------------------
@@ -341,21 +343,20 @@ server <- function(input, output, session) {
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag',
                               skjemastatus=as.numeric(input$skjemastatus),
-                              bekr=as.numeric(input$bekr),
                               erMann=as.numeric(input$erMann)
     )
     #NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
     UtData <- KoronaUtvalg(RegData=KoroData,
                            enhetsNivaa=enhetsNivaaRolle, valgtEnhet=egenEnhet,
                            skjemastatus=as.numeric(input$skjemastatus),
-                           bekr=as.numeric(input$bekr),
                            erMann=as.numeric(input$erMann)
     )
 
     txt <- if(dim(UtData$RegData)[1]>2) {
       paste0('Gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
-             round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn. Antall døde: ',
-             sum(UtData$RegData$DischargedIntensivStatus==1))
+             round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn.')
+             # Antall døde: ',
+             # sum(UtData$RegData$DischargedIntensivStatus==1))
     } else {''}
 
     output$utvalgAntOpph <- renderUI({
@@ -371,15 +372,13 @@ server <- function(input, output, session) {
     #Tab status nå
     # statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #valgtEnhet=input$valgtEnhet,
     #                                   erMann=as.numeric(input$erMann),
-    #                                   bekr=as.numeric(input$bekr))
-    # output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
+      # output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
     # output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
     #Tab ferdigstilte
     # TabFerdig <- FerdigeRegInnTab(RegData=KoroData,
     #                                    #valgtEnhet=input$valgtEnhet,
-    #                                  bekr = as.numeric(input$bekr),
-    #                                    erMann=as.numeric(input$erMann))
+   #                                    erMann=as.numeric(input$erMann))
     #
     # output$tabFerdigeReg <- if (TabFerdig$Ntest>2){
     #   renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
@@ -394,7 +393,6 @@ server <- function(input, output, session) {
     RisikoTab <- RisikoInnTab(RegData=KoroData, tidsenhet='Totalt',
                               valgtEnhet= input$valgtEnhet,
                               skjemastatus=as.numeric(input$skjemastatus),
-                              bekr=as.numeric(input$bekr),
                               #dodInt=as.numeric(input$dodInt),
                               erMann=as.numeric(input$erMann),
                               minald=as.numeric(input$alder[1]),
@@ -411,7 +409,6 @@ server <- function(input, output, session) {
                          valgtEnhet= input$valgtEnhet,
                          #dodInt=as.numeric(input$dodInt),
                          erMann=as.numeric(input$erMann),
-                         bekr=as.numeric(input$bekr),
                          skjemastatus=as.numeric(input$skjemastatus)
     )
     output$tabAlder<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
@@ -425,10 +422,10 @@ server <- function(input, output, session) {
   observe({
 
     AntTab <- intensivberedskap::TabTidEnhet(RegData=KoroDataInt, tidsenhet='dag', #valgtRHF= 'Alle',
-                                             bekr=as.numeric(input$bekr)
+                                             bekr=as.numeric(input$bekrInt)
     )
     UtData <- NIRUtvalgBeredsk(RegData=KoroDataInt,
-                               bekr=as.numeric(input$bekr)
+                               bekr=as.numeric(input$bekrInt)
     )
     utvalg <- UtData$utvalgTxt
     txt <- if(AntTab$Ntest>2) {
@@ -475,7 +472,7 @@ server <- function(input, output, session) {
 
     #Tab risiko
     RisikoTab <- intensivberedskap::RisikofaktorerTab(RegData=KoroDataInt, tidsenhet='Totalt',
-                                                      bekr=as.numeric(input$bekr))
+                                                      bekr=as.numeric(input$bekrInt))
 
     output$tabRisikofaktorerInt <- if (RisikoTab$Ntest>2){
       renderTable(RisikoTab$Tab, rownames = T, digits=0, spacing="xs") } else {
@@ -484,7 +481,7 @@ server <- function(input, output, session) {
     })
 
     TabAlder <- intensivberedskap::TabAlder(RegData=KoroDataInt,
-                                            bekr=as.numeric(input$bekr)
+                                            bekr=as.numeric(input$bekrInt)
     )
     output$tabAlderInt<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
     output$utvalgAlderInt <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })

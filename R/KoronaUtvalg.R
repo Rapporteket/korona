@@ -7,7 +7,6 @@
 #' @param datoFra startdato 'yyyy-mm-dd'
 #' @param datoTil sluttdato 'yyyy-mm-dd'
 #' @param erMann kjønn, 0-kvinne, 1-mann
-#' @param bekr 1-bekreftet, 0-mistenkt tilfelle
 #' @param skjemastatus status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
 #' @param enhetsUtvalg enhetsutvalg...
 #' @param dodSh død på sykehus 0-nei, 1-ja
@@ -17,11 +16,10 @@
 #' @export
 #'
 KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
-                             bekr=9, skjemastatus=9, dodSh=9, reshID=0,
+                             skjemastatus=9, dodSh=9, reshID=0,
                          enhetsNivaa='RHF', valgtEnhet='Alle') {
 
 
- if (bekr %in% 0:1){RegData <- subset(RegData, RegData$Bekreftet==bekr)}
  if (skjemastatus %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatus)}
  #if (dodSh %in% 0:1){RegData <- subset(RegData, RegData$DischargedIntensivStatus==dodSh)}
  if (erMann %in% 0:1){
@@ -39,8 +37,6 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
   N <- dim(RegData)[1]
 
   utvalgTxt <- c(
-    if (bekr %in% 0:1){paste(c('Mistenkte','Bekreftede')[bekr+1], 'tilfeller')
-    } else {'Alle registrerte (mistenkte og bekreftede)'},
     if(datoFra!=0 | datoTil!=0) {paste0(
       'Innleggelsesdatoer: ', if (N>0) {min(as.Date(RegData$InnDato), na.rm=T)} else {datoFra},
       ' til ', if (N>0) {max(as.Date(RegData$InnDato), na.rm=T)} else {datoTil})} else {NULL},

@@ -4,14 +4,7 @@
 \alias{henteSamlerapporterKorona}
 \title{Funksjon som produserer rapporten som skal sendes til mottager.}
 \usage{
-henteSamlerapporterKorona(
-  filnavn,
-  rnwFil,
-  Rpakke = "korona",
-  valgtRHF = "Alle",
-  datoFra = Sys.Date() - 180,
-  datoTil = Sys.Date()
-)
+henteSamlerapporterKorona(filnavn, rnwFil, Rpakke = "korona")
 }
 \arguments{
 \item{filnavn}{dummy}
