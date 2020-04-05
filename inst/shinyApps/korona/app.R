@@ -15,6 +15,7 @@ library(lubridate)
 library(intensivberedskap)
 library(korona)
 
+
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
 ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
                         stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
