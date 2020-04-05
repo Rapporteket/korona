@@ -19,7 +19,7 @@ Remotes:
       Rapporteket/rapbase,
       Rapporteket/rapFigurer,
       Rapporteket/raplog,
-      Rapporteket/intensivberedskap,
+      Rapporteket/intensivberedskap
 Imports:
     digest,
     DT,
@@ -35,7 +35,8 @@ Imports:
     shinyalert,
     shinyjs,
     xtable,
-    zoo
+    zoo,
+    tidyverse
 VignetteBuilder: knitr
 Suggests: 
     testthat (>= 2.1.0)

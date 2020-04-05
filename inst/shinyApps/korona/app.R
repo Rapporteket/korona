@@ -15,6 +15,13 @@ library(lubridate)
 library(intensivberedskap)
 library(korona)
 
+
+## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
+# ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
+#                         stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
+# usethis::use_data(ReshNivaa, overwrite = TRUE, internal = FALSE)
+# ###################################################################
+
 shiny::addResourcePath('rap', system.file('www', package='rapbase'))
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
 paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
@@ -31,9 +38,9 @@ if (paaServer) {
 } else {
   # KoroData <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
   #                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroData <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 10-59-33.txt', sep=';',
+  KoroData <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 16-39-11.txt', sep=';',
                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 11-02-00.txt', sep=';',
+  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 } #hente data
 #Velger å gjøre sammenkobling i R for å letter kjøre kode lokalt
