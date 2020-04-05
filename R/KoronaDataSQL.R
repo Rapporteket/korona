@@ -9,6 +9,8 @@ KoronaDataSQL <- function(skjema=1) { #datoFra = '2020-03-01', datoTil = Sys.Dat
 
 #VARIABELLISTE MÅ OPPDATERES
 
+
+
 varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,AceHemmerInnkomst
   -- ,AddressQuality
@@ -38,9 +40,9 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,FormStatus
   ,FormTypeId
   ,Gravid
-  ,HealthUnitId
-  ,HealthUnitName
-  ,HealthUnitShortName
+  ,Helseenhet
+  ,HelseenhetID
+  ,HelseenhetKortNavn
   ,HF
   ,Hjertefrekvens
   ,HjertefrekvensUkjent
@@ -73,12 +75,13 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,Nyresykdom
   ,Oksygenmetning
   ,OkysgenmetningUkjent
+ ,OverfortAnnetSykehusInnleggelse
   ,PasientGUID
   ,PatientAge
   ,PatientGender
   ,Penicillin
   ,PenicillinEnzymhemmer
-  ,PostalCode
+  -- ,PostalCode
   ,ReiseUtenfor
   ,RelevantDato
   ,Respirasjonsfrekvens
@@ -87,7 +90,9 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,RontgenThorax
   ,Royker
   ,Skjematype
+  ,SkjemaGUID
   ,SkreatininUkjent
+  ,Sykehus
   ,Status30Dager
   ,Status90Dager
   ,SystoliskBlodtrykk
@@ -106,7 +111,7 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,UtsAndreGencefalosporin
   ,UtsAntibiotika
   ,UtsAntibiotikaAnnet
-  ,UtsAntibiotikaukjent
+  ,UtsAntibiotikaUkjent
   ,UtsAntifungalbehandling
   ,UtsAntiviralBehandling
   ,UtsKarbapenem
@@ -121,7 +126,7 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
 
 
 varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
-  ,AddressQuality
+  -- ,AddressQuality
   ,AkuttNyresvikt
   ,AkuttRespirasjonsvikt
   ,AkuttSirkulasjonsvikt
@@ -132,14 +137,14 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,AntibiotikaUkjent
   ,Antifungalbehandling
   ,AntiviralBehandling
-  ,CurrentMunicipalNumber
-  ,DistrictCode
+  -- ,CurrentMunicipalNumber
+  -- ,DistrictCode
   ,FormDate
   ,FormStatus
   ,FormTypeId
-  ,HealthUnitId
-  ,HealthUnitName
-  ,HealthUnitShortName
+  ,HelseenhetID
+  ,Helseenhet
+  ,HelseenhetKortNavn
   ,HF
   ,Hospital
   ,HovedskjemaGUID
@@ -147,32 +152,36 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,Karbapenem
   ,Kinolon
   ,LastUpdate
-  ,MajorVersion
+  -- ,MajorVersion
   ,Makrolid
   ,MigrationInformation
   ,MinorVersion
   ,Municipal
   ,MunicipalNumber
+  ,OverfortAnnetSykehusUtskrivning
   ,PasientGUID
   ,PatientAge
   ,PatientGender
   ,Penicillin
   ,PenicillinEnzymhemmer
-  ,PostalCode
+  -- ,PostalCode
   ,RelevantDato
   ,RHF
-  ,SkjemaGUID
   ,Skjematype
+  ,Sykehus
+  ,StatusVedUtskriving
   ,TimerSidenRelevantDato
   ,TredjeGencefalosporin
   ,UnitId
   ,Utskrivningsdato')
 
-alle <- '*'
+
+#alle <- '*'
 
         query <- paste0('SELECT ',
-                        alle,
-                        ' FROM InklusjonSkjemaDataContract Q')
+                       alle, #ifelse(skjema==1, varPandemiInn, varPandemiUt),
+                        ' FROM ',
+                        ifelse(skjema==1, 'InklusjonSkjemaDataContract', 'UtskrivningSkjemaDataContract'))
                       #WHERE cast(DateAdmittedIntensive as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
 
 

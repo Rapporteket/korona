@@ -24,7 +24,8 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020 ',
 
 #---------Hente data------------
 if (paaServer) {
-  KoroData <- KoronaDataSQL() #rapbase::LoadRegData(registryName= "nir", query=qCoro, dbType="mysql")
+  KoroDataInn <- KoronaDataSQL(skjema=1)
+  KoroDataUt <- KoronaDataSQL(skjema=2)
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
@@ -35,7 +36,13 @@ if (paaServer) {
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 11-02-00.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 } #hente data
+#Velger å gjøre sammenkobling i R for å letter kjøre kode lokalt
+NavnInn <- sort(names(KoroDataInn))
+NavnUt <- sort(names(KoroDataUt))
+setdiff(NavnUt, NavnInn)
+intersect(NavnUt, NavnInn)
 
+KoroData <- KoroDataInn
 KoroData <- KoronaPreprosesser(RegData = KoroData)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
