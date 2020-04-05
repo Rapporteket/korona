@@ -44,10 +44,10 @@ if (paaServer) {
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 } #hente data
 #Velger å gjøre sammenkobling i R for å letter kjøre kode lokalt
-NavnInn <- sort(names(KoroDataInn))
-NavnUt <- sort(names(KoroDataUt))
-setdiff(NavnUt, NavnInn)
-intersect(NavnUt, NavnInn)
+# NavnInn <- sort(names(KoroDataInn))
+# NavnUt <- sort(names(KoroDataUt))
+# setdiff(NavnUt, NavnInn)
+# intersect(NavnUt, NavnInn)
 
 KoroData <- KoroDataInn
 KoroData <- KoronaPreprosesser(RegData = KoroData)

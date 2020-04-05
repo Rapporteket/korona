@@ -47,10 +47,10 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,Hjertefrekvens
   ,HjertefrekvensUkjent
   ,Hjertesykdom
-  ,Hospital
+  -- ,Hospital
   ,Hoyde
   ,HoydeUkjent
-  ,IkkeFerdigstillt30Dager
+  -- ,IkkeFerdigstillt30Dager
   ,Innleggelse
   ,Isolert
   ,Karbapenem
@@ -66,7 +66,7 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,Leversykdom
   ,MajorVersion
   ,Makrolid
-  ,MigrationInformation
+  -- ,MigrationInformation
   ,MinorVersion
   ,Municipal
   ,MunicipalNumber
@@ -83,13 +83,13 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,PenicillinEnzymhemmer
   -- ,PostalCode
   ,ReiseUtenfor
-  ,RelevantDato
+  -- ,RelevantDato
   ,Respirasjonsfrekvens
   ,RespirasjonsfrekvensUkjent
   ,RHF
   ,RontgenThorax
   ,Royker
-  ,Skjematype
+  -- ,Skjematype
   ,SkjemaGUID
   ,SkreatininUkjent
   ,Sykehus
@@ -99,7 +99,7 @@ varPandemiInn <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,SystoliskBlodtrykkUkjent
   ,Temp
   ,TempUkjent
-  ,TimerSidenRelevantDato
+  -- ,TimerSidenRelevantDato
   ,TredjeGencefalosporin
   ,Trombocytter
   ,TrombocytterUkjent
@@ -146,15 +146,15 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,Helseenhet
   ,HelseenhetKortNavn
   ,HF
-  ,Hospital
+  -- ,Hospital
   ,HovedskjemaGUID
-  ,IkkeFerdigstillt30Dager
+  -- ,IkkeFerdigstillt30Dager
   ,Karbapenem
   ,Kinolon
   ,LastUpdate
   -- ,MajorVersion
   ,Makrolid
-  ,MigrationInformation
+  -- ,MigrationInformation
   ,MinorVersion
   ,Municipal
   ,MunicipalNumber
@@ -165,12 +165,12 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,Penicillin
   ,PenicillinEnzymhemmer
   -- ,PostalCode
-  ,RelevantDato
+  -- ,RelevantDato
   ,RHF
-  ,Skjematype
+  -- ,Skjematype
   ,Sykehus
   ,StatusVedUtskriving
-  ,TimerSidenRelevantDato
+  -- ,TimerSidenRelevantDato
   ,TredjeGencefalosporin
   ,UnitId
   ,Utskrivningsdato')
@@ -179,7 +179,7 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
 #alle <- '*'
 
         query <- paste0('SELECT ',
-                       alle, #ifelse(skjema==1, varPandemiInn, varPandemiUt),
+                       ifelse(skjema==1, varPandemiInn, varPandemiUt),
                         ' FROM ',
                         ifelse(skjema==1, 'InklusjonSkjemaDataContract', 'UtskrivningSkjemaDataContract'))
                       #WHERE cast(DateAdmittedIntensive as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
