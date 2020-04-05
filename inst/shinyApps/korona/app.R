@@ -36,9 +36,9 @@ if (paaServer) {
 } else {
   # KoroData <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
   #                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroData <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 10-59-33.txt', sep=';',
+  KoroData <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 16-39-11.txt', sep=';',
                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 11-02-00.txt', sep=';',
+  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 } #hente data
 
