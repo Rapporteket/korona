@@ -17,10 +17,10 @@ library(korona)
 
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
-ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
-                        stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
-usethis::use_data(ReshNivaa, overwrite = TRUE, internal = FALSE)
-###################################################################
+# ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
+#                         stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
+# usethis::use_data(ReshNivaa, overwrite = TRUE, internal = FALSE)
+# ###################################################################
 
 shiny::addResourcePath('rap', system.file('www', package='rapbase'))
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
