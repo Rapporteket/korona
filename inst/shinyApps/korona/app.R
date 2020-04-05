@@ -10,21 +10,17 @@
 library(shiny)
 library(shinyjs)
 library(magrittr)
-library(lubridate)
 library(tidyverse)
-library(rapbase)
+library(lubridate)
 library(intensivberedskap)
 library(korona)
-library(tidyverse)
-library(lubridate)
 
 shiny::addResourcePath('rap', system.file('www', package='rapbase'))
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
 paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
-regTitle <- ifelse(paaServer,
-                   paste0('Koronaregistreringer, pandemi 2020 ',ifelse(context=='QA', 'QA','')),
-                   'FIKTIVE data')
+regTitle <- paste0('Koronaregistreringer, pandemi 2020 ',
+                   ifelse(context=='QA', 'QA',''))
 
 #---------Hente data------------
 if (paaServer) {
@@ -38,7 +34,6 @@ if (paaServer) {
                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 11-02-00.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-
 } #hente data
 
 KoroData <- KoronaPreprosesser(RegData = KoroData)
@@ -49,7 +44,7 @@ KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
 #Definere utvalgsinnhold
 rhfNavn <- c('Alle', as.character(sort(unique(KoroData$RHF))))
-hfNavn <- sort(unique(KoroData$HF)) #, index.return=T)
+hfNavn <- c('Alle', sort(unique(KoroData$HF))) #, index.return=T)
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som flge av et annet input.
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
 #names(enhetsNivaa) <- c('RHF', 'HF')
@@ -160,13 +155,12 @@ ui <- tagList(
 
                       sidebarPanel(id = 'intensiv',
                                    width = 3,
-                                   uiOutput('KoroRappTxtInt'),
-                                   h3('Koronarapport fra intensivregisteret'),
-                                   h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                                   Gå til fanen "Abonnement" for å bestille dette.'),
-                                   downloadButton(outputId = 'KoroRappInt.pdf',
-                                                  label=HTML('Last ned Koronarapport <br /> for intensivopphold'), class = "butt"),
-                                   tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
+                                   # h3('Koronarapport fra intensivregisteret'),
+                                   # h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
+                                   # Gå til fanen "Abonnement" for å bestille dette.'),
+                                   # downloadButton(outputId = 'KoroRappInt.pdf',
+                                   #                label=HTML('Last ned Koronarapport <br /> for intensivopphold'), class = "butt"),
+                                   # tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                    br(),
                                    br(),
                                    h3('Gjør filtreringer/utvalg:'),
@@ -328,12 +322,11 @@ server <- function(input, output, session) {
     )
   })
 
-  output$KoroRappTxt <- renderUI(tagList(
-    h3(HTML('Koronarapport med samling av resultater'))
-    # h5(HTML('Koronarapporten kan man få regelmessig tilsendt på e-post.
-    #                 Gå til fanen "Abonnement" for å bestille dette'))
-    )
-  )
+  # output$KoroRappTxt <- renderUI(tagList(
+  #   h3(HTML('Koronarapport med samling av resultater'))
+  #   # h5(HTML('Koronarapporten kan man få regelmessig tilsendt på e-post.
+  #   #                 Gå til fanen "Abonnement" for å bestille dette'))
+  #   )
 
   #----------Tabeller, Korona----------------------------
 
