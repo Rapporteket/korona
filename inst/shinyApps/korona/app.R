@@ -31,8 +31,13 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020 ',
 
 #---------Hente data------------
 if (paaServer) {
-  KoroDataInn <- KoronaDataSQL(skjema=1)
-  KoroDataUt <- KoronaDataSQL(skjema=2)
+  #KoroDataInn <- KoronaDataSQL(skjema=1)
+  #KoroDataUt <- KoronaDataSQL(skjema=2)
+  #Mange av variablene på ut-skjema er med i inn-dumpen
+  #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
+  KoroData <-  KoronaDataSQL(koble=1)
+  KoroDataInn <- KoronaDataSQL(skjema = 1, koble=0)
+  KoroDataUt <- KoronaDataSQL(skjema=2, koble = 0) #Inneholder dobbeltregistrering!
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
@@ -43,13 +48,11 @@ if (paaServer) {
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 } #hente data
-#Velger å gjøre sammenkobling i R for å letter kjøre kode lokalt
-# NavnInn <- sort(names(KoroDataInn))
-# NavnUt <- sort(names(KoroDataUt))
-# setdiff(NavnUt, NavnInn)
-# intersect(NavnUt, NavnInn)
 
-KoroData <- KoroDataInn
+# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
+#           'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+# KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+#       by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 KoroData <- KoronaPreprosesser(RegData = KoroData)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
@@ -59,6 +62,7 @@ KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 #Definere utvalgsinnhold
 rhfNavn <- c('Alle', as.character(sort(unique(KoroData$RHF))))
 hfNavn <- c('Alle', sort(unique(KoroData$HF))) #, index.return=T)
+enhetsNavn <- rhfNavn
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som flge av et annet input.
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
 #names(enhetsNivaa) <- c('RHF', 'HF')
@@ -91,19 +95,19 @@ ui <- tagList(
                                    #                            value = Sys.Date(), max = Sys.Date())
                                    # ),
                                    #MÅ HA ET VALG SOM ENDRER SEG AVHENGIG AV ROLLE, DVS. Velg RHF/HF/ingen valg?
-                                   selectInput(inputId = "valgtEnhet", label="Velg RHF",
-                                               choices = rhfNavn
+                                   selectInput(inputId = "valgtEnhet", label="Velg enhet",
+                                               choices = 'Alle'
                                    ),
                                    # selectInput(inputId = 'enhetsGruppe', label='Enhetgruppe',
                                    #             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
                                    # ),
 
-                                   selectInput(inputId = "skjemastatus", label="Skjemastatus",
+                                   selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
                                                choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                    ),
-                                   # selectInput(inputId = "dodInt", label="Tilstand ut fra intensiv",
-                                   #             choices = c("Alle"=9, "Død"=1, "Levende"=0)
-                                   # ),
+                                   selectInput(inputId = "dodSh", label="Tilstand ut fra sykehuset",
+                                               choices = c("Alle"=9, "Død"=2, "Levende"=1)
+                                   ),
                                    selectInput(inputId = "erMann", label="Kjønn",
                                                choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
                                    ),
@@ -162,7 +166,7 @@ ui <- tagList(
                       ) #main
              ), #tab Startside
 
-             #---------Intensivregistreringer--------------------------------
+#---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
                       value = 'Intensiv',
@@ -268,18 +272,17 @@ server <- function(input, output, session) {
   rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'SC')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
 
-  finnesEgenResh <- reshID %in% unique(KoroData$ReshId)
+  finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
   if (finnesEgenResh) {
-    indReshEgen <- match(reshID, KoroData$ReshId) #Her skal benyttes HF-resh
-    egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
+    indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
+    #egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
   }
 
-  egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF)
   #Filtreringsnivå for data:
-  enhetsNivaaRolle <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
-  print(rolle)
+  egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+  egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
 
   # observe({if ((rolle != 'SC') & !(finnesEgenResh)) {
   #   shinyjs::hide(id = 'KoroRappInt.pdf')
@@ -290,16 +293,14 @@ server <- function(input, output, session) {
   # }
   #})
 
-  # SC KAN VELGE BLANT ALLE RHF, DE ANDRE KAN BARE VELGE EGEN ENHET/ALLE
-  if (rolle != 'SC') {
-    updateSelectInput(session, "valgtEnhet",
-                      choices = unique(c('Alle', ifelse(egetRHF=='Ukjent', 'Alle',
-                                                        egetRHF))))
+  # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
+  enhetsvalg <- c('Alle', if (rolle=='SC'){rhfNavn} else {egenEnhet})
+  if (rolle != 'SC') {updateSelectInput(session, "valgtEnhet",
+                      choices = enhetsvalg)
     #KoroData$RHF[match(reshID, KoroData$ReshId)]))
     updateSelectInput(session, "valgtEnhetabb",
-                      choices = egetRHF) #unique(c('Alle', egetRHF)))
-    #KoroData$RHF[match(reshID, KoroData$ReshId)]))
-  }
+                      choices = enhetsvalg)
+    }
 
 
   # widget
@@ -351,21 +352,20 @@ server <- function(input, output, session) {
     AntTab <- antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag',
-                              skjemastatus=as.numeric(input$skjemastatus),
+                              skjemastatusInn=as.numeric(input$skjemastatusInn),
                               erMann=as.numeric(input$erMann)
     )
     #NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
     UtData <- KoronaUtvalg(RegData=KoroData,
                            enhetsNivaa=enhetsNivaaRolle, valgtEnhet=egenEnhet,
-                           skjemastatus=as.numeric(input$skjemastatus),
+                           skjemastatusInn=as.numeric(input$skjemastatusInn),
                            erMann=as.numeric(input$erMann)
     )
 
     txt <- if(dim(UtData$RegData)[1]>2) {
       paste0('Gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
-             round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn.')
-             # Antall døde: ',
-             # sum(UtData$RegData$DischargedIntensivStatus==1))
+             round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn.
+              Antall døde: ', sum(KoroDataUt$StatusVedUtskriving==2))
     } else {''}
 
     output$utvalgAntOpph <- renderUI({
@@ -399,10 +399,10 @@ server <- function(input, output, session) {
 
 
     #Tab risiko
-    RisikoTab <- RisikoInnTab(RegData=KoroData, tidsenhet='Totalt',
+    RisikoTab <- RisikoInnTab(RegData=KoroData,
                               valgtEnhet= input$valgtEnhet,
-                              skjemastatus=as.numeric(input$skjemastatus),
-                              #dodInt=as.numeric(input$dodInt),
+                              skjemastatusInn=as.numeric(input$skjemastatusInn),
+                              dodSh=as.numeric(input$dodSh),
                               erMann=as.numeric(input$erMann),
                               minald=as.numeric(input$alder[1]),
                               maxald=as.numeric(input$alder[2]))
@@ -416,9 +416,9 @@ server <- function(input, output, session) {
 
     TabAlder <- AlderTab(RegData=KoroData,
                          valgtEnhet= input$valgtEnhet,
-                         #dodInt=as.numeric(input$dodInt),
+                         dodSh=as.numeric(input$dodSh),
                          erMann=as.numeric(input$erMann),
-                         skjemastatus=as.numeric(input$skjemastatus)
+                         skjemastatusInn=as.numeric(input$skjemastatusInn)
     )
     output$tabAlder<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
     output$utvalgAlder <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })

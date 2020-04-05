@@ -6,11 +6,10 @@
 \usage{
 RisikoInnTab(
   RegData,
-  tidsenhet = "Totalt",
   datoTil = Sys.Date(),
   reshID = 0,
   erMann = "",
-  skjemastatus = 9,
+  skjemastatusInn = 9,
   dodSh = 9,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
@@ -27,7 +26,7 @@ RisikoInnTab(
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
-\item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
+\item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
 }

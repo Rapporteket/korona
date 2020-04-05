@@ -13,7 +13,7 @@
 #' @return
 #' @export
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
-                        skjemastatus=9, dodSh=9, valgtEnhet='Alle'){
+                        skjemastatusInn=9, dodSh=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
         RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
@@ -30,7 +30,7 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   #Benytter ikke utvalgsfila til enhetsfiltrering. Skal også ha oppsummering for hele landet
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
-                             skjemastatus=skjemastatus,
+                             skjemastatusInn=skjemastatusInn,
                              dodSh=dodSh)
 
 
@@ -70,11 +70,12 @@ if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
 
 
 
-#' Nøkkeltall
+#' Status nå
 #' @param RegData pandemiskjema
 #' @return
 #' @export
-statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9){
+statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
+                         skjemastatusInn=9, skjemastatusUt=9, erMann=9){
 
   UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
                                erMann=erMann)
@@ -82,14 +83,15 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9
 RegData <- UtData$RegData
   N <- dim(RegData)[1]
   ##MechanicalRespirator Fått respiratorstøtte. Ja=1, nei=2,
-inneliggere <- is.na(RegData$DateDischargedIntensive)
+inneliggere <- is.na(RegData$UtDato)
 AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
-LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$Innleggelsestidspunkt[inneliggere], units='days'))
-LiggetidNaaGjsn <- mean(LiggetidNaa[LiggetidNaa < 30], na.rm = T)
+LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$InnTidspunkt[inneliggere], units='days'))
+LiggetidNaaGjsn <- mean(LiggetidNaa[LiggetidNaa < 50], na.rm = T)
 
 statusTab <- rbind(
-  Liggetid = summary(LiggetidNaa)
+  'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
 )
+colnames(statusTab) <- c('Antall', 'Liggetid(gj.sn)')
 # TabHjelp <- rbind(
 #   'På ECMO nå' = c(AntIECMONaa*(c(1, 100/AntPaaIntNaa)), ECMOtidNaaGjsn),
 #   'På respirator nå' = c(AntIrespNaa*(c(1, 100/AntPaaIntNaa)), ResptidNaaGjsn),
@@ -100,7 +102,7 @@ statusTab <- rbind(
 xtable::xtable(statusTab,
                digits=0,
                #align = c('l','r','r','r'),
-               caption='Korona på sykehus nå')
+               caption='Inneliggende på sykehus nå')
 UtData <- list(Tab=statusTab, utvalgTxt=UtData$utvalgTxt, PaaShNaa=inneliggere)
 return(UtData)
 }
@@ -116,7 +118,7 @@ FerdigeRegInnTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMa
 
 UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
                              erMann = erMann,
-                              skjemastatus=2)
+                              skjemastatusInn=2)
 RegData <- UtData$RegData
   N <- dim(RegData)[1]
   Liggetid <- summary(RegData$liggetid[RegData$liggetid < 30], na.rm = T)
@@ -156,12 +158,12 @@ TabFerdigeReg <- rbind(
 #' @inheritParams KoronaUtvalg
 #' @export
 #' @return
-RisikoInnTab <- function(RegData, tidsenhet='Totalt', datoTil=Sys.Date(), reshID=0,
-                              erMann='', skjemastatus=9, dodSh=9,
+RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
+                              erMann='', skjemastatusInn=9, dodSh=9,
                               valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #enhetsUtvalg=0, minald=0, maxald=110,
-                             skjemastatus=skjemastatus, dodSh=dodSh,
+                             skjemastatusInn=skjemastatusInn, dodSh=dodSh,
                              minald=minald, maxald=maxald,
                              reshID=reshID, valgtEnhet=valgtEnhet) #velgAvd=velgAvd
   Ntest <- dim(UtData$RegData)[1]
@@ -216,7 +218,7 @@ AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
 #' @return
 #' @export
 AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNivaa='SC', #
-                     skjemastatus=9, dodSh=9, erMann=9){
+                     skjemastatusInn=9, dodSh=9, erMann=9){
 
     #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   # RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
@@ -233,7 +235,7 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNi
                              valgtEnhet=valgtEnhet,
                              dodSh = dodSh,
                              erMann = erMann,
-                              skjemastatus=skjemastatus
+                              skjemastatusInn=skjemastatusInn
                               )
   RegData <- UtData$RegData
 

@@ -10,7 +10,7 @@ antallTidEnhTab(
   tidsenhet = "dag",
   erMann = 9,
   tilgangsNivaa = "SC",
-  skjemastatus = 9,
+  skjemastatusInn = 9,
   dodSh = 9,
   valgtEnhet = "Alle"
 )
@@ -25,7 +25,7 @@ antallTidEnhTab(
 \item{tilgangsNivaa}{SC, LC og LU bestemmer hvilket enhetsNivaa
 ('RHF', 'HF', 'ShNavn') resultatene skal vises for}
 
-\item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
+\item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
 

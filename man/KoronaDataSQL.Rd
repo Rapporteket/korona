@@ -2,16 +2,18 @@
 % Please edit documentation in R/KoronaDataSQL.R
 \name{KoronaDataSQL}
 \alias{KoronaDataSQL}
-\title{SKAL Hente data fra database for koronaregisteringer.NB MÅ OPPDATERES}
+\title{Henter data fra database for koronaregisteringer.}
 \usage{
-KoronaDataSQL(skjema = 1)
+KoronaDataSQL(skjema = 1, koble = 0)
 }
 \arguments{
 \item{skjema}{1-innleggelse, 2-utskriving}
+
+\item{koble}{0-kun valgt skjema, 1 koble inn og ut-skjema}
 }
 \value{
-Henter dataramma RegData for Intensivregisteret
+Henter dataramma RegData for Pandemiregisteret
 }
 \description{
-SKAL Hente data fra database for koronaregisteringer.NB MÅ OPPDATERES
+Henter data fra database for koronaregisteringer.
 }

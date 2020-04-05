@@ -1,6 +1,6 @@
 #Kjørefil for Rapporteket-Pandemi
 library(korona)
-RegData <- KoronaPreprosesser(KoronaDataSQL())
+PandemiInn <- KoronaPreprosesser(KoronaDataSQL(skjema=1))
 
 tidsenhet='dag'
 erMann=9
@@ -26,7 +26,7 @@ tools::texi2pdf(file='KoronaRapport.tex')
 knitr::knit2pdf('KoronaRapport.Rnw') #, encoding = 'UTF-8')
 
 
-unique(PandemiInn[,c("UnitId","HealthUnitShortName",'HF')])
+unique(PandemiInn[,c('RHFresh','RHF')])
 PandemiInn %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = length(unique(HealthUnitShortName)))
 PandemiInn %>% dplyr::group_by(RHF) %>% dplyr::summarise(Antall = length(unique(HF)))
 
@@ -42,10 +42,28 @@ PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')
 # Antall med fristbrudd (24t) - også ferdigstilte? Kun fra 1.april? Spør
 
 library(korona)
-Data <- KoronaDataSQL()
-RegData <- KoronaPreprosesser(RegData=Data)
+KoroDataInn <- KoronaDataSQL(skjema=1, koble=0)
+KoroDataUt <- KoronaDataSQL(skjema=2)
+# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID",
+#            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+# KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+#                   by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 
-#tidsenhet='Totalt'
+KoroData <- KoronaDataSQL(koble = 1)
+KoroData <- KoronaPreprosesser(RegData = KoroData)
+
+RegData <- KoronaPreprosesser(RegData = KoroData)
+
+UtData <- KoronaUtvalg(RegData=KoroData, dodSh = 2)
+
+RisikoInnTab(RegData = RegData, dodSh = 2)
+
+max(sort(table(KoroDataInn$SkjemaGUID)))
+sort(table(KoroDataUt$HovedskjemaGUID))
+sort(table(KoroDataUt$SkjemaGUID))
+ind <- which(KoroDataUt$HovedskjemaGUID==('D403C085-3F28-4840-AF72-9A6AF7954066'))
+SkjemaGUID = 'D403C085-3F28-4840-AF72-9A6AF7954066'
+KoroDataUt[ind, "FormStatus"]
 
 datoTil=Sys.Date()
 reshID=0
@@ -58,14 +76,13 @@ enhetsNivaa='RHF'
 minald=0
 maxald=110
 
+
+
 RisikoInnTab(RegData, erMann='', skjemastatus=2, dodSh=9,
                          valgtEnhet='Alle', enhetsNivaa='RHF',
                          minald=0, maxald=110)
 
 AlderTab(RegData)
-
-
-
 
 
 

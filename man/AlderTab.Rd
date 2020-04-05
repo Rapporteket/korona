@@ -8,7 +8,7 @@ AlderTab(
   RegData,
   valgtEnhet = "Alle",
   enhetsNivaa = "Alle",
-  skjemastatus = 9,
+  skjemastatusInn = 9,
   dodSh = 9,
   erMann = 9
 )
@@ -18,7 +18,7 @@ AlderTab(
 
 \item{enhetsNivaa}{styres av tilgangsnivå 'Alle', 'RHF', 'HF'}
 
-\item{skjemastatus}{status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
+\item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
 

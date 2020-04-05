@@ -2,9 +2,16 @@
 % Please edit documentation in R/KoronaTabeller.R
 \name{statusNaaTab}
 \alias{statusNaaTab}
-\title{Nøkkeltall}
+\title{Status nå}
 \usage{
-statusNaaTab(RegData, valgtEnhet = "Alle", enhetsNivaa = "RHF", erMann = 9)
+statusNaaTab(
+  RegData,
+  valgtEnhet = "Alle",
+  enhetsNivaa = "RHF",
+  skjemastatusInn = 9,
+  skjemastatusUt = 9,
+  erMann = 9
+)
 }
 \arguments{
 \item{RegData}{pandemiskjema}
@@ -13,5 +20,5 @@ statusNaaTab(RegData, valgtEnhet = "Alle", enhetsNivaa = "RHF", erMann = 9)
 
 }
 \description{
-Nøkkeltall
+Status nå
 }

@@ -7,7 +7,8 @@
 #' @param datoFra startdato 'yyyy-mm-dd'
 #' @param datoTil sluttdato 'yyyy-mm-dd'
 #' @param erMann kjønn, 0-kvinne, 1-mann
-#' @param skjemastatus status på registreringa 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
+#' @param skjemastatusInn status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
+#' @param skjemastatusUt status på utskrivingsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
 #' @param enhetsUtvalg enhetsutvalg...
 #' @param dodSh død på sykehus 0-nei, 1-ja
 #' @param reshID reshID fra innlogging
@@ -16,12 +17,13 @@
 #' @export
 #'
 KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
-                             skjemastatus=9, dodSh=9, reshID=0,
+                             skjemastatusInn=9, skjemastatusUt=9, dodSh=9, reshID=0,
                          enhetsNivaa='RHF', valgtEnhet='Alle') {
 
 
- if (skjemastatus %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatus)}
- #if (dodSh %in% 0:1){RegData <- subset(RegData, RegData$DischargedIntensivStatus==dodSh)}
+ if (skjemastatusInn %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatusInn)}
+  if (skjemastatusUt %in% 1:2){RegData <- subset(RegData, RegData$FormStatusUt==skjemastatusUt)}
+  if (dodSh %in% 1:2){RegData <- subset(RegData, RegData$StatusVedUtskriving==dodSh)}
  if (erMann %in% 0:1){
    vec <- (RegData$erMann == erMann)
    RegData <- subset(RegData, vec)}
@@ -43,10 +45,12 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
     if ((minald>0) | (maxald<110)) {
       paste0('Pasienter fra ', if (N>0) {min(RegData$Alder, na.rm=T)} else {minald},
              ' til ', if (N>0) {max(RegData$Alder, na.rm=T)} else {maxald}, ' år')},
-    if (skjemastatus %in% 0:5){paste('Skjemastatus:',
-                                     c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatus+1])},
+    if (skjemastatusInn %in% 0:5){paste('Skjemastatus, inklusjon:',
+                                     c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
+    if (skjemastatusUt %in% 0:5){paste('Skjemastatus, utskriving:',
+                                        c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
-    #if (dodSh %in% 0:1) {paste0('Status ut fra intensiv: ', c('Levende','Død')[as.numeric(dodSh)+1])},
+    if (dodSh %in% 1:2) {paste0('Tilstand ved utskriving: ', c('Levende','Død')[as.numeric(dodSh)])},
     if (valgtEnhet != 'Alle'){paste('Valgt enhet:', valgtEnhet)}
   )
 

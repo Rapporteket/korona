@@ -27,30 +27,33 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
       # Enhetsnivånavn
       RegData$ShNavn <- trimws(as.character(RegData$HelseenhetKortNavn)) #Fjerner mellomrom (før) og etter navn
-      # Kode om fra Haraldsplass til RHF Vest og Lovisenberg diakonhjemmet til RHF Øst, fra priv
-      #FÅ PÅ PLASS OMKODING FOR ALLE
-      # RegData$RHF[RegData$ReshId == 100180] <- 'Vest' #Haraldsplass
-      # RegData$RHF[RegData$ReshId %in% c(42088921, 108897)] <- 'Sør-Øst' #Lovisenberg Diakonale
-
       RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
       #Får encoding-feil hvis bruker denne:
       #RegData$RHF <- ReshNivaa$RHFnavn[match(RegData$HFresh, ReshNivaa$HFresh)]
       #RegData$RHF <- gsub('HELSE | RHF', '', RegData$RHF) #factor()
-      RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
+      #Kode om private
+      RegData$RHF <- as.factor(RegData$RHFresh)
+      levels(RegData$RHF) <- c('Vest','Nord','Midt', 'Sør-Øst')
+      #head(as.character(RegData$RHF))
+      #RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
-      RegData$Innleggelsestidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
+      RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
+      RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Evt. FormDateUt
+      RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
+                                        format="%Y-%m-%d %H:%M:%S" )
+
 #Fjerne feilregisteringer
-      RegData <- RegData[which(RegData$InnDato>'2020-02-15'),]
+      RegData <- RegData[which((RegData$InnDato>'2020-02-15') & (RegData$InnDato <= Sys.Date())),]
 
       # Nye tidsvariable:
-      # RegData$MndNum <- RegData$Innleggelsestidspunkt$mon +1
-      RegData$MndNum <- as.numeric(format(RegData$Innleggelsestidspunkt, '%m'))
-      RegData$MndAar <- format(RegData$Innleggelsestidspunkt, '%b%y')
+      # RegData$MndNum <- RegData$InnTidspunkt$mon +1
+      RegData$MndNum <- as.numeric(format(RegData$InnTidspunkt, '%m'))
+      RegData$MndAar <- format(RegData$InnTidspunkt, '%b%y')
       RegData$Kvartal <- ceiling(RegData$MndNum/3)
       RegData$Halvaar <- ceiling(RegData$MndNum/6)
       RegData$Aar <- format(RegData$InnDato, '%Y')
