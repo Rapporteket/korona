@@ -105,6 +105,9 @@ ui <- tagList(
                                    selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
                                                choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                    ),
+                                   selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
+                                               choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                                   ),
                                    selectInput(inputId = "dodSh", label="Tilstand ut fra sykehuset",
                                                choices = c("Alle"=9, "Død"=2, "Levende"=1)
                                    ),
@@ -403,6 +406,7 @@ server <- function(input, output, session) {
                               valgtEnhet= input$valgtEnhet,
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               dodSh=as.numeric(input$dodSh),
+                              aarsakInn = as.numeric(input$aarsakInn),
                               erMann=as.numeric(input$erMann),
                               minald=as.numeric(input$alder[1]),
                               maxald=as.numeric(input$alder[2]))
@@ -417,6 +421,7 @@ server <- function(input, output, session) {
     TabAlder <- AlderTab(RegData=KoroData,
                          valgtEnhet= input$valgtEnhet,
                          dodSh=as.numeric(input$dodSh),
+                         aarsakInn = as.numeric(input$aarsakInn),
                          erMann=as.numeric(input$erMann),
                          skjemastatusInn=as.numeric(input$skjemastatusInn)
     )

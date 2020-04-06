@@ -159,12 +159,12 @@ TabFerdigeReg <- rbind(
 #' @export
 #' @return
 RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
-                              erMann='', skjemastatusInn=9, dodSh=9,
+                              erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
                               valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #enhetsUtvalg=0, minald=0, maxald=110,
                              skjemastatusInn=skjemastatusInn, dodSh=dodSh,
-                             minald=minald, maxald=maxald,
+                             minald=minald, maxald=maxald, aarsakInn=aarsakInn,
                              reshID=reshID, valgtEnhet=valgtEnhet) #velgAvd=velgAvd
   Ntest <- dim(UtData$RegData)[1]
   RegData <- UtData$RegData
@@ -222,7 +222,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
 #' @return
 #' @export
 AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNivaa='SC', #
-                     skjemastatusInn=9, dodSh=9, erMann=9){
+                     skjemastatusInn=9,  aarsakInn=9, dodSh=9, erMann=9){
 
     #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   # RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
@@ -238,6 +238,7 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNi
   UtData <- KoronaUtvalg(RegData=RegData,
                              valgtEnhet=valgtEnhet,
                              dodSh = dodSh,
+                         aarsakInn=aarsakInn,
                              erMann = erMann,
                               skjemastatusInn=skjemastatusInn
                               )

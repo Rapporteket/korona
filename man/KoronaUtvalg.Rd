@@ -14,6 +14,7 @@ KoronaUtvalg(
   skjemastatusInn = 9,
   skjemastatusUt = 9,
   dodSh = 9,
+  aarsakInn = 9,
   reshID = 0,
   enhetsNivaa = "RHF",
   valgtEnhet = "Alle"
@@ -33,6 +34,8 @@ KoronaUtvalg(
 \item{skjemastatusUt}{status på utskrivingsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
+
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse}
 
 \item{reshID}{reshID fra innlogging}
 

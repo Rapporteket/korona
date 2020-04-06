@@ -9,6 +9,7 @@ AlderTab(
   valgtEnhet = "Alle",
   enhetsNivaa = "Alle",
   skjemastatusInn = 9,
+  aarsakInn = 9,
   dodSh = 9,
   erMann = 9
 )
@@ -19,6 +20,8 @@ AlderTab(
 \item{enhetsNivaa}{styres av tilgangsnivå 'Alle', 'RHF', 'HF'}
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
+
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse}
 
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
 

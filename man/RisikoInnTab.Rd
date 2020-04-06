@@ -11,6 +11,7 @@ RisikoInnTab(
   erMann = "",
   skjemastatusInn = 9,
   dodSh = 9,
+  aarsakInn = 9,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
   minald = 0,
@@ -29,6 +30,8 @@ RisikoInnTab(
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
+
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse}
 }
 \value{
 Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
