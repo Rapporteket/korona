@@ -66,7 +66,7 @@ PandemiInn <- KoronaPreprosesser(PandemiInn)
 # PandemiUt$UtDato <- as.Date(PandemiUt$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 # PandemiUt$UtDag <- format(PandemiUt$UtDato, '%d.%B')
 Ntot <- dim(PandemiInn)[1]
-AlderGjsn <- mean(PandemiInn$Alder, na.rm = T)
+AlderGjsn <- round(mean(PandemiInn$Alder, na.rm = T))
 andelMenn <- paste0(sprintf('%.0f', 100*sum(PandemiInn$erMann)/Ntot), ' \\%')
 indFerdigUt <- which(PandemiUt$FormStatus==2)
 antDod <- sum(PandemiUt$StatusVedUtskriving[indFerdigUt]==2)
@@ -139,7 +139,7 @@ xtable::xtable(addmargins(AntUtRHF), digits=0, #method='compact', #align=c('l', 
 \begin{frame}[fragile] {Antall døde}
 <<'Dode', results='asis'>>=
 indDod <- which(Pandemi$StatusVedUtskriving==2)
-AntDodeTab <- table(Pandemi$UtDato, Pandemi$RHF)
+AntDodeTab <- table(Pandemi$UtDato[indDod], Pandemi$RHF[indDod])
 AntDodeTab <- addmargins(AntDodeTab, FUN=list('Totalt i 2020:'=sum, 'Hele landet'=sum), quiet = T)
 fra <- max(1, (nrow(AntDodeTab)-20))
 xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
