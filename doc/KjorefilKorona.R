@@ -49,7 +49,8 @@ KoroDataUt <- KoronaDataSQL(skjema=2)
 # KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
 #                   by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 
-KoroData <- KoronaDataSQL(koble = 1)
+KoroDataInn <- KoronaDataSQL(skjema=1, koble = 0)
+KoroDataUt <- KoronaDataSQL(skjema=2, koble=0)
 KoroData <- KoronaPreprosesser(RegData = KoroData)
 
 RegData <- KoronaPreprosesser(RegData = KoroData)
@@ -62,7 +63,7 @@ max(sort(table(KoroDataInn$SkjemaGUID)))
 sort(table(KoroDataUt$HovedskjemaGUID))
 sort(table(KoroDataUt$SkjemaGUID))
 ind <- which(KoroDataUt$HovedskjemaGUID==('D403C085-3F28-4840-AF72-9A6AF7954066'))
-SkjemaGUID = 'D403C085-3F28-4840-AF72-9A6AF7954066'
+KoroDataUt$SkjemaGUID[ind] #= 'D403C085-3F28-4840-AF72-9A6AF7954066'
 KoroDataUt[ind, "FormStatus"]
 
 datoTil=Sys.Date()

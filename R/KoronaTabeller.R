@@ -174,7 +174,10 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
 
     N <- sum(RegData$KjentRisikofaktor %in% 1:2) #dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
 
-AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
+#AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
+    AntAndel <- function(Var, Nevner){
+      c(sum(Var),
+        paste0(sprintf('%.0f', 100*(sum(Var)/Nevner)),' %'))}
 
 #KjentRisikofaktor # 1-ja, 2-nei, 3-ukjent, -1 velg verdi
 
@@ -191,11 +194,12 @@ AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
     Gravid	= AntAndel(RegData$Gravid, N),
     'Fedme (KMI>30)' =	AntAndel(Fedme>30, sum(indBMI)),
     'Røyker' =	AntAndel(RegData$Royker, N),
-    'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N)
+    'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
+    'Antall pasienter (tot.)' = c(N, '')
     #'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
   )
 
-  TabRisiko[,2] <- paste0(sprintf('%.0f', 100*(TabRisiko[ ,2])),'%')
+  #TabRisiko[,2] <- paste0(sprintf('%.0f', 100*(TabRisiko[ ,2])),'%')
 
   #if (Ntest>3){
 

@@ -74,7 +74,7 @@ ui <- tagList(
              windowTitle = regTitle,
              theme = "rap/bootstrap.css",
 
-             #-------------Startside--------------
+#-------------Startside--------------
              tabPanel("Oversikt",
                       useShinyjs(),
                       sidebarPanel(id = 'brukervalgStartside',
@@ -228,7 +228,7 @@ ui <- tagList(
                       )
              ), #Intensiv-side
 
-             #-----------Abonnement--------------------------------
+#-----------Abonnement--------------------------------
              tabPanel(p("Abonnement",
                         title='Bestill automatisk utsending av rapporter på e-post'),
                       value = 'Abonnement',
@@ -357,7 +357,7 @@ server <- function(input, output, session) {
     )
     #NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
     UtData <- KoronaUtvalg(RegData=KoroData,
-                           enhetsNivaa=enhetsNivaaRolle, valgtEnhet=egenEnhet,
+                           enhetsNivaa=egetEnhetsNivaa, valgtEnhet=egenEnhet,
                            skjemastatusInn=as.numeric(input$skjemastatusInn),
                            erMann=as.numeric(input$erMann)
     )
