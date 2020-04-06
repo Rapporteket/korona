@@ -58,9 +58,18 @@ UtData <- KoronaUtvalg(RegData=KoroData, dodSh = 2)
 
 RisikoInnTab(RegData = RegData, dodSh = 2)
 
+
+KoroDataInn <- read.table('A:/Pandemi/InklusjonSkjemaDataContract2020-04-06.csv', sep=';',
+                       stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+KoroDataUt <- read.table('A:/Pandemi/UtskrivningSkjemaDataContract2020-04-06.csv', sep=';',
+                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 max(sort(table(KoroDataInn$SkjemaGUID)))
-sort(table(KoroDataUt$HovedskjemaGUID))
-sort(table(KoroDataUt$SkjemaGUID))
+max(sort(table(KoroDataUt$HovedskjemaGUID)))
+max(sort(table(KoroDataUt$SkjemaGUID)))
+
+table(KoroDataInn$PasientGUID)[table(KoroDataInn$PasientGUID)>1]
+sort(table(KoroDataUt$PasientGUID)) #[table(KoroDataUt$PasientGUID)>1]
+
 ind <- which(KoroDataUt$HovedskjemaGUID==('D403C085-3F28-4840-AF72-9A6AF7954066'))
 SkjemaGUID = 'D403C085-3F28-4840-AF72-9A6AF7954066'
 KoroDataUt[ind, "FormStatus"]
