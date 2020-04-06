@@ -43,8 +43,6 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       verdiTxt <- '' 	#pstTxt, ...
       strIfig <- ''		#cex
       sortAvtagende <- TRUE  #Sortering av resultater
-      KImaal <- NA
-      KImaaltxt=''
       varTxt <- 'hendelser'
 
       minald <- 0

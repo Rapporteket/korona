@@ -28,6 +28,14 @@
 KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
                              skjemastatusInn=9, skjemastatusUt=9, dodSh=9, aarsakInn=9,
                          reshID=0, enhetsNivaa='RHF', valgtEnhet='Alle') {
+  #Enhetsutvalg:
+  #Når bare skal sammenlikne med sykehusgruppe eller region, eller ikke sammenlikne,
+  #trengs ikke data for hele landet:
+  reshID <- as.numeric(reshID)
+  indEgen1 <- match(reshID, RegData$ReshId)
+  if (enhetsUtvalg ==2) {
+    RegData <- RegData[which(RegData$ReshId == reshID),]}	#kun egen enhet
+
 
 
  if (skjemastatusInn %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatusInn)}
@@ -62,6 +70,34 @@ if (dodSh %in% 1:2){RegData <- subset(RegData, RegData$StatusVedUtskriving==dodS
     if (dodSh %in% 1:2) {paste0('Tilstand ved utskriving: ', c('Levende','Død')[as.numeric(dodSh)])},
     if (valgtEnhet != 'Alle'){paste('Valgt enhet:', valgtEnhet)}
   )
+
+
+  #Enhetsutvalg:
+  indEgen1 <- match(reshID, RegData$ReshId)
+  if (enhetsUtvalg %in% 1:2) {	#Involverer egen enhet
+    hovedgrTxt <- as.character(RegData$ShNavn[indEgen1]) } else {
+      hovedgrTxt <- 'Hele landet'}
+
+
+  ind <- list(Hoved=0, Rest=0)
+  smltxt <- ''
+  if (enhetsUtvalg %in% c(0,2)) {		#Ikke sammenlikning
+    medSml <- 0
+    ind$Hoved <- 1:dim(RegData)[1]	#Tidligere redusert datasettet for 2 (egen)
+    ind$Rest <- NULL}
+    if (enhetsUtvalg ==1 ) {	#Involverer egen enhet
+      medSml <- 1
+      ind$Hoved <-which(as.numeric(RegData$ReshId)==reshID)
+      smltxt <- 'landet forøvrig'
+      ind$Rest <- which(as.numeric(RegData$ReshId) != reshID)
+   }
+
+
+
+
+  UtData <- list(utvalgTxt=utvalgTxt, fargepalett=fargepalett, ind=ind, medSml=medSml,
+                 smltxt=smltxt, hovedgrTxt=hovedgrTxt, grTypeTxt=grTypeTxt, RegData=RegData)
+
 
  UtData <- list(RegData=RegData, utvalgTxt=utvalgTxt) #ind=ind, medSml=medSml, smltxt=smltxt, hovedgrTxt=hovedgrTxt, grTypeTxt=grTypeTxt,
 
