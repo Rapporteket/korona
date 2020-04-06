@@ -2,6 +2,14 @@
 #'
 #' Returnerer filtrert dataramme og utvalgstekst.
 #' Aktuelt med utvalg på HF og RHF-nivå
+#' Argumentet \emph{enhetsUtvalg} har følgende valgmuligheter:
+#'    \itemize{
+#'     \item 0: Hele landet
+#'     \item 1: Egen enhet mot resten av landet (Standard)
+#'     \item 2: Egen enhet (kan være både RHF eller HF)
+#'    	}
+#'
+
 #'
 #' @param RegData data, beredskapsskjema
 #' @param datoFra startdato 'yyyy-mm-dd'
@@ -44,16 +52,13 @@ if (dodSh %in% 1:2){RegData <- subset(RegData, RegData$StatusVedUtskriving==dodS
     if(datoFra!=0 | datoTil!=0) {paste0(
       'Innleggelsesdatoer: ', if (N>0) {min(as.Date(RegData$InnDato), na.rm=T)} else {datoFra},
       ' til ', if (N>0) {max(as.Date(RegData$InnDato), na.rm=T)} else {datoTil})} else {NULL},
-    if ((minald>0) | (maxald<110)) {
-      paste0('Pasienter fra ', if (N>0) {min(RegData$Alder, na.rm=T)} else {minald},
-             ' til ', if (N>0) {max(RegData$Alder, na.rm=T)} else {maxald}, ' år')},
+    if ((minald>0) | (maxald<110)) {paste0('Pasienter fra ', minald, ' til ', maxald)},   #if (N>0) {min(RegData$Alder, na.rm=T)} else {minald},' til ', if (N>0) {max(RegData$Alder, na.rm=T)} else {maxald}, ' år')},
     if (skjemastatusInn %in% 0:5){paste('Skjemastatus, inklusjon:',
                                      c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
     if (skjemastatusUt %in% 0:5){paste('Skjemastatus, utskriving:',
                                         c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
-
     if (aarsakInn %in% 1:2){paste0('Covid-19, hovedårsak? ', c('Ja','Nei')[aarsakInn])},
-      if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
+    if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
     if (dodSh %in% 1:2) {paste0('Tilstand ved utskriving: ', c('Levende','Død')[as.numeric(dodSh)])},
     if (valgtEnhet != 'Alle'){paste('Valgt enhet:', valgtEnhet)}
   )
