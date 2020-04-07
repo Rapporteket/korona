@@ -39,18 +39,19 @@ if (paaServer) {
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
-  # KoroData <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
-  #                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroData <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 16-39-11.txt', sep=';',
-                         stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 16-39-11.txt', sep=';',
+                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-03 16-39-11.txt', sep=';',
+                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
+            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+  KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+        by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 } #hente data
 
-# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
-#           'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
-# KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
-#       by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+
 KoroData <- KoronaPreprosesser(RegData = KoroData)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
@@ -479,6 +480,34 @@ server <- function(input, output, session) {
 
 
   })
+
+
+  ############ Kevin start ######################
+  output$FigurAldersfordeling <- renderPlot({
+    korona::AlderKjFig(RegData=KoroData,
+                       valgtEnhet= input$valgtEnhet,
+                       dodSh=as.numeric(input$dodSh),
+                       aarsakInn = as.numeric(input$aarsakInn),
+                       erMann=as.numeric(input$erMann),
+                       skjemastatusInn=as.numeric(input$skjemastatusInn))
+  }, width = 500, height = 500)
+
+  output$lastNedAldKj <- downloadHandler(
+    filename = function(){
+      paste0('AldKjTabell', Sys.time(), '.csv')
+    },
+
+    content = function(file){
+      Tabell <- korona::AlderKjFig(RegData=KoroData,
+                                   valgtEnhet= input$valgtEnhet,
+                                   dodSh=as.numeric(input$dodSh),
+                                   aarsakInn = as.numeric(input$aarsakInn),
+                                   erMann=as.numeric(input$erMann),
+                                   skjemastatusInn=as.numeric(input$skjemastatusInn))
+      write.csv2(Tabell, file, row.names = F, fileEncoding = 'latin1')
+    }
+  )
+########## Kevin slutt ##################
 
   #-------------Intensivregistreringer------------------------
 

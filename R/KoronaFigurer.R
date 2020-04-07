@@ -1,4 +1,4 @@
-# Fil med samling av figurfunksjoner for Rapporteket Pamndemi
+# Fil med samling av figurfunksjoner for Rapporteket Pandemi
 
 #' Aldersfordeling, tabell
 #' @param RegData datatabell, beredskapsdata
