@@ -169,6 +169,41 @@ ui <- tagList(
                       ) #main
              ), #tab Startside
 
+#-----------Resultater-------------------------------------
+tabPanel("Resultater",
+         sidebarPanel(id = 'brukervalgStartside',
+                      width = 3,
+                      br(),
+                      h3('Her kommer utvalgsmuligheter')
+         ),
+         mainPanel(
+         tabsetPanel(
+           tabPanel('Antall registreringer',
+                    br(),
+                    h2('Her kommer figur og tabell med antall registreringer'),
+                    br(),
+                    h3('Antall registreringer'),
+                    h3('Antall utskrivinger'),
+                    h3('Antall inneliggende'),
+                    h3('Antall døde')
+         ),
+         tabPanel('Fordelinger',
+                  br(),
+                  h2('Her kommer fordelingsfigurer, inkl. nedlastbare tabeller'),
+                  h3('Alder,
+Kjønn,
+Yrke (helsepersonell, lab.personell),
+Sannsynlig smittested,
+Geografi,
+Risikotilstand (ja/nei, type),
+Dato inn/ut av sykehus og intensivenhet (hvor mange skrives ut igjen friske?),
+Liggetid sykehus, intensivenhet,
+hvilken behandling pasientene mottar (respirator, ECMO), for å si noe om alvorlighet – ikke kapasitet
+')
+                  )
+         )) #tabset og main
+
+), #tab
 #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
