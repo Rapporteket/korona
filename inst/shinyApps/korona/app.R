@@ -168,9 +168,10 @@ ui <- tagList(
                                          uiOutput('utvalgRisiko'),
                                          tableOutput('tabRisikofaktorer')),
                                   column(width=5, offset=1,
-                                         h3('Aldersfordeling - byttes ut med figur alder/kjønn'),
-                                         uiOutput('utvalgAlder'),
-                                         tableOutput('tabAlder')
+                                         h3('Aldersfordeling'),
+                                         plotOutput("FigurAldersfordeling", height="auto"),
+                                         br(),
+                                         downloadButton("lastNedAldKj", "Last ned tabell")
                                   ))
                       ) #main
              ), #tab Startside

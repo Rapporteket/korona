@@ -99,6 +99,11 @@ RisikoInnTab(RegData, erMann='', skjemastatus=2, dodSh=9,
 
 AlderTab(RegData)
 
+#Fra KEvin
+h3('Aldersfordeling'),
+plotOutput("FigurAldersfordeling", height="auto"),
+br(),
+downloadButton("lastNedAldKj", "Last ned tabell")
 
 
 
