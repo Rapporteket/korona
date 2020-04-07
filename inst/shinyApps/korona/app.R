@@ -480,6 +480,34 @@ server <- function(input, output, session) {
 
   })
 
+
+  ############ Kevin start ######################
+  output$FigurAldersfordeling <- renderPlot({
+    korona::AlderKjFig(RegData=KoroData,
+                       valgtEnhet= input$valgtEnhet,
+                       dodSh=as.numeric(input$dodSh),
+                       aarsakInn = as.numeric(input$aarsakInn),
+                       erMann=as.numeric(input$erMann),
+                       skjemastatusInn=as.numeric(input$skjemastatusInn))
+  }, width = 500, height = 500)
+
+  output$lastNedAldKj <- downloadHandler(
+    filename = function(){
+      paste0('AldKjTabell', Sys.time(), '.csv')
+    },
+
+    content = function(file){
+      Tabell <- korona::AlderKjFig(RegData=KoroData,
+                                   valgtEnhet= input$valgtEnhet,
+                                   dodSh=as.numeric(input$dodSh),
+                                   aarsakInn = as.numeric(input$aarsakInn),
+                                   erMann=as.numeric(input$erMann),
+                                   skjemastatusInn=as.numeric(input$skjemastatusInn))
+      write.csv2(Tabell, file, row.names = F, fileEncoding = 'latin1')
+    }
+  )
+########## Kevin slutt ##################
+
   #-------------Intensivregistreringer------------------------
 
   observe({
