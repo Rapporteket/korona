@@ -48,12 +48,11 @@ KoroDataUt <- KoronaDataSQL(skjema=2)
 #            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
 # KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
 #                   by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
-
 KoroDataInn <- KoronaDataSQL(skjema=1, koble = 0)
 KoroDataUt <- KoronaDataSQL(skjema=2, koble=0)
-KoroData <- KoronaPreprosesser(RegData = KoroData)
 
-RegData <- KoronaPreprosesser(RegData = KoroData)
+KoroData <- KoronaPreprosesser(RegData = KoronaDataSQL(koble=1))
+RegData <- KoroData
 
 UtData <- KoronaUtvalg(RegData=KoroData, dodSh = 2)
 

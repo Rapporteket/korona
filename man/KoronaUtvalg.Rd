@@ -47,4 +47,10 @@ KoronaUtvalg(
 \description{
 Returnerer filtrert dataramme og utvalgstekst.
 Aktuelt med utvalg på HF og RHF-nivå
+Argumentet \emph{enhetsUtvalg} har følgende valgmuligheter:
+   \itemize{
+    \item 0: Hele landet
+    \item 1: Egen enhet mot resten av landet (Standard)
+    \item 2: Egen enhet (kan være både RHF eller HF)
+   	}
 }

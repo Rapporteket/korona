@@ -47,6 +47,12 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
 
+      #Liggetider
+      #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
+      RegData$liggetid <- as.numeric(difftime(RegData$UtTidspunkt,
+                                              RegData$InnTidspunkt,
+                                              units = 'days'))
+
 #Fjerne feilregisteringer
       RegData <- RegData[which((RegData$InnDato>'2020-02-15') & (RegData$InnDato <= Sys.Date())),]
 
