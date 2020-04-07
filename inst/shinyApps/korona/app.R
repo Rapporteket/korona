@@ -31,8 +31,6 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020 ',
 
 #---------Hente data------------
 if (paaServer) {
-  #KoroDataInn <- KoronaDataSQL(skjema=1)
-  #KoroDataUt <- KoronaDataSQL(skjema=2)
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
   KoroData <-  KoronaDataSQL(koble=1)
@@ -98,6 +96,7 @@ ui <- tagList(
                                    selectInput(inputId = "valgtEnhet", label="Velg enhet",
                                                choices = 'Alle'
                                    ),
+                                   #Tildeles ut fra rolle:
                                    # selectInput(inputId = 'enhetsGruppe', label='Enhetgruppe',
                                    #             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
                                    # ),
@@ -400,11 +399,12 @@ server <- function(input, output, session) {
                               tidsenhet='dag',
                               aarsakInn = as.numeric(input$aarsakInn),
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
-                              erMann=as.numeric(input$erMann),
-                              dodSh=as.numeric(input$dodSh))
+                              erMann=as.numeric(input$erMann))
+                              #dodSh=as.numeric(input$dodSh))
     #NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
     UtData <- KoronaUtvalg(RegData=KoroData,
                            enhetsNivaa=egetEnhetsNivaa, valgtEnhet=egenEnhet,
+                           aarsakInn = as.numeric(input$aarsakInn),
                            skjemastatusInn=as.numeric(input$skjemastatusInn),
                            erMann=as.numeric(input$erMann)
     )
@@ -412,7 +412,7 @@ server <- function(input, output, session) {
     txt <- if(dim(UtData$RegData)[1]>2) {
       paste0('Gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
              round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn.
-              Antall døde: ', sum(KoroDataUt$StatusVedUtskriving==2))
+              Antall døde: ', sum(KoroData$StatusVedUtskriving==2, na.rm=T))
     } else {''}
 
     output$utvalgAntOpph <- renderUI({
@@ -450,6 +450,7 @@ server <- function(input, output, session) {
     #Tab risiko
     RisikoTab <- RisikoInnTab(RegData=KoroData,
                               valgtEnhet= input$valgtEnhet,
+                              enhetsNivaa = egetEnhetsNivaa,
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               dodSh=as.numeric(input$dodSh),
                               aarsakInn = as.numeric(input$aarsakInn),
@@ -466,6 +467,7 @@ server <- function(input, output, session) {
 
     TabAlder <- AlderTab(RegData=KoroData,
                          valgtEnhet= input$valgtEnhet,
+                         enhetsNivaa = egetEnhetsNivaa,
                          dodSh=as.numeric(input$dodSh),
                          aarsakInn = as.numeric(input$aarsakInn),
                          erMann=as.numeric(input$erMann),

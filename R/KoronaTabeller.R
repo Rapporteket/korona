@@ -158,16 +158,16 @@ TabFerdigeReg <- rbind(
 #' @inheritParams KoronaUtvalg
 #' @export
 #' @return
-RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
+RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
                               erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
                               valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann,
                              skjemastatusInn=skjemastatusInn, dodSh=dodSh,
                              minald=minald, maxald=maxald, aarsakInn=aarsakInn,
-                             reshID=reshID, valgtEnhet=valgtEnhet) #velgAvd=velgAvd
-  Ntest <- dim(UtData$RegData)[1]
-  RegData <- UtData$RegData
+                             valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa)
+
+  RegData <- UtData$RegData[UtData$ind$Hoved, ] #
 
     indBMI <- RegData$Vekt>0 & RegData$Hoyde>0
     Fedme <- 100^2*(RegData$Vekt/(RegData$Hoyde)^2)[indBMI]
@@ -209,7 +209,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
                  digits=0,
                  align = c('l',rep('r',ncol(TabRisiko))),
                  caption='Risikofaktorer')
-  return(UtData <- list(Tab=TabRisiko, utvalgTxt=UtData$utvalgTxt, Ntest=Ntest))
+  return(UtData <- list(Tab=TabRisiko, utvalgTxt=UtData$utvalgTxt, Ntest=N))
 }
 
 
@@ -221,28 +221,20 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
 #' @param enhetsNivaa styres av tilgangsnivå 'Alle', 'RHF', 'HF'
 #' @return
 #' @export
-AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNivaa='SC', #
+AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                      skjemastatusInn=9,  aarsakInn=9, dodSh=9, erMann=9){
-
-    #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
-  # RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
-  #                               SC = RegData$RHF,
-  #                               LC = RegData$HF,
-  #                               LU = RegData$ShNavn)
-  #
-
-  #RegData$EnhetsNivaaVar <- RegData[ , enhetsNivaa]
-  # RegData$EnhetsNivaaVar <- as.factor(RegData$EnhetsNivaaVar)
 
   #ENDRING KOMMER: Utvalg skal returnere både utvalg for alle og egen enhet. Som i andre registere
   UtData <- KoronaUtvalg(RegData=RegData,
                              valgtEnhet=valgtEnhet,
+                         enhetsNivaa=enhetsNivaa,
                              dodSh = dodSh,
                          aarsakInn=aarsakInn,
                              erMann = erMann,
                               skjemastatusInn=skjemastatusInn
                               )
-  RegData <- UtData$RegData
+
+  RegData <- UtData$RegData[UtData$ind$Hoved, ]
 
 
 

@@ -1,14 +1,20 @@
 #Kjørefil for Rapporteket-Pandemi
 library(korona)
-PandemiInn <- KoronaPreprosesser(KoronaDataSQL(skjema=1))
+Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 
 tidsenhet='dag'
 erMann=9
 bekr=9
-skjemastatus=9
+skjemastatusInn=9
+aarsakInn<- 9
 dodSh=9
-valgtEnhet='Alle'
-tilgangsNivaa <- 'SC'
+minald <- 0
+maxald <- 110
+valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
+enhetsNivaa <- 'HF'
+
+RegData <- Pandemi
+RisikoInnTab(Pandemi, valgtEnhet = valgtEnhet, enhetsNivaa = enhetsNivaa)
 
 AlderTab(RegData=RegData)$Tab
 

@@ -15,9 +15,14 @@ FerdigeRegInnTab(
 \arguments{
 \item{RegData}{beredskapsskjema}
 
+\item{valgtEnhet}{- gis ut fra resh}
+
+\item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
+RHF (SC og LC-brukere), HF (LU-brukere)}
+
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
-\item{dodSh}{død på sykehus 0-nei, 1-ja}
+\item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 }
 \value{
 

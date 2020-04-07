@@ -7,7 +7,7 @@
 AlderTab(
   RegData,
   valgtEnhet = "Alle",
-  enhetsNivaa = "Alle",
+  enhetsNivaa = "RHF",
   skjemastatusInn = 9,
   aarsakInn = 9,
   dodSh = 9,
@@ -17,13 +17,15 @@ AlderTab(
 \arguments{
 \item{RegData}{datatabell, beredskapsdata}
 
+\item{valgtEnhet}{- gis ut fra resh}
+
 \item{enhetsNivaa}{styres av tilgangsnivå 'Alle', 'RHF', 'HF'}
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{aarsakInn}{covid-19 som hovedårsak til innleggelse}
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, 2-nei}
 
-\item{dodSh}{død på sykehus 0-nei, 1-ja}
+\item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 }
