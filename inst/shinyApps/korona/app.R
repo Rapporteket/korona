@@ -110,8 +110,8 @@ ui <- tagList(
                                    selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
                                                choices = c("Alle"=9, "Ja"=1, "Nei"=2)
                                    ),
-                                   selectInput(inputId = "dodSh", label="Tilstand ut fra sykehuset",
-                                               choices = c("Alle"=9, "Død"=2, "Levende"=1)
+                                   selectInput(inputId = "dodSh", label="Utskrevne, tilstand",
+                                               choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
                                    ),
                                    selectInput(inputId = "erMann", label="Kjønn",
                                                choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
@@ -140,21 +140,28 @@ ui <- tagList(
                                 h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
                                 h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
-                                # fluidRow(
-                                #   column(width = 4,
-                                #          h4('Innlagte på sykehus nå'),
+                                 fluidRow(
+                                   column(width = 4,
+                                          h3('Status nå'),
+                                          h4('Antall inneliggende, gj.sn. liggetid, antall inklusjon i kladd'),
+                                          h4('Hva mer?')
+
                                 #          uiOutput('statusNaaShTab'),
                                 #          br(),
                                 #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
                                 #          h5('Kommer...'),
-                                #   ),
-                                # column(width=5, offset=1,
+                                   ),
+                                 column(width=5, offset=1,
+                                        h3('Oppsummering, ferdigstilte, utskrevne'),
+                                        h4('Gjsn, Median, IQR, N, evt andel for:'),
+                                        h4('Liggetid, Alder, BMI, registreringsforsinkelse?, døde, annet?')
                                 #        uiOutput('tittelFerdigeReg'),
                                 #        uiOutput('utvalgFerdigeReg'),
                                 #        tableOutput('tabFerdigeReg')
-                                # )),
+                                 )),
 
-                                h3('Antall sykehusopphold'),
+                                h3('Antall innleggelser siste 10 dager'),
+                                h4('Tabell/figur som viser alle registreringer kommer på neste side'),
                                 uiOutput('utvalgAntOpph'),
                                 tableOutput('tabAntOpph'),
                                 br(),
@@ -164,13 +171,49 @@ ui <- tagList(
                                          uiOutput('utvalgRisiko'),
                                          tableOutput('tabRisikofaktorer')),
                                   column(width=5, offset=1,
-                                         h3('Aldersfordeling'),
+                                         h3('Aldersfordeling - byttes ut med figur alder/kjønn'),
                                          uiOutput('utvalgAlder'),
                                          tableOutput('tabAlder')
                                   ))
                       ) #main
              ), #tab Startside
 
+#-----------Resultater-------------------------------------
+tabPanel("Resultater",
+         sidebarPanel(id = 'brukervalgStartside',
+                      width = 3,
+                      br(),
+                      h3('Her kommer utvalgsmuligheter')
+         ),
+         mainPanel(
+         tabsetPanel(
+           tabPanel('Antall registreringer',
+                    br(),
+                    h2('Her kommer figur og tabell med antall registreringer'),
+                    br(),
+                    h3('Antall registreringer'),
+                    h3('Filtrere på døde = ant. døde'),
+                    h3('Filtrere på ferdigstilte utskrivninger = Antall utskrivinger'),
+                    h3('Antall inneliggende')
+
+         ),
+         tabPanel('Fordelinger',
+                  br(),
+                  h2('Her kommer fordelingsfigurer, inkl. nedlastbare tabeller'),
+                  h3('Alder,
+Kjønn,
+Yrke (helsepersonell, lab.personell),
+Sannsynlig smittested,
+Geografi,
+Risikotilstand (ja/nei, type),
+Dato inn/ut av sykehus og intensivenhet (hvor mange skrives ut igjen friske?),
+Liggetid sykehus, intensivenhet,
+hvilken behandling pasientene mottar (respirator, ECMO), for å si noe om alvorlighet – ikke kapasitet
+')
+                  )
+         )) #tabset og main
+
+), #tab
 #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
@@ -197,8 +240,8 @@ ui <- tagList(
                                 h3('Resultater fra koronaregistrering på INTENSIVavdelinger.'),
                                 h4('Mer detaljerte resultater fra intensivavdlingene
                                finnes på Rapporteket-NIR-Beredskap'),
-                                h4('Husk at andre tilgangsnivåer/resh enn i Rapporteket-Beredskap', style = "color:red"),
-                                h5('Siden er under utvikling... ', style = "color:red"),
+                                #h4('Husk at andre tilgangsnivåer/resh enn i Rapporteket-Beredskap', style = "color:red"),
+                                #h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
                                 fluidRow(
                                   column(width = 4,
@@ -357,9 +400,10 @@ server <- function(input, output, session) {
     AntTab <- antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag',
+                              aarsakInn = as.numeric(input$aarsakInn),
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
-                              erMann=as.numeric(input$erMann)
-    )
+                              erMann=as.numeric(input$erMann),
+                              dodSh=as.numeric(input$dodSh))
     #NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
     UtData <- KoronaUtvalg(RegData=KoroData,
                            enhetsNivaa=egetEnhetsNivaa, valgtEnhet=egenEnhet,
@@ -380,7 +424,9 @@ server <- function(input, output, session) {
 
       )})
 
-    output$tabAntOpph <- renderTable({AntTab$Tab}, rownames = T, digits=0, spacing="xs"
+    output$tabAntOpph <- renderTable({
+      Nrad <- nrow(AntTab$Tab)
+      AntTab$Tab[(Nrad-10):Nrad,]}, rownames = T, digits=0, spacing="xs"
     )
 
     #Tab status nå

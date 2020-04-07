@@ -27,7 +27,7 @@
 #'
 KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
                              skjemastatusInn=9, skjemastatusUt=9, dodSh=9, aarsakInn=9,
-                         reshID=0, enhetsNivaa='RHF', valgtEnhet='Alle') {
+                         reshID=0, enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=0) {
   #Enhetsutvalg:
   #Når bare skal sammenlikne med sykehusgruppe eller region, eller ikke sammenlikne,
   #trengs ikke data for hele landet:
@@ -41,7 +41,9 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
  if (skjemastatusInn %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatusInn)}
  if (skjemastatusUt %in% 1:2){RegData <- subset(RegData, RegData$FormStatusUt==skjemastatusUt)}
  if (aarsakInn %in% 1:2){RegData <- subset(RegData, RegData$ArsakInnleggelse==aarsakInn)}
-if (dodSh %in% 1:2){RegData <- subset(RegData, RegData$StatusVedUtskriving==dodSh)}
+if (dodSh %in% 1:3){
+  RegData <- if (dodSh %in% 1:2) {subset(RegData, RegData$StatusVedUtskriving==dodSh)
+    } else {subset(RegData, RegData$StatusVedUtskriving %in% 1:2)}} #Alle utskrevne
   if (erMann %in% 0:1){
    vec <- (RegData$erMann == erMann)
    RegData <- subset(RegData, vec)}
@@ -67,7 +69,7 @@ if (dodSh %in% 1:2){RegData <- subset(RegData, RegData$StatusVedUtskriving==dodS
                                         c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
     if (aarsakInn %in% 1:2){paste0('Covid-19, hovedårsak? ', c('Ja','Nei')[aarsakInn])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
-    if (dodSh %in% 1:2) {paste0('Tilstand ved utskriving: ', c('Levende','Død')[as.numeric(dodSh)])},
+    if (dodSh %in% 1:3) {paste0('Tilstand ved utskriving: ', c('Levende','Død','Alle utskrevne')[as.numeric(dodSh)])},
     if (valgtEnhet != 'Alle'){paste('Valgt enhet:', valgtEnhet)}
   )
 
@@ -95,11 +97,11 @@ if (dodSh %in% 1:2){RegData <- subset(RegData, RegData$StatusVedUtskriving==dodS
 
 
 
-  UtData <- list(utvalgTxt=utvalgTxt, fargepalett=fargepalett, ind=ind, medSml=medSml,
-                 smltxt=smltxt, hovedgrTxt=hovedgrTxt, grTypeTxt=grTypeTxt, RegData=RegData)
+  UtData <- list(utvalgTxt=utvalgTxt, ind=ind, medSml=medSml, #fargepalett=fargepalett, grTypeTxt=grTypeTxt,
+                 smltxt=smltxt, hovedgrTxt=hovedgrTxt, RegData=RegData)
 
 
- UtData <- list(RegData=RegData, utvalgTxt=utvalgTxt) #ind=ind, medSml=medSml, smltxt=smltxt, hovedgrTxt=hovedgrTxt, grTypeTxt=grTypeTxt,
+ #UtData <- list(RegData=RegData, utvalgTxt=utvalgTxt) #ind=ind, medSml=medSml, smltxt=smltxt, hovedgrTxt=hovedgrTxt, grTypeTxt=grTypeTxt,
 
  return(invisible(UtData))
 }
