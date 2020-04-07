@@ -11,6 +11,7 @@ antallTidEnhTab(
   erMann = 9,
   tilgangsNivaa = "SC",
   skjemastatusInn = 9,
+  aarsakInn = 9,
   dodSh = 9,
   valgtEnhet = "Alle"
 )
@@ -26,6 +27,8 @@ antallTidEnhTab(
 ('RHF', 'HF', 'ShNavn') resultatene skal vises for}
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
+
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse}
 
 \item{dodSh}{død på sykehus 0-nei, 1-ja}
 
