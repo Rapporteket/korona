@@ -13,7 +13,7 @@
 #' @return
 #' @export
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
-                        skjemastatusInn=9, dodSh=9, valgtEnhet='Alle'){
+                        skjemastatusInn=9, aarsakInn=9, dodSh=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
         RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
@@ -30,7 +30,7 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   #Benytter ikke utvalgsfila til enhetsfiltrering. Skal også ha oppsummering for hele landet
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
-                             skjemastatusInn=skjemastatusInn,
+                             skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
                              dodSh=dodSh)
 
 
@@ -53,7 +53,7 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                           dimnames = list(c(levels(RegData$TidsVar), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
     }else{
       TabTidEnh <- table(RegData[ , c('TidsVar', 'EnhNivaaVis')]) #ftable(RegData[ , c(TidsVar, enhetsNivaa, 'Korona')], row.vars =TidsVar)
-      TabTidEnh <- addmargins(TabTidEnh, FUN=list(Totalt=sum, 'Hele landet' = sum), quiet=TRUE)
+      TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt, 2020'=sum, 'Hele landet' = sum), quiet=TRUE)
       colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
     }
 
@@ -162,7 +162,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
                               erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
                               valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #enhetsUtvalg=0, minald=0, maxald=110,
+  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann,
                              skjemastatusInn=skjemastatusInn, dodSh=dodSh,
                              minald=minald, maxald=maxald, aarsakInn=aarsakInn,
                              reshID=reshID, valgtEnhet=valgtEnhet) #velgAvd=velgAvd
