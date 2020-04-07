@@ -45,12 +45,13 @@ if (paaServer) {
                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
+            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+  KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+        by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 } #hente data
 
-# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
-#           'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
-# KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
-#       by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+
 KoroData <- KoronaPreprosesser(RegData = KoroData)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
