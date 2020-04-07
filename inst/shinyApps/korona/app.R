@@ -43,16 +43,18 @@ if (paaServer) {
 } else {
   # KoroData <- read.table('A:/Pandemi/Pandemiskjema2020-03-31.csv', sep=';',
   #                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroData <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 16-39-11.txt', sep=';',
+  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-03 16-39-11.txt', sep=';',
                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-03 16-39-11.txt', sep=';',
+                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 } #hente data
 
-# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
-#           'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
-# KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
-#       by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
+          'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+      by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 KoroData <- KoronaPreprosesser(RegData = KoroData)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
