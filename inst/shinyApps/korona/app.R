@@ -66,6 +66,9 @@ enhetsNavn <- rhfNavn
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
 #names(enhetsNivaa) <- c('RHF', 'HF')
 
+#last modul(er)
+source(system.file("shinyApps/korona/R/resultatmodul.R", package = "korona"), encoding = 'UTF-8')
+
 ui <- tagList(
   navbarPage(id='hovedark',
              title = div(img(src="rap/logo.svg", alt="Rapporteket", height="26px"),
@@ -253,6 +256,11 @@ tabPanel("Resultater",
          )) #tabset og main
 
 ), #Resultater
+
+tabPanel("Resultater_v2",
+         koronaresultater_UI("resultater_id")
+),
+
 #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
@@ -547,6 +555,10 @@ server <- function(input, output, session) {
       write.csv2(Tabell, file, row.names = F, fileEncoding = 'latin1')
     }
   )
+
+  callModule(koronaresultater, "resultater_id", KoroData = KoroData, egenEnhet = egenEnhet,
+             egetEnhetsNivaa=egetEnhetsNivaa, hvdsession = session)
+
 ########## Kevin slutt ##################
 
   #-----------------------------Resultater---------------------------------
