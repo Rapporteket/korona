@@ -72,13 +72,13 @@ koronaresultater_UI <- function(id){
 }
 
 
-koronaresultater <- function(input, output, session, KoroData, rolle, egenEnhet, egetEnhetsNivaa, hvdsession){
+koronaresultater <- function(input, output, session, KoroData, enhetsvalg, egetEnhetsNivaa, hvdsession){
 
   observeEvent(input$tilbakestillValgRes, {
     shinyjs::reset("brukervalgRes")
   })
 
-  enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
+  # enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
   updateSelectInput(session, "valgtEnhetRes", choices = enhetsvalg)
 
 
