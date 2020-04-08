@@ -8,31 +8,14 @@ koronaresultater_UI <- function(id){
                         width = 3,
                         br(),
                         h3('Velg variabel/tema og filtreringer i data'),
-                        conditionalPanel(condition = paste0("input['", ns("resultater"), "'] == 'Fordelinger'"),
-                                         selectInput(inputId = ns('valgtVarFord'), label='Velg variabel',
-                                                     choices = c("Alder"='alder',
-                                                                 "Kommer: Liggetid"='liggetid',
-                                                                 'Kommer: Risikotiltander'='risiko',
-                                                                 'Kommer: sirkulasjonssvikt' = 'sirkSvikt',
-                                                                 'Kommer: respirasjonssvikt' = 'sirkSvikt',
-                                                                 'Kommer: Antibiotikaordinasjon' = 'antibiotika',
-                                                                 'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
-                                                                 'Kommer: grad av sirksvikt, inn/ut',
-                                                                 'Kommer: grad av respsvikt, inn/ut',
-                                                                 'Kommer: Demografi og epidemYrke' = 'yrke',
-                                                                 'Kommer: sanns. smittested' = 'smittested',
-                                                                 'Kommer: fylker' = 'fylker')
-                                         ),
-                                         selectInput(inputId = ns("enhetsUtvalgFord"), label="Velg enhetsnivå",
-                                                     choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Egen enhet'=2)
-                                         )),
-                        conditionalPanel(condition = paste0("input['", ns("resultater"), "'] == 'Tellinger'"),
+
+                        #conditionalPanel(condition = paste0("input['", ns("resultater"), "'] == 'Tellinger'"),
                                          selectInput(inputId = ns('valgtVar'), label='Velg variabel',
                                                      choices = c('Antall registreringer'='antreg',
                                                                  'Antall døde'='antdod',
                                                                  'Antall utskrivinger'= 'antut',
                                                                  'Antall inneliggende'='antinn')
-                                         )),
+                                         ),
                         selectInput(inputId = ns("valgtEnhetRes"), label="Velg enhet",
                                     choices = 'Alle'
                         ),
@@ -53,16 +36,13 @@ koronaresultater_UI <- function(id){
                         )
     ),
     mainPanel(
-      tabsetPanel(id=ns("resultater"),
-                  tabPanel('Antall registreringer',
-                           value = 'Tellinger',
-                           br(),
-                           h2('Her kommer figur og tabell med antall registreringer'),
-                           br(),
-                           h3('Antall registreringer'),
-                           h3('Ant. døde - utskrivingsdag'),
-                           h3('Antall utskrivinger - utskrivingsdag'),
-                           h3('Antall inneliggende'),
+      #tabsetPanel(id=ns("resultater"),
+                  # tabPanel('Antall registreringer',
+                  #          value = 'Tellinger',
+                  #          br(),
+                           h2('Tellinger:'),
+                           h4('Antall registreringer, inneliggende, utskrivinger, døde'),
+                           h3('NB:Siden er under utvikling!', style = "color:red"),
                            br(),
                            plotOutput(ns("FigurTidEnhet"), height="auto"),
                            # downloadButton(ns("LastNedFig"), label = 'Last ned figur'),
@@ -70,17 +50,9 @@ koronaresultater_UI <- function(id){
                            br(),
                            DT::DTOutput(ns("tabTidEnhet_DT")),
                            downloadButton(ns("lastNed"), "Last ned tabell")
-                  ),
-                  tabPanel(p('Fordelinger',
-                             title='Figurer/tabeller for de fleste opplysninger registrert i
-                  inlusjons- eller utskrivingsskjema'),
-                           value = 'Fordelinger',
-                           br(),
-                           h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
-                           h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
-                           plotOutput(ns('fordelinger'))
-                  )
-      )
+                  #)
+
+      #)
     )
   )
 }
@@ -96,7 +68,6 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
   updateSelectInput(session, "valgtEnhetRes", choices = enhetsvalg)
 
 
-dodSh=9
 
   AntTab <- function() {
     AntTab <- switch(input$valgtVar,
@@ -171,20 +142,4 @@ dodSh=9
     }
   )
 
-  ####### Fordelingsfigurer #########################################################################
-
-  output$fordelinger <- renderPlot({
-    KoronaFigAndeler(RegData=KoroData,
-                     valgtVar=input$valgtVarFord,
-                     valgtEnhet = input$valgtEnhetRes,  #input$valgtEnhetFord,
-                     enhetsNivaa=egetEnhetsNivaa,
-                     enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
-                     dodSh=as.numeric(input$dodShRes),
-                     aarsakInn = as.numeric(input$aarsakInnRes),
-                     erMann=as.numeric(input$erMannRes),
-                     skjemastatusInn=as.numeric(input$skjemastatusInnRes),
-                     kjemastatusUt=as.numeric(input$skjemastatusUtRes),
-                     session = hvdsession)
-  }, height=700, width=700 #height = function() {session$clientData$output_fordelinger_width}
-  )
 }

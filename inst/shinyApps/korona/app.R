@@ -177,80 +177,71 @@ ui <- tagList(
 
 #-----------Resultater-------------------------------------
 tabPanel("Resultater",
-         sidebarPanel(id = 'brukervalgRes',
+         tags$style(HTML("
+    .tabbable > .nav > li > a {background-color: aqua;  color:black; width: 300PX;}")),
+         tabsetPanel(
+           tabPanel("Tellinger",
+                    koronaresultater_UI("resultater_id")
+           ),
 
-                      width = 3,
-                      br(),
-                      h3('Velg variabel/tema og filtreringer i data'),
-                      conditionalPanel(condition = "input.ark == 'Fordelinger' ",
-                                       selectInput(inputId = 'valgtVarFord', label='Velg variabel',
-                                  choices = c("Alder"='alder',
-                                              "Kommer: Liggetid"='liggetid',
-                                              'Kommer: Risikotiltander'='risiko',
-                                              'Kommer: sirkulasjonssvikt' = 'sirkSvikt',
-                                              'Kommer: respirasjonssvikt' = 'sirkSvikt',
-                                              'Kommer: Antibiotikaordinasjon' = 'antibiotika',
-                                              'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
-                                              'Kommer: grad av sirksvikt, inn/ut',
-                                              'Kommer: grad av respsvikt, inn/ut',
-                                              'Kommer: Demografi og epidemYrke' = 'yrke',
-                                              'Kommer: sanns. smittested' = 'smittested',
-                                              'Kommer: fylker' = 'fylker')
-                      ),
-                      selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
-                                  choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
-                      )),
-
-                      selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
-                                  choices = 'Alle'
-                      ),
-                      selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
-                                  choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                      ),
-                      selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
-                                  choices = c("Alle"=9, "Ja"=1, "Nei"=2)
-                      ),
-                      selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
-                                  choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
-                      ),
-                      selectInput(inputId = "erMannRes", label="Kjønn",
-                                  choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
-                      ),
-                      br(),
-                      actionButton("tilbakestillValgRes", label="Tilbakestill valg")
-
-         ),
-         mainPanel(
-         tabsetPanel(id='ark',
-           tabPanel('Antall registreringer',
-                    br(),
-                    h2('Her kommer figur og tabell med antall registreringer'),
-                    br(),
-                    h3('Antall registreringer'),
-                    h3('Ant. døde - utskrivingsdag'),
-                    h3('Antall utskrivinger - utskrivingsdag'),
-                    h3('Antall inneliggende')
-
-         ),
-         tabPanel(p('Fordelinger',
-                  title='Figurer/tabeller for de fleste opplysninger registrert i
+           tabPanel(p('Fordelinger',
+                      title='Figurer/tabeller for de fleste opplysninger registrert i
                   inlusjons- eller utskrivingsskjema'),
-                  value = 'Fordelinger',
-                  br(),
-                  h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
-                  h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
-                  plotOutput('fordelinger')
-                  # uiOutput("tittelFord"),
-                  # tableOutput('fordelingTab'),
-                  # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
-         )
-         )) #tabset og main
+                    value = 'Fordelinger',
+                    br(),
+                    sidebarPanel(id = 'brukervalgRes',
+                                 width = 3,
+                                 br(),
+                                 h3('Velg variabel/tema og filtreringer i data'),
+                                 conditionalPanel(condition = "input.ark == 'Fordelinger' ",
+                                                  selectInput(inputId = 'valgtVarFord', label='Velg variabel',
+                                                              choices = c("Alder"='alder',
+                                                                          "Kommer: Liggetid"='liggetid',
+                                                                          'Kommer: Risikotiltander'='risiko',
+                                                                          'Kommer: sirkulasjonssvikt' = 'sirkSvikt',
+                                                                          'Kommer: respirasjonssvikt' = 'sirkSvikt',
+                                                                          'Kommer: Antibiotikaordinasjon' = 'antibiotika',
+                                                                          'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
+                                                                          'Kommer: grad av sirksvikt, inn/ut',
+                                                                          'Kommer: grad av respsvikt, inn/ut',
+                                                                          'Kommer: Demografi og epidemYrke' = 'yrke',
+                                                                          'Kommer: sanns. smittested' = 'smittested',
+                                                                          'Kommer: fylker' = 'fylker')
+                                                  ),
+                                                  selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
+                                                              choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
+                                                  )),
 
+                                 selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
+                                             choices = 'Alle'
+                                 ),
+                                 selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
+                                             choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
+                                 ),
+                                 selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
+                                             choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                                 ),
+                                 selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
+                                             choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
+                                 ),
+                                 selectInput(inputId = "erMannRes", label="Kjønn",
+                                             choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
+                                 ),
+                                 br(),
+                                 actionButton("tilbakestillValgRes", label="Tilbakestill valg")
+
+                    ),
+                    mainPanel(
+                      h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
+                      h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
+                      plotOutput('fordelinger')
+                      # uiOutput("tittelFord"),
+                      # tableOutput('fordelingTab'),
+                      # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
+                    )
+           )) #tabset og tab
 ), #Resultater
 
-tabPanel("Resultater_v2",
-         koronaresultater_UI("resultater_id")
-),
 
 #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
@@ -579,8 +570,6 @@ server <- function(input, output, session) {
                      session = session)
   }, height=700, width=700 #height = function() {session$clientData$output_fordelinger_width}
   )
-
-
 
   #-------------Intensivregistreringer------------------------
 
