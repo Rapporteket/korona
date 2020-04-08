@@ -65,7 +65,7 @@ koronaresultater_UI <- function(id){
                            h3('Antall inneliggende'),
                            br(),
                            plotOutput(ns("FigurTidEnhet"), height="auto"),
-                           downloadButton(ns("LastNedFig"), label = 'Last ned figur'),
+                           # downloadButton(ns("LastNedFig"), label = 'Last ned figur'),
                            br(),
                            br(),
                            DT::DTOutput(ns("tabTidEnhet_DT")),
@@ -130,19 +130,19 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
   }, width = 700, height = 700)
 
 
-  output$LastNedFig <- downloadHandler(
-    filename = function(){
-      paste0('KoronaFigur', Sys.time(), '.', input$bildeformat)
-    },
-
-    content = function(file){
-      AntTab <- AntTab()
-      if (rolle != 'SC') {
-        AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
-      }
-      korona::FigTidEnhet(AntTab, outfile = file)
-    }
-  )
+  # output$LastNedFig <- downloadHandler(
+  #   filename = function(){
+  #     paste0('KoronaFigur', Sys.time(), '.', input$bildeformat)
+  #   },
+  #
+  #   content = function(file){
+  #     AntTab <- AntTab()
+  #     if (rolle != 'SC') {
+  #       AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
+  #     }
+  #     korona::FigTidEnhet(AntTab, outfile = file)
+  #   }
+  # )
 
   output$lastNed <- downloadHandler(
     filename = function(){
