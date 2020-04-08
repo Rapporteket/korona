@@ -558,7 +558,7 @@ server <- function(input, output, session) {
     }
   )
 
-  callModule(koronaresultater, "resultater_id", KoroData = KoroData, egenEnhet = egenEnhet,
+  callModule(koronaresultater, "resultater_id", KoroData = KoroData, rolle=rolle, egenEnhet = egenEnhet,
              egetEnhetsNivaa=egetEnhetsNivaa, hvdsession = session)
 
 ########## Kevin slutt ##################

@@ -8,7 +8,7 @@ koronaresultater_UI <- function(id){
                         width = 3,
                         br(),
                         h3('Velg variabel/tema og filtreringer i data'),
-                        h5('Vis bare for fordeling'),
+                        conditionalPanel(condition = paste0("input['", ns("resultater"), "'] == 'Fordelinger'"),
                         selectInput(inputId = ns('valgtVarFord'), label='Velg variabel',
                                     choices = c("Alder"='alder',
                                                 "Kommer: Liggetid"='liggetid',
@@ -23,12 +23,9 @@ koronaresultater_UI <- function(id){
                                                 'Kommer: sanns. smittested' = 'smittested',
                                                 'Kommer: fylker' = 'fylker')
                         ),
-                        h5('Vis bare for fordeling'),
                         selectInput(inputId = ns("enhetsUtvalgFord"), label="Velg enhetsnivå",
-                                    choices = c('Egen mot resten'=1, 'Hele landet'=0, 'Egen enhet'=2)
-                        ),
-
-                        h5('Ikke vis for fordeling:'),
+                                    choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Egen enhet'=2)
+                        )),
                         selectInput(inputId = ns("valgtEnhetRes"), label="Velg enhet",
                                     choices = 'Alle'
                         ),
@@ -49,7 +46,7 @@ koronaresultater_UI <- function(id){
                         )
     ),
     mainPanel(
-      tabsetPanel(
+      tabsetPanel(id=ns("resultater"),
         tabPanel('Antall registreringer',
                  br(),
                  h2('Her kommer figur og tabell med antall registreringer'),
@@ -75,16 +72,20 @@ koronaresultater_UI <- function(id){
 }
 
 
-koronaresultater <- function(input, output, session, KoroData, egenEnhet, egetEnhetsNivaa, hvdsession){
+koronaresultater <- function(input, output, session, KoroData, rolle, egenEnhet, egetEnhetsNivaa, hvdsession){
 
   observeEvent(input$tilbakestillValgRes, {
     shinyjs::reset("brukervalgRes")
   })
 
+  enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
+  updateSelectInput(session, "valgtEnhetRes", choices = enhetsvalg)
+
+
   output$fordelinger <- renderPlot({
     KoronaFigAndeler(RegData=KoroData,
                      valgtVar=input$valgtVarFord,
-                     valgtEnhet = egenEnhet,  #input$valgtEnhetFord,
+                     valgtEnhet = input$valgtEnhetRes,  #input$valgtEnhetFord,
                      enhetsNivaa=egetEnhetsNivaa,
                      enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
                      dodSh=as.numeric(input$dodShRes),
@@ -95,5 +96,4 @@ koronaresultater <- function(input, output, session, KoroData, egenEnhet, egetEn
                      session = hvdsession)
   }, height=700, width=700 #height = function() {session$clientData$output_fordelinger_width}
   )
-
 }
