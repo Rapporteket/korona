@@ -93,7 +93,6 @@ ui <- tagList(
                                    #                  dateInput(inputId = 'sluttDatoReg', label = 'Velg sluttdato', language="nb",
                                    #                            value = Sys.Date(), max = Sys.Date())
                                    # ),
-                                   #MÅ HA ET VALG SOM ENDRER SEG AVHENGIG AV ROLLE, DVS. Velg RHF/HF/ingen valg?
                                    selectInput(inputId = "valgtEnhet", label="Velg enhet",
                                                choices = 'Alle'
                                    ),
@@ -152,7 +151,10 @@ ui <- tagList(
                                  column(width=5, offset=1,
                                         h3('Oppsummering, ferdigstilte, utskrevne'),
                                         h4('Gjsn, Median, IQR, N, evt andel for:'),
-                                        h4('Liggetid, Alder, BMI, registreringsforsinkelse?, døde, annet?')
+                                        h4('Liggetid, Alder, BMI, registreringsforsinkelse?, døde, annet?'),
+                                        '?hvilken behandling pasientene mottar (respirator, ECMO),
+                                        for å si noe om alvorlighet – ikke kapasitet'
+
                                 #        uiOutput('tittelFerdigeReg'),
                                 #        uiOutput('utvalgFerdigeReg'),
                                 #        tableOutput('tabFerdigeReg')
@@ -182,7 +184,41 @@ tabPanel("Resultater",
          sidebarPanel(id = 'brukervalgStartside',
                       width = 3,
                       br(),
-                      h3('Her kommer utvalgsmuligheter')
+                      h3('Velg variabel/tema og filtreringer i data'),
+                      selectInput(inputId = 'valgtVar', label='Velg variabel',
+                                  choices = c("Alder"='alder',
+                                              "Kommer: Liggetid"='liggetid',
+                                              'Kommer: Risikotiltander'='risiko',
+                                              'Kommer: sirkulasjonssvikt' = 'sirkSvikt',
+                                              'Kommer: respirasjonssvikt' = 'sirkSvikt',
+                                              'Kommer: Antibiotikaordinasjon' = 'antibiotika',
+                                              'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
+                                              'Kommer: grad av sirksvikt, inn/ut',
+                                              'Kommer: grad av respsvikt, inn/ut',
+                                              'Kommer: Demografi og epidemYrke' = 'yrke',
+                                              'Kommer: sanns. smittested' = 'smittested',
+                                              'Kommer: fylker' = 'fylker')
+                      ),
+                      selectInput(inputId = "valgtEnhet", label="Velg enhet",
+                                  choices = 'Alle'
+                      ),
+                      selectInput(inputId = "enhetsUtvalg", label="Velg enhet",
+                                  choices = c('Egen mot resten'=1, 'Hele landet'=0, 'Egen enhet'=2)
+                      ),
+
+                      selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
+                                  choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
+                      ),
+                      selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
+                                  choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                      ),
+                      selectInput(inputId = "dodSh", label="Utskrevne, tilstand",
+                                  choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
+                      ),
+                      selectInput(inputId = "erMann", label="Kjønn",
+                                  choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
+                      ),
+
          ),
          mainPanel(
          tabsetPanel(
@@ -191,23 +227,17 @@ tabPanel("Resultater",
                     h2('Her kommer figur og tabell med antall registreringer'),
                     br(),
                     h3('Antall registreringer'),
-                    h3('Filtrere på døde = ant. døde'),
-                    h3('Filtrere på ferdigstilte utskrivninger = Antall utskrivinger'),
+                    h3('Ant. døde - utskrivingsdag'),
+                    h3('Antall utskrivinger - utskrivingsdag'),
                     h3('Antall inneliggende')
 
          ),
          tabPanel('Fordelinger',
                   br(),
+                  h3('Vise fordelingsfigurer bare for ferdigstilte skjema'),
                   h2('Her kommer fordelingsfigurer, inkl. nedlastbare tabeller'),
                   h3('Alder,
-Kjønn,
-Yrke (helsepersonell, lab.personell),
-Sannsynlig smittested,
-Geografi,
-Risikotilstand (ja/nei, type),
-Dato inn/ut av sykehus og intensivenhet (hvor mange skrives ut igjen friske?),
-Liggetid sykehus, intensivenhet,
-hvilken behandling pasientene mottar (respirator, ECMO), for å si noe om alvorlighet – ikke kapasitet
+
 ')
                   )
          )) #tabset og main
@@ -414,7 +444,7 @@ server <- function(input, output, session) {
     txt <- if(dim(UtData$RegData)[1]>2) {
       paste0('Gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
              round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn.
-              Antall døde: ', sum(KoroData$StatusVedUtskriving==2, na.rm=T))
+              Antall døde: ', sum(UtData$RegData$StatusVedUtskriving==2, na.rm=T))
     } else {''}
 
     output$utvalgAntOpph <- renderUI({
