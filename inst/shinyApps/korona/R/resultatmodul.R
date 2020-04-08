@@ -123,9 +123,9 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
 
   output$FigurTidEnhet <- renderPlot({
     AntTab <- AntTab()
-    # if (rolle != 'SC' | input$valgtRHF != 'Alle') {
-    #   AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
-    # }
+    if (rolle != 'SC') {
+      AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
+    }
     korona::FigTidEnhet(AntTab)
   }, width = 700, height = 700)
 
@@ -137,9 +137,9 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
 
     content = function(file){
       AntTab <- AntTab()
-      # if (rolle != 'SC' | input$valgtRHF != 'Alle') {
-      #   AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
-      # }
+      if (rolle != 'SC') {
+        AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
+      }
       korona::FigTidEnhet(AntTab, outfile = file)
     }
   )
