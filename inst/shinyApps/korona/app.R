@@ -473,7 +473,8 @@ server <- function(input, output, session) {
     )
 
     #Tab status nå
-    statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #valgtEnhet=input$valgtEnhet,
+    statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #
+                                 valgtEnhet=input$valgtEnhet,
                                  aarsakInn = as.numeric(input$aarsakInn),
                                       erMann=as.numeric(input$erMann))
     output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
@@ -530,6 +531,7 @@ server <- function(input, output, session) {
   output$FigurAldersfordeling <- renderPlot({
     korona::AlderKjFig(RegData=KoroData,
                        valgtEnhet= input$valgtEnhet,
+                       enhetsNivaa = egetEnhetsNivaa,
                        dodSh=as.numeric(input$dodSh),
                        aarsakInn = as.numeric(input$aarsakInn),
                        erMann=as.numeric(input$erMann),
