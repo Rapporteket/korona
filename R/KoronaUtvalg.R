@@ -66,16 +66,9 @@ if (dodSh %in% 1:3){
     if (aarsakInn %in% 1:2){paste0('Covid-19, hovedårsak? ', c('Ja','Nei')[aarsakInn])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
     if (dodSh %in% 1:3) {paste0('Tilstand ved utskriving: ', c('Levende','Død','Alle utskrevne')[as.numeric(dodSh)])},
-    if (!(valgtEnhet == 'Alle' |(enhetsUtvalg == 0)  )){paste('Valgt enhet:', valgtEnhet)}
+    if ((valgtEnhet != 'Alle') &(enhetsUtvalg == 2)) {paste('Valgt enhet:', valgtEnhet)}
   )
 
-
-  #reshID er HF-resh
-  #Filtrerer på egen enhet, som er
-  #  enhetsNivaa: SC-Alle, LC-RHF,
-  #tilgangsNivaa, SC kan filtrere på RHF, dvs. velge RHF
-  #RHF - LC kan velge eget RHF (og hele landet)
-  # HF - LU kan velge eget HF (og hele landet)
 
   ind <- list(Hoved=0, Rest=0)
 
@@ -94,12 +87,13 @@ if (dodSh %in% 1:3){
       medSml <- 1
       smltxt <- 'resten av landet' #switch(enhetsNivaa, RHF='andre RHF', HF = 'andre HF')
       }
-    }
-  if ((valgtEnhet != 'Alle') ) {RegData <- subset(RegData, RegData[,enhetsNivaa] == valgtEnhet)}
+  }
+  RegDataAlle <- RegData
+  if ((valgtEnhet != 'Alle') &(enhetsUtvalg == 2)) {RegData <- subset(RegData, RegData[,enhetsNivaa] == valgtEnhet)}
 
 
   #RegData er ikke filtrert på enhet. Velg enhetsutvalg 1 el 2 for å få ind$Hoved for egen enhet
-  UtData <- list(RegData=RegData, utvalgTxt=utvalgTxt, ind=ind, medSml=medSml,
+  UtData <- list(RegData=RegData, RegDataAlle=RegDataAlle, utvalgTxt=utvalgTxt, ind=ind, medSml=medSml,
                smltxt=smltxt, hovedgrTxt=hovedgrTxt) #fargepalett=fargepalett,
  return(invisible(UtData))
 }

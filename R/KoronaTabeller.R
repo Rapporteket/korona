@@ -79,8 +79,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=9, erMann=9){
 
   UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
-                         aarsakInn=aarsakInn, erMann=erMann,
-                         dodSh=dodSh)
+                         aarsakInn=aarsakInn, erMann=erMann)
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
   inneliggere <- is.na(RegData$UtDato)
@@ -168,7 +167,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
                          minald=minald, maxald=maxald, aarsakInn=aarsakInn,
                          valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa)
 
-  RegData <- UtData$RegData[UtData$ind$Hoved, ] #
+  RegData <- UtData$RegData
 
   N <- sum(RegData$KjentRisikofaktor %in% 1:2) #dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
 

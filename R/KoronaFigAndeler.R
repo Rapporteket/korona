@@ -51,7 +51,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', datoFra=0, datoTil=0, e
                               enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=0,
                            hentData=0, outfile='', lagFig=1, ...) {
 
-   if ("session" %in% names(list(...)) & rapbase::isRapContext()) {
+   if ("session" %in% names(list(...))) {
       raplog::repLogger(session = list(...)[["session"]], msg = paste0('Fordelingsfigur: ',valgtVar))
    }
     if (hentData == 1) {
@@ -72,7 +72,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', datoFra=0, datoTil=0, e
                                 enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet,
                                 enhetsUtvalg=enhetsUtvalg)
 
-      RegData <- Utvalg$RegData
+      RegData <- Utvalg$RegDataAlle
       utvalgTxt <- Utvalg$utvalgTxt
 
 

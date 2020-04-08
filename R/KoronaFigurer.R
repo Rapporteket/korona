@@ -18,7 +18,7 @@ AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa
                          erMann = erMann,
                          skjemastatusInn=skjemastatusInn
   )
-  RegData <- UtData$RegData[UtData$ind$Hoved, ]
+  RegData <- UtData$RegData #[UtData$ind$Hoved, ]
   utvalgTxt <- UtData$utvalgTxt
 
   N <- dim(RegData)[1]
