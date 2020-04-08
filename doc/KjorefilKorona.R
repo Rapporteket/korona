@@ -21,14 +21,14 @@ valgtVar <- 'alder'
 RegData <- Pandemi
 
 
-Tab <- FerdigeRegTab(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, dodSh=9)$Tab
-
 Utdata <- KoronaFigAndeler(valgtVar='alder', RegData=Pandemi,
                  minald=minald, maxald=maxald, aarsakInn=aarsakInn,
                  erMann=erMann, dodSh=dodSh,
                  skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,
                  enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet,
-                 enhetsUtvalg=0)
+                 enhetsUtvalg=1)
+
+Tab <- FerdigeRegTab(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, dodSh=9)$Tab
 
 
 RisikoInnTab(Pandemi, valgtEnhet = valgtEnhet, enhetsNivaa = enhetsNivaa)

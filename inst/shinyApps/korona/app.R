@@ -546,6 +546,7 @@ server <- function(input, output, session) {
     content = function(file){
       Tabell <- korona::AlderKjFig(RegData=KoroData,
                                    valgtEnhet= input$valgtEnhet,
+                                   enhetsNivaa = egetEnhetsNivaa,
                                    dodSh=as.numeric(input$dodSh),
                                    aarsakInn = as.numeric(input$aarsakInn),
                                    erMann=as.numeric(input$erMann),
@@ -562,6 +563,9 @@ server <- function(input, output, session) {
   #-----------------------------Resultater---------------------------------
 
   output$fordelinger <- renderPlot({
+    # print(as.numeric(input$enhetsUtvalgFord))
+    # print(input$valgtEnhetRes)
+    # print(egetEnhetsNivaa)
     KoronaFigAndeler(RegData=KoroData,
                      valgtVar=input$valgtVarFord,
                      valgtEnhet = input$valgtEnhetRes, #egenEnhet,  #
