@@ -46,7 +46,7 @@
 #'
 #' @export
 
-KoronaFigAndeler  <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
+KoronaFigAndeler  <- function(RegData, valgtVar='alder', datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
                               skjemastatusInn=9, skjemastatusUt=9, dodSh=9, aarsakInn=9,
                               enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=0,
                            hentData=0, outfile='', lagFig=1, ...) {
@@ -60,7 +60,7 @@ KoronaFigAndeler  <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0,
 
 
       #--------------- Definere variable ------------------------------
-      KoronaVarSpes <- KoronaVarTilrettelegg(RegData=RegData, valgtVar='alder', figurtype='andeler')
+      KoronaVarSpes <- KoronaVarTilrettelegg(RegData=RegData, valgtVar=valgtVar, figurtype='andeler')
    RegData <- KoronaVarSpes$RegData
       flerevar <- KoronaVarSpes$flerevar
 

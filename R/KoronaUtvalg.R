@@ -46,7 +46,7 @@ if (dodSh %in% 1:3){
    vec <- (RegData$erMann == erMann)
    RegData <- subset(RegData, vec)}
 
-  if (valgtEnhet != 'Alle'){RegData <- subset(RegData, RegData[,enhetsNivaa] == valgtEnhet)}
+  #if (valgtEnhet != 'Alle'){RegData <- subset(RegData, RegData[,enhetsNivaa] == valgtEnhet)}
 
   if(minald>0 | maxald<110) {RegData <- subset(RegData,
                                                RegData$Alder >= minald & RegData$Alder <= maxald)}
@@ -83,7 +83,7 @@ if (dodSh %in% 1:3){
 
   medSml <- 0
   smltxt <- ''
-  if (valgtEnhet == 'Alle') {
+  if (valgtEnhet == 'Alle' |(enhetsUtvalg == 0)  ) {
     enhetsUtvalg <- 0
     ind$Hoved <- 1:N
     hovedgrTxt <- 'Hele landet'
@@ -94,9 +94,7 @@ if (dodSh %in% 1:3){
     if (enhetsUtvalg==1){
       ind$Rest <- setdiff(1:N, ind$Hoved)
       medSml <- 1
-      smltxt <- switch(enhetsNivaa,
-                       RHF='andre RHF',
-                       HF = 'andre HF')
+      smltxt <- 'resten av landet' #switch(enhetsNivaa, RHF='andre RHF', HF = 'andre HF')
       }
     }
 

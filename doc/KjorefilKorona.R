@@ -3,17 +3,32 @@ library(korona)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 
 tidsenhet='dag'
+datoFra <- '2020-01-01'
+datoTil <- Sys.Date()
 erMann=9
 bekr=9
 skjemastatusInn=9
+skjemastatusUt <- 9
 aarsakInn<- 9
 dodSh=9
 minald <- 0
 maxald <- 110
 valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
+enhetsUtvalg <- 1
+valgtVar <- 'alder'
 
 RegData <- Pandemi
+
+
+Utdata <- KoronaFigAndeler(valgtVar='alder', RegData=Pandemi,
+                 minald=minald, maxald=maxald, aarsakInn=aarsakInn,
+                 erMann=erMann, dodSh=dodSh,
+                 skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,
+                 enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet,
+                 enhetsUtvalg=0)
+
+
 RisikoInnTab(Pandemi, valgtEnhet = valgtEnhet, enhetsNivaa = enhetsNivaa)
 
 AlderTab(RegData=RegData)$Tab

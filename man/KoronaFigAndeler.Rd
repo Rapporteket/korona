@@ -5,24 +5,22 @@
 \title{Funksjon som beregner aggregerte verdier (andeler) for ulike variabler/variabelkombinasjoner}
 \usage{
 KoronaFigAndeler(
-  RegData = 0,
+  RegData,
   valgtVar = "alder",
-  datoFra = "2011-01-01",
-  datoTil = "3000-12-31",
-  aar = 0,
-  overfPas = 0,
+  datoFra = 0,
+  datoTil = 0,
+  erMann = 9,
   minald = 0,
   maxald = 110,
-  erMann = "",
-  InnMaate = "",
-  dodInt = "",
-  outfile = "",
-  grType = 99,
-  preprosess = 1,
-  hentData = 0,
-  reshID = 0,
-  velgAvd = 0,
+  skjemastatusInn = 9,
+  skjemastatusUt = 9,
+  dodSh = 9,
+  aarsakInn = 9,
+  enhetsNivaa = "RHF",
+  valgtEnhet = "Alle",
   enhetsUtvalg = 0,
+  hentData = 0,
+  outfile = "",
   lagFig = 1,
   ...
 )
@@ -30,54 +28,58 @@ KoronaFigAndeler(
 \arguments{
 \item{RegData}{En dataramme med alle nødvendige variabler fra registeret}
 
-\item{valgtVar}{Hvilken variabel som skal visualiseres. Se \strong{Details} for oversikt.}
+\item{valgtVar}{Hvilken variabel som skal visualiseres. Se \strong{Details} for oversikt.
+' @param outfile Navn på fil figuren skrives til. Standard: '' (Figur skrives
+   til systemets standard utdataenhet (som regel skjerm))}
 
-\item{datoFra}{Tidligste dato i utvalget (vises alltid i figuren).}
+\item{datoFra}{startdato 'yyyy-mm-dd'}
 
-\item{datoTil}{Seneste dato i utvalget (vises alltid i figuren).}
+\item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
-\item{overfPas}{Overført under pågående intensivbehandling? 
-1 = Pasienten er ikke overført
-2 = Pasienten er overført}
+\item{erMann}{kjønn, 0-kvinne, 1-mann}
 
-\item{minald}{Alder, fra og med (Standardverdi: 0)}
+\item{minald}{kjønn, 0-kvinne, 1-mann}
 
-\item{maxald}{Alder, til og med (Standardverdi: 110)}
+\item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{erMann}{Kjønn, standard: alt annet enn 0/1 gir begge kjønn
-0: Kvinner
-1: Menn}
+\item{skjemastatusUt}{status på utskrivingsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{dodInt}{Levende/død ut fra intensiv. 
-0: i live, 
-1: død,   
-alle: standard (alle andre verdier)}
+\item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 
-\item{outfile}{Navn på fil figuren skrives til. Standard: '' (Figur skrives
-til systemets standard utdataenhet (som regel skjerm))}
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, 2-nei}
 
-\item{preprosess}{Preprosesser data
-FALSE: Nei
-TRUE: Ja (Standard)}
+\item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
+RHF (SC og LC-brukere), HF (LU-brukere)}
+
+\item{valgtEnhet}{- gis ut fra resh}
+
+\item{enhetsUtvalg}{Gjør gruppeutvalg med eller uten sammenlikning. Se \strong{Details} for oversikt.}
 
 \item{hentData}{Gjør spørring mot database
 0: Nei, RegData gis som input til funksjonen (Standard)
 1: Ja}
 
+\item{lagFig}{Angir om figur skal lages eller ikke 0-ikke lag, 1-lag}
+
+\item{figurtype}{Hvilken figurtype som ønskes ut:
+andel (fordelingsfigurer),
+andelGrVar (andel i hver kategori av grupperingsvariabel, eks. sykehus),
+andelTid (andel per tidsenhet, eks. år, måned),
+andelPP (andel før og etter),
+gjsnGrVar (sentralmål i hver kategori av grupperingsvariabel, eks. sykehus),
+gjsnTid (sentralmål per tidsenhet, eks. år, måned)}
+
 \item{reshID}{Parameter følger fra innlogging helseregister.no og angir
 hvilken enhet i spesialisthelsetjenesten brukeren tilhører}
 
-\item{enhetsUtvalg}{Gjør gruppeutvalg med eller uten sammenlikning. Se \strong{Details} for oversikt.}
+\item{preprosess}{Preprosesser data
+FALSE: Nei
+TRUE: Ja (Standard)}
 
-\item{lagFig}{Angir om figur skal lages eller ikke 0-ikke lag, 1-lag}
-
-\item{figurtype}{Hvilken figurtype som ønskes ut: 
-andel (fordelingsfigurer), 
-andelGrVar (andel i hver kategori av grupperingsvariabel, eks. sykehus), 
-andelTid (andel per tidsenhet, eks. år, måned), 
-andelPP (andel før og etter), 
-gjsnGrVar (sentralmål i hver kategori av grupperingsvariabel, eks. sykehus),
-gjsnTid (sentralmål per tidsenhet, eks. år, måned)}
+\item{dodInt}{Levende/død ut fra intensiv.
+0: i live,
+1: død,
+alle: standard (alle andre verdier)}
 }
 \value{
 Søylediagram (fordeling) av valgt variabel. De enkelte verdiene kan også sendes med.
@@ -87,14 +89,13 @@ Denne funksjonen beregner AggVerdier (fordeling) av valgt variabel
 filtrert på de utvalg som er gjort. Kan trenge funksjonerne:
 }
 \details{
-Funksjonen benytter funksjonene: NIRRegDataSQL, NIRPreprosess, NIRVarTilrettelegg, NIRUtvalgEnh
-og NIRFigSoyler
+Funksjonen benytter funksjonene: KoronaRegDataSQL, KoronaPreprosess, KoronaVarTilrettelegg, KoronaUtvalg
 
 Argumentet \emph{valgtVar} har følgende valgmuligheter:
    \itemize{
-    \item alder: Aldersfordeling, 10-årige grupper 
+    \item alder: Aldersfordeling, 10-årige grupper
     \item inklKrit: Andeler for de 5 inklusjonskriteriene
-    \item liggetid: Liggetid 
+    \item liggetid: Liggetid
     \item PrimaryReasonAdmitted: Hovedårsak til intensivopphold
     \item respiratortid: Tid tilbrakt i respirator
     \item spesTiltak: Spesielle tiltak

@@ -181,11 +181,13 @@ ui <- tagList(
 
 #-----------Resultater-------------------------------------
 tabPanel("Resultater",
-         sidebarPanel(id = 'brukervalgStartside',
+         sidebarPanel(id = 'brukervalgRes',
+
                       width = 3,
                       br(),
                       h3('Velg variabel/tema og filtreringer i data'),
-                      selectInput(inputId = 'valgtVar', label='Velg variabel',
+                      h5('Vis bare for fordeling'),
+                      selectInput(inputId = 'valgtVarFord', label='Velg variabel',
                                   choices = c("Alder"='alder',
                                               "Kommer: Liggetid"='liggetid',
                                               'Kommer: Risikotiltander'='risiko',
@@ -199,25 +201,29 @@ tabPanel("Resultater",
                                               'Kommer: sanns. smittested' = 'smittested',
                                               'Kommer: fylker' = 'fylker')
                       ),
-                      selectInput(inputId = "valgtEnhet", label="Velg enhet",
-                                  choices = 'Alle'
-                      ),
-                      selectInput(inputId = "enhetsUtvalg", label="Velg enhet",
+                      h5('Vis bare for fordeling'),
+                      selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
                                   choices = c('Egen mot resten'=1, 'Hele landet'=0, 'Egen enhet'=2)
                       ),
 
-                      selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
+                      h5('Ikke vis for fordeling:'),
+                      selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
+                                  choices = 'Alle'
+                      ),
+                      selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
                                   choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                       ),
-                      selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
+                      selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
                                   choices = c("Alle"=9, "Ja"=1, "Nei"=2)
                       ),
-                      selectInput(inputId = "dodSh", label="Utskrevne, tilstand",
+                      selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
                                   choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
                       ),
-                      selectInput(inputId = "erMann", label="Kjønn",
+                      selectInput(inputId = "erMannRes", label="Kjønn",
                                   choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
                       ),
+                      br(),
+                      actionButton("tilbakestillValgRes", label="Tilbakestill valg")
 
          ),
          mainPanel(
@@ -232,17 +238,21 @@ tabPanel("Resultater",
                     h3('Antall inneliggende')
 
          ),
-         tabPanel('Fordelinger',
+         tabPanel(p('Fordelinger',
+                  title='Figurer/tabeller for de fleste opplysninger registrert i
+                  inlusjons- eller utskrivingsskjema'),
+                  value = 'Fordelinger',
                   br(),
-                  h3('Vise fordelingsfigurer bare for ferdigstilte skjema'),
-                  h2('Her kommer fordelingsfigurer, inkl. nedlastbare tabeller'),
-                  h3('Alder,
-
-')
-                  )
+                  h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
+                  h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
+                  plotOutput('fordelinger'),
+                  # uiOutput("tittelFord"),
+                  # tableOutput('fordelingTab'),
+                  # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
+         )
          )) #tabset og main
 
-), #tab
+), #Resultater
 #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
@@ -420,9 +430,10 @@ server <- function(input, output, session) {
   #   #                 Gå til fanen "Abonnement" for å bestille dette'))
   #   )
 
-  #----------Tabeller, Korona----------------------------
+  #----------Dæsjbord, Korona----------------------------
 
   observeEvent(input$tilbakestillValg, shinyjs::reset("brukervalgStartside"))
+  observeEvent(input$tilbakestillValgRes, shinyjs::reset("brukervalgRes"))
 
   observe({
 
@@ -511,7 +522,6 @@ server <- function(input, output, session) {
 
   })
 
-
   ############ Kevin start ######################
   output$FigurAldersfordeling <- renderPlot({
     korona::AlderKjFig(RegData=KoroData,
@@ -538,6 +548,25 @@ server <- function(input, output, session) {
     }
   )
 ########## Kevin slutt ##################
+
+  #-----------------------------Resultater---------------------------------
+
+  output$fordelinger <- renderPlot({
+    KoronaFigAndeler(RegData=KoroData,
+                     valgtVar=input$valgtVarFord,
+                     valgtEnhet = egenEnhet,  #input$valgtEnhetFord,
+                     enhetsNivaa=egetEnhetsNivaa,
+                     enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
+                     dodSh=as.numeric(input$dodShRes),
+                     aarsakInn = as.numeric(input$aarsakInnRes),
+                     erMann=as.numeric(input$erMannRes),
+                     skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                     kjemastatusUt=as.numeric(input$skjemastatusUtRes),
+                     session = session)
+  }, height=700, width=700 #height = function() {session$clientData$output_fordelinger_width}
+  )
+
+
 
   #-------------Intensivregistreringer------------------------
 
