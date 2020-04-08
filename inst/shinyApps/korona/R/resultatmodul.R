@@ -96,13 +96,29 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
   updateSelectInput(session, "valgtEnhetRes", choices = enhetsvalg)
 
 
+dodSh=9
+
   AntTab <- function() {
-    AntTab <- antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
+    AntTab <- switch(input$valgtVar,
+                     'antreg'= antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag',
                               aarsakInn = as.numeric(input$aarsakInnRes),
                               skjemastatusInn=as.numeric(input$skjemastatusInnRes),
-                              erMann=as.numeric(input$erMannRes))
+                              erMann=as.numeric(input$erMannRes)),
+                     'antdod'= antallTidAvdode(RegData=KoroData, tilgangsNivaa=rolle,
+                                     valgtEnhet= egenEnhet, #nivå avgjort av rolle
+                                     tidsenhet='dag',
+                                     aarsakInn = as.numeric(input$aarsakInnRes),
+                                     skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                                     erMann=as.numeric(input$erMannRes)),
+                     'antut'=antallTidUtskrevne(RegData=KoroData, tilgangsNivaa=rolle,
+                                             valgtEnhet= egenEnhet, #nivå avgjort av rolle
+                                             tidsenhet='dag',
+                                             aarsakInn = as.numeric(input$aarsakInnRes),
+                                             skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                                             erMann=as.numeric(input$erMannRes))
+    )
     ant_skjema <- AntTab$Tab_tidy
     ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
     sketch <- htmltools::withTags(table(
