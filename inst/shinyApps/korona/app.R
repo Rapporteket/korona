@@ -245,7 +245,7 @@ tabPanel("Resultater",
                   br(),
                   h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
                   h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
-                  plotOutput('fordelinger'),
+                  plotOutput('fordelinger')
                   # uiOutput("tittelFord"),
                   # tableOutput('fordelingTab'),
                   # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
