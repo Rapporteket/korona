@@ -205,7 +205,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
     'Fedme (KMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
-    'Antall pasienter (tot.)' = c(N, '')
+    'Antall pasienter (i tab.)' = c(N, '')
     #'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
   )
 

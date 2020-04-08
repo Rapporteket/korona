@@ -353,9 +353,9 @@ server <- function(input, output, session) {
   if (context %in% c('QA', 'PRODUCTION')){
     raplog::appLogger(session = session, msg = "Starter Pandemi-app")}
 
-  reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 0)
+  reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100089)
 
-  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'SC')
+  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'LU')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
 
   finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
@@ -552,8 +552,8 @@ server <- function(input, output, session) {
     }
   )
 
-  callModule(koronaresultater, "resultater_id", KoroData = KoroData, egenEnhet = egenEnhet,
-             egetEnhetsNivaa=egetEnhetsNivaa, hvdsession = session)
+  callModule(koronaresultater, "resultater_id", KoroData = KoroData, rolle=rolle, enhetsvalg=enhetsvalg,
+             egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
 
 ########## Kevin slutt ##################
 
