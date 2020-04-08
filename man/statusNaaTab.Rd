@@ -8,8 +8,7 @@ statusNaaTab(
   RegData,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
-  skjemastatusInn = 9,
-  skjemastatusUt = 9,
+  aarsakInn = 9,
   erMann = 9
 )
 }

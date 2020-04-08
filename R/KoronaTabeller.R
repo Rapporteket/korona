@@ -75,10 +75,10 @@ if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
 #' @return
 #' @export
 statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
-                         skjemastatusInn=9, skjemastatusUt=9, erMann=9){
+                         aarsakInn=9, erMann=9){
 
   UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
-                               erMann=erMann)
+                         aarsakInn=aarsakInn, erMann=erMann)
                               # dodSh=dodSh)$RegData velgAvd=velgAvd
 RegData <- UtData$RegData
   N <- dim(RegData)[1]
@@ -86,7 +86,7 @@ RegData <- UtData$RegData
 inneliggere <- is.na(RegData$UtDato)
 AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
 LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$InnTidspunkt[inneliggere], units='days'))
-LiggetidNaaGjsn <- mean(LiggetidNaa[LiggetidNaa < 50], na.rm = T)
+LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 50], na.rm = T), 1)
 
 statusTab <- rbind(
   'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
@@ -109,21 +109,32 @@ return(UtData)
 
 
 
-#' Ferdigstilte registreringer
+#' Ferdigstilte registreringer, utskrevne pasienter
 #' @param RegData beredskapsskjema
 #' @inheritParams KoronaUtvalg
 #' @return
 #' @export
-FerdigeRegInnTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, dodSh=9){
+FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
+                          aarsakInn=9, erMann=9, dodSh=9){
 
-UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
-                             erMann = erMann,
-                              skjemastatusInn=2)
+  UtData <- KoronaUtvalg(RegData=RegData,
+                         valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
+                         aarsakInn=aarsakInn, erMann = erMann,
+                              skjemastatusInn=2, skjemastatusUt = 2)
 RegData <- UtData$RegData
+utvalgTxt <- UtData$utvalgTxt
+
+if (valgtEnhet !='Alle'){
+  utvalgTxt <- c(valgtEnhet, utvalgTxt)
+  subset(RegData, RegData[,enhetsNivaa]==valgtEnhet)}
+
   N <- dim(RegData)[1]
-  Liggetid <- summary(RegData$liggetid[RegData$liggetid < 30], na.rm = T)
+  Liggetid <- summary(RegData$Liggetid, na.rm = T)
   Alder <- summary(RegData$Alder, na.rm = T)
-  AntDod <- sum(RegData$DischargedIntensivStatus==1, na.rm=T)
+  BMI <- summary(RegData$BMI)
+  AntDod <- sum(RegData$StatusVedUtskriving==2, na.rm=T)
+  NrisikoKjent <- sum(RegData$KjentRisikofaktor %in% 1:2, na.rm=T)
+  pstRisiko <- 100*sum(RegData$KjentRisikofaktor==1, na.rm=T)/NrisikoKjent
 
 med_IQR <- function(x){
   #x[is.na(x)]<-0
@@ -135,19 +146,21 @@ med_IQR <- function(x){
 TabFerdigeReg <- rbind(
     'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
-    'Døde' = c('','','',AntDod, paste0(sprintf('%.f',100*AntDod/N),'%'))
+    'KMI' = c(med_IQR(BMI), N, ''),
+    'Har risikofaktorer' = c('','','', NrisikoKjent, pstRisiko),
+    'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
-#TabFerdigeReg[TabFerdigeReg==NA]<-""
+TabFerdigeReg[4:5,5] <- paste0(sprintf('%.f', as.numeric(TabFerdigeReg[4:5,5])),' %')
   colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall opphold', 'Andel opphold')
-  TabFerdigeReg[c(1:2),'Andel opphold'] <-
-    paste0(sprintf('%.0f', as.numeric(TabFerdigeReg[c(1:2),'Andel opphold'])),'%')
+  # TabFerdigeReg[c(1:2),'Andel opphold'] <-
+  #   paste0(sprintf('%.0f', as.numeric(TabFerdigeReg[c(1:2),'Andel opphold'])),'%')
   xtable::xtable(TabFerdigeReg,
                  digits=0,
                  align = c('l','r','r','c', 'r','r'),
                  caption='Ferdigstilte opphold.
                  IQR (Inter quartile range) - 50% av oppholdene er i dette intervallet.')
   return(invisible(UtData <- list(Tab=TabFerdigeReg,
-                                  utvalgTxt=UtData$utvalgTxt,
+                                  utvalgTxt = utvalgTxt,
                                   Ntest=N)))
 }
 
@@ -169,15 +182,12 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
 
   RegData <- UtData$RegData[UtData$ind$Hoved, ] #
 
-    indBMI <- RegData$Vekt>0 & RegData$Hoyde>0
-    Fedme <- 100^2*(RegData$Vekt/(RegData$Hoyde)^2)[indBMI]
-
     N <- sum(RegData$KjentRisikofaktor %in% 1:2) #dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
 
 #AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
     AntAndel <- function(Var, Nevner){
-      c(sum(Var),
-        paste0(sprintf('%.0f', 100*(sum(Var)/Nevner)),' %'))}
+      Ant <- sum(Var, na.rm=T)
+      c(Ant, paste0(sprintf('%.0f', 100*(Ant/Nevner)),' %'))}
 
 #KjentRisikofaktor # 1-ja, 2-nei, 3-ukjent, -1 velg verdi
 
@@ -192,7 +202,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
     Leversykdom = AntAndel(RegData$Leversykdom, N),
     'Nevrologisk/nevromusk.' = AntAndel(RegData$KroniskNevro, N),
     Gravid	= AntAndel(RegData$Gravid, N),
-    'Fedme (KMI>30)' =	AntAndel(Fedme>30, sum(indBMI)),
+    'Fedme (KMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
     'Antall pasienter (tot.)' = c(N, '')

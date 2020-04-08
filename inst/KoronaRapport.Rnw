@@ -114,6 +114,7 @@ xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l'
 
 
 \begin{frame}[fragile] {Antall som ligger på sykehus nå}
+Denne burde vel heller vise kumulativt antall...?
 <<'ShusNaa', results='asis'>>=
 # Antall som ligger på sykehus nå
 AntReg <- dim(PandemiInn)[1]

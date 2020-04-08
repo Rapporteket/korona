@@ -2,7 +2,7 @@
 
 export(AlderKjFig)
 export(AlderTab)
-export(FerdigeRegInnTab)
+export(FerdigeRegTab)
 export(KoronaDataSQL)
 export(KoronaFigAndeler)
 export(KoronaPreprosesser)

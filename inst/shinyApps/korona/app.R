@@ -143,29 +143,21 @@ ui <- tagList(
                                 br(),
                                  fluidRow(
                                    column(width = 4,
-                                          h3('Status nå'),
-                                          h4('Antall inneliggende, gj.sn. liggetid, antall inklusjon i kladd'),
-                                          h4('Hva mer?')
-
-                                #          uiOutput('statusNaaShTab'),
-                                #          br(),
+                                          h3('Inneliggende pasienter'),
+                                          uiOutput('statusNaaShTab'),
+                                          h4('Hva mer av info?', style = "color:red"),
+                                          h4('Kommer: antall inklusjon i kladd'),
+                                          br(),
                                 #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
-                                #          h5('Kommer...'),
                                    ),
                                  column(width=5, offset=1,
-                                        h3('Oppsummering, ferdigstilte, utskrevne'),
-                                        h4('Gjsn, Median, IQR, N, evt andel for:'),
-                                        h4('Liggetid, Alder, BMI, registreringsforsinkelse?, døde, annet?'),
-                                        '?hvilken behandling pasientene mottar (respirator, ECMO),
-                                        for å si noe om alvorlighet – ikke kapasitet'
-
-                                #        uiOutput('tittelFerdigeReg'),
-                                #        uiOutput('utvalgFerdigeReg'),
-                                #        tableOutput('tabFerdigeReg')
+                                        uiOutput('tittelFerdigeReg'),
+                                        uiOutput('utvalgFerdigeReg'),
+                                        tableOutput('tabFerdigeReg')
                                  )),
 
                                 h3('Antall innleggelser siste 10 dager'),
-                                h4('Tabell/figur som viser alle registreringer kommer på neste side'),
+                                h4('Hele tidsperioden, se fanen Resultater'),
                                 uiOutput('utvalgAntOpph'),
                                 tableOutput('tabAntOpph'),
                                 br(),
@@ -481,23 +473,25 @@ server <- function(input, output, session) {
     )
 
     #Tab status nå
-    # statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #valgtEnhet=input$valgtEnhet,
-    #                                   erMann=as.numeric(input$erMann),
-      # output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
-    # output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
+    statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #valgtEnhet=input$valgtEnhet,
+                                 aarsakInn = as.numeric(input$aarsakInn),
+                                      erMann=as.numeric(input$erMann))
+    output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
+    output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
     #Tab ferdigstilte
-    # TabFerdig <- FerdigeRegInnTab(RegData=KoroData,
-    #                                    #valgtEnhet=input$valgtEnhet,
-   #                                    erMann=as.numeric(input$erMann))
-    #
-    # output$tabFerdigeReg <- if (TabFerdig$Ntest>2){
-    #   renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
-    #     renderText('Få registreringer (N<3)')}
-    #
-    # output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
-    # output$tittelFerdigeReg <- renderUI(
-    #   h4(paste0('Fullførte registreringer (', TabFerdig$Ntest, ' skjema)')))
+   TabFerdig <- FerdigeRegTab(RegData=KoroData,
+                              aarsakInn = as.numeric(input$aarsakInn),
+                                      valgtEnhet=input$valgtEnhet,
+                                      erMann=as.numeric(input$erMann))
+
+   output$tabFerdigeReg <- if (TabFerdig$Ntest>4){
+     renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
+       renderText('Få registreringer (N<5)')}
+
+   output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
+   output$tittelFerdigeReg <- renderUI(
+     h4(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' skjema)')))
 
 
     #Tab risiko
