@@ -1,7 +1,7 @@
 #Kjørefil for Rapporteket-Pandemi
 library(korona)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
-
+RegData <- Pandemi
 tidsenhet='dag'
 datoFra <- '2020-01-01'
 datoTil <- Sys.Date()
@@ -20,6 +20,8 @@ valgtVar <- 'alder'
 
 RegData <- Pandemi
 
+
+Tab <- FerdigeRegTab(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, dodSh=9)$Tab
 
 Utdata <- KoronaFigAndeler(valgtVar='alder', RegData=Pandemi,
                  minald=minald, maxald=maxald, aarsakInn=aarsakInn,

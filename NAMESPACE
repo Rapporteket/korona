@@ -2,8 +2,12 @@
 
 export(AlderKjFig)
 export(AlderTab)
+<<<<<<< HEAD
+export(FerdigeRegTab)
+=======
 export(FerdigeRegInnTab)
 export(FigTidEnhet)
+>>>>>>> 98156c64c4ef86632669679dca25c2239d9b4e2e
 export(KoronaDataSQL)
 export(KoronaFigAndeler)
 export(KoronaPreprosesser)
