@@ -135,6 +135,7 @@ ui <- tagList(
 
                                 h3('Resultater fra pandemiregistrering, korona.'),
                                 h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
+                                h4('Sidene er organisert i faner. De fleste resultater finnes under fanen "Resultater".'),
                                 h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
                                  fluidRow(
@@ -186,8 +187,8 @@ tabPanel("Resultater",
                       width = 3,
                       br(),
                       h3('Velg variabel/tema og filtreringer i data'),
-                      h5('Vis bare for fordeling'),
-                      selectInput(inputId = 'valgtVarFord', label='Velg variabel',
+                      conditionalPanel(condition = "input.ark == 'Fordelinger' ",
+                                       selectInput(inputId = 'valgtVarFord', label='Velg variabel',
                                   choices = c("Alder"='alder',
                                               "Kommer: Liggetid"='liggetid',
                                               'Kommer: Risikotiltander'='risiko',
@@ -201,12 +202,10 @@ tabPanel("Resultater",
                                               'Kommer: sanns. smittested' = 'smittested',
                                               'Kommer: fylker' = 'fylker')
                       ),
-                      h5('Vis bare for fordeling'),
                       selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
-                                  choices = c('Egen mot resten'=1, 'Hele landet'=0, 'Egen enhet'=2)
-                      ),
+                                  choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
+                      )),
 
-                      h5('Ikke vis for fordeling:'),
                       selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
                                   choices = 'Alle'
                       ),
@@ -227,7 +226,7 @@ tabPanel("Resultater",
 
          ),
          mainPanel(
-         tabsetPanel(
+         tabsetPanel(id='ark',
            tabPanel('Antall registreringer',
                     br(),
                     h2('Her kommer figur og tabell med antall registreringer'),
@@ -381,13 +380,16 @@ server <- function(input, output, session) {
   #})
 
   # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
-  enhetsvalg <- c('Alle', if (rolle=='SC'){rhfNavn} else {egenEnhet})
-  if (rolle != 'SC') {updateSelectInput(session, "valgtEnhet",
+  enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
+  #if (rolle != 'SC') {
+    updateSelectInput(session, "valgtEnhet",
+                      choices = enhetsvalg)
+    updateSelectInput(session, "valgtEnhetRes",
                       choices = enhetsvalg)
     #KoroData$RHF[match(reshID, KoroData$ReshId)]))
     updateSelectInput(session, "valgtEnhetabb",
                       choices = enhetsvalg)
-    }
+    #}
 
 
   # widget
@@ -554,7 +556,7 @@ server <- function(input, output, session) {
   output$fordelinger <- renderPlot({
     KoronaFigAndeler(RegData=KoroData,
                      valgtVar=input$valgtVarFord,
-                     valgtEnhet = egenEnhet,  #input$valgtEnhetFord,
+                     valgtEnhet = input$valgtEnhetRes, #egenEnhet,  #
                      enhetsNivaa=egetEnhetsNivaa,
                      enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
                      dodSh=as.numeric(input$dodShRes),
