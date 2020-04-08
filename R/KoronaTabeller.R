@@ -79,11 +79,10 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=9, erMann=9){
 
   UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
-                         aarsakInn=aarsakInn, erMann=erMann)
-  # dodSh=dodSh)$RegData velgAvd=velgAvd
+                         aarsakInn=aarsakInn, erMann=erMann,
+                         dodSh=dodSh)
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
-  ##MechanicalRespirator Fått respiratorstøtte. Ja=1, nei=2,
   inneliggere <- is.na(RegData$UtDato)
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$InnTidspunkt[inneliggere], units='days'))
@@ -93,13 +92,6 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
     'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
   )
   colnames(statusTab) <- c('Antall', 'Liggetid(gj.sn)')
-  # TabHjelp <- rbind(
-  #   'På ECMO nå' = c(AntIECMONaa*(c(1, 100/AntPaaIntNaa)), ECMOtidNaaGjsn),
-  #   'På respirator nå' = c(AntIrespNaa*(c(1, 100/AntPaaIntNaa)), ResptidNaaGjsn),
-  #   'På intensiv nå' = c(AntPaaIntNaa,'', LiggetidNaaGjsn))
-  # colnames(statusTab) <- c('Antall', 'Andel', 'Liggetid (gj.sn.)')
-  # statusTab[1:2,'Andel'] <- paste0(sprintf('%.0f', as.numeric(TabHjelp[1:2,'Andel'])),'%')
-  # statusTab[1:3, 3] <- paste0(sprintf('%.1f', as.numeric(TabHjelp[1:3, 3])), ' døgn')
   xtable::xtable(statusTab,
                  digits=0,
                  #align = c('l','r','r','r'),
@@ -118,16 +110,11 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                           aarsakInn=9, erMann=9, dodSh=9){
 
-  UtData <- KoronaUtvalg(RegData=RegData,
+  Utvalg <- KoronaUtvalg(RegData=RegData,
                          valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
                          aarsakInn=aarsakInn, erMann = erMann,
                          skjemastatusInn=2, skjemastatusUt = 2)
-  RegData <- UtData$RegData
-  utvalgTxt <- UtData$utvalgTxt
-
-  if (valgtEnhet !='Alle'){
-    utvalgTxt <- c(valgtEnhet, utvalgTxt)
-    subset(RegData, RegData[,enhetsNivaa]==valgtEnhet)}
+  RegData <- Utvalg$RegData
 
   N <- dim(RegData)[1]
   Liggetid <- summary(RegData$Liggetid, na.rm = T)
@@ -161,7 +148,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                  caption='Ferdigstilte opphold.
                  IQR (Inter quartile range) - 50% av oppholdene er i dette intervallet.')
   return(invisible(UtData <- list(Tab=TabFerdigeReg,
-                                  utvalgTxt = utvalgTxt,
+                                  utvalgTxt = Utvalg$utvalgTxt,
                                   Ntest=N)))
 }
 

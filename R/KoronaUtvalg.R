@@ -45,14 +45,12 @@ if (dodSh %in% 1:3){
   if (erMann %in% 0:1){
    vec <- (RegData$erMann == erMann)
    RegData <- subset(RegData, vec)}
-
-  #if (valgtEnhet != 'Alle'){RegData <- subset(RegData, RegData[,enhetsNivaa] == valgtEnhet)}
-
   if(minald>0 | maxald<110) {RegData <- subset(RegData,
                                                RegData$Alder >= minald & RegData$Alder <= maxald)}
-
  if(datoFra!=0) {RegData <- subset(RegData, RegData$InnDato >= as.Date(datoFra, tz= 'UTC'))}
  if(datoTil!=0) {RegData <- subset(RegData, RegData$InnDato <= as.Date(datoTil, tz= 'UTC'))}
+
+
 
   N <- dim(RegData)[1]
 
@@ -68,7 +66,7 @@ if (dodSh %in% 1:3){
     if (aarsakInn %in% 1:2){paste0('Covid-19, hovedårsak? ', c('Ja','Nei')[aarsakInn])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
     if (dodSh %in% 1:3) {paste0('Tilstand ved utskriving: ', c('Levende','Død','Alle utskrevne')[as.numeric(dodSh)])},
-    if (valgtEnhet != 'Alle'){paste('Valgt enhet:', valgtEnhet)}
+    if (!(valgtEnhet == 'Alle' |(enhetsUtvalg == 0)  )){paste('Valgt enhet:', valgtEnhet)}
   )
 
 
@@ -97,6 +95,7 @@ if (dodSh %in% 1:3){
       smltxt <- 'resten av landet' #switch(enhetsNivaa, RHF='andre RHF', HF = 'andre HF')
       }
     }
+  if ((valgtEnhet != 'Alle') ) {RegData <- subset(RegData, RegData[,enhetsNivaa] == valgtEnhet)}
 
 
   #RegData er ikke filtrert på enhet. Velg enhetsutvalg 1 el 2 for å få ind$Hoved for egen enhet

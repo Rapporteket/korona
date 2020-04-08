@@ -10,7 +10,6 @@ AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa
 
    if (grvar=='PatientGender') {RegData$PatientGender <- factor(RegData$PatientGender, levels = 1:2, labels = c("Menn", "Kvinner"))}
 
-  #ENDRING KOMMER: Utvalg skal returnere både utvalg for alle og egen enhet. Som i andre registere
   UtData <- KoronaUtvalg(RegData=RegData,
                          valgtEnhet=valgtEnhet,
                          enhetsNivaa = enhetsNivaa,
