@@ -88,7 +88,13 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
                                              tidsenhet='dag',
                                              aarsakInn = as.numeric(input$aarsakInnRes),
                                              skjemastatusInn=as.numeric(input$skjemastatusInnRes),
-                                             erMann=as.numeric(input$erMannRes))
+                                             erMann=as.numeric(input$erMannRes)),
+                     'antinn'= antallTidInneliggende(RegData=KoroData, tilgangsNivaa=rolle,
+                                                  valgtEnhet= egenEnhet, #nivå avgjort av rolle
+                                                  tidsenhet='dag',
+                                                  aarsakInn = as.numeric(input$aarsakInnRes),
+                                                  skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                                                  erMann=as.numeric(input$erMannRes))
     )
     ant_skjema <- AntTab$Tab_tidy
     ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
