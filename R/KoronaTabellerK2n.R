@@ -142,16 +142,17 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
 #'
 #' Returnerer TRUE for datoer pasienten er inneliggende
 #'
-#' @param aktuelldato dato som inneligging skal avgjøres for
-#' @param InnDato Innleggelsesdato
-#' @param UtDato Utskrivingsdato
+#' @param datoer datoer som inneligging skal avgjøres for
+#' @param regdata Dataramme som inneholder InnDato og Utdato
 #'
 #' @return
 #' @export
-erInneliggende <- function(aktuelldato){
+erInneliggende <- function(datoer, regdata){
   # regnes som inneliggende på aktuell dato hvis den faller mellom inn- og utdato eller
   # er etter inndato og det ikke finnes utddato. Flere betingelser kan legges til.
-  (aktuelldato >=  regdata$InnDato & aktuelldato <= regdata$UtDato) | (aktuelldato >=  regdata$InnDato & is.na( regdata$UtDato))
+
+  auxfunc <- function(x) {(x >=  regdata$InnDato & x <= regdata$UtDato) | (x >=  regdata$InnDato & is.na( regdata$UtDato))}
+  map_df(datoer, auxfunc)
 }
 
 #' Transponer output fra tidyr::summarize
@@ -186,7 +187,7 @@ tr_summarize_output <- function(x, grvarnavn=''){
 #'
 #' @return
 #' @export
-antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
+antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
                                skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
@@ -201,10 +202,13 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
 
   RegDataAlle <- UtData$RegData
-  regdata <- RegDataAlle
+  # regdata <- RegDataAlle
   datoer <- seq(min(RegDataAlle$InnDato), today(), by="day")
   names(datoer) <- format(datoer, '%d.%B')
-  aux <- map_df(datoer, erInneliggende)
+  aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
+  # aux <- map_df(datoer, erInneliggende)
+
+
   RegDataAlle <- bind_cols(RegDataAlle, aux)
 
   #Trenger utvalg når totalen ikke er summen av det som vises.

@@ -4,14 +4,12 @@
 \alias{erInneliggende}
 \title{Funksjon som avgjør om en pasient er inneliggende på aktuell dato}
 \usage{
-erInneliggende(aktuelldato)
+erInneliggende(datoer, regdata)
 }
 \arguments{
-\item{aktuelldato}{dato som inneligging skal avgjøres for}
+\item{datoer}{datoer som inneligging skal avgjøres for}
 
-\item{InnDato}{Innleggelsesdato}
-
-\item{UtDato}{Utskrivingsdato}
+\item{regdata}{Dataramme som inneholder InnDato og Utdato}
 }
 \value{
 
