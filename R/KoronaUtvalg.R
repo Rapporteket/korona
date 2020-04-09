@@ -68,7 +68,7 @@ if (dodSh %in% 1:3){
     if (dodSh %in% 1:3) {paste0('Tilstand ved utskriving: ', c('Levende','Død','Alle utskrevne')[as.numeric(dodSh)])},
     if ((valgtEnhet != 'Alle') &(enhetsUtvalg == 2)) {paste('Valgt enhet:', valgtEnhet)}
   )
-
+utvalgTxt <- ifelse(is.null(utvalgTxt), '', utvalgTxt)
 
   ind <- list(Hoved=0, Rest=0)
 
