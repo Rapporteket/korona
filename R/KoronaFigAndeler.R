@@ -46,7 +46,7 @@
 #'
 #' @export
 
-KoronaFigAndeler  <- function(RegData, valgtVar='alder', datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
+KoronaFigAndeler  <- function(RegData, valgtVar='alder', erMann=9, minald=0, maxald=110, #datoFra=0, datoTil=0,
                               skjemastatusInn=9, skjemastatusUt=9, dodSh=9, aarsakInn=9,
                               enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=0,
                            hentData=0, outfile='', lagFig=1, ...) {
@@ -65,7 +65,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', datoFra=0, datoTil=0, e
       flerevar <- KoronaVarSpes$flerevar
 
 
-      Utvalg <- KoronaUtvalg(RegData=RegData, datoFra=datoFra, datoTil=datoTil,
+      Utvalg <- KoronaUtvalg(RegData=RegData, #datoFra=datoFra, datoTil=datoTil,
                                 minald=minald, maxald=maxald, aarsakInn=aarsakInn,
                                 erMann=erMann, dodSh=dodSh,
                                 skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,
@@ -89,7 +89,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', datoFra=0, datoTil=0, e
       Ngr$Hoved <- switch(as.character(flerevar),
                           '0' = table(RegData$VariabelGr[ind$Hoved]),
                           # '1' = colSums(sapply(RegData[ind$Hoved ,variable], as.numeric), na.rm=T))
-                          '1' = apply(RegData[ind$Hoved,variable], MARGIN=2,
+                          '1' = apply(RegData[ind$Hoved ,variable], MARGIN=2,
                                       FUN=function(x) sum(x == 1, na.rm=T)))
       #N$ gjelder selv om totalutvalget er ulikt for de ulike variablene i flerevar
      N$Hoved <- switch(as.character(flerevar),
@@ -140,7 +140,6 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', datoFra=0, datoTil=0, e
                            Ngr=Ngr,
                            grtxt2=grtxt2,
                            grtxt=grtxt,
-                           grTypeTxt=grTypeTxt,
                            tittel=tittel,
                            retn=retn,
                            xAkseTxt=xAkseTxt,

@@ -16,12 +16,12 @@ maxald <- 110
 valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
 enhetsUtvalg <- 1
-valgtVar <- 'liggetid'
+valgtVar <- 'demografi'
 
 RegData <- Pandemi
 
 
-Utdata <- KoronaFigAndeler(valgtVar='alder', RegData=Pandemi,
+Utdata <- KoronaFigAndeler(valgtVar='demografi', RegData=Pandemi,
                  minald=minald, maxald=maxald, aarsakInn=aarsakInn,
                  erMann=erMann, dodSh=dodSh,
                  skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,
