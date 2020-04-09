@@ -9,7 +9,7 @@ erInneliggende(datoer, regdata)
 \arguments{
 \item{datoer}{datoer som inneligging skal avgjøres for}
 
-\item{regdata}{Dataramme som inneholder InnDato og Utdato}
+\item{regdata}{Dataramme som inneholder InnDato og Utdato per pasient}
 }
 \value{
 
