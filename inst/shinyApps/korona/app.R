@@ -203,7 +203,7 @@ tabPanel("Resultater",
                                                                           'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
                                                                           'Respirasjonssvikt, innleggelse' = 'respSviktInn',
                                                                           'Respirasjonssvikt på sykehus' = 'respSviktUt',
-                                                                          'Tilstand ved innleggelse' = 'tilstandInn',
+                                                                          'Må sjekkes: Tilstand ved innleggelse' = 'tilstandInn',
                                                                           'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
                                                                           'Kommer: sanns. smittested' = 'smittested',
                                                                           'Feil def av var: Demografi' = 'demografi'
