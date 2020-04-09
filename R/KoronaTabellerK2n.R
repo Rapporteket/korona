@@ -28,6 +28,7 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
 
   RegDataAlle <- UtData$RegData
+  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- RegDataAlle$InnDato[is.na(RegDataAlle$UtDato)]
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                              dag = factor(format(RegDataAlle$UtDato, '%d.%B'),

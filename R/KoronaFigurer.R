@@ -37,12 +37,20 @@ AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa
   tittel <- "Aldersfordeling";
   FigTypUt <- rapFigurer::figtype(outfile=outfile, pointsizePDF=12)
   retn <- 'V'; cexgr<-1
-
   NutvTxt <- length(utvalgTxt)
   vmarg <- switch(retn, V=0, H=max(0, strwidth(grtxt, units='figure', cex=cexgr)*0.7))
   if (NutvTxt>0) {par('fig'=c(vmarg, 1, 0, 1-0.02*(NutvTxt-1+length(tittel)-1)))}
 
   farger <- FigTypUt$farger
+
+  if (sum(NHoved) < 5 ) {
+    farger <- FigTypUt$farger
+    plot.new()
+    # title(tittel)	#, line=-6)
+    legend('topleft',utvalgTxt, bty='n', cex=0.9, text.col=farger[1])
+    text(0.5, 0.6, 'Færre enn 5 registreringer i utvalget', cex=1.2)
+    if ( outfile != '') {dev.off()}
+  } else {
   ymax <- max(c(AntHoved),na.rm=T)*1.25
   pos <- barplot(AntHoved, beside=TRUE, las=1, ylab="Antall pasienter",
                  cex.axis=cexgr, cex.sub=cexgr,	cex.lab=cexgr, # ,	names.arg=grtxt, cex.names=cexgr,sub=subtxt,
@@ -59,9 +67,11 @@ AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa
   par('fig'=c(0, 1, 0, 1))
 
   if ( outfile != '') {dev.off()}
+  }
 
   AntHovedTab$Andel <- paste0(round(AntHovedTab$Sum/AntHovedTab$Sum[dim(AntHovedTab)[1]]*100), ' %')
   names(AntHovedTab)[(dim(AntHovedTab)[2]-1):dim(AntHovedTab)[2]] <- c("Antall", "Andel")
+
 #UtData <- list(Tab=AntHovedTab, Ntest=N)
   return(AntHovedTab)
 }

@@ -41,7 +41,8 @@ koronaresultater_UI <- function(id){
                   #          value = 'Tellinger',
                   #          br(),
                            h2('Tellinger:'),
-                           h4('Antall registreringer, inneliggende, utskrivinger, døde'),
+                           h4('Merk at i figur/tabell over antall døde så benyttes inndato i de tilfeller det ikke
+                              finnes utskrivingsdato. Dette kan skje når man inkluderer registreringer i kladd.'),
                            h3('NB:Siden er under utvikling!', style = "color:red"),
                            br(),
                            plotOutput(ns("FigurTidEnhet"), height="auto"),
