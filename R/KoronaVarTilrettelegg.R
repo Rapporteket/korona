@@ -41,15 +41,18 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       txtEtiketter  <- ''	#legend
       verdier <- ''	#AggVerdier, gjennomsnitt, ...
       verdiTxt <- '' 	#pstTxt, ...
-      strIfig <- ''		#cex
       sortAvtagende <- TRUE  #Sortering av resultater
       varTxt <- 'hendelser'
 
+      aarsakInn <-9
+      skjemastatusInn <- 9
+      skjemastatusUt <- 9
+      aarsakInn<- 9
+      dodSh <- 9
       minald <- 0
       maxald <- 110
       tittel <- 'Mangler tittel'
       variable <- 'Ingen'
-      #deltittel <- ''
       RegData$Variabel <- 0
       N <- dim(RegData)[1]
 
@@ -78,13 +81,12 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
 
       if (valgtVar == 'liggetid') { #Andeler #GjsnGrVar
             #Liggetid bare >0
-            RegData$Variabel  <- as.numeric(RegData$liggetid)
-            RegData <- RegData[which(RegData$Variabel>0), ]
+            RegData$Variabel  <- as.numeric(RegData$Liggetid)
+            RegData <- RegData[which(RegData$Liggetid>0), ]
             tittel <- 'Liggetid'
-            if (figurtype %in% c('gjsnGrVar', 'gjsnTid')) {
-                  tittel <- 'liggetid'}
+            #if (figurtype %in% c('gjsnGrVar', 'gjsnTid')) {tittel <- 'liggetid'}
             gr <- c(0, 2, 4, 6, 8, 10, 12, 14, 21, 1000)  #c(0, 1, 2, 3, 4, 5, 6, 7, 14, 1000)
-            RegData$VariabelGr <- cut(RegData$liggetid, breaks=gr, include.lowest=TRUE, right=FALSE)
+            RegData$VariabelGr <- cut(RegData$Liggetid, breaks=gr, include.lowest=TRUE, right=FALSE)
             grtxt <- c('(0-1)','[1-2)','[2-3)','[3-4)','[4-5)','[5-6)','[6-7)','[7-14)','14+')
             xAkseTxt <- 'Liggetid (døgn)'
       }
@@ -105,18 +107,6 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
 
       }
 
-      if (valgtVar == 'respiratortid') { #andeler, gjsnGrVar, GjsnTid
-            RegData <- RegData[which(RegData$respiratortid>0), ] # & (RegData$InnDato>=as.Date('2016-01-01', tz='UTC'))), ]
-            RegData$Variabel  <- as.numeric(RegData$respiratortid)
-            tittel <- 'Respiratortid'
-            if (figurtype %in% c('gjsnGrVar', 'gjsnTid')) {
-                  tittel <- 'respiratortid'}
-            gr <- c(0, 1, 2, 3, 4, 5, 6, 7, 14, 1000)#c(0, exp(seq(0,log(30),length.out = 6)), 500),1)
-            RegData$VariabelGr <- cut(RegData$respiratortid, breaks=gr, include.lowest=TRUE, right=FALSE)
-            grtxt <- c('(0-1)','[1-2)','[2-3)','[3-4)','[4-5)','[5-6)','[6-7)','[7-14)','14+')
-            xAkseTxt <- 'Respiratortid (døgn)'
-            sortAvtagende <- TRUE      #Rekkefølge
-      }
       #---------------KATEGORISKE
 
       if (valgtVar == 'PrimaryReasonAdmitted') { #Andeler
@@ -143,27 +133,77 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       #Vi sender tilbake alle variable som indikatorvariable, dvs. med 0,1,NA
       #(Alternativt kan vi gjøre beregninga her og sende tilbake teller og nevner for den sammensatte variabelen)
 
-      if (valgtVar == 'inklKrit' ) {   # Andeler
-            tittel <- 'Inklusjonskriterier, NIR'
-            #RegData <- RegData[which(RegData$InnDato>=as.Date('2016-01-01', tz='UTC')), ]
-            sortAvtagende <- T
+      if (valgtVar == 'risikoInn' ) {   # Andeler
+            tittel <- 'Risikofaktorer, innleggelse'
             retn <- 'H'
             flerevar <- 1
-            variable <- c('MoreThan24Hours',  'MechanicalRespirator', 'DeadPatientDuring24Hours',
-                          'MovedPatientToAnotherIntensivDuring24Hours', 'VasoactiveInfusion' )
-            #retn <- 'H'
-            grtxt <- c('Liggetid over 24t', 'Mekanisk \nrespirasjonsstøtte', 'Død innen 24t',  'Overflyttet innen 24t',
-                       'Infusjon av medikamenter for å \n endre hemodynamikk/sirkulasjon')
-            ind01 <- which(RegData[ ,variable] != -1, arr.ind = T) #Alle ja/nei
-            ind1 <- which(RegData[ ,variable] == 1, arr.ind=T) #Ja i alle variable
-            RegData[ ,variable] <- NA
-            RegData[ ,variable][ind01] <- 0
-            RegData[ ,variable][ind1] <- 1
-            xAkseTxt <- 'Andel opphold (%)'
+            RegData <- RegData[RegData$KjentRisikofaktor %in% 1:2, ]
+            RegData$Fedme <- RegData$BMI>30
+            statusInn <- 2
+            variable <- c('Kreft',  'NedsattimmunHIV', 'Diabetes', 'Hjertesykdom', 'Astma',
+                          'KroniskLungesykdom', 'Nyresykdom', 'Leversykdom', 'KroniskNevro',
+                          'KroniskNevro', 'Fedme', 'Royker', 'KjentRisikofaktor')
+            grtxt <- c('Kreft', 'Nedsatt immunforsvar', 'Diabetes', 'Hjertesykdom', 'Astma',
+                       'Kronisk lungesykdom', 'Nyresykdom', 'Leversykdom', 'Nevrologisk/nevromusk.',
+                       'Gravid', 'Fedme (KMI>30)', 'Røyker', 'Risikofaktorer (minst en)')
+            #Trenger bare kode om Risikofaktorer:
+            RegData$KjentRisikofaktor <- ifelse(RegData$KjentRisikofaktor==1, TRUE, FALSE)
+            xAkseTxt <- 'Andel pasienter (%)'
             #Beregne direkte:
             #apply(RegData[,variable], MARGIN=2, FUN=function(x) sum(x %in% 0:1))
       }
-      if (valgtVar == 'spesTiltak' ) {   # Andeler
+      if (valgtVar == 'antibiotikaInn' ) {   # Andeler
+        tittel <- 'Antibiotika ved innleggelse'
+        retn <- 'H'
+        flerevar <- 1
+        RegData <- RegData[RegData$Antibiotika %in% 1:2, ] #1-ja, 2-nei
+        statusUt <- 2
+        variable <- c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
+                      'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
+                      'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'Antibiotika')
+        grtxt <- c('Penicillin', 'Penicillin med enzymhemmer', 'Aminoglykosid',
+                   '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
+                   'Karbapenem', 'Makrolid', 'Annet', 'Antibiotika')
+        #Trenger bare kode om Antibiotika tot.:
+        RegData$Antibiotika <- ifelse(RegData$Antibiotika==1, TRUE, FALSE)
+        #ind01 <- which(RegData[ ,variable] %in% ..., arr.ind = T) #Alle ja/nei
+        #ind1 <- which(RegData[ ,variable] == TRUE, arr.ind=T) #Ja i alle variable
+        #Kodes om til indikatorvariabel:
+        #RegData[ ,variable] <- NA
+        #RegData[ ,variable][ind01] <- 0
+        #RegData[ ,variable][ind1] <- 1
+        xAkseTxt <- 'Andel pasienter (%)'
+        #Beregne direkte:
+        #apply(RegData[,variable], MARGIN=2, FUN=function(x) sum(x %in% 0:1))
+      }
+      if (valgtVar == 'antibiotikaUt' ) {   # Andeler
+        tittel <- 'Antibiotika ved utskriving'
+        retn <- 'H'
+        flerevar <- 1
+        RegData <- RegData[RegData$Antibiotika %in% 1:2, ] #1-ja, 2-nei
+        statusUt <- 2
+        variable <- c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
+                      'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
+                      'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'Antibiotika')
+        grtxt <- c('Penicillin', 'Penicillin med enzymhemmer', 'Aminoglykosid',
+                   '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
+                   'Karbapenem', 'Makrolid', 'Annet', 'Antibiotika')
+        #Trenger bare kode om Antibiotika tot.:
+        RegData$Antibiotika <- ifelse(RegData$Antibiotika==1, TRUE, FALSE)
+        #ind01 <- which(RegData[ ,variable] %in% ..., arr.ind = T) #Alle ja/nei
+        #ind1 <- which(RegData[ ,variable] == TRUE, arr.ind=T) #Ja i alle variable
+        #Kodes om til indikatorvariabel:
+        #RegData[ ,variable] <- NA
+        #RegData[ ,variable][ind01] <- 0
+        #RegData[ ,variable][ind1] <- 1
+        xAkseTxt <- 'Andel pasienter (%)'
+        #Beregne direkte:
+        #apply(RegData[,variable], MARGIN=2, FUN=function(x) sum(x %in% 0:1))
+      }
+
+
+
+           if (valgtVar == 'spesTiltak' ) {   # Andeler
             #SpecialMeasures
             tittel <- 'Spesielle tiltak/intervensjoner'
             RegData <- RegData[which(RegData$InnDato>=as.Date('2016-01-01', tz='UTC')), ]

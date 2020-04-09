@@ -11,7 +11,7 @@ koronaresultater_UI <- function(id){
 
                         #conditionalPanel(condition = paste0("input['", ns("resultater"), "'] == 'Tellinger'"),
                                          selectInput(inputId = ns('valgtVar'), label='Velg variabel',
-                                                     choices = c('Antall registreringer'='antreg',
+                                                     choices = c('Antall innleggelser'='antreg',
                                                                  'Antall døde'='antdod',
                                                                  'Antall utskrivinger'= 'antut',
                                                                  'Antall inneliggende'='antinn')

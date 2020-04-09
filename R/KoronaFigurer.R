@@ -62,10 +62,8 @@ AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa
 
   AntHovedTab$Andel <- paste0(round(AntHovedTab$Sum/AntHovedTab$Sum[dim(AntHovedTab)[1]]*100), ' %')
   names(AntHovedTab)[(dim(AntHovedTab)[2]-1):dim(AntHovedTab)[2]] <- c("Antall", "Andel")
-
+#UtData <- list(Tab=AntHovedTab, Ntest=N)
   return(AntHovedTab)
-
-
 }
 
 

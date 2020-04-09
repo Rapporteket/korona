@@ -6,7 +6,7 @@ tidsenhet='dag'
 datoFra <- '2020-01-01'
 datoTil <- Sys.Date()
 erMann=9
-bekr=9
+aarsakInn=9
 skjemastatusInn=9
 skjemastatusUt <- 9
 aarsakInn<- 9
@@ -16,7 +16,7 @@ maxald <- 110
 valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
 enhetsUtvalg <- 1
-valgtVar <- 'alder'
+valgtVar <- 'liggetid'
 
 RegData <- Pandemi
 

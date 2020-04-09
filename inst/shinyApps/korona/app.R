@@ -193,11 +193,12 @@ tabPanel("Resultater",
                                  width = 3,
                                  br(),
                                  h3('Velg variabel/tema og filtreringer i data'),
-                                 conditionalPanel(condition = "input.ark == 'Fordelinger' ",
+                                 #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
                                                   selectInput(inputId = 'valgtVarFord', label='Velg variabel',
                                                               choices = c("Alder"='alder',
-                                                                          "Kommer: Liggetid"='liggetid',
-                                                                          'Kommer: Risikotiltander'='risiko',
+                                                                          "Liggetid"='liggetid',
+                                                                          'Risikofaktorer, innleggelse'='risikoInn',
+                                                                          'Antibiotika, utskriving'='antibiotikaUt',
                                                                           'Kommer: sirkulasjonssvikt' = 'sirkSvikt',
                                                                           'Kommer: respirasjonssvikt' = 'sirkSvikt',
                                                                           'Kommer: Antibiotikaordinasjon' = 'antibiotika',
@@ -210,7 +211,7 @@ tabPanel("Resultater",
                                                   ),
                                                   selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
                                                               choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
-                                                  )),
+                                                  ),
 
                                  selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
                                              choices = 'Alle'
@@ -519,8 +520,8 @@ server <- function(input, output, session) {
   })
 
   ############ Kevin start ######################
-  output$FigurAldersfordeling <- renderPlot({
-    korona::AlderKjFig(RegData=KoroData,
+   #output$FigurAldersfordeling <- if (..>4){
+    renderPlot({korona::AlderKjFig(RegData=KoroData,
                        valgtEnhet= input$valgtEnhet,
                        enhetsNivaa = egetEnhetsNivaa,
                        dodSh=as.numeric(input$dodSh),
@@ -528,6 +529,7 @@ server <- function(input, output, session) {
                        erMann=as.numeric(input$erMann),
                        skjemastatusInn=as.numeric(input$skjemastatusInn))
   }, width = 500, height = 500)
+  #} else {     renderText('Få registreringer (N<5)')}
 
   output$lastNedAldKj <- downloadHandler(
     filename = function(){
@@ -554,9 +556,6 @@ server <- function(input, output, session) {
   #-----------------------------Resultater---------------------------------
 
   output$fordelinger <- renderPlot({
-    # print(as.numeric(input$enhetsUtvalgFord))
-    # print(input$valgtEnhetRes)
-    # print(egetEnhetsNivaa)
     KoronaFigAndeler(RegData=KoroData,
                      valgtVar=input$valgtVarFord,
                      valgtEnhet = input$valgtEnhetRes, #egenEnhet,  #
