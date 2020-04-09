@@ -143,7 +143,7 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
 #' Returnerer TRUE for datoer pasienten er inneliggende
 #'
 #' @param datoer datoer som inneligging skal avgjøres for
-#' @param regdata Dataramme som inneholder InnDato og Utdato
+#' @param regdata Dataramme som inneholder InnDato og Utdato per pasient
 #'
 #' @return
 #' @export
