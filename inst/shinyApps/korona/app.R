@@ -201,13 +201,13 @@ tabPanel("Resultater",
                                                                           'Antibiotika, utskriving'='antibiotikaUt',
                                                                           'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',
                                                                           'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
-                                                                          'Kommer: respirasjonssvikt' = 'respSvikt',
+                                                                          'Respirasjonssvikt, innleggelse' = 'respSviktInn',
+                                                                          'Respirasjonssvikt på sykehus' = 'respSviktUt',
+                                                                          'Tilstand ved innleggelse' = 'tilstandInn',
                                                                           'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
-                                                                          'Kommer: grad av sirksvikt, inn/ut',
-                                                                          'Kommer: grad av respsvikt, inn/ut',
-                                                                          'Feil def av var: Demografi' = 'demografi',
                                                                           'Kommer: sanns. smittested' = 'smittested',
-                                                                          'Kommer: fylker' = 'fylker')
+                                                                          'Feil def av var: Demografi' = 'demografi'
+                                                                          )
                                                   ),
                                                   selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
                                                               choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)

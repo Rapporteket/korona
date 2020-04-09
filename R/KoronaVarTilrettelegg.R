@@ -91,29 +91,14 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
             xAkseTxt <- 'Liggetid (døgn)'
       }
 
-      if (valgtVar=='erMann') { #AndelTid/GrVar
-        RegData <- RegData[which(RegData$erMann %in% 0:1), ]  	#Tar bort ukjente
-        RegData$Variabel <- RegData$erMann
-        varTxt <- 'menn'
-        tittel <- 'Andel av oppholdene hvor pasienten er mann'
-      }
-      if (valgtVar == 'overfTil'){ #Overf: 1= ikke overført, 2= overført
-        tittel <- 'Pasienter overført TIL valgt(e) enheter'
-        ind <- which(RegData$Overf==2 & !is.na(RegData$PatientTransferredToHospitalName))
-        RegData <- RegData[ind,]
-        RegData$VariabelGr <- as.factor(RegData$PatientTransferredToHospitalName)
-        grtxt <- levels(RegData$VariabelGr)
-        retn <- 'H'
-
-      }
 
       #---------------KATEGORISKE
 
       if (valgtVar == 'sirkSviktInn') { #Andeler
         #-1 = Velg verdi, 1 = Nei, 2 = Ja, symptomer ved høy aktivitet/anstrengelse
         #3 = Ja, symptomer ved moderat aktivitet, 4 = Ja, symptomer ved lett aktivitet
-        #5 = Ja, symptomer i hvile
-            gr <- 1:5
+        #5 = Ja, symptomer i hvile, 999 - Ukjent
+            gr <- c(1:5,999)
             retn <- 'H'
             tittel <- 'Akutt sirkulasjonssvikt ved innleggelse'
             RegData$VariabelGr <- factor(RegData$AkuttSirkulasjonsvikt, levels=gr)
@@ -121,8 +106,46 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
                        'Ja, lett aktivitet', 'Ja, hvile')
             cexgr <- 0.9
       }
+      if (valgtVar == 'sirkSviktUt') { #Andeler
+        gr <- c(1:5,999)
+        retn <- 'H'
+        tittel <- 'Akutt sirkulasjonssvikt under oppholdet'
+        RegData$VariabelGr <- factor(RegData$UtsAkuttSirkulasjonsvikt, levels=gr)
+        grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
+                   'Ja, lett aktivitet', 'Ja, hvile')
+        cexgr <- 0.9
+      }
 
-      #AkuttRespirasjonsvikt
+      #
+      if (valgtVar == 'respSviktInn') { #Andeler
+        #-1 = Velg verdi, 1 = Nei, 2 = Ja, symptomer ved høy aktivitet/anstrengelse
+        #3 = Ja, symptomer ved moderat aktivitet, 4 = Ja, symptomer ved lett aktivitet
+        #5 = Ja, symptomer i hvile, 999 - Ukjent
+        gr <- c(1:5,999)
+        retn <- 'H'
+        tittel <- 'Akutt respirasjonssvikt ved innleggelse'
+        RegData$VariabelGr <- factor(RegData$AkuttRespirasjonsvikt, levels=gr)
+        grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
+                   'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
+        cexgr <- 0.9
+      }
+      if (valgtVar == 'respSviktUt') { #Andeler
+        gr <- c(1:5,999)
+        retn <- 'H'
+        tittel <- 'Akutt respirasjonssvikt under oppholdet'
+        RegData$VariabelGr <- factor(RegData$UtsAkuttRespirasjonsvikt, levels=gr)
+        grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
+                   'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
+        cexgr <- 0.9
+      }
+
+      #RontgenThorax
+      # -1 = Velg verdi
+      # 1 = Normalt
+      # 2 = Infiltrat
+      # 3 = Stuvning
+      # 4 = Ikke utført
+      # 5 = Ukjent
 
       #-------------- SAMMENSATTE variable
       #For flerevar=1 må vi omdefinere variablene slik at alle gyldige registreringer
@@ -199,12 +222,9 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         retn <- 'H'
         flerevar <- 1
         variable <- c('ReiseUtenfor', 'NerkontaktCovid', 'ErHelsepersonell', 'ErAnsattMikrobiologisk')
-        RegData[,variable]
-        table(RegData$ErAnsattMikrobiologisk)
+        #1:ja, 2:nei
         grtxt <- c('Utenlandsreise', 'Nærkontakt, Covid', 'Helsepersonell', 'Ansatt, mikro.bio.lab.')
-        #Trenger bare kode om Antibiotika tot.:
         ind01 <- which(RegData[ ,variable] != c(-1,3), arr.ind = T) #Alle ja/nei
-        ind01 <- which(RegData[ ,c('NerkontaktCovid', 'ReiseUtenfor')] %in% 1:2, arr.ind = T) #Alle ja/nei
         ind1 <- which(RegData[ ,variable] == 1, arr.ind=T) #Ja i alle variable
         #Kodes om til indikatorvariabel:
         RegData[ ,variable] <- NA
@@ -217,12 +237,29 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
 
 
            if (valgtVar == 'tilstandInn' ) {
-             respSvikt
-             sirkSvikt
-             nyreSvikt
-            ACE-hemmer/A2blokker
-            Forvirring
-            isolert
+
+            tittel <- 'Demografi og epidemiologi'
+            #AkuttRespirasjonsvikt, AkuttSirkulasjonsvikt, ja:2:5, nei:1
+            #AkuttNyresvikt, EndretBevissthet, Isolert, ja:1, nei:2
+            #AceHemmerInnkomst/AceHemmerInnkomst2 - tomme!
+            retn <- 'H'
+            flerevar <- 1
+            variable <- c('AkuttRespirasjonsvikt', 'AkuttSirkulasjonsvikt', 'AkuttNyresvikt',
+                          'EndretBevissthet','Isolert')
+            head(RegData[,variable])
+            grtxt <- c('Akutt respirasjonsvikt', 'Akutt sirkulasjonsvikt', 'Akutt nyresvikt',
+                       'Endret bevissthet','Isolert')
+            RegData$AkuttRespirasjonsvikt <- recode(RegData$AkuttRespirasjonsvikt,
+                                                       '1'=0, '2'=1, '3'=1, '4'=1, '5'=1, .default=NULL)
+            #RegData$AkuttRespirasjonsvikt <- replace(RegData$AkuttRespirasjonsvikt)
+            RegData$AkuttSirkulasjonsvikt <- recode(RegData$AkuttSirkulasjonsvikt,
+                                                     '1'=0, '2'=1, '3'=1, '4'=1, '5'=1, .default=NULL)
+            var <- c('AkuttNyresvikt', 'EndretBevissthet', 'Isolert')
+            RegData[ ,var][which((RegData[ ,var]==2), arr.ind = T)] <- 0
+            ind01 <- which(RegData[ ,variable] != c(-1,3), arr.ind = T) #Alle ja/nei
+            ind1 <- which(RegData[ ,variable] == 1, arr.ind=T) #Ja i alle variable
+
+            xAkseTxt <- 'Andel pasienter (%)'
            }
 
       RegData$Variabel <- as.numeric(RegData$Variabel)
