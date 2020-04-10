@@ -51,7 +51,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', erMann=9, minald=0, max
                               enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=0,
                            hentData=0, outfile='', lagFig=1, ...) {
 
-   if ("session" %in% names(list(...))) {
+   if ("session" %in% names(list(...)) & rapbase::isRapContext()) {
       raplog::repLogger(session = list(...)[["session"]], msg = paste0('Fordelingsfigur: ',valgtVar))
    }
     if (hentData == 1) {
