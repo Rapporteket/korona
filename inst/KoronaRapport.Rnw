@@ -43,15 +43,15 @@ paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
   if (paaServer) {
     Pandemi <- KoronaDataSQL(koble = 1)
-    PandemiInn <- KoronaDataSQL(skjema = 1)
-    PandemiUt <- KoronaDataSQL(skjema=2)
+    PandemiInn <- Pandemi
+    #PandemiUt <- KoronaDataSQL(skjema=2)
     } else {
       PandemiInn <- read.table('A:/Pandemi/XX.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
       }
 
 Pandemi <- KoronaPreprosesser(Pandemi)
-PandemiInn <- KoronaPreprosesser(PandemiInn)
+#PandemiInn <- KoronaPreprosesser(PandemiInn)
 
 # PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 # PandemiInn$InnDag <-  factor(format(PandemiInn$InnDato, '%d.%B'),
@@ -68,9 +68,9 @@ PandemiInn <- KoronaPreprosesser(PandemiInn)
 Ntot <- dim(PandemiInn)[1]
 AlderGjsn <- round(mean(PandemiInn$Alder, na.rm = T))
 andelMenn <- paste0(sprintf('%.0f', 100*sum(PandemiInn$erMann)/Ntot), ' \\%')
-indFerdigUt <- which(PandemiUt$FormStatus==2)
-antDod <- sum(PandemiUt$StatusVedUtskriving[indFerdigUt]==2)
-antIkkeFerdig <- sum(Pandemi$FormStatus==1)
+indFerdigUt <- which(Pandemi$FormStatusUt==2)
+antDod <- sum(Pandemi$StatusVedUtskriving[indFerdigUt]==2)
+antIkkeFerdig <- sum(Pandemi$FormStatusUt==1)
 @
 
 
