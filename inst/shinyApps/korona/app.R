@@ -43,9 +43,10 @@ if (paaServer) {
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-09 21-10-12.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
+  varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
   KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
         by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)

@@ -37,7 +37,6 @@ belegg_ssb$HFresh[belegg_ssb$region == "Vestre Viken HF (2009-)"] <- 700272
 belegg_ssb$HFresh[belegg_ssb$region == "Oslo Universitetssykehus HF (2009-)"] <- 4001031
 belegg_ssb$HFresh[belegg_ssb$region == "Haugesund Sanitetsforenings Revmatismesykehus AS"] <- 106834
 belegg_ssb$HFresh[belegg_ssb$region == "Stiftelsen Betanien Bergen"] <- 4216267
-belegg_ssb$HFresh[belegg_ssb$region == "Stiftelsen Betanien Bergen"] <- 4216267
 belegg_ssb$HFresh[belegg_ssb$region == "NKS Jæren Distriktspsykiatriske senter AS"] <- 106819
 belegg_ssb$HFresh[belegg_ssb$region == "NKS Olaviken alderspsykiatriske sykehus AS"] <- 106816
 
