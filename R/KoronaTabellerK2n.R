@@ -28,6 +28,7 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
 
   RegDataAlle <- UtData$RegData
+  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- RegDataAlle$InnDato[is.na(RegDataAlle$UtDato)]
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                              dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
@@ -143,7 +144,7 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
 #' Returnerer TRUE for datoer pasienten er inneliggende
 #'
 #' @param datoer datoer som inneligging skal avgjøres for
-#' @param regdata Dataramme som inneholder InnDato og Utdato
+#' @param regdata Dataramme som inneholder InnDato og Utdato per pasient
 #'
 #' @return
 #' @export

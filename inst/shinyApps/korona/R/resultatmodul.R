@@ -16,18 +16,18 @@ koronaresultater_UI <- function(id){
                                                                  'Antall utskrivinger'= 'antut',
                                                                  'Antall inneliggende'='antinn')
                                          ),
-                        selectInput(inputId = ns("valgtEnhetRes"), label="Velg enhet",
-                                    choices = 'Alle'
-                        ),
+                        # selectInput(inputId = ns("valgtEnhetRes"), label="Velg enhet",
+                        #             choices = 'Alle'
+                        # ),
                         selectInput(inputId = ns("skjemastatusInnRes"), label="Skjemastatus, inklusjon",
                                     choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                         ),
                         selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
                                     choices = c("Alle"=9, "Ja"=1, "Nei"=2)
                         ),
-                        selectInput(inputId = ns("dodShRes"), label="Utskrevne, tilstand",
-                                    choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
-                        ),
+                        # selectInput(inputId = ns("dodShRes"), label="Utskrevne, tilstand",
+                        #             choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
+                        # ),
                         selectInput(inputId = ns("erMannRes"), label="Kjønn",
                                     choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
                         ),
@@ -41,7 +41,8 @@ koronaresultater_UI <- function(id){
                   #          value = 'Tellinger',
                   #          br(),
                            h2('Tellinger:'),
-                           h4('Antall registreringer, inneliggende, utskrivinger, døde'),
+                           h4('Merk at i figur/tabell over antall døde så benyttes inndato i de tilfeller det ikke
+                              finnes utskrivingsdato. Dette kan skje når man inkluderer registreringer i kladd.'),
                            h3('NB:Siden er under utvikling!', style = "color:red"),
                            br(),
                            plotOutput(ns("FigurTidEnhet"), height="auto"),
