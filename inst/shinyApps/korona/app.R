@@ -145,10 +145,14 @@ ui <- tagList(
                                  fluidRow(
                                    column(width = 4,
                                           h3('Inneliggende pasienter'),
-                                          uiOutput('statusNaaShTab'),
-                                          h4('Hva mer av info?', style = "color:red"),
-                                          h4('Kommer: antall inklusjon i kladd'),
-                                          br(),
+                                          uiOutput('utvalgNaa'),
+                                          tableOutput('statusNaaShTab'),
+                                          h6('Flere variabler?', style = "color:red"),
+                                          # HTML('<hr height="8" style="color:purple;background-color:purple;"></hr>'),
+                                          # HTML('<hr size="10" />'),
+                                          hr(),
+                                          #h4('Ikke-ferdigstilte inklusjonsskjema'),
+                                          tableOutput('skjemaInnKladdTab')
                                 #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
                                    ),
                                  column(width=5, offset=1,
@@ -468,24 +472,30 @@ server <- function(input, output, session) {
     #Tab status nå
     statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #
                                  valgtEnhet=input$valgtEnhet,
-                                 aarsakInn = as.numeric(input$aarsakInn),
-                                      erMann=as.numeric(input$erMann))
+                                 aarsakInn = as.numeric(input$aarsakInn))
+                                      #erMann=as.numeric(input$erMann))
     output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
     output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
-    #Tab ferdigstilte
+#Skjema i kladd
+    AntKladdShus <- table(KoroData$ShNavn[which(KoroData$FormStatus==1)], dnn= 'Skjema i kladd')
+    AntKladdShus <-  xtable::xtable(addmargins(AntKladdShus))
+    output$skjemaInnKladdTab <- renderTable({AntKladdShus}, rownames = T, digits=0, spacing="xs")
+
+
+#Tab ferdigstilte
    TabFerdig <- FerdigeRegTab(RegData=KoroData,
                               aarsakInn = as.numeric(input$aarsakInn),
-                                      valgtEnhet=input$valgtEnhet,
-                                      erMann=as.numeric(input$erMann))
+                              valgtEnhet=input$valgtEnhet,
+                              dodSh=as.numeric(input$dodSh),
+                              erMann=as.numeric(input$erMann))
 
    output$tabFerdigeReg <- if (TabFerdig$Ntest>4){
      renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
        renderText('Få registreringer (N<5)')}
-
    output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
    output$tittelFerdigeReg <- renderUI(
-     h4(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' skjema)')))
+     h3(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' skjema)')))
 
 
     #Tab risiko
@@ -527,7 +537,6 @@ server <- function(input, output, session) {
                        enhetsNivaa = egetEnhetsNivaa,
                        dodSh=as.numeric(input$dodSh),
                        aarsakInn = as.numeric(input$aarsakInn),
-                       erMann=as.numeric(input$erMann),
                        skjemastatusInn=as.numeric(input$skjemastatusInn))
   }, width = 500, height = 500)
   #} else {     renderText('Få registreringer (N<5)')}
@@ -543,7 +552,6 @@ server <- function(input, output, session) {
                                    enhetsNivaa = egetEnhetsNivaa,
                                    dodSh=as.numeric(input$dodSh),
                                    aarsakInn = as.numeric(input$aarsakInn),
-                                   erMann=as.numeric(input$erMann),
                                    skjemastatusInn=as.numeric(input$skjemastatusInn))
       write.csv2(Tabell, file, row.names = F, fileEncoding = 'latin1')
     }

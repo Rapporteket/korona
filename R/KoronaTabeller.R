@@ -111,7 +111,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
   Utvalg <- KoronaUtvalg(RegData=RegData,
                          valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
-                         aarsakInn=aarsakInn, erMann = erMann,
+                         aarsakInn=aarsakInn, erMann = erMann, dodSh = dodSh,
                          skjemastatusInn=2, skjemastatusUt = 2)
   RegData <- Utvalg$RegData
 
