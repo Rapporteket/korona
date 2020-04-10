@@ -150,3 +150,88 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
   )
 
 }
+
+
+koronabelegg_UI <- function(id){
+  ns <- shiny::NS(id)
+
+
+  shiny::sidebarLayout(
+    shiny::sidebarPanel(id = ns('brukervalgBelegg'),
+
+                        width = 3,
+                        br(),
+                        h3('Velg variabel/tema og filtreringer i data'),
+
+                        selectInput(inputId = ns("skjemastatusInn"), label="Skjemastatus, inklusjon",
+                                    choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
+                        ),
+                        selectInput(inputId = ns("aarsakInn"), label="Covid-19 hovedårsak til innleggelse?",
+                                    choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                        ),
+                        selectInput(inputId = ns("erMann"), label="Kjønn",
+                                    choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
+                        ),
+                        br(),
+                        actionButton(inputId = ns("tilbakestillValg"), label="Tilbakestill valg"
+                        )
+    ),
+    mainPanel(
+
+      h2('Estimert belegg sykehussenger'),
+      h4(''),
+      h3('NB:Siden er under utvikling!', style = "color:red"),
+      br(),
+
+      DT::DTOutput(ns("tabBelegg_DT")),
+
+    )
+  )
+}
+
+
+koronabelegg <- function(input, output, session, KoroData, rolle, egetEnhetsNivaa, egenEnhet, hvdsession){
+
+  observeEvent(input$tilbakestillValgRes, {
+    shinyjs::reset("brukervalgBelegg")
+  })
+
+  AntTab <- function() {
+    AntTab <- antallTidBelegg(RegData=KoroData, tilgangsNivaa=rolle,
+                              valgtEnhet= egenEnhet, #nivå avgjort av rolle
+                              tidsenhet='dag',
+                              aarsakInn = as.numeric(input$aarsakInn),
+                              skjemastatusInn=as.numeric(input$skjemastatusInn),
+                              erMann=as.numeric(input$erMann))
+    ant_skjema <- AntTab$belegg_anslag_txt
+    ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
+    sketch <- htmltools::withTags(table(
+      DT::tableHeader(ant_skjema[-dim(ant_skjema)[1], ]),
+      DT::tableFooter(c('Dognplasser' , as.numeric(ant_skjema[dim(ant_skjema)[1], 2:dim(ant_skjema)[2]])))))
+    AntTab$ant_skjema <- ant_skjema
+    AntTab$sketch <- sketch
+    AntTab
+  }
+
+  output$tabBelegg_DT = DT::renderDT(
+    DT::datatable(AntTab()$ant_skjema[-dim(AntTab()$ant_skjema)[1], ],
+                  container = AntTab()$sketch,
+                  rownames = F,
+                  options = list(pageLength = 40)
+    )
+  )
+
+  output$lastNed <- downloadHandler(
+    filename = function(){
+      paste0('KoronaTabell', Sys.time(), '.csv')
+    },
+
+    content = function(file){
+      Tabell1 <- AntTab()$Tab_tidy
+      write.csv2(Tabell1, file, row.names = F, fileEncoding = 'latin1')
+    }
+  )
+
+}
+
+

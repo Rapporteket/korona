@@ -189,6 +189,9 @@ tabPanel("Resultater",
            tabPanel("Tellinger",
                     koronaresultater_UI("resultater_id")
            ),
+           tabPanel("Belegg",
+                    koronabelegg_UI("koronabelegg_id")
+           ),
 
            tabPanel(p('Fordelinger',
                       title='Figurer/tabeller for de fleste opplysninger registrert i
@@ -559,6 +562,9 @@ server <- function(input, output, session) {
   )
 
   callModule(koronaresultater, "resultater_id", KoroData = KoroData, rolle=rolle, enhetsvalg=enhetsvalg,
+             egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
+
+  callModule(koronabelegg, "koronabelegg_id", KoroData = KoroData, rolle=rolle,
              egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
 
 ########## Kevin slutt ##################
