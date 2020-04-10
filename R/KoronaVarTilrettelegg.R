@@ -103,7 +103,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
             tittel <- 'Akutt sirkulasjonssvikt ved innleggelse'
             RegData$VariabelGr <- factor(RegData$AkuttSirkulasjonsvikt, levels=gr)
             grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
-                       'Ja, lett aktivitet', 'Ja, hvile')
+                       'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
             cexgr <- 0.9
       }
       if (valgtVar == 'sirkSviktUt') { #Andeler
@@ -112,7 +112,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         tittel <- 'Akutt sirkulasjonssvikt under oppholdet'
         RegData$VariabelGr <- factor(RegData$UtsAkuttSirkulasjonsvikt, levels=gr)
         grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
-                   'Ja, lett aktivitet', 'Ja, hvile')
+                   'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
         cexgr <- 0.9
       }
 

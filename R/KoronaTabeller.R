@@ -221,7 +221,6 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
 AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                      skjemastatusInn=9,  aarsakInn=9, dodSh=9, erMann=9){
 
-  #ENDRING KOMMER: Utvalg skal returnere både utvalg for alle og egen enhet. Som i andre registere
   UtData <- KoronaUtvalg(RegData=RegData,
                          valgtEnhet=valgtEnhet,
                          enhetsNivaa=enhetsNivaa,
@@ -230,17 +229,13 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          erMann = erMann,
                          skjemastatusInn=skjemastatusInn
   )
-
-  RegData <- UtData$RegData[UtData$ind$Hoved, ]
-
-
+  RegData <- UtData$RegData #[UtData$ind$Hoved, ]
 
   N <- dim(RegData)[1]
   gr <- seq(0, 90, ifelse(N<100, 25, 10) )
   RegData$AldersGr <- cut(RegData$Alder, breaks=c(gr, 110), include.lowest=TRUE, right=FALSE)
   grtxt <- if(N<100){c('0-24', '25-49', "50-74", "75+")} else {
     c('0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+')}
-  #grtxt <- c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))#paste(gr,sep='-')
   levels(RegData$AldersGr) <- grtxt #c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))
 
   TabAlder <- table(RegData$AldersGr) #, RegData$EnhetsNivaaVar)

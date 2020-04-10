@@ -15,11 +15,12 @@ minald <- 0
 maxald <- 110
 valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
-enhetsUtvalg <- 1
-valgtVar <- 'demografi'
+enhetsUtvalg <- 0
+valgtVar <- 'risikoInn'
 
 RegData <- Pandemi
 
+AlderKjFig(RegData=RegData, valgtEnhet = valgtEnhet, enhetsNivaa = enhetsNivaa)
 
 Utdata <- KoronaFigAndeler(valgtVar='demografi', RegData=Pandemi,
                  minald=minald, maxald=maxald, aarsakInn=aarsakInn,

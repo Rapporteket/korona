@@ -138,7 +138,8 @@ ui <- tagList(
 
                                 h3('Resultater fra pandemiregistrering, korona.'),
                                 h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
-                                h4('Sidene er organisert i faner. De fleste resultater finnes under fanen "Resultater".'),
+                                h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
+                                   pandemiregisteret finnes under fanen "Resultater".'),
                                 h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
                                  fluidRow(
@@ -505,23 +506,23 @@ server <- function(input, output, session) {
     output$utvalgRisiko <- renderUI({h5(HTML(paste0(RisikoTab$utvalgTxt, '<br />'))) #tagList()
     })
 
-    TabAlder <- AlderTab(RegData=KoroData,
-                         valgtEnhet= input$valgtEnhet,
-                         enhetsNivaa = egetEnhetsNivaa,
-                         dodSh=as.numeric(input$dodSh),
-                         aarsakInn = as.numeric(input$aarsakInn),
-                         erMann=as.numeric(input$erMann),
-                         skjemastatusInn=as.numeric(input$skjemastatusInn)
-    )
-    output$tabAlder<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
-    output$utvalgAlder <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })
+    # TabAlder <- AlderTab(RegData=KoroData,
+    #                      valgtEnhet= input$valgtEnhet,
+    #                      enhetsNivaa = egetEnhetsNivaa,
+    #                      dodSh=as.numeric(input$dodSh),
+    #                      aarsakInn = as.numeric(input$aarsakInn),
+    #                      erMann=as.numeric(input$erMann),
+    #                      skjemastatusInn=as.numeric(input$skjemastatusInn)
+    # )
+    # output$tabAlder<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
+    # output$utvalgAlder <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })
 
 
   })
 
   ############ Kevin start ######################
    #output$FigurAldersfordeling <- if (..>4){
-    renderPlot({korona::AlderKjFig(RegData=KoroData,
+  renderPlot({korona::AlderKjFig(RegData=KoroData,
                        valgtEnhet= input$valgtEnhet,
                        enhetsNivaa = egetEnhetsNivaa,
                        dodSh=as.numeric(input$dodSh),
