@@ -1,5 +1,7 @@
 #Kjørefil for Rapporteket-Pandemi
+library(tidyverse)
 library(korona)
+RegData <- KoronaDataSQL(koble=1)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
 tidsenhet='dag'
@@ -17,8 +19,6 @@ valgtEnhet='Alle' #'Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'risikoInn'
-
-RegData <- Pandemi
 
 test <- KoronaUtvalg(RegData=RegData, erMann=1, skjemastatusInn=2, aarsakInn=1)
 test$utvalgTxt

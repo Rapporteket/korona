@@ -178,7 +178,7 @@ varUtKoblet <- c('UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.AntiviralBehandling
   ,Ut.HelseenhetKortNavn AS ShNavnUt
   ,Ut.FormStatus AS FormStatusUt
-  ,Ut.FormDate AS FormDate
+  ,Ut.FormDate AS FormDateUt
   ,Ut.OverfortAnnetSykehusUtskrivning
   ,Ut.StatusVedUtskriving
   ')
