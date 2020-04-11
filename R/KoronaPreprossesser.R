@@ -51,7 +51,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 #Ddimer,
                 Diabetes = sum(Diabetes)>0,
                 #DiastoliskBlodtrykk,
-                DistrictCode[1],
+                DistrictCode = DistrictCode[1],
                 EndretBevissthet = EndretBevissthet[1], #1-ja, 2-nei, 3-ukjent
                 ErAnsattMikrobiologisk = ErAnsattMikrobiologisk[1], #1-ja, 2-nei, 3-ukjent
                 ErHelsepersonell = ErHelsepersonell[1], #1-ja, 2-nei, 3-ukjent

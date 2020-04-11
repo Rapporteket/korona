@@ -22,6 +22,7 @@ library(intensivberedskap)
 library(tidyverse)
 library(lubridate)
 library(xtable)
+library(korona)
 @
 
 
@@ -43,10 +44,9 @@ paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
   if (paaServer) {
     Pandemi <- KoronaDataSQL(koble = 1)
-    PandemiInn <- Pandemi
     #PandemiUt <- KoronaDataSQL(skjema=2)
     } else {
-      PandemiInn <- read.table('A:/Pandemi/XX.csv', sep=';',
+      Pandemi <- read.table('A:/Pandemi/XX.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
       }
 
@@ -65,12 +65,12 @@ Pandemi <- KoronaPreprosesser(Pandemi)
 #                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 # PandemiUt$UtDato <- as.Date(PandemiUt$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
 # PandemiUt$UtDag <- format(PandemiUt$UtDato, '%d.%B')
-Ntot <- dim(PandemiInn)[1]
-AlderGjsn <- round(mean(PandemiInn$Alder, na.rm = T))
-andelMenn <- paste0(sprintf('%.0f', 100*sum(PandemiInn$erMann)/Ntot), ' \\%')
+Ntot <- dim(Pandemi)[1]
+AlderGjsn <- round(mean(Pandemi$Alder, na.rm = T))
+andelMenn <- paste0(sprintf('%.0f', 100*sum(Pandemi$erMann)/Ntot), ' \\%')
 indFerdigUt <- which(Pandemi$FormStatusUt==2)
-antDod <- sum(Pandemi$StatusVedUtskriving[indFerdigUt]==2)
-antIkkeFerdig <- sum(Pandemi$FormStatusUt==1)
+antDod <- sum(Pandemi$StatusVedUtskriving==2) #[indFerdigUt]
+antIkkeFerdig <- sum(Pandemi$FormStatus==1)
 @
 
 
@@ -94,7 +94,7 @@ og etter dagens dato, filtrert bort.
 
 \begin{frame}[fragile] {Antall registrerte}
 <<'RegRHF', results='asis'>>=
-AntRegRHF <- table(PandemiInn$InnDag, PandemiInn$RHF)
+AntRegRHF <- table(Pandemi$InnDag, Pandemi$RHF)
 AntRegRHF <- addmargins(AntRegRHF)
 xtable::xtable(AntRegRHF[(nrow(AntRegRHF)-20):nrow(AntRegRHF), ], digits=0,
                #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
@@ -105,8 +105,8 @@ xtable::xtable(AntRegRHF[(nrow(AntRegRHF)-20):nrow(AntRegRHF), ], digits=0,
 
 \begin{frame}[fragile] {Registereringer i hvert HF}
 <<'RegHF', results='asis'>>=
-RegHF <- PandemiInn %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
-#sort(table(PandemiInn$HF), decreasing = T)
+RegHF <- Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
+#sort(table(Pandemi$HF), decreasing = T)
 xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall registreringer i hvert HF')
 @
@@ -117,11 +117,11 @@ xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l'
 Denne burde vel heller vise kumulativt antall...?
 <<'ShusNaa', results='asis'>>=
 # Antall som ligger på sykehus nå
-AntReg <- dim(PandemiInn)[1]
-AntPaaSh <- sum(is.na(PandemiInn$UtDato))
+AntReg <- dim(Pandemi)[1]
+AntPaaSh <- sum(is.na(Pandemi$UtDato))
 
-indNaa <- which(is.na(PandemiInn$UtDato))
-AntPaaRHFnaa <- table(PandemiInn$InnDag[indNaa], PandemiInn$RHF[indNaa])
+indNaa <- which(is.na(Pandemi$UtDato))
+AntPaaRHFnaa <- table(Pandemi$InnDag[indNaa], Pandemi$RHF[indNaa])
 AntPaaRHFnaa <- addmargins(AntPaaRHFnaa)
 xtable::xtable(AntPaaRHFnaa[(nrow(AntPaaRHFnaa)-20):nrow(AntPaaRHFnaa), ], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall som ligger på sykehus (mangler utskrivingsdato), basert på innleggelsesdato.
@@ -131,7 +131,7 @@ xtable::xtable(AntPaaRHFnaa[(nrow(AntPaaRHFnaa)-20):nrow(AntPaaRHFnaa), ], digit
 
 \begin{frame}[fragile] {Antall utskrevne}
 <<'Utskrevne', results='asis'>>=
-AntUtRHF <- table(PandemiInn$UtDato, PandemiInn$RHF)
+AntUtRHF <- table(Pandemi$UtDato, Pandemi$RHF)
 xtable::xtable(addmargins(AntUtRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall med utskrivingsdato.')
 @
@@ -154,9 +154,9 @@ xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #
 <<'Kladd', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 
-indKladd <- which(PandemiInn$FormStatus==1)
-AntKladdRHF <- table(PandemiInn$InnDag[indKladd], PandemiInn$RHF[indKladd])
-AntKladdShus <- table(PandemiInn$InnDag[indKladd], PandemiInn$ShNavn[indKladd])
+indKladd <- which(Pandemi$FormStatus==1)
+AntKladdRHF <- table(Pandemi$InnDag[indKladd], Pandemi$RHF[indKladd])
+AntKladdShus <- table(Pandemi$InnDag[indKladd], Pandemi$ShNavn[indKladd])
 
 xtable::xtable(addmargins(AntKladdRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Pandemiskjema i kladd, innleggelsesdato')
@@ -167,7 +167,7 @@ xtable::xtable(addmargins(AntKladdRHF), digits=0, #method='compact', #align=c('l
 \begin{frame}[fragile] {Sykehus med pandemiskjema i kladd}
 <<'KladdSh', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-AntKladdShus <- table(PandemiInn$ShNavn[indKladd])
+AntKladdShus <- table(Pandemi$ShNavn[indKladd])
 xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Pandemiskjema i kladd')
 @
@@ -176,7 +176,7 @@ xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('
 \begin{frame}[fragile] {Risikofaktorer (ferdigstilte skjema)}
 <<'Risikofaktorer', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-RisikoTab <- RisikoInnTab(RegData=PandemiInn, skjemastatusInn = 2)$Tab
+RisikoTab <- RisikoInnTab(RegData=Pandemi, skjemastatusInn = 2)$Tab
 
 xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Risikofaktorer ved innleggelse')
@@ -186,7 +186,7 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', n
 
 \begin{frame}[fragile] {Aldersfordeling, alle opphold}
 <<'Alder', results='asis'>>=
-AldersTab <- AlderTab(RegData=PandemiInn)$Tab
+AldersTab <- AlderTab(RegData=Pandemi)$Tab
 
 xtable::xtable(AldersTab, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Aldersfordeling, alle innleggelser')
