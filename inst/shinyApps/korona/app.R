@@ -43,9 +43,10 @@ if (paaServer) {
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-09 21-10-12.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'HelseenhetKortNavn',
+  varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
   KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
         by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
@@ -187,6 +188,9 @@ tabPanel("Resultater",
          tabsetPanel(
            tabPanel("Tellinger",
                     koronaresultater_UI("resultater_id")
+           ),
+           tabPanel("Belegg",
+                    koronabelegg_UI("koronabelegg_id")
            ),
 
            tabPanel(p('Fordelinger',
@@ -558,6 +562,9 @@ server <- function(input, output, session) {
   )
 
   callModule(koronaresultater, "resultater_id", KoroData = KoroData, rolle=rolle, enhetsvalg=enhetsvalg,
+             egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
+
+  callModule(koronabelegg, "koronabelegg_id", KoroData = KoroData, rolle=rolle,
              egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
 
 ########## Kevin slutt ##################

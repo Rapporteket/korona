@@ -169,10 +169,12 @@ erInneliggende <- function(datoer, regdata){
 tr_summarize_output <- function(x, grvarnavn=''){
 
   rekkefolge <- names(x)[-1]
+  rekkefolge_col <- x[,1]
   y <- x %>% gather(names(x)[-1], key=nokkel, value = verdi) %>%
     spread(key=names(x)[1], value = verdi)
   y <- y[match(rekkefolge, y$nokkel), ]
   names(y)[1] <- grvarnavn
+  y <- y[,  c(1, match(rekkefolge_col, names(y)))]
   y
 }
 
@@ -253,5 +255,87 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   #                             caption='Antall Coronatilfeller.')
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
   return(UtData <- list(utvalgTxt=c(valgtEnhet, UtData$utvalgTxt), Ntest=dim(RegData)[1], Tab_tidy=TabTidEnh))
+}
+
+
+#' Belegg per tidsenhet  og HF. Filtreringer kan også gjøres.
+#' Detaljerinsnivå er styrt av tilgangsnivå
+#'
+#' @param RegData dataramme med preprossesserte data
+#' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
+#' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
+#' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
+#' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
+#' @inheritParams KoronaUtvalg
+#'
+#' @return
+#' @export
+antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
+                                  skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
+  #valgtEnhet representerer eget RHF/HF
+
+  #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
+  # RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
+  #                               SC = RegData$RHF,
+  #                               LC = RegData$HF,
+  #                               LU = RegData$ShNavn)
+  RegData$EnhNivaaVis <- RegData$HFresh
+
+  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+                         skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
+
+
+  RegDataAlle <- UtData$RegData
+  # regdata <- RegDataAlle
+  datoer <- seq(min(RegDataAlle$InnDato), today(), by="day")
+  names(datoer) <- format(datoer, '%d.%B')
+  aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
+  # aux <- map_df(datoer, erInneliggende)
+
+
+  RegDataAlle <- bind_cols(RegDataAlle, aux)
+
+  #Trenger utvalg når totalen ikke er summen av det som vises.
+  RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
+  } else {
+    enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
+    subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
+  }
+
+  Ntest <- dim(RegData)[1]
+
+  kolNavnSum <- ifelse(tilgangsNivaa=='SC',
+                       'Hele landet',
+                       paste0(valgtEnhet, ', totalt'))
+  if (Ntest==0) {
+    TabTidEnh <- matrix(0, ncol=1, nrow=length(datoer) + 1,
+                        dimnames = list(c(names(datoer), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
+  }else{
+    TabTidEnh <-
+      RegData[,c("EnhNivaaVis", names(datoer))] %>%
+      group_by(EnhNivaaVis) %>%
+      summarise_all(sum) %>%
+      merge(belegg_ssb[, c("HFresh", "Døgnplasser.2018", "HF")], by.x = "EnhNivaaVis", by.y = "HFresh", all.x = T) %>%
+      mutate(EnhNivaaVis = HF) %>% select(-HF) %>%
+      bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
+      tr_summarize_output(grvarnavn = 'Dato')
+    colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
+  }
+
+  if (tilgangsNivaa != 'SC'){
+    TabTidEnh[, "Hele landet"] <- c(colSums(RegDataAlle[, names(datoer)]), sum(colSums(RegDataAlle[, names(datoer)])))
+  }
+  belegg_anslag <- TabTidEnh[,-1] %>% map_df(function(x) {x[-length(x)]/x[length(x)]*100})
+  belegg_anslag <- bind_rows(belegg_anslag, TabTidEnh[dim(TabTidEnh)[1], 2:dim(TabTidEnh)[2]])
+  belegg_anslag$Dato <- TabTidEnh$Dato
+  belegg_anslag <- belegg_anslag[, c(dim(belegg_anslag)[2], 1:(dim(belegg_anslag)[2]-1))]
+  belegg_anslag_txt <- belegg_anslag %>% map_df(as.character)
+  belegg_anslag_txt[-dim(belegg_anslag_txt)[1], 2:dim(belegg_anslag_txt)[2]] <-
+    belegg_anslag_txt[-dim(belegg_anslag_txt)[1], 2:dim(belegg_anslag_txt)[2]] %>%
+    map_df(function(x) {paste0(round(as.numeric(x)), ' %')})
+
+  if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
+  return(UtData <- list(utvalgTxt=c(valgtEnhet, UtData$utvalgTxt), Ntest=dim(RegData)[1], Tab_tidy=TabTidEnh,
+                        belegg_anslag=belegg_anslag, belegg_anslag_txt=belegg_anslag_txt))
 }
 
