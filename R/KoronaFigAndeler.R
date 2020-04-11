@@ -154,7 +154,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', erMann=9, minald=0, max
 
 
       if (lagFig == 1) {
-            if ((Nfig$Hoved < 5) | (dim(RegData)[1]<5))
+            if ((min(N$Hoved, na.rm = T) < 5) | (dim(RegData)[1]<5))
             {
                   #-----------Figur---------------------------------------
                   FigTypUt <- rapFigurer::figtype(outfile)  #FigTypUt <- figtype(outfile)

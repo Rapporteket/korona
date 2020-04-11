@@ -9,7 +9,7 @@ datoFra <- '2020-01-01'
 datoTil <- Sys.Date()
 erMann=9
 aarsakInn=9
-skjemastatusInn=2
+skjemastatusInn=9
 skjemastatusUt <- 9
 aarsakInn<- 9
 dodSh=9
@@ -18,7 +18,7 @@ maxald <- 110
 valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
-valgtVar <- 'antibiotikaInn'
+valgtVar <- 'demografi'
 
 test <- KoronaUtvalg(RegData=RegData, erMann=1, skjemastatusInn=2, aarsakInn=1)
 test$utvalgTxt

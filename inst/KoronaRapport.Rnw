@@ -68,9 +68,8 @@ Pandemi <- KoronaPreprosesser(Pandemi)
 Ntot <- dim(Pandemi)[1]
 AlderGjsn <- round(mean(Pandemi$Alder, na.rm = T))
 andelMenn <- paste0(sprintf('%.0f', 100*sum(Pandemi$erMann)/Ntot), ' \\%')
-indFerdigUt <- which(Pandemi$FormStatusUt==2)
-antDod <- sum(Pandemi$StatusVedUtskriving==2) #[indFerdigUt]
-antIkkeFerdig <- sum(Pandemi$FormStatus==1)
+antDod <- sum(Pandemi$StatusVedUtskriving==2, na.rm = T) #[indFerdigUt]
+antIkkeFerdig <- sum(Pandemi$FormStatus==1, na.rm = T)
 @
 
 
@@ -108,7 +107,7 @@ xtable::xtable(AntRegRHF[(nrow(AntRegRHF)-20):nrow(AntRegRHF), ], digits=0,
 RegHF <- Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
 #sort(table(Pandemi$HF), decreasing = T)
 xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall registrerte pasienter i hvert HF')
+                              caption='Totalt antall registrerte pasienter i hvert HF')
 @
 \end{frame}
 
@@ -121,19 +120,27 @@ AntReg <- dim(Pandemi)[1]
 AntPaaSh <- sum(is.na(Pandemi$UtDato))
 
 indNaa <- which(is.na(Pandemi$UtDato))
-AntPaaRHFnaa <- table(Pandemi$InnDag[indNaa], Pandemi$RHF[indNaa])
-AntPaaRHFnaa <- addmargins(AntPaaRHFnaa)
-xtable::xtable(AntPaaRHFnaa[(nrow(AntPaaRHFnaa)-20):nrow(AntPaaRHFnaa), ], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall som ligger på sykehus (mangler utskrivingsdato), basert på innleggelsesdato.
-               Siste 20 innleggelsesdager, samt totalt.')
+InneliggHF <- Pandemi[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
+InneliggPas <- rbind(as.matrix(InneliggHF),
+      c('','Totalt', AntPaaSh))
+
+xtable::xtable(InneliggPas, digits=0,
+                              caption='Antall inneliggende pasienter (mangler utskrivingsdato) på hvert HF.')
+# indNaa <- which(is.na(Pandemi$UtDato))
+# AntPaaRHFnaa <- table(Pandemi$InnDag[indNaa], Pandemi$RHF[indNaa])
+# AntPaaRHFnaa <- addmargins(AntPaaRHFnaa)
+# xtable::xtable(AntPaaRHFnaa[(nrow(AntPaaRHFnaa)-20):nrow(AntPaaRHFnaa), ], digits=0,
+#                             caption='Antall som ligger på sykehus (mangler utskrivingsdato), basert på innleggelsesdato.
+#               Siste 20 innleggelsesdager, samt totalt.')
 @
 \end{frame}
 
 \begin{frame}[fragile] {Antall utskrevne}
 <<'Utskrevne', results='asis'>>=
 AntUtRHF <- table(Pandemi$UtDato, Pandemi$RHF)
-xtable::xtable(addmargins(AntUtRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall med utskrivingsdato.')
+AntUtRHF <- addmargins(AntUtRHF)
+xtable::xtable(AntUtRHF, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Antall utskrevne per dag siste 20 dager, samt totalt.')
 @
 \end{frame}
 
@@ -149,19 +156,19 @@ xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #
 \end{frame}
 
 
-\begin{frame}[fragile] {Pandemiskjema i kladd}
-
-<<'Kladd', results='asis'>>=
-#Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-
-indKladd <- which(Pandemi$FormStatus==1)
-AntKladdRHF <- table(Pandemi$InnDag[indKladd], Pandemi$RHF[indKladd])
-AntKladdShus <- table(Pandemi$InnDag[indKladd], Pandemi$ShNavn[indKladd])
-
-xtable::xtable(addmargins(AntKladdRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Pandemiskjema i kladd, innleggelsesdato')
-@
-\end{frame}
+% \begin{frame}[fragile] {Pandemiskjema i kladd}
+%
+% <<'Kladd', results='asis'>>=
+% #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
+%
+% indKladd <- which(Pandemi$FormStatus==1)
+% AntKladdRHF <- table(Pandemi$InnDag[indKladd], Pandemi$RHF[indKladd])
+% AntKladdShus <- table(Pandemi$InnDag[indKladd], Pandemi$ShNavn[indKladd])
+%
+% xtable::xtable(addmargins(AntKladdRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+%                               caption='Pandemiskjema i kladd, innleggelsesdato')
+% @
+% \end{frame}
 
 
 \begin{frame}[fragile] {Sykehus med pandemiskjema i kladd}

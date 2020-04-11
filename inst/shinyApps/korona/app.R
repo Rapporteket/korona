@@ -84,9 +84,9 @@ ui <- tagList(
                       sidebarPanel(id = 'brukervalgStartside',
                                    width = 3,
                                    uiOutput('KoroRappTxt'),
-                                   # h3('Koronarapport med samling av resultater'),
-                                   # h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                                   #    Gå til fanen "Abonnement" for å bestille dette.'),
+                                   h3('Koronarapport med samling av resultater'),
+                                   h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
+                                      Gå til fanen "Abonnement" for å bestille dette.'),
                                    downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
                                    tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                    br(),
@@ -209,10 +209,10 @@ ui <- tagList(
                                                                       'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
                                                                       'Respirasjonssvikt, innleggelse' = 'respSviktInn',
                                                                       'Respirasjonssvikt på sykehus' = 'respSviktUt',
-                                                                      'Må sjekkes: Tilstand ved innleggelse' = 'tilstandInn',
-                                                                      'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
-                                                                      'Kommer: sanns. smittested' = 'smittested',
-                                                                      'Feil def av var: Demografi' = 'demografi'
+                                                                      'Tilstand ved innleggelse' = 'tilstandInn',
+                                                                      #'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
+                                                                      #'Kommer: sanns. smittested' = 'smittested',
+                                                                      'Demografi' = 'demografi'
                                                           )
                                               ),
                                               selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
@@ -337,8 +337,8 @@ ui <- tagList(
                                                       Ukentlig="Ukentlig-week",
                                                       Daglig="Daglig-DSTday"),
                                                  selected = "Ukentlig-week"),
-                                     selectInput(inputId = "valgtEnhetabb", label="Velg RHF",
-                                                 choices = rhfNavn
+                                     selectInput(inputId = "valgtEnhetabb", label="Velg enhet",
+                                                 choices = 'Alle'
                                      ),
                                      actionButton("subscribe", "Bestill!")
                         ),
@@ -397,9 +397,8 @@ server <- function(input, output, session) {
                     choices = enhetsvalg)
   updateSelectInput(session, "valgtEnhetRes",
                     choices = enhetsvalg)
-  #KoroData$RHF[match(reshID, KoroData$ReshId)]))
-  updateSelectInput(session, "valgtEnhetabb",
-                    choices = enhetsvalg)
+  # updateSelectInput(session, "valgtEnhetabb", Må aktiveres når samlerapport med valg.
+  #                   choices = enhetsvalg)
   #}
 
 
@@ -752,11 +751,10 @@ server <- function(input, output, session) {
       rnwFil <- "KoronaRapp.Rnw" #Navn på fila
     }
     fun <- "abonnementKorona"
-    paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet")
+    paramNames <- c('rnwFil', 'brukernavn', "reshID") #, "valgtEnhet")
 
-    paramValues <- c(rnwFil, brukernavn, reshID, as.character(input$valgtEnhetabb))
-
-    #test <- abonnementBeredsk(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
+    paramValues <- c(rnwFil, brukernavn, reshID) #, as.character(input$valgtEnhetabb))
+    #test <- abonnementKorona(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
     #                       reshID=105460)
 
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
