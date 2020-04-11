@@ -12,6 +12,7 @@ library(shinyjs)
 library(magrittr)
 library(tidyverse)
 library(lubridate)
+library(kableExtra)
 library(intensivberedskap)
 library(korona)
 
@@ -602,7 +603,6 @@ server <- function(input, output, session) {
   )
 
   observe({
-    KoroData <- RegData
     UtDataFord <- KoronaFigAndeler(RegData=KoroData,
                                    valgtVar=input$valgtVarFord,
                                    valgtEnhet = input$valgtEnhetRes,
