@@ -118,6 +118,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 ShNavn = first(ShNavn, order_by = FormDate),
                 ShNavnUt = last(ShNavnUt, order_by = FormDate),
                 FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
+                FormDateUt = sort(FormDateUt, decreasing = T)[1],
                 FormDate = sort(FormDate)[1])
   #----------------------------
    RegData <- data.frame(RegDataRed)
