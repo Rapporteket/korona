@@ -22,6 +22,7 @@ usethis::use_data(kodebok, overwrite = TRUE, internal = FALSE)
 
 belegg_ssb <- read.table(system.file(file.path('extdata', 'BeleggSSB.csv'), package = 'korona'), sep=';',
                          stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
+names(belegg_ssb)[names(belegg_ssb)=="Døgnplasser.2018"] <- "Dognplasser.2018"
 
 belegg_ssb$HFresh <- ReshNivaa$HFresh[pmatch(trimws(tolower(belegg_ssb$region)), trimws(tolower(ReshNivaa$HFnavn)))]
 belegg_ssb$HF <- ReshNivaa$HFnavn[pmatch(trimws(tolower(belegg_ssb$region)), trimws(tolower(ReshNivaa$HFnavn)))]

@@ -287,20 +287,20 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
     RegData[,c("HFresh", names(datoer))] %>%
     group_by(HFresh) %>%
     summarise_all(sum) %>%
-    merge(belegg_ssb[, c("HFresh", "Døgnplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
+    merge(belegg_ssb[, c("HFresh", "Dognplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
     mutate(HFresh = HF) %>% select(-HF) %>%
     # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
     tr_summarize_output(grvarnavn = 'Dato')
 
   belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
-  belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Døgnplasser.2018" = sum(Døgnplasser.2018))
+  belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
   belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
 
   TabTidRHF <-
     RegData[,c("RHFresh", names(datoer))] %>%
     group_by(RHFresh) %>%
     summarise_all(sum) %>%
-    merge(belegg_rhf[, c("RHFresh", "Døgnplasser.2018", "RHF")], by.x = "RHFresh", by.y = "RHFresh", all.x = T) %>%
+    merge(belegg_rhf[, c("RHFresh", "Dognplasser.2018", "RHF")], by.x = "RHFresh", by.y = "RHFresh", all.x = T) %>%
     mutate(RHFresh = RHF) %>% select(-RHF) %>%
     bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
     tr_summarize_output(grvarnavn = 'Dato')
