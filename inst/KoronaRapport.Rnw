@@ -113,7 +113,6 @@ xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l'
 
 
 \begin{frame}[fragile] {Antall som ligger på sykehus nå}
-Denne burde vel heller vise kumulativt antall...?
 <<'ShusNaa', results='asis'>>=
 # Antall som ligger på sykehus nå
 AntReg <- dim(Pandemi)[1]
@@ -139,7 +138,8 @@ xtable::xtable(InneliggPas, digits=0,
 <<'Utskrevne', results='asis'>>=
 AntUtRHF <- table(Pandemi$UtDato, Pandemi$RHF)
 AntUtRHF <- addmargins(AntUtRHF)
-xtable::xtable(AntUtRHF, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+fra <- max(1, (nrow(AntUtRHF)-20))
+xtable::xtable(AntUtRHF[fra:nrow(AntUtRHF),], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall utskrevne per dag siste 20 dager, samt totalt.')
 @
 \end{frame}
@@ -174,7 +174,7 @@ xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #
 \begin{frame}[fragile] {Sykehus med pandemiskjema i kladd}
 <<'KladdSh', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-AntKladdShus <- table(Pandemi$ShNavn[indKladd], dnn= 'Skjema i kladd')
+AntKladdShus <- table(Pandemi$ShNavn[which(Pandemi$FormStatus==1)], dnn= 'Skjema i kladd')
 xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Pandemiskjema i kladd')
 @

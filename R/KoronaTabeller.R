@@ -90,7 +90,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   statusTab <- rbind(
     'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
   )
-  colnames(statusTab) <- c('Antall', 'Liggetid(gj.sn)')
+  colnames(statusTab) <- c('Antall', 'Liggetid (gj.sn)')
   xtable::xtable(statusTab,
                  digits=0,
                  #align = c('l','r','r','r'),
