@@ -92,13 +92,13 @@ og etter dagens dato, filtrert bort.
 \end{frame}
 
 
-\begin{frame}[fragile] {Antall registrerte}
+\begin{frame}[fragile] {Antall registrerte pasienter}
 <<'RegRHF', results='asis'>>=
 AntRegRHF <- table(Pandemi$InnDag, Pandemi$RHF)
 AntRegRHF <- addmargins(AntRegRHF)
 xtable::xtable(AntRegRHF[(nrow(AntRegRHF)-20):nrow(AntRegRHF), ], digits=0,
                #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-               caption='Antall registrerte koronainnleggelser siste 20 dager, samt totalt antall for hele pandemiperioden.')
+               caption='Antall registrerte pasienter med korona siste 20 dager, samt totalt antall for hele pandemiperioden.')
 @
 \end{frame}
 
@@ -108,7 +108,7 @@ xtable::xtable(AntRegRHF[(nrow(AntRegRHF)-20):nrow(AntRegRHF), ], digits=0,
 RegHF <- Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
 #sort(table(Pandemi$HF), decreasing = T)
 xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall registreringer i hvert HF')
+                              caption='Antall registrerte pasienter i hvert HF')
 @
 \end{frame}
 
@@ -167,7 +167,7 @@ xtable::xtable(addmargins(AntKladdRHF), digits=0, #method='compact', #align=c('l
 \begin{frame}[fragile] {Sykehus med pandemiskjema i kladd}
 <<'KladdSh', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-AntKladdShus <- table(Pandemi$ShNavn[indKladd])
+AntKladdShus <- table(Pandemi$ShNavn[indKladd], dnn= 'Skjema i kladd')
 xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Pandemiskjema i kladd')
 @
@@ -187,7 +187,7 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', n
 \begin{frame}[fragile] {Aldersfordeling, alle opphold}
 <<'Alder', results='asis'>>=
 AldersTab <- AlderTab(RegData=Pandemi)$Tab
-
+AldersTab[ ,'Antall'][as.numeric(AldersTab[ ,'Antall'])<3] <- '<3'
 xtable::xtable(AldersTab, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Aldersfordeling, alle innleggelser')
 @

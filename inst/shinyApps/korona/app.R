@@ -133,8 +133,8 @@ ui <- tagList(
                       mainPanel(width = 9,
                                 shinyalert::useShinyalert(),
                                 appNavbarUserWidget(user = uiOutput("appUserName"),
-                                                    organization = uiOutput("appOrgName"),
-                                                    addUserInfo = TRUE),
+                                                    organization = uiOutput("appOrgName")),
+                                                    #,addUserInfo = TRUE),
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
 
                                 h3('Resultater fra pandemiregistrering, korona.'),
@@ -152,7 +152,7 @@ ui <- tagList(
                                           # HTML('<hr height="8" style="color:purple;background-color:purple;"></hr>'),
                                           # HTML('<hr size="10" />'),
                                           hr(),
-                                          #h4('Ikke-ferdigstilte inklusjonsskjema'),
+                                          h4('WALL OF SHAME'),
                                           tableOutput('skjemaInnKladdTab')
                                 #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
                                    ),
@@ -241,13 +241,26 @@ tabPanel("Resultater",
                                  actionButton("tilbakestillValgRes", label="Tilbakestill valg")
 
                     ),
+                    # mainPanel(
+                    #   h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
+                    #   h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
+                    #   plotOutput('fordelinger')
+                    #   # uiOutput("tittelFord"),
+                    #   # tableOutput('fordelingTab'),
+                    #   # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
+                    # )
                     mainPanel(
-                      h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
-                      h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
-                      plotOutput('fordelinger')
-                      # uiOutput("tittelFord"),
-                      # tableOutput('fordelingTab'),
-                      # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
+                      tabsetPanel(
+                        tabPanel(
+                          'Figur',
+                          plotOutput('fordelinger')),
+                        tabPanel(
+                          'Tabell',
+                          uiOutput("tittelFord"),
+                          tableOutput('fordelingTab'),
+                          downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt")
+                        )
+                      )
                     )
            )) #tabset og tab
 ), #Resultater
@@ -571,6 +584,8 @@ server <- function(input, output, session) {
 
   #-----------------------------Resultater---------------------------------
 
+  #------------Fordelinger---------------------
+
   output$fordelinger <- renderPlot({
     KoronaFigAndeler(RegData=KoroData,
                      valgtVar=input$valgtVarFord,
@@ -585,6 +600,48 @@ server <- function(input, output, session) {
                      session = session)
   }, height=700, width=700 #height = function() {session$clientData$output_fordelinger_width}
   )
+
+  observe({
+    KoroData <- RegData
+    UtDataFord <- KoronaFigAndeler(RegData=KoroData,
+                                   valgtVar=input$valgtVarFord,
+                                   valgtEnhet = input$valgtEnhetRes,
+                                   enhetsNivaa= egetEnhetsNivaa,
+                                   enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
+                                   dodSh=as.numeric(input$dodShRes),
+                                   aarsakInn = as.numeric(input$aarsakInnRes),
+                                   erMann=as.numeric(input$erMannRes),
+                                   skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                                   kjemastatusUt=as.numeric(input$skjemastatusUtRes),
+                                   session = session)
+    tab <- lagTabavFigFord(UtDataFraFig = UtDataFord)
+
+    output$tittelFord <- renderUI({
+      tagList(
+        h3(HTML(paste(UtDataFord$tittel, sep='<br />'))),
+        h5(HTML(paste0(UtDataFord$utvalgTxt, '<br />')))
+      )}) #, align='center'
+    output$fordelingTab <- function() { #gr1=UtDataFord$hovedgrTxt, gr2=UtDataFord$smltxt renderTable(
+      #       kable_styling("hover", full_width = F)
+      antKol <- ncol(tab)
+      kableExtra::kable(tab, format = 'html'
+                        , full_width=F
+                        , digits = c(0,1,0,1)[1:antKol]
+      ) %>%
+        add_header_above(c(" "=1, 'Egen enhet/gruppe' = 2, 'Resten' = 2)[1:(antKol/2+1)]) %>%
+        column_spec(column = 1, width_min = '7em') %>%
+        column_spec(column = 2:(ncol(tab)+1), width = '7em') %>%
+        row_spec(0, bold = T)
+    }
+
+    output$lastNed_tabFord <- downloadHandler(
+      filename = function(){
+        paste0(input$valgtVar, '_fordeling.csv')
+      },
+      content = function(file, filename){
+        write.csv2(tab, file, row.names = F, na = '')
+      })
+  }) #observe
 
   #-------------Intensivregistreringer------------------------
 

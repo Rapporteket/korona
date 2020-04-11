@@ -116,7 +116,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 #HovedskjemaGUID
                 #OverfortAnnetSykehusUtskrivning #1-ja, 2-nei
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
-                ShNavn = first(ShNavnUt, order_by = FormDate),
+                ShNavn = first(ShNavn, order_by = FormDate),
                 ShNavnUt = last(ShNavnUt, order_by = FormDate),
                 FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
                 FormDate = sort(FormDate)[1])
