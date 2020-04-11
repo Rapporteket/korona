@@ -48,9 +48,9 @@ if (paaServer) {
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
-            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
   KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
-        by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+                    by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 } #hente data
 
 
@@ -78,7 +78,7 @@ ui <- tagList(
              windowTitle = regTitle,
              theme = "rap/bootstrap.css",
 
-#-------------Startside--------------
+             #-------------Startside--------------
              tabPanel("Oversikt",
                       useShinyjs(),
                       sidebarPanel(id = 'brukervalgStartside',
@@ -94,10 +94,6 @@ ui <- tagList(
                                    h3('Gjør filtreringer/utvalg:'),
                                    #br(),
 
-                                   # conditionalPanel(condition = "input.hovedark == 'Nøkkeltall' || input.ark == 'Ant. opphold'",
-                                   #                  dateInput(inputId = 'sluttDatoReg', label = 'Velg sluttdato', language="nb",
-                                   #                            value = Sys.Date(), max = Sys.Date())
-                                   # ),
                                    selectInput(inputId = "valgtEnhet", label="Velg enhet",
                                                choices = 'Alle'
                                    ),
@@ -135,33 +131,33 @@ ui <- tagList(
                                 shinyalert::useShinyalert(),
                                 appNavbarUserWidget(user = uiOutput("appUserName"),
                                                     organization = uiOutput("appOrgName")),
-                                                    #,addUserInfo = TRUE),
+                                #,addUserInfo = TRUE),
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
 
                                 h3('Resultater fra pandemiregistrering, korona.'),
                                 h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
                                 h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
                                    pandemiregisteret finnes under fanen "Resultater".'),
-                                h5('Siden er under utvikling... ', style = "color:red"),
+                                #h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
-                                 fluidRow(
-                                   column(width = 4,
-                                          h3('Inneliggende pasienter'),
-                                          uiOutput('utvalgNaa'),
-                                          tableOutput('statusNaaShTab'),
-                                          h6('Flere variabler?', style = "color:red"),
-                                          # HTML('<hr height="8" style="color:purple;background-color:purple;"></hr>'),
-                                          # HTML('<hr size="10" />'),
-                                          hr(),
-                                          h4('WALL OF SHAME'),
-                                          tableOutput('skjemaInnKladdTab')
-                                #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
-                                   ),
-                                 column(width=5, offset=1,
-                                        uiOutput('tittelFerdigeReg'),
-                                        uiOutput('utvalgFerdigeReg'),
-                                        tableOutput('tabFerdigeReg')
-                                 )),
+                                fluidRow(
+                                  column(width = 4,
+                                         h3('Inneliggende pasienter'),
+                                         uiOutput('utvalgNaa'),
+                                         tableOutput('statusNaaShTab'),
+                                         h6('Flere variabler?', style = "color:red"),
+                                         # HTML('<hr height="8" style="color:purple;background-color:purple;"></hr>'),
+                                         # HTML('<hr size="10" />'),
+                                         hr(),
+                                         h4('WALL OF SHAME'),
+                                         tableOutput('skjemaInnKladdTab')
+                                         #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
+                                  ),
+                                  column(width=5, offset=1,
+                                         uiOutput('tittelFerdigeReg'),
+                                         uiOutput('utvalgFerdigeReg'),
+                                         tableOutput('tabFerdigeReg')
+                                  )),
 
                                 h3('Antall innleggelser siste 10 dager'),
                                 h4('Hele tidsperioden, se fanen Resultater'),
@@ -182,92 +178,92 @@ ui <- tagList(
                       ) #main
              ), #tab Startside
 
-#-----------Resultater-------------------------------------
-tabPanel("Resultater",
-         tags$style(HTML("
-    .tabbable > .nav > li > a {background-color: aqua;  color:black; width: 300PX;}")),
-         tabsetPanel(
-           tabPanel("Tellinger",
-                    koronaresultater_UI("resultater_id")
-           ),
-           tabPanel("Belegg",
-                    koronabelegg_UI("koronabelegg_id")
-           ),
-
-           tabPanel(p('Fordelinger',
-                      title='Figurer/tabeller for de fleste opplysninger registrert i
-                  inlusjons- eller utskrivingsskjema'),
-                    value = 'Fordelinger',
-                    sidebarPanel(id = 'brukervalgRes',
-                                 width = 3,
-                                 br(),
-                                 h3('Velg variabel/tema og filtreringer i data'),
-                                 #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
-                                                  selectInput(inputId = 'valgtVarFord', label='Velg variabel',
-                                                              choices = c("Alder"='alder',
-                                                                          "Liggetid"='liggetid',
-                                                                          'Risikofaktorer, innleggelse'='risikoInn',
-                                                                          'Antibiotika, innleggelse'='antibiotikaInn',
-                                                                          'Antibiotika, utskriving'='antibiotikaUt',
-                                                                          'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',
-                                                                          'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
-                                                                          'Respirasjonssvikt, innleggelse' = 'respSviktInn',
-                                                                          'Respirasjonssvikt på sykehus' = 'respSviktUt',
-                                                                          'Må sjekkes: Tilstand ved innleggelse' = 'tilstandInn',
-                                                                          'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
-                                                                          'Kommer: sanns. smittested' = 'smittested',
-                                                                          'Feil def av var: Demografi' = 'demografi'
-                                                                          )
-                                                  ),
-                                                  selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
-                                                              choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
-                                                  ),
-
-                                 selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
-                                             choices = 'Alle'
-                                 ),
-                                 selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
-                                             choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                                 ),
-                                 selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
-                                             choices = c("Alle"=9, "Ja"=1, "Nei"=2)
-                                 ),
-                                 selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
-                                             choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
-                                 ),
-                                 selectInput(inputId = "erMannRes", label="Kjønn",
-                                             choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
-                                 ),
-                                 br(),
-                                 actionButton("tilbakestillValgRes", label="Tilbakestill valg")
-
-                    ),
-                    # mainPanel(
-                    #   h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
-                    #   h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
-                    #   plotOutput('fordelinger')
-                    #   # uiOutput("tittelFord"),
-                    #   # tableOutput('fordelingTab'),
-                    #   # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
-                    # )
-                    mainPanel(
+             #-----------Resultater-------------------------------------
+             tabPanel("Resultater",
+                      tags$style(HTML("
+    .tabbable > .nav > li > a {background-color: #DBDBDB;  color:black; width: 300PX;}")),
                       tabsetPanel(
-                        tabPanel(
-                          'Figur',
-                          plotOutput('fordelinger')),
-                        tabPanel(
-                          'Tabell',
-                          uiOutput("tittelFord"),
-                          tableOutput('fordelingTab'),
-                          downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt")
-                        )
-                      )
-                    )
-           )) #tabset og tab
-), #Resultater
+                        tabPanel("Tellinger",
+                                 koronaresultater_UI("resultater_id")
+                        ),
+                        tabPanel("Belegg",
+                                 koronabelegg_UI("koronabelegg_id")
+                        ),
+
+                        tabPanel(p('Fordelinger',
+                                   title='Figurer/tabeller for de fleste opplysninger registrert i
+                  inlusjons- eller utskrivingsskjema'),
+                                 value = 'Fordelinger',
+                                 sidebarPanel(id = 'brukervalgRes',
+                                              width = 3,
+                                              br(),
+                                              h3('Velg variabel/tema og filtreringer i data'),
+                                              #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
+                                              selectInput(inputId = 'valgtVarFord', label='Velg variabel',
+                                                          choices = c("Alder"='alder',
+                                                                      "Liggetid"='liggetid',
+                                                                      'Risikofaktorer, innleggelse'='risikoInn',
+                                                                      'Antibiotika, innleggelse'='antibiotikaInn',
+                                                                      'Antibiotika, utskriving'='antibiotikaUt',
+                                                                      'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',
+                                                                      'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
+                                                                      'Respirasjonssvikt, innleggelse' = 'respSviktInn',
+                                                                      'Respirasjonssvikt på sykehus' = 'respSviktUt',
+                                                                      'Må sjekkes: Tilstand ved innleggelse' = 'tilstandInn',
+                                                                      'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
+                                                                      'Kommer: sanns. smittested' = 'smittested',
+                                                                      'Feil def av var: Demografi' = 'demografi'
+                                                          )
+                                              ),
+                                              selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
+                                                          choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
+                                              ),
+
+                                              selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
+                                                          choices = 'Alle'
+                                              ),
+                                              selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
+                                                          choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
+                                              ),
+                                              selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
+                                                          choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                                              ),
+                                              selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
+                                                          choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
+                                              ),
+                                              selectInput(inputId = "erMannRes", label="Kjønn",
+                                                          choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
+                                              ),
+                                              br(),
+                                              actionButton("tilbakestillValgRes", label="Tilbakestill valg")
+
+                                 ),
+                                 # mainPanel(
+                                 #   h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
+                                 #   h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
+                                 #   plotOutput('fordelinger')
+                                 #   # uiOutput("tittelFord"),
+                                 #   # tableOutput('fordelingTab'),
+                                 #   # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
+                                 # )
+                                 mainPanel(
+                                   tabsetPanel(
+                                     tabPanel(
+                                       'Figur',
+                                       plotOutput('fordelinger')),
+                                     tabPanel(
+                                       'Tabell',
+                                       uiOutput("tittelFord"),
+                                       tableOutput('fordelingTab'),
+                                       downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt")
+                                     )
+                                   )
+                                 )
+                        )) #tabset og tab
+             ), #Resultater
 
 
-#---------Intensivregistreringer--------------------------------
+             #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
                       value = 'Intensiv',
@@ -329,7 +325,7 @@ tabPanel("Resultater",
                       )
              ), #Intensiv-side
 
-#-----------Abonnement--------------------------------
+             #-----------Abonnement--------------------------------
              tabPanel(p("Abonnement",
                         title='Bestill automatisk utsending av rapporter på e-post'),
                       value = 'Abonnement',
@@ -397,14 +393,14 @@ server <- function(input, output, session) {
   # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
   enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
   #if (rolle != 'SC') {
-    updateSelectInput(session, "valgtEnhet",
-                      choices = enhetsvalg)
-    updateSelectInput(session, "valgtEnhetRes",
-                      choices = enhetsvalg)
-    #KoroData$RHF[match(reshID, KoroData$ReshId)]))
-    updateSelectInput(session, "valgtEnhetabb",
-                      choices = enhetsvalg)
-    #}
+  updateSelectInput(session, "valgtEnhet",
+                    choices = enhetsvalg)
+  updateSelectInput(session, "valgtEnhetRes",
+                    choices = enhetsvalg)
+  #KoroData$RHF[match(reshID, KoroData$ReshId)]))
+  updateSelectInput(session, "valgtEnhetabb",
+                    choices = enhetsvalg)
+  #}
 
 
   # widget
@@ -433,10 +429,10 @@ server <- function(input, output, session) {
         paste0('KoronaRapport', Sys.time(), '.pdf')},
       content = function(file){
         henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw"
-                                 #rolle = rolle,
-                                 #valgtEnhet = valgtEnhet, #as.character(input$valgtEnhet),
-                                 #reshID = reshID
-                                 ) #Vurder å ta med tidsinndeling eller startdato
+                                  #rolle = rolle,
+                                  #valgtEnhet = valgtEnhet, #as.character(input$valgtEnhet),
+                                  #reshID = reshID
+        ) #Vurder å ta med tidsinndeling eller startdato
       }
     )
   })
@@ -460,7 +456,7 @@ server <- function(input, output, session) {
                               aarsakInn = as.numeric(input$aarsakInn),
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               erMann=as.numeric(input$erMann))
-                              #dodSh=as.numeric(input$dodSh))
+    #dodSh=as.numeric(input$dodSh))
     #NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
     UtData <- KoronaUtvalg(RegData=KoroData,
                            enhetsNivaa=egetEnhetsNivaa, valgtEnhet=egenEnhet,
@@ -491,29 +487,29 @@ server <- function(input, output, session) {
     statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #
                                  valgtEnhet=input$valgtEnhet,
                                  aarsakInn = as.numeric(input$aarsakInn))
-                                      #erMann=as.numeric(input$erMann))
+    #erMann=as.numeric(input$erMann))
     output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
     output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
-#Skjema i kladd
+    #Skjema i kladd
     AntKladdShus <- table(KoroData$ShNavn[which(KoroData$FormStatus==1)], dnn= 'Skjema i kladd')
     AntKladdShus <-  xtable::xtable(addmargins(AntKladdShus))
     output$skjemaInnKladdTab <- renderTable({AntKladdShus}, rownames = T, digits=0, spacing="xs")
 
 
-#Tab ferdigstilte
-   TabFerdig <- FerdigeRegTab(RegData=KoroData,
-                              aarsakInn = as.numeric(input$aarsakInn),
-                              valgtEnhet=input$valgtEnhet,
-                              dodSh=as.numeric(input$dodSh),
-                              erMann=as.numeric(input$erMann))
+    #Tab ferdigstilte
+    TabFerdig <- FerdigeRegTab(RegData=KoroData,
+                               aarsakInn = as.numeric(input$aarsakInn),
+                               valgtEnhet=input$valgtEnhet,
+                               dodSh=as.numeric(input$dodSh),
+                               erMann=as.numeric(input$erMann))
 
-   output$tabFerdigeReg <- if (TabFerdig$Ntest>4){
-     renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
-       renderText('Få registreringer (N<5)')}
-   output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
-   output$tittelFerdigeReg <- renderUI(
-     h3(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' skjema)')))
+    output$tabFerdigeReg <- if (TabFerdig$Ntest>4){
+      renderTable({TabFerdig$Tab}, rownames = T, digits=0, spacing="xs")} else {
+        renderText('Få registreringer (N<5)')}
+    output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
+    output$tittelFerdigeReg <- renderUI(
+      h3(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' skjema)')))
 
 
     #Tab risiko
@@ -549,14 +545,14 @@ server <- function(input, output, session) {
   })
 
   ############ Kevin start ######################
-   output$FigurAldersfordeling <- #if (..>4){
+  output$FigurAldersfordeling <- #if (..>4){
     renderPlot({korona::AlderKjFig(RegData=KoroData,
-                       valgtEnhet= input$valgtEnhet,
-                       enhetsNivaa = egetEnhetsNivaa,
-                       dodSh=as.numeric(input$dodSh),
-                       aarsakInn = as.numeric(input$aarsakInn),
-                       skjemastatusInn=as.numeric(input$skjemastatusInn))
-  }, width = 500, height = 500)
+                                   valgtEnhet= input$valgtEnhet,
+                                   enhetsNivaa = egetEnhetsNivaa,
+                                   dodSh=as.numeric(input$dodSh),
+                                   aarsakInn = as.numeric(input$aarsakInn),
+                                   skjemastatusInn=as.numeric(input$skjemastatusInn))
+    }, width = 500, height = 500)
   #} else {     renderText('Få registreringer (N<5)')}
 
   output$lastNedAldKj <- downloadHandler(
@@ -581,7 +577,7 @@ server <- function(input, output, session) {
   callModule(koronabelegg, "koronabelegg_id", KoroData = KoroData, rolle=rolle,
              egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
 
-########## Kevin slutt ##################
+  ########## Kevin slutt ##################
 
   #-----------------------------Resultater---------------------------------
 
@@ -636,7 +632,7 @@ server <- function(input, output, session) {
 
     output$lastNed_tabFord <- downloadHandler(
       filename = function(){
-        paste0(input$valgtVar, '_fordeling.csv')
+        paste0(input$valgtVarFord, '_fordeling.csv')
       },
       content = function(file, filename){
         write.csv2(tab, file, row.names = F, na = '')

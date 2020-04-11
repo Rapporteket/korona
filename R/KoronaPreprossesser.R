@@ -30,7 +30,6 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
-
 #SJEKK ALLE SOM HAR FÅTT [1] -
 #vil første innleggesle komme først, eller må det sorteres på FormDate?
    RegDataRed <- RegData %>% group_by(PasientID) %>%
@@ -41,7 +40,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 AkuttSirkulasjonsvikt = AkuttSirkulasjonsvikt[1], #1-nei, 2:5 ja, 999 ukjent
                 Aminoglykosid = sum(Aminoglykosid)>0,
                 AndreGencefalosporin = sum(AndreGencefalosporin)>0,
-                Antibiotika[1], #1 ja, 2-nei 3-ukjent
+                Antibiotika = Antibiotika[1], #1 ja, 2-nei 3-ukjent
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
                 ArsakInnleggelse = ArsakInnleggelse[1], #1-ja, 2-nei, 3-ukjent
                 Astma = sum(Astma)>0,
@@ -70,7 +69,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 KroniskNevro = sum(KroniskNevro),
                 #Leukocytter,
                 Leversykdom = sum(Leversykdom)>0,
-                #Makrolid,
+                Makrolid = sum(Makrolid)>0,
                 #Municipal
                 #MunicipalNumber,
                 NedsattimmunHIV = sum(NedsattimmunHIV)>0,
