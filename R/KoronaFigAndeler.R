@@ -52,6 +52,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', erMann=9, minald=0, max
                            hentData=0, outfile='', lagFig=1, ...) {
 
    if ("session" %in% names(list(...)) & rapbase::isRapContext()) {
+      # Error: 'isRapContext' is not an exported object from 'namespace:rapbase'
       raplog::repLogger(session = list(...)[["session"]], msg = paste0('Fordelingsfigur: ',valgtVar))
    }
     if (hentData == 1) {
@@ -153,7 +154,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', erMann=9, minald=0, max
 
 
       if (lagFig == 1) {
-            if ((Nfig$Hoved < 5) | (dim(RegData)[1]<5))
+            if ((min(N$Hoved, na.rm = T) < 5) | (dim(RegData)[1]<5))
             {
                   #-----------Figur---------------------------------------
                   FigTypUt <- rapFigurer::figtype(outfile)  #FigTypUt <- figtype(outfile)

@@ -7,13 +7,7 @@
 has the effect of providing the parameters as class
 \emph{list}. Verdier gis inn som listeparametre}
 \usage{
-abonnementKorona(
-  rnwFil,
-  brukernavn = "lluring",
-  reshID = 0,
-  valgtRHF = "Alle",
-  Rpakke = "korona"
-)
+abonnementKorona(rnwFil, brukernavn = "lluring", reshID = 0, Rpakke = "korona")
 }
 \arguments{
 \item{rnwFil}{Navn på fila som skal kjøres. Angis MED filending (\emph{dvs "filnavn.Rnw"})}

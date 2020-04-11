@@ -90,7 +90,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   statusTab <- rbind(
     'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
   )
-  colnames(statusTab) <- c('Antall', 'Liggetid(gj.sn)')
+  colnames(statusTab) <- c('Antall', 'Liggetid (gj.sn)')
   xtable::xtable(statusTab,
                  digits=0,
                  #align = c('l','r','r','r'),
@@ -272,3 +272,24 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   # return(invisible(UtData <- list(Tab=TabAlder, utvalgTxt=UtData$utvalgTxt)))
 }
 
+#' Vise figurdata som tabell
+#' @param UtDataFraFig data fra figurfunksjoner, dvs. beregnede verdier
+#' @export
+lagTabavFigFord <- function(UtDataFraFig){
+  tab <-cbind(UtDataFraFig$Ngr$Hoved,
+              UtDataFraFig$AggVerdier$Hoved,
+              UtDataFraFig$Ngr$Rest,
+              UtDataFraFig$AggVerdier$Rest)
+  grtxt <- UtDataFraFig$grtxt
+  if ((min(nchar(grtxt)) == 5) & (max(nchar(grtxt)) == 5)) {
+    grtxt <- paste(substr(grtxt, 1,3), substr(grtxt, 4,5))}
+  rownames(tab) <- grtxt
+  kolnavn <- c('Antall' , 'Andel (%)')
+  colnames(tab) <- c(kolnavn, if(!is.null(UtDataFraFig$Ngr$Rest)){kolnavn})
+  # colnames(tab) <- c(paste0(UtDataFraFig$hovedgrTxt,', Antall'),
+  #                    paste0(UtDataFraFig$hovedgrTxt, ', Andel (%)'),
+  #                    if(!is.null(UtDataFraFig$Ngr$Rest)){paste0(UtDataFraFig$smltxt,', Antall')},
+  #                    if(!is.null(UtDataFraFig$Ngr$Rest)){paste0(UtDataFraFig$smltxt, ', Andel (%)')})
+
+  return(tab)
+}

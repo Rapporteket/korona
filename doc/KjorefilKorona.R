@@ -7,18 +7,18 @@ RegData <- Pandemi
 tidsenhet='dag'
 datoFra <- '2020-01-01'
 datoTil <- Sys.Date()
-erMann=1
+erMann=9
 aarsakInn=9
-skjemastatusInn=2
+skjemastatusInn=9
 skjemastatusUt <- 9
 aarsakInn<- 9
 dodSh=9
 minald <- 0
 maxald <- 110
-valgtEnhet='Alle' #'Sykehuset i Vestfold HF' #'Alle'
+valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
-valgtVar <- 'risikoInn'
+valgtVar <- 'demografi'
 
 test <- KoronaUtvalg(RegData=RegData, erMann=1, skjemastatusInn=2, aarsakInn=1)
 test$utvalgTxt

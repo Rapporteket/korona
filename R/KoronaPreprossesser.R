@@ -30,7 +30,6 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
-
 #SJEKK ALLE SOM HAR FÅTT [1] -
 #vil første innleggesle komme først, eller må det sorteres på FormDate?
    RegDataRed <- RegData %>% group_by(PasientID) %>%
@@ -41,7 +40,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 AkuttSirkulasjonsvikt = AkuttSirkulasjonsvikt[1], #1-nei, 2:5 ja, 999 ukjent
                 Aminoglykosid = sum(Aminoglykosid)>0,
                 AndreGencefalosporin = sum(AndreGencefalosporin)>0,
-                Antibiotika[1], #1 ja, 2-nei 3-ukjent
+                Antibiotika = Antibiotika[1], #1 ja, 2-nei 3-ukjent
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
                 ArsakInnleggelse = ArsakInnleggelse[1], #1-ja, 2-nei, 3-ukjent
                 Astma = sum(Astma)>0,
@@ -51,7 +50,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 #Ddimer,
                 Diabetes = sum(Diabetes)>0,
                 #DiastoliskBlodtrykk,
-                DistrictCode[1],
+                DistrictCode = DistrictCode[1],
                 EndretBevissthet = EndretBevissthet[1], #1-ja, 2-nei, 3-ukjent
                 ErAnsattMikrobiologisk = ErAnsattMikrobiologisk[1], #1-ja, 2-nei, 3-ukjent
                 ErHelsepersonell = ErHelsepersonell[1], #1-ja, 2-nei, 3-ukjent
@@ -70,7 +69,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 KroniskNevro = sum(KroniskNevro),
                 #Leukocytter,
                 Leversykdom = sum(Leversykdom)>0,
-                #Makrolid,
+                Makrolid = sum(Makrolid)>0,
                 #Municipal
                 #MunicipalNumber,
                 NedsattimmunHIV = sum(NedsattimmunHIV)>0,
@@ -116,7 +115,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 #HovedskjemaGUID
                 #OverfortAnnetSykehusUtskrivning #1-ja, 2-nei
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
-                ShNavn = first(ShNavnUt, order_by = FormDate),
+                ShNavn = first(ShNavn, order_by = FormDate),
                 ShNavnUt = last(ShNavnUt, order_by = FormDate),
                 FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
                 FormDate = sort(FormDate)[1])
