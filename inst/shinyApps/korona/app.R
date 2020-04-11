@@ -492,7 +492,7 @@ server <- function(input, output, session) {
 
     #Skjema i kladd
     AntKladdShus <- table(KoroData$ShNavn[which(KoroData$FormStatus==1)], dnn= 'Skjema i kladd')
-    AntKladdShus <-  xtable::xtable(addmargins(AntKladdShus))
+    AntKladdShus <-  xtable::xtable(addmargins(sort(AntKladdShus, decreasing = T)))
     output$skjemaInnKladdTab <- renderTable({AntKladdShus}, rownames = T, digits=0, spacing="xs")
 
 
