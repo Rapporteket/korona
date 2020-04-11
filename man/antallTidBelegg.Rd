@@ -12,7 +12,8 @@ antallTidBelegg(
   tilgangsNivaa = "SC",
   skjemastatusInn = 9,
   aarsakInn = 9,
-  valgtEnhet = "Alle"
+  valgtEnhet = "Alle",
+  reshID = 0
 )
 }
 \arguments{

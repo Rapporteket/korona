@@ -179,8 +179,8 @@ koronabelegg_UI <- function(id){
     mainPanel(
 
       h2('Estimert belegg sykehussenger'),
-      h4(''),
-      h3('NB:Siden er under utvikling!', style = "color:red"),
+      h4('Tallene er basert på SSB sine tall på døgnplasser per HF fra 2018.'),
+      # h3('Merk at ', style = "color:red"),
       br(),
 
       DT::DTOutput(ns("tabBelegg_DT")),
@@ -190,7 +190,7 @@ koronabelegg_UI <- function(id){
 }
 
 
-koronabelegg <- function(input, output, session, KoroData, rolle, egetEnhetsNivaa, egenEnhet, hvdsession){
+koronabelegg <- function(input, output, session, KoroData, rolle, reshID, egetEnhetsNivaa, egenEnhet, hvdsession){
 
   observeEvent(input$tilbakestillValgRes, {
     shinyjs::reset("brukervalgBelegg")
@@ -199,7 +199,7 @@ koronabelegg <- function(input, output, session, KoroData, rolle, egetEnhetsNiva
   AntTab <- function() {
     AntTab <- antallTidBelegg(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
-                              tidsenhet='dag',
+                              tidsenhet='dag', reshID = reshID,
                               aarsakInn = as.numeric(input$aarsakInn),
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               erMann=as.numeric(input$erMann))
