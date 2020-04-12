@@ -13,13 +13,13 @@
 #' @return
 #' @export
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
-                        skjemastatusInn=9, aarsakInn=9, dodSh=9, valgtEnhet='Alle'){
+                            skjemastatusInn=9, aarsakInn=9, dodSh=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
-        RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
-                     dag = 'Dag',
-                     uke = 'UkeNr',
-                     maaned = 'MndAar')])
+  RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
+                                                 dag = 'Dag',
+                                                 uke = 'UkeNr',
+                                                 maaned = 'MndAar')])
 
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
@@ -30,8 +30,8 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   #Benytter ikke utvalgsfila til enhetsfiltrering. Skal også ha oppsummering for hele landet
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
-                             skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
-                             dodSh=dodSh)
+                         skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
+                         dodSh=dodSh)
 
 
   RegDataAlle <- UtData$RegData
@@ -41,30 +41,31 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
   } else {
     enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
     subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
-    }
+  }
 
   Ntest <- dim(RegData)[1]
 
-    kolNavnSum <- ifelse(tilgangsNivaa=='SC',
-                         'Hele landet',
-                         paste0(valgtEnhet, ', totalt'))
-    if (Ntest==0) {
-      TabTidEnh <- matrix(0, ncol=1, nrow=length(levels(RegData$TidsVar)) + 1,
-                          dimnames = list(c(levels(RegData$TidsVar), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
-    }else{
-      TabTidEnh <- table(RegData[ , c('TidsVar', 'EnhNivaaVis')]) #ftable(RegData[ , c(TidsVar, enhetsNivaa, 'Korona')], row.vars =TidsVar)
-      TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt, 2020'=sum, 'Hele landet' = sum), quiet=TRUE)
-      colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
-    }
+  kolNavnSum <- ifelse(tilgangsNivaa=='SC',
+                       'Hele landet',
+                       paste0(valgtEnhet, ', totalt'))
+  if (Ntest==0) {
+    TabTidEnh <- matrix(0, ncol=1, nrow=length(levels(RegData$TidsVar)) + 1,
+                        dimnames = list(c(levels(RegData$TidsVar), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
+  }else{
+    TabTidEnh <- table(RegData[ , c('TidsVar', 'EnhNivaaVis')]) #ftable(RegData[ , c(TidsVar, enhetsNivaa, 'Korona')], row.vars =TidsVar)
+    TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt, 2020'=sum, 'Hele landet' = sum), quiet=TRUE)
+    colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
+  }
 
-    if (tilgangsNivaa != 'SC'){
-      TabTidEnh <- cbind(TabTidEnh,
-                         'Hele landet'= c(table(RegDataAlle$TidsVar), dim(RegDataAlle)[1]))}
+  if (tilgangsNivaa != 'SC'){
+    TabTidEnh <- cbind(TabTidEnh,
+                       'Hele landet'= c(table(RegDataAlle$TidsVar), dim(RegDataAlle)[1]))}
 
+  Tab_tidy <- tidyr::as_tibble(as.data.frame.matrix(TabTidEnh), rownames = "Dato")
   TabTidEnh <- xtable::xtable(TabTidEnh, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall Coronatilfeller.')
-if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
-  return(UtData <- list(Tab=TabTidEnh, utvalgTxt=c(valgtEnhet, UtData$utvalgTxt), Ntest=dim(RegData)[1]))
+  if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
+  return(UtData <- list(Tab=TabTidEnh, utvalgTxt=c(valgtEnhet, UtData$utvalgTxt), Ntest=dim(RegData)[1], Tab_tidy=Tab_tidy))
 }
 
 
@@ -75,79 +76,78 @@ if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
 #' @return
 #' @export
 statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
-                         skjemastatusInn=9, skjemastatusUt=9, erMann=9){
+                         aarsakInn=9, erMann=9){
 
   UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
-                               erMann=erMann)
-                              # dodSh=dodSh)$RegData velgAvd=velgAvd
-RegData <- UtData$RegData
+                         aarsakInn=aarsakInn, erMann=erMann)
+  RegData <- UtData$RegData
   N <- dim(RegData)[1]
-  ##MechanicalRespirator Fått respiratorstøtte. Ja=1, nei=2,
-inneliggere <- is.na(RegData$UtDato)
-AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
-LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$InnTidspunkt[inneliggere], units='days'))
-LiggetidNaaGjsn <- mean(LiggetidNaa[LiggetidNaa < 50], na.rm = T)
+  inneliggere <- is.na(RegData$UtDato)
+  AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
+  LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$InnTidspunkt[inneliggere], units='days'))
+  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 50], na.rm = T), 1)
 
-statusTab <- rbind(
-  'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
-)
-colnames(statusTab) <- c('Antall', 'Liggetid(gj.sn)')
-# TabHjelp <- rbind(
-#   'På ECMO nå' = c(AntIECMONaa*(c(1, 100/AntPaaIntNaa)), ECMOtidNaaGjsn),
-#   'På respirator nå' = c(AntIrespNaa*(c(1, 100/AntPaaIntNaa)), ResptidNaaGjsn),
-#   'På intensiv nå' = c(AntPaaIntNaa,'', LiggetidNaaGjsn))
-# colnames(statusTab) <- c('Antall', 'Andel', 'Liggetid (gj.sn.)')
-# statusTab[1:2,'Andel'] <- paste0(sprintf('%.0f', as.numeric(TabHjelp[1:2,'Andel'])),'%')
-# statusTab[1:3, 3] <- paste0(sprintf('%.1f', as.numeric(TabHjelp[1:3, 3])), ' døgn')
-xtable::xtable(statusTab,
-               digits=0,
-               #align = c('l','r','r','r'),
-               caption='Inneliggende på sykehus nå')
-UtData <- list(Tab=statusTab, utvalgTxt=UtData$utvalgTxt, PaaShNaa=inneliggere)
-return(UtData)
+  statusTab <- rbind(
+    'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
+  )
+  colnames(statusTab) <- c('Antall', 'Liggetid (gj.sn)')
+  xtable::xtable(statusTab,
+                 digits=0,
+                 #align = c('l','r','r','r'),
+                 caption='Inneliggende på sykehus nå')
+  UtData <- list(Tab=statusTab, utvalgTxt=UtData$utvalgTxt, PaaShNaa=inneliggere)
+  return(UtData)
 }
 
 
 
-#' Ferdigstilte registreringer
+#' Ferdigstilte registreringer, utskrevne pasienter
 #' @param RegData beredskapsskjema
 #' @inheritParams KoronaUtvalg
 #' @return
 #' @export
-FerdigeRegInnTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, dodSh=9){
+FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
+                          aarsakInn=9, erMann=9, dodSh=9){
 
-UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
-                             erMann = erMann,
-                              skjemastatusInn=2)
-RegData <- UtData$RegData
+  Utvalg <- KoronaUtvalg(RegData=RegData,
+                         valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
+                         aarsakInn=aarsakInn, erMann = erMann, dodSh = dodSh,
+                         skjemastatusInn=2, skjemastatusUt = 2)
+  RegData <- Utvalg$RegData
+
   N <- dim(RegData)[1]
-  Liggetid <- summary(RegData$liggetid[RegData$liggetid < 30], na.rm = T)
+  Liggetid <- summary(RegData$Liggetid, na.rm = T)
   Alder <- summary(RegData$Alder, na.rm = T)
-  AntDod <- sum(RegData$DischargedIntensivStatus==1, na.rm=T)
+  BMI <- summary(RegData$BMI)
+  AntDod <- sum(RegData$StatusVedUtskriving==2, na.rm=T)
+  NrisikoKjent <- sum(RegData$KjentRisikofaktor %in% 1:2, na.rm=T)
+  pstRisiko <- 100*sum(RegData$KjentRisikofaktor==1, na.rm=T)/NrisikoKjent
 
-med_IQR <- function(x){
-  #x[is.na(x)]<-0
-  c(sprintf('%.1f',x[4]), sprintf('%.1f',x[3]), paste(sprintf('%.1f',x[2]), sprintf('%.1f',x[5]), sep=' - '))
+  med_IQR <- function(x){
+    #x[is.na(x)]<-0
+    c(sprintf('%.1f',x[4]), sprintf('%.1f',x[3]), paste(sprintf('%.1f',x[2]), sprintf('%.1f',x[5]), sep=' - '))
   }
-# x <- Liggetid
-#  test <- sprintf('%.2f',c(x[2],x[5]))
-# test <- med_IQR(ECMOtid)
-TabFerdigeReg <- rbind(
+  # x <- Liggetid
+  #  test <- sprintf('%.2f',c(x[2],x[5]))
+  # test <- med_IQR(ECMOtid)
+  TabFerdigeReg <- rbind(
     'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
-    'Døde' = c('','','',AntDod, paste0(sprintf('%.f',100*AntDod/N),'%'))
+    'KMI' = c(med_IQR(BMI), N, ''),
+    'Har risikofaktorer' = c('','','', NrisikoKjent, pstRisiko),
+    'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
-#TabFerdigeReg[TabFerdigeReg==NA]<-""
+  TabFerdigeReg[4:5,5] <- paste0(sprintf('%.f', as.numeric(TabFerdigeReg[4:5,5])),' %')
   colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall opphold', 'Andel opphold')
-  TabFerdigeReg[c(1:2),'Andel opphold'] <-
-    paste0(sprintf('%.0f', as.numeric(TabFerdigeReg[c(1:2),'Andel opphold'])),'%')
+  # TabFerdigeReg[c(1:2),'Andel opphold'] <-
+  #   paste0(sprintf('%.0f', as.numeric(TabFerdigeReg[c(1:2),'Andel opphold'])),'%')
   xtable::xtable(TabFerdigeReg,
                  digits=0,
                  align = c('l','r','r','c', 'r','r'),
                  caption='Ferdigstilte opphold.
                  IQR (Inter quartile range) - 50% av oppholdene er i dette intervallet.')
   return(invisible(UtData <- list(Tab=TabFerdigeReg,
-                                  utvalgTxt=UtData$utvalgTxt,
+                                  utvalgTxt = Utvalg$utvalgTxt,
                                   Ntest=N)))
 }
 
@@ -158,28 +158,25 @@ TabFerdigeReg <- rbind(
 #' @inheritParams KoronaUtvalg
 #' @export
 #' @return
-RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
-                              erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
-                              valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
+RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
+                         erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
+                         valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann,
-                             skjemastatusInn=skjemastatusInn, dodSh=dodSh,
-                             minald=minald, maxald=maxald, aarsakInn=aarsakInn,
-                             reshID=reshID, valgtEnhet=valgtEnhet) #velgAvd=velgAvd
-  Ntest <- dim(UtData$RegData)[1]
+                         skjemastatusInn=skjemastatusInn, dodSh=dodSh,
+                         minald=minald, maxald=maxald, aarsakInn=aarsakInn,
+                         valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa)
+
   RegData <- UtData$RegData
 
-    indBMI <- RegData$Vekt>0 & RegData$Hoyde>0
-    Fedme <- 100^2*(RegData$Vekt/(RegData$Hoyde)^2)[indBMI]
+  N <- sum(RegData$KjentRisikofaktor %in% 1:2) #dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
 
-    N <- sum(RegData$KjentRisikofaktor %in% 1:2) #dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
+  #AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
+  AntAndel <- function(Var, Nevner){
+    Ant <- sum(Var, na.rm=T)
+    c(Ant, paste0(sprintf('%.0f', 100*(Ant/Nevner)),' %'))}
 
-#AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
-    AntAndel <- function(Var, Nevner){
-      c(sum(Var),
-        paste0(sprintf('%.0f', 100*(sum(Var)/Nevner)),' %'))}
-
-#KjentRisikofaktor # 1-ja, 2-nei, 3-ukjent, -1 velg verdi
+  #KjentRisikofaktor # 1-ja, 2-nei, 3-ukjent, -1 velg verdi
 
   TabRisiko <- rbind(
     Kreft = AntAndel(RegData$Kreft, N),
@@ -192,10 +189,10 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
     Leversykdom = AntAndel(RegData$Leversykdom, N),
     'Nevrologisk/nevromusk.' = AntAndel(RegData$KroniskNevro, N),
     Gravid	= AntAndel(RegData$Gravid, N),
-    'Fedme (KMI>30)' =	AntAndel(Fedme>30, sum(indBMI)),
+    'Fedme (KMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
-    'Antall pasienter (tot.)' = c(N, '')
+    'Antall pasienter (i tab.)' = c(N, '')
     #'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
   )
 
@@ -209,7 +206,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
                  digits=0,
                  align = c('l',rep('r',ncol(TabRisiko))),
                  caption='Risikofaktorer')
-  return(UtData <- list(Tab=TabRisiko, utvalgTxt=UtData$utvalgTxt, Ntest=Ntest))
+  return(UtData <- list(Tab=TabRisiko, utvalgTxt=UtData$utvalgTxt, Ntest=N))
 }
 
 
@@ -221,70 +218,78 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(), reshID=0,
 #' @param enhetsNivaa styres av tilgangsnivå 'Alle', 'RHF', 'HF'
 #' @return
 #' @export
-AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='Alle', #tilgangsNivaa='SC', #
+AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                      skjemastatusInn=9,  aarsakInn=9, dodSh=9, erMann=9){
 
-    #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
-  # RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
-  #                               SC = RegData$RHF,
-  #                               LC = RegData$HF,
-  #                               LU = RegData$ShNavn)
-  #
-
-  #RegData$EnhetsNivaaVar <- RegData[ , enhetsNivaa]
-  # RegData$EnhetsNivaaVar <- as.factor(RegData$EnhetsNivaaVar)
-
-  #ENDRING KOMMER: Utvalg skal returnere både utvalg for alle og egen enhet. Som i andre registere
   UtData <- KoronaUtvalg(RegData=RegData,
-                             valgtEnhet=valgtEnhet,
-                             dodSh = dodSh,
+                         valgtEnhet=valgtEnhet,
+                         enhetsNivaa=enhetsNivaa,
+                         dodSh = dodSh,
                          aarsakInn=aarsakInn,
-                             erMann = erMann,
-                              skjemastatusInn=skjemastatusInn
-                              )
-  RegData <- UtData$RegData
+                         erMann = erMann,
+                         skjemastatusInn=skjemastatusInn
+  )
+  RegData <- UtData$RegData #[UtData$ind$Hoved, ]
+
+  N <- dim(RegData)[1]
+  gr <- seq(0, 90, ifelse(N<100, 25, 10) )
+  RegData$AldersGr <- cut(RegData$Alder, breaks=c(gr, 110), include.lowest=TRUE, right=FALSE)
+  grtxt <- if(N<100){c('0-24', '25-49', "50-74", "75+")} else {
+    c('0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+')}
+  levels(RegData$AldersGr) <- grtxt #c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))
+
+  TabAlder <- table(RegData$AldersGr) #, RegData$EnhetsNivaaVar)
+  #TabAlder <- addmargins(TabAlder) #switch(enhetsNivaa, RHF = 'Totalt', HF = paste0(valgtRHF, ', totalt'))
+  TabAlderPst <-TabAlder/N*100 #[-nrow(TabAlder),]
+  #paste0(sprintf('%.0f', as.numeric(TabHjelp[1:2,'Andel'])),'%')
+
+  TabAlderAlle <- cbind(
+    'Antall' = c(TabAlder, N),#[,'Sum'],
+    'Andel' = paste0(sprintf('%.0f', c(TabAlderPst, 100)), ' %') #[,'Sum']
+  )
+  row.names(TabAlderAlle)[nrow(TabAlderAlle)] <- 'Totalt'
+  TabAlderUt <-  TabAlderAlle
+  #   if (valgtRHF %in% levels(RegData$RHF)){
+  #   TabAlderUt <- cbind(
+  #     'Antall, eget' = TabAlder[ ,valgtRHF],
+  #     'Andel, eget' = paste0(sprintf('%.0f', c(TabAlderPst[ ,valgtRHF], 100)), ' %'),
+  #     TabAlderAlle)
+  # } else {TabAlderAlle}
+
+  return(invisible(UtData <-
+                     list(Tab=TabAlderUt,
+                          utvalgTxt=UtData$utvalgTxt))) #c(UtData$utvalgTxt, paste0('Valgt RHF: ', valgtRHF)))))
 
 
-
-N <- dim(RegData)[1]
-gr <- seq(0, 90, ifelse(N<100, 25, 10) )
-RegData$AldersGr <- cut(RegData$Alder, breaks=c(gr, 110), include.lowest=TRUE, right=FALSE)
-grtxt <- if(N<100){c('0-24', '25-49', "50-74", "75+")} else {
-                c('0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+')}
-#grtxt <- c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))#paste(gr,sep='-')
-levels(RegData$AldersGr) <- grtxt #c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))
-
-TabAlder <- table(RegData$AldersGr) #, RegData$EnhetsNivaaVar)
-#TabAlder <- addmargins(TabAlder) #switch(enhetsNivaa, RHF = 'Totalt', HF = paste0(valgtRHF, ', totalt'))
-TabAlderPst <-TabAlder/N*100 #[-nrow(TabAlder),]
-#paste0(sprintf('%.0f', as.numeric(TabHjelp[1:2,'Andel'])),'%')
-
-TabAlderAlle <- cbind(
-  'Antall' = c(TabAlder, N),#[,'Sum'],
-  'Andel' = paste0(sprintf('%.0f', c(TabAlderPst, 100)), ' %') #[,'Sum']
-)
-row.names(TabAlderAlle)[nrow(TabAlderAlle)] <- 'Totalt'
-TabAlderUt <-  TabAlderAlle
-#   if (valgtRHF %in% levels(RegData$RHF)){
-#   TabAlderUt <- cbind(
-#     'Antall, eget' = TabAlder[ ,valgtRHF],
-#     'Andel, eget' = paste0(sprintf('%.0f', c(TabAlderPst[ ,valgtRHF], 100)), ' %'),
-#     TabAlderAlle)
-# } else {TabAlderAlle}
-
-return(invisible(UtData <-
-                   list(Tab=TabAlderUt,
-                        utvalgTxt=UtData$utvalgTxt))) #c(UtData$utvalgTxt, paste0('Valgt RHF: ', valgtRHF)))))
-
-
-# TabAlder <- table(RegData$AldersGr, RegData$EnhetsNivaaVar)
-# TabAlder <- addmargins(TabAlder) #switch(enhetsNivaa, RHF = 'Totalt', HF = paste0(valgtEnhet, ', totalt'))
-#
-# if (valgtEnhet == 'Ukjent') {
-#   TabAlder <- as.matrix(TabAlder[,ncol(TabAlder)], ncol=1) } else {
-#     if (valgtEnhet != 'Alle') {TabAlder <- TabAlder[,c(valgtEnhet, 'Sum')]}}
-# colnames(TabAlder)[ncol(TabAlder)] <- 'Hele landet'
-#
-# return(invisible(UtData <- list(Tab=TabAlder, utvalgTxt=UtData$utvalgTxt)))
+  # TabAlder <- table(RegData$AldersGr, RegData$EnhetsNivaaVar)
+  # TabAlder <- addmargins(TabAlder) #switch(enhetsNivaa, RHF = 'Totalt', HF = paste0(valgtEnhet, ', totalt'))
+  #
+  # if (valgtEnhet == 'Ukjent') {
+  #   TabAlder <- as.matrix(TabAlder[,ncol(TabAlder)], ncol=1) } else {
+  #     if (valgtEnhet != 'Alle') {TabAlder <- TabAlder[,c(valgtEnhet, 'Sum')]}}
+  # colnames(TabAlder)[ncol(TabAlder)] <- 'Hele landet'
+  #
+  # return(invisible(UtData <- list(Tab=TabAlder, utvalgTxt=UtData$utvalgTxt)))
 }
 
+#' Vise figurdata som tabell
+#' @param UtDataFraFig data fra figurfunksjoner, dvs. beregnede verdier
+#' @export
+lagTabavFigFord <- function(UtDataFraFig){
+  tab <-cbind(UtDataFraFig$Ngr$Hoved,
+              UtDataFraFig$AggVerdier$Hoved,
+              UtDataFraFig$Ngr$Rest,
+              UtDataFraFig$AggVerdier$Rest)
+  grtxt <- UtDataFraFig$grtxt
+  if ((min(nchar(grtxt)) == 5) & (max(nchar(grtxt)) == 5)) {
+    grtxt <- paste(substr(grtxt, 1,3), substr(grtxt, 4,5))}
+  rownames(tab) <- grtxt
+  kolnavn <- c('Antall' , 'Andel (%)')
+  colnames(tab) <- c(kolnavn, if(!is.null(UtDataFraFig$Ngr$Rest)){kolnavn})
+  # colnames(tab) <- c(paste0(UtDataFraFig$hovedgrTxt,', Antall'),
+  #                    paste0(UtDataFraFig$hovedgrTxt, ', Andel (%)'),
+  #                    if(!is.null(UtDataFraFig$Ngr$Rest)){paste0(UtDataFraFig$smltxt,', Antall')},
+  #                    if(!is.null(UtDataFraFig$Ngr$Rest)){paste0(UtDataFraFig$smltxt, ', Andel (%)')})
+
+  return(tab)
+}

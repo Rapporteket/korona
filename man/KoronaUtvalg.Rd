@@ -15,10 +15,9 @@ KoronaUtvalg(
   skjemastatusUt = 9,
   dodSh = 9,
   aarsakInn = 9,
-  reshID = 0,
   enhetsNivaa = "RHF",
   valgtEnhet = "Alle",
-  enhetsUtvalg = 0
+  enhetsUtvalg = 2
 )
 }
 \arguments{
@@ -30,24 +29,34 @@ KoronaUtvalg(
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
+\item{minald}{kjønn, 0-kvinne, 1-mann}
+
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{skjemastatusUt}{status på utskrivingsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{dodSh}{død på sykehus 0-nei, 1-ja}
+\item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 
-\item{aarsakInn}{covid-19 som hovedårsak til innleggelse}
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, 2-nei}
 
-\item{reshID}{reshID fra innlogging}
+\item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
+RHF (SC og LC-brukere), HF (LU-brukere)}
 
-\item{enhetsUtvalg}{enhetsutvalg...}
+\item{valgtEnhet}{- gis ut fra resh}
+
+\item{enhetsUtvalg}{0: hele landet,
+1: egen enhet mot resten av landet,
+2: egen enhet (NB: returnerer hele landet i ind$Rest)}
 }
 \value{
 
 }
 \description{
 Returnerer filtrert dataramme og utvalgstekst.
-Aktuelt med utvalg på HF og RHF-nivå
+NB: RegData filtreres IKKE på enhet. Velg enhetsutvalg 1 el 2 for
+å få ind$Hoved for "egen enhet"
+}
+\details{
 Argumentet \emph{enhetsUtvalg} har følgende valgmuligheter:
    \itemize{
     \item 0: Hele landet

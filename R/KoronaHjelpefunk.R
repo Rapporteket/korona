@@ -42,10 +42,10 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona'
 #' @export
 
 abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
-                              valgtRHF = 'Alle', Rpakke='korona') {
+                               Rpakke='korona') { #valgtRHF = 'Alle',
 
   #function(baseName, reshId, registryName,author, hospitalName, type) {
-  valgtRHF <- valgtRHF[[1]]
+  #valgtRHF <- valgtRHF[[1]]
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = "starter Abonnement: Pandemi-rapport")
