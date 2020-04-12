@@ -85,8 +85,8 @@ ui <- tagList(
                                    width = 3,
                                    uiOutput('KoroRappTxt'),
                                    h3('Koronarapport med samling av resultater'),
-                                   h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                                      Gå til fanen "Abonnement" for å bestille dette.'),
+                                   # h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
+                                   #    Gå til fanen "Abonnement" for å bestille dette.'),
                                    downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
                                    tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                    br(),
