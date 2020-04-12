@@ -179,7 +179,7 @@ koronabelegg_UI <- function(id){
     mainPanel(
 
       h2('Estimert belegg sykehussenger'),
-      h4('Tallene er basert på SSB sine tall på døgnplasser per HF fra 2018.'),
+      h4('Tallene er basert på SSB sine tall på døgnplasser per HF fra 2018 og beregnes som antall inneliggende delt på antall døgnplasser.'),
       # h3('Merk at ', style = "color:red"),
       br(),
 
