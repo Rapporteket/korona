@@ -12,7 +12,7 @@
 #'
 #' @return
 #' @export
-antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
+antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
                             skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
@@ -29,13 +29,16 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   RegDataAlle <- UtData$RegData
   RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- RegDataAlle$InnDato[is.na(RegDataAlle$UtDato)]
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
                                               levels = format(seq(min(RegDataAlle$UtDato), max(RegDataAlle$UtDato), by="day"), '%d.%B')),
-                                 uke = format(RegDataAlle$UtDato, '%V'),
-                                 maaned = format(RegDataAlle$UtDato, '%b%y'))
-
+                                 uke = factor(format(RegDataAlle$UtDato, '%V'),
+                                              levels = format(seq(min(RegDataAlle$UtDato), max(RegDataAlle$UtDato), by="week"), '%V')),
+                                 maaned = factor(format(RegDataAlle$UtDato, '%b.%y'),
+                                                 levels = format(seq(min(RegDataAlle$UtDato), max(RegDataAlle$UtDato), by="month"), '%b.%y'))
+  )
   #Trenger utvalg når totalen ikke er summen av det som vises.
   RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   } else {
@@ -83,7 +86,7 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 #'
 #' @return
 #' @export
-antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
+antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
                                skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
@@ -93,19 +96,23 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                                 LC = RegData$HF,
                                 LU = RegData$ShNavn)
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+  UtData <- KoronaUtvalg(RegData=RegData, datoFra=datoFra, datoTil=0, erMann=erMann, #minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
 
 
   RegDataAlle <- UtData$RegData
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$UtDato), ]
 
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
+
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
                                               levels = format(seq(min(RegDataAlle$UtDato), max(RegDataAlle$UtDato), by="day"), '%d.%B')),
-                                 uke = format(RegDataAlle$UtDato, '%V'),
-                                 maaned = format(RegDataAlle$UtDato, '%b%y'))
-
+                                 uke = factor(format(RegDataAlle$UtDato, '%V'),
+                                              levels = format(seq(min(RegDataAlle$UtDato), max(RegDataAlle$UtDato), by="week"), '%V')),
+                                 maaned = factor(format(RegDataAlle$UtDato, '%b.%y'),
+                                                 levels = format(seq(min(RegDataAlle$UtDato), max(RegDataAlle$UtDato), by="month"), '%b.%y'))
+  )
   #Trenger utvalg når totalen ikke er summen av det som vises.
   RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   } else {
