@@ -77,7 +77,7 @@ antIkkeFerdig <- sum(Pandemi$FormStatus==1, na.rm = T)
 
 \begin{frame}[fragile] {Hva er dette?}
 Dette er en automatisk generert rapport fra pandemiregisteret for registerering av Covid-19 pasienter.
-Dokumentet inneholder oppsummering av disse registreringene. Med mindre annet er angitt, er kun \textit{pasienter
+Dokumentet inneholder oppsummering av disse registreringene. Med mindre annet er angitt, er \textit{kun pasienter
 hvor Covid-19 er hovedårsak til innleggelsen}, tatt med.
 
 \begin{itemize}
@@ -142,10 +142,10 @@ xtable::xtable(InneliggPas, digits=0,
 \begin{frame}[fragile] {Covid-19-smitte hos andre pasienter}
 <<'ShusNaaAndre', results='asis'>>=
 # Antall som ligger på sykehus nå
+PandemiAndre <- KoronaUtvalg(RegData = PandemiAlle, aarsakInn = 2)$RegData
 AntAndre <- dim(PandemiAndre)[1]
 AntPaaShAndre <- sum(is.na(PandemiAndre$UtDato))
 
-PandemiAndre <- KoronaUtvalg(RegData = PandemiAlle, aarsakInn = 2)$RegData
 AlderGjsnAndre <- round(mean(PandemiAndre$Alder, na.rm = T))
 andelMennAndre <- paste0(sprintf('%.0f', 100*sum(PandemiAndre$erMann)/AntAndre), ' \\%')
 antDodAndre <- sum(PandemiAndre$StatusVedUtskriving==2, na.rm = T) #[indFerdigUt]
@@ -157,10 +157,11 @@ InneliggPasAndre <- rbind(as.matrix(InneliggHFandre),
       c('','Totalt', AntPaaShAndre))
 @
 
-Det er \Sexpr{AntReg} som er, eller har vært, innlagt av andre årsaker enn Covid-19, men også har Covid-19-smitte.
+Det er \Sexpr{AntAndre} pasienter som er, eller har vært, innlagt av andre årsaker enn Covid-19,
+men også har Covid-19-smitte.
 Hos disse er gjennomsnittsalderen \Sexpr{AlderGjsnAndre} år og \Sexpr{andelMennAndre} er menn.
 Det er \Sexpr{antDodAndre}
-av de \Sexpr{AntReg} som er døde.
+av de \Sexpr{AntAndre} som er døde.
 
 <<'ShusNaaAndreTab', results='asis'>>=
 xtable::xtable(InneliggPasAndre, digits=0,
@@ -180,16 +181,14 @@ xtable::xtable(InneliggPasAndre, digits=0,
 # Data <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)
 # Data$belegg_anslag
 # Data$belegg_anslag_txt
-BeleggTab <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)$belegg_anslag_txt
-
+BeleggTab <- as.data.frame(antallTidBelegg(RegData=Pandemi)$belegg_anslag_txt)
+#as.data.frame(BeleggTab)
 AntRader <- nrow(BeleggTab)
 fra <- max(1, (AntRader-20))
-rownames(BeleggTab[AntRader,]) <- 'Ant. somatiske senger'
+#rownames(BeleggTab[AntRader,]) <- 'Ant. somatiske senger'
 xtable::xtable(BeleggTab[fra:AntRader, ], digits=1,
                               caption='Andel av totalt antall senger som opptas av pasienter
                innlagt p.g.a. Covid-19')
-
-
 @
 \end{frame}
 

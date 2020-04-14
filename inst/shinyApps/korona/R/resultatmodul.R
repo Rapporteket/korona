@@ -163,11 +163,11 @@ koronabelegg_UI <- function(id){
                         br(),
                         h3('Velg variabel/tema og filtreringer i data'),
 
-                        selectInput(inputId = ns("skjemastatusInn"), label="Skjemastatus, inklusjon",
-                                    choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                        ),
                         selectInput(inputId = ns("aarsakInn"), label="Covid-19 hovedårsak til innleggelse?",
                                     choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                        ),
+                        selectInput(inputId = ns("skjemastatusInn"), label="Skjemastatus, inklusjon",
+                                    choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                         ),
                         selectInput(inputId = ns("erMann"), label="Kjønn",
                                     choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
