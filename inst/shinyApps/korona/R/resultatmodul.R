@@ -19,11 +19,11 @@ koronaresultater_UI <- function(id){
                         # selectInput(inputId = ns("valgtEnhetRes"), label="Velg enhet",
                         #             choices = 'Alle'
                         # ),
+                        selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
+                                    choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                        ),
                         selectInput(inputId = ns("skjemastatusInnRes"), label="Skjemastatus, inklusjon",
                                     choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                        ),
-                        selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
-                                    choices = c("Alle"=9, "Ja"=1, "Nei"=2)
                         ),
                         # selectInput(inputId = ns("dodShRes"), label="Utskrevne, tilstand",
                         #             choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)

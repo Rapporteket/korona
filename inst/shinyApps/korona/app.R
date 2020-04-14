@@ -159,8 +159,9 @@ ui <- tagList(
                                          tableOutput('tabFerdigeReg')
                                   )),
 
-                                h3('Antall innleggelser siste 10 dager'),
-                                h4('Hele tidsperioden, se fanen Resultater'),
+                                h3('Antall ny-innlagte siste 10 dager'),
+                                h5('Overføringer telles ikke med'),
+                                #h4('Hele tidsperioden, se fanen Resultater'),
                                 uiOutput('utvalgAntOpph'),
                                 tableOutput('tabAntOpph'),
                                 br(),
@@ -222,11 +223,11 @@ ui <- tagList(
                                               selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
                                                           choices = 'Alle'
                                               ),
-                                              selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
-                                                          choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                                              ),
                                               selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
                                                           choices = c("Ja"=1, "Alle"=9, "Ja"=1, "Nei"=2)
+                                              ),
+                                              selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
+                                                          choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                               ),
                                               selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
                                                           choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
