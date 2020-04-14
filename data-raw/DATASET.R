@@ -6,6 +6,8 @@
 ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
                         stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
 
+ReshNivaa <- ReshNivaa %>% mutate_if(is.character, enc2utf8)
+
 usethis::use_data(ReshNivaa, overwrite = TRUE, internal = FALSE)
 
 kodebok_inklusjon <- xlsx::read.xlsx2('I:/korona/Kodebok_pandemiregisteret01042020.xlsx', sheetIndex = '2. Pandemiskjema. Skjemaversjon')
@@ -23,6 +25,7 @@ usethis::use_data(kodebok, overwrite = TRUE, internal = FALSE)
 belegg_ssb <- read.table(system.file(file.path('extdata', 'BeleggSSB.csv'), package = 'korona'), sep=';',
                          stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
 names(belegg_ssb)[names(belegg_ssb)=="Døgnplasser.2018"] <- "Dognplasser.2018"
+belegg_ssb <- belegg_ssb %>% mutate_if(is.character, enc2utf8)
 
 belegg_ssb$HFresh <- ReshNivaa$HFresh[pmatch(trimws(tolower(belegg_ssb$region)), trimws(tolower(ReshNivaa$HFnavn)))]
 belegg_ssb$HF <- ReshNivaa$HFnavn[pmatch(trimws(tolower(belegg_ssb$region)), trimws(tolower(ReshNivaa$HFnavn)))]

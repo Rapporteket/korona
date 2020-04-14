@@ -110,7 +110,7 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.UtsAntiviralBehandling
   ,Inn.UtsKarbapenem
   ,Inn.UtsKinolon
-  ,Inn.Utskrivningsdato
+  -- ,Inn.Utskrivningsdato AS UtskrivningsdatoInnSkjema
   ,Inn.UtsMakrolid
   ,Inn.UtsPenicillin
   ,Inn.UtsPenicillinEnzymhemmer
@@ -181,6 +181,7 @@ varUtKoblet <- c('UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.FormDate AS FormDateUt
   ,Ut.OverfortAnnetSykehusUtskrivning
   ,Ut.StatusVedUtskriving
+  ,Ut.Utskrivningsdato
   ')
 
 if (koble==0){

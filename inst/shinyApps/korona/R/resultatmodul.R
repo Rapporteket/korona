@@ -19,11 +19,11 @@ koronaresultater_UI <- function(id){
                         # selectInput(inputId = ns("valgtEnhetRes"), label="Velg enhet",
                         #             choices = 'Alle'
                         # ),
+                        selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
+                                    choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                        ),
                         selectInput(inputId = ns("skjemastatusInnRes"), label="Skjemastatus, inklusjon",
                                     choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                        ),
-                        selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
-                                    choices = c("Alle"=9, "Ja"=1, "Nei"=2)
                         ),
                         # selectInput(inputId = ns("dodShRes"), label="Utskrevne, tilstand",
                         #             choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
@@ -179,7 +179,7 @@ koronabelegg_UI <- function(id){
     mainPanel(
 
       h2('Estimert belegg sykehussenger'),
-      h4('Tallene er basert på SSB sine tall på døgnplasser per HF fra 2018.'),
+      h4('Tallene er basert på SSB sine tall på døgnplasser per HF fra 2018 og beregnes som antall inneliggende delt på antall døgnplasser.'),
       # h3('Merk at ', style = "color:red"),
       br(),
 
