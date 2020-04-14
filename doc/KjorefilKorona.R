@@ -20,6 +20,9 @@ enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
+
+test <- RegData[ , c("FormDateUt", "Utskrivningsdato",'UtskrivningsdatoInnSkjema', "FormStatus", "FormStatusUt" )]
+
 test <- KoronaUtvalg(RegData=RegData, erMann=1, skjemastatusInn=2, aarsakInn=1)
 test$utvalgTxt
 test$hovedgrTxt
