@@ -329,7 +329,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
   belegg_anslag_txt <- belegg_anslag %>% map_df(as.character)
   belegg_anslag_txt[-dim(belegg_anslag_txt)[1], 2:dim(belegg_anslag_txt)[2]] <-
     belegg_anslag_txt[-dim(belegg_anslag_txt)[1], 2:dim(belegg_anslag_txt)[2]] %>%
-    map_df(function(x) {paste0(round(as.numeric(x)), ' %')})
+    map_df(function(x) {paste0(round(as.numeric(x),1), ' %')})
 
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
   return(UtData <- list(utvalgTxt=c(valgtEnhet, UtData$utvalgTxt), Ntest=dim(RegData)[1], Tab_tidy=TabTidEnh,

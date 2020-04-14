@@ -52,7 +52,7 @@ paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
 Pandemi <- KoronaPreprosesser(Pandemi)
 PandemiAlle <- Pandemi
-Pandemi <-  KoronaUtvalg(RegData=PandemiAlle, aarsakInn = 1)
+Pandemi <-  KoronaUtvalg(RegData=PandemiAlle, aarsakInn = 1)$RegData
 #PandemiInn <- KoronaPreprosesser(PandemiInn)
 
 # PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
@@ -77,8 +77,8 @@ antIkkeFerdig <- sum(Pandemi$FormStatus==1, na.rm = T)
 
 \begin{frame}[fragile] {Hva er dette?}
 Dette er en automatisk generert rapport fra pandemiregisteret for registerering av Covid-19 pasienter.
-Dokumentet inneholder oppsummering av disse registreringene. Med mindre annet er angitt, er kun pasienter
-hvor Covid-19 er hovedårsak til innleggelsen, tatt med.
+Dokumentet inneholder oppsummering av disse registreringene. Med mindre annet er angitt, er kun \bf{pasienter
+hvor Covid-19 er hovedårsak til innleggelsen}, tatt med.
 
 \begin{itemize}
 \item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke, med mindre dette er angitt
@@ -129,7 +129,7 @@ InneliggPas <- rbind(as.matrix(InneliggHF),
       c('','Totalt', AntPaaSh))
 
 xtable::xtable(InneliggPas, digits=0,
-                              caption='Antall inneliggende pasienter (mangler utskrivingsdato) på hvert HF.')
+                              caption='Antall inneliggende pasienter (mangler utskrivingsdato) på hvert HF, samt totalt.')
 # indNaa <- which(is.na(Pandemi$UtDato))
 # AntPaaRHFnaa <- table(Pandemi$InnDag[indNaa], Pandemi$RHF[indNaa])
 # AntPaaRHFnaa <- addmargins(AntPaaRHFnaa)
@@ -139,7 +139,7 @@ xtable::xtable(InneliggPas, digits=0,
 @
 \end{frame}
 
-\begin{frame}[fragile] {Antall som ligger på sykehus av andre årsaker, men med Covid-19-smitte}
+\begin{frame}[fragile] {Covid-19-smitte hos andre pasienter}
 <<'ShusNaaAndre', results='asis'>>=
 # Antall som ligger på sykehus nå
 
@@ -158,9 +158,10 @@ InneliggPasAndre <- rbind(as.matrix(InneliggHFandre),
       c('','Totalt', AntPaaShAndre))
 @
 
-For pasienter som har Covid-19, men er eller har vært lagt inn på sykehuset av andre årsaker, er
-gjennomsnittsalderen \Sexpr{AlderGjsnAndre} år og \Sexpr{andelMennAndre} er menn. Det er \Sexpr{antDodAndre}
-av \Sexpr{AntReg} som er døde.
+Det er \Sexpr{AntReg} som er, eller har vært, innlagt av andre årsaker enn Covid-19, men også har Covid-19-smitte.
+Hos disse er gjennomsnittsalderen \Sexpr{AlderGjsnAndre} år og \Sexpr{andelMennAndre} er menn.
+Det er \Sexpr{antDodAndre}
+av de \Sexpr{AntReg} som er døde.
 
 <<'ShusNaaAndreTab', results='asis'>>=
 xtable::xtable(InneliggPasAndre, digits=0,
@@ -177,8 +178,17 @@ xtable::xtable(InneliggPasAndre, digits=0,
 
 \begin{frame}[fragile] {Belegg}
 <<'Belegg', results='asis'>>=
-BeleggTab <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)
+# Data <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)
+# Data$belegg_anslag
+# Data$belegg_anslag_txt
+BeleggTab <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)$belegg_anslag_txt
 
+AntRader <- nrow(BeleggTab)
+fra <- max(1, (AntRader-20))
+rownames(BeleggTab[AntRader,]) <- 'Ant. somatiske senger'
+xtable::xtable(BeleggTab[fra:AntRader, ], digits=1,
+                              caption='Andel av totalt antall senger som opptas av pasienter
+               innlagt p.g.a. Covid-19')
 
 
 @
@@ -252,11 +262,12 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', n
 
 \begin{frame}[fragile] {Oppsummering av ferdigstilte registreringer}
 
-<<'Risikofaktorer', results='asis'>>=
+<<'Oppsum', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 
-xtable::xtable(FerdigeReg, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
+               #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Oppsummering, utskrevne pasienter')
 @
 \end{frame}

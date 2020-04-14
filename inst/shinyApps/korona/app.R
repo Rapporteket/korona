@@ -200,18 +200,19 @@ ui <- tagList(
                                               #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
                                               selectInput(inputId = 'valgtVarFord', label='Velg variabel',
                                                           choices = c("Alder"='alder',
+                                                                      'Demografi' = 'demografi',
                                                                       "Liggetid"='liggetid',
                                                                       'Risikofaktorer, innleggelse'='risikoInn',
                                                                       'Antibiotika, innleggelse'='antibiotikaInn',
                                                                       'Antibiotika, utskriving'='antibiotikaUt',
-                                                                      'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',
-                                                                      'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
                                                                       'Respirasjonssvikt, innleggelse' = 'respSviktInn',
                                                                       'Respirasjonssvikt på sykehus' = 'respSviktUt',
-                                                                      'Tilstand ved innleggelse' = 'tilstandInn',
+                                                                      'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',
+                                                                      'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
+                                                                      'Tilstand ved innleggelse' = 'tilstandInn'
                                                                       #'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
                                                                       #'Kommer: sanns. smittested' = 'smittested',
-                                                                      'Demografi' = 'demografi'
+
                                                           )
                                               ),
                                               selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
