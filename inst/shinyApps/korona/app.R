@@ -102,11 +102,11 @@ ui <- tagList(
                                    #             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
                                    # ),
 
-                                   selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
-                                               choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                                   ),
                                    selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
                                                choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                                   ),
+                                   selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
+                                               choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                    ),
                                    selectInput(inputId = "dodSh", label="Utskrevne, tilstand",
                                                choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)

@@ -184,7 +184,7 @@ BeleggTab <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)$belegg_anslag_txt
 
 AntRader <- nrow(BeleggTab)
 fra <- max(1, (AntRader-20))
-rownames(BeleggTab[AntRader,]) <- 'Ant. somatiske senger'
+#rownames(BeleggTab[AntRader,]) <- 'Ant. somatiske senger'
 xtable::xtable(BeleggTab[fra:AntRader, ], digits=1,
                               caption='Andel av totalt antall senger som opptas av pasienter
                innlagt p.g.a. Covid-19')
