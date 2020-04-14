@@ -145,7 +145,7 @@ ui <- tagList(
                                          h3('Inneliggende pasienter'),
                                          uiOutput('utvalgNaa'),
                                          tableOutput('statusNaaShTab'),
-                                         h6('Flere variabler?', style = "color:red"),
+                                         #h6('Flere variabler?', style = "color:red"),
                                          # HTML('<hr height="8" style="color:purple;background-color:purple;"></hr>'),
                                          # HTML('<hr size="10" />'),
                                          hr(),
@@ -180,8 +180,7 @@ ui <- tagList(
 
              #-----------Resultater-------------------------------------
              tabPanel("Resultater",
-                      tags$style(HTML("
-    .tabbable > .nav > li > a {background-color: #DBDBDB;  color:black; width: 300PX;}")),
+                      #tags$style(HTML(".tabbable > .nav > li > a {background-color: #DBDBDB;  color:black; width: 300PX;}")),
                       tabsetPanel(
                         tabPanel("Tellinger",
                                  koronaresultater_UI("resultater_id")
