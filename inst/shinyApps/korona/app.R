@@ -224,7 +224,7 @@ ui <- tagList(
                                                           choices = 'Alle'
                                               ),
                                               selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
-                                                          choices = c("Ja"=1, "Alle"=9, "Ja"=1, "Nei"=2)
+                                                          choices = c("Ja"=1, "Alle"=9, "Nei"=2)
                                               ),
                                               selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
                                                           choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
