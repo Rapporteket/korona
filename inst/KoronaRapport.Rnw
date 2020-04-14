@@ -142,15 +142,14 @@ xtable::xtable(InneliggPas, digits=0,
 \begin{frame}[fragile] {Covid-19-smitte hos andre pasienter}
 <<'ShusNaaAndre', results='asis'>>=
 # Antall som ligger på sykehus nå
+AntAndre <- dim(PandemiAndre)[1]
+AntPaaShAndre <- sum(is.na(PandemiAndre$UtDato))
 
 PandemiAndre <- KoronaUtvalg(RegData = PandemiAlle, aarsakInn = 2)$RegData
 AlderGjsnAndre <- round(mean(PandemiAndre$Alder, na.rm = T))
-andelMennAndre <- paste0(sprintf('%.0f', 100*sum(PandemiAndre$erMann)/Ntot), ' \\%')
+andelMennAndre <- paste0(sprintf('%.0f', 100*sum(PandemiAndre$erMann)/AntAndre), ' \\%')
 antDodAndre <- sum(PandemiAndre$StatusVedUtskriving==2, na.rm = T) #[indFerdigUt]
 
-
-AntReg <- dim(PandemiAndre)[1]
-AntPaaShAndre <- sum(is.na(PandemiAndre$UtDato))
 
 indNaa <- which(is.na(PandemiAndre$UtDato))
 InneliggHFandre <- PandemiAndre[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
