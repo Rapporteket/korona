@@ -77,12 +77,12 @@ antIkkeFerdig <- sum(Pandemi$FormStatus==1, na.rm = T)
 
 \begin{frame}[fragile] {Hva er dette?}
 Dette er en automatisk generert rapport fra pandemiregisteret for registerering av Covid-19 pasienter.
-Dokumentet inneholder oppsummering av disse registreringene. Med mindre annet er angitt, er kun \bf{pasienter
+Dokumentet inneholder oppsummering av disse registreringene. Med mindre annet er angitt, er kun \textit{pasienter
 hvor Covid-19 er hovedårsak til innleggelsen}, tatt med.
 
 \begin{itemize}
 \item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke, med mindre dette er angitt
-Det er \Sexpr{antIkkeFerdig} av de \Sexpr{Ntot} inklusjonsskjemaene som ikke er ferdigstilt.
+Det er \Sexpr{antIkkeFerdig} av de \Sexpr{Ntot} pasientene som har uferdige inklusjonsskjema.
 \item For å luke bort feilregistreringer, er registrering av innleggelse før 15.februar
 og etter dagens dato, filtrert bort.
 \item Resultatene er basert på antall pasienter, dvs. at skjema for overflyttede pasienter
