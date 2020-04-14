@@ -48,7 +48,7 @@ if (paaServer) {
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
-             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivingsdato')
   KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
                     by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 } #hente data
@@ -106,7 +106,7 @@ ui <- tagList(
                                                choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                    ),
                                    selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
-                                               choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                                               choices = c("Ja"=1, "Alle"=9, "Nei"=2)
                                    ),
                                    selectInput(inputId = "dodSh", label="Utskrevne, tilstand",
                                                choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
@@ -225,7 +225,7 @@ ui <- tagList(
                                                           choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                               ),
                                               selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
-                                                          choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                                                          choices = c("Ja"=1, "Alle"=9, "Ja"=1, "Nei"=2)
                                               ),
                                               selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
                                                           choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
@@ -375,7 +375,7 @@ server <- function(input, output, session) {
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
   }
-
+print(finnesEgenResh)
   #Filtreringsnivå for data:
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
