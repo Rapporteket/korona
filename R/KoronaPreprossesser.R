@@ -142,6 +142,8 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       #head(as.character(RegData$RHF))
       #RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
 
+      #RegData$HF <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
+
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
       RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',

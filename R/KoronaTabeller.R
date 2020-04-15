@@ -34,7 +34,7 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, #valgtVar='innla
   # } else {
   #   subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
   # }
-  enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
+  enhetsNivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
 
   #Skal også ha oppsummering for hele landet
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110
