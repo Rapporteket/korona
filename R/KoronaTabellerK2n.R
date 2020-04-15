@@ -33,11 +33,11 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
-                                              levels = format(rev(seq(Sys.Date(), min(RegDataAlle$UtDato), by=paste0('-1 day'))), '%d.%B')),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 day'))), '%d.%B')),
                                  uke = factor(format(RegDataAlle$UtDato, '%V'),
-                                              levels = format(rev(seq(Sys.Date(), min(RegDataAlle$UtDato), by=paste0('-1 week'))), '%V')),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 week'))), '%V')),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), min(RegDataAlle$UtDato), by=paste0('-1 month'))), '%b.%Y')))
+                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 month'))), '%b.%Y')))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
 
@@ -107,11 +107,11 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
-                                              levels = format(rev(seq(Sys.Date(), min(RegDataAlle$UtDato), by=paste0('-1 day'))), '%d.%B')),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 day'))), '%d.%B')),
                                  uke = factor(format(RegDataAlle$UtDato, '%V'),
-                                              levels = format(rev(seq(Sys.Date(), min(RegDataAlle$UtDato), by=paste0('-1 week'))), '%V')),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 week'))), '%V')),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), min(RegDataAlle$UtDato), by=paste0('-1 month'))), '%b.%Y')))
+                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 month'))), '%b.%Y')))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
 
@@ -217,7 +217,8 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
   RegDataAlle <- UtData$RegData
   if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$InnDato >= datoFra), ]} # filtrerer på dato
-  datoer <- seq(min(RegDataAlle$InnDato), today(), by="day")
+  # datoer <- seq(min(RegDataAlle$InnDato), today(), by="day")
+  datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), today(), by="day")
 
   if (tidsenhet=='dag') {
     names(datoer) <- format(datoer, '%d.%B')

@@ -9,6 +9,7 @@ antallTidEnhTab(
   RegData,
   tidsenhet = "dag",
   erMann = 9,
+  datoFra = 0,
   tilgangsNivaa = "SC",
   valgtEnhet = "Alle",
   skjemastatusInn = 9,
@@ -22,6 +23,8 @@ antallTidEnhTab(
 \item{tidsenhet}{'dag' (standard), 'uke', 'maaned'}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
+
+\item{datoFra}{startdato 'yyyy-mm-dd'}
 
 \item{tilgangsNivaa}{SC, LC og LU bestemmer hvilket enhetsNivaa
 ('RHF', 'HF', 'ShNavn') resultatene skal vises for}

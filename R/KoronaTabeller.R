@@ -12,16 +12,26 @@
 #'
 #' @return
 #' @export
-antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, #valgtVar='innlagt',
+antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valgtVar='innlagt',
                             tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF',
                             skjemastatusInn=9, aarsakInn=9, dodSh=9){
   #valgtEnhet representerer eget RHF/HF
 #if (valgtVar == 'utskrevet') {}
 
-  RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
-                                                 dag = 'Dag',
-                                                 uke = 'UkeNr',
-                                                 maaned = 'MndAar')])
+  # RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
+  #                                                dag = 'Dag',
+  #                                                uke = 'UkeNr',
+  #                                                maaned = 'MndAar')])
+  if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
+  RegData$TidsVar <- switch (tidsenhet,
+                                 dag = factor(format(RegData$InnDato, '%d.%B'),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 day'))), '%d.%B')),
+                                 uke = factor(format(RegData$InnDato, '%V'),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 week'))), '%V')),
+                                 maaned = factor(format(RegData$InnDato, '%b.%Y'),
+                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 month'))), '%b.%Y')))
+
+  RegData <- RegData[!is.na(RegData$TidsVar), ]
 
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa,
@@ -37,11 +47,10 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, #valgtVar='innla
   enhetsNivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
 
   #Skal også ha oppsummering for hele landet
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110
+  UtData <- KoronaUtvalg(RegData=RegData, datoFra=, datoTil=0, erMann=erMann, #minald=0, maxald=110
                          enhetsNivaa = enhetsNivaa, valgtEnhet = valgtEnhet,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
                          dodSh=dodSh)
-
 
   RegDataAlle <- UtData$RegDataAlle
   RegData <- UtData$RegData

@@ -81,7 +81,8 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
     AntTab <- switch(input$valgtVar,
                      'antreg'= antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
                                                valgtEnhet= egenEnhet, #nivå avgjort av rolle
-                                               tidsenhet='dag',
+                                               tidsenhet=input$velgTidsenhet,
+                                               datoFra=datoFra(),
                                                aarsakInn = as.numeric(input$aarsakInnRes),
                                                skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                erMann=as.numeric(input$erMannRes)),
