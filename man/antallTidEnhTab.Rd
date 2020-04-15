@@ -10,10 +10,10 @@ antallTidEnhTab(
   tidsenhet = "dag",
   erMann = 9,
   tilgangsNivaa = "SC",
+  valgtEnhet = "Alle",
   skjemastatusInn = 9,
   aarsakInn = 9,
-  dodSh = 9,
-  valgtEnhet = "Alle"
+  dodSh = 9
 )
 }
 \arguments{
@@ -26,13 +26,13 @@ antallTidEnhTab(
 \item{tilgangsNivaa}{SC, LC og LU bestemmer hvilket enhetsNivaa
 ('RHF', 'HF', 'ShNavn') resultatene skal vises for}
 
+\item{valgtEnhet}{NULL for SC-bruker, ellers eget RHF/HF}
+
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, 2-nei}
 
 \item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
-
-\item{valgtEnhet}{NULL for SC-bruker, ellers eget RHF/HF}
 }
 \value{
 
