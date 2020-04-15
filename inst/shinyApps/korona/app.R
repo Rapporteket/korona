@@ -169,8 +169,8 @@ ui <- tagList(
                                   ),
                                 column(width=6, offset = 1,
                                        h3('Antall utskrevne siste 10 dager'),
-                                       uiOutput('utvalgAntUtskr'),
-                                       tableOutput('tabAntUtskr')
+                                       #uiOutput('utvalgAntUtskr'),
+                                       #tableOutput('tabAntUtskr')
                                        )
                                 ),
                                 br(),
@@ -490,8 +490,8 @@ server <- function(input, output, session) {
       AntTab$Tab[(Nrad-10):Nrad,]}, rownames = T, digits=0, spacing="xs"
     )
 #Antall utskrevne
-    output$tvalgAntUtskr
-    output$tabAntUtskr <-
+    #output$tvalgAntUtskr
+    #output$tabAntUtskr <-
 
     #Tab status nå
     statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=egetEnhetsNivaa, #
