@@ -12,9 +12,11 @@
 #'
 #' @return
 #' @export
-antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
-                            skjemastatusInn=9, aarsakInn=9, dodSh=9, valgtEnhet='Alle'){
+antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, #valgtVar='innlagt',
+                            tilgangsNivaa='SC', valgtEnhet='Alle', enhetsNivaa='RHF',
+                            skjemastatusInn=9, aarsakInn=9, dodSh=9){
   #valgtEnhet representerer eget RHF/HF
+#if (valgtVar == 'utskrevet') {}
 
   RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
                                                  dag = 'Dag',
@@ -22,26 +24,27 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                                                  maaned = 'MndAar')])
 
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
-  RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
+  RegData$EnhNivaaVis <- switch(tilgangsNivaa,
                                 SC = RegData$RHF,
                                 LC = RegData$HF,
                                 LU = RegData$ShNavn)
 
+  #Trenger utvalg når totalen ikke er summen av det som vises.
+  # RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
+  # } else {
+  #   enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
+  #   subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
+  # }
 
-  #Benytter ikke utvalgsfila til enhetsfiltrering. Skal også ha oppsummering for hele landet
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+  #Skal også ha oppsummering for hele landet
+  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110
+                         enhetsNivaa = enhetsNivaa, valgtEnhet = valgtEnhet,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
                          dodSh=dodSh)
 
 
-  RegDataAlle <- UtData$RegData
-
-  #Trenger utvalg når totalen ikke er summen av det som vises.
-  RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
-  } else {
-    enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
-    subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
-  }
+  RegDataAlle <- UtData$RegDataAlle
+  RegData <- UtData$RegData
 
   Ntest <- dim(RegData)[1]
 

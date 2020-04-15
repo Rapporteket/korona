@@ -159,11 +159,19 @@ ui <- tagList(
                                          tableOutput('tabFerdigeReg')
                                   )),
 
+                                fluidRow(
+                                  column(width=6,
                                 h3('Antall ny-innlagte siste 10 dager'),
                                 h5('Overføringer telles ikke med'),
-                                #h4('Hele tidsperioden, se fanen Resultater'),
                                 uiOutput('utvalgAntOpph'),
                                 tableOutput('tabAntOpph'),
+                                  ),
+                                column(width=6, offset = 1,
+                                       h3('Antall utskrevne siste 10 dager'),
+                                       uiOutput('utvalgAntUtskr'),
+                                       tableOutput('tabAntUtskr')
+                                       )
+                                ),
                                 br(),
                                 fluidRow(
                                   column(width=3,
@@ -449,15 +457,13 @@ server <- function(input, output, session) {
   observeEvent(input$tilbakestillValgRes, shinyjs::reset("brukervalgRes"))
 
   observe({
-
+#Antall innleggelser
     AntTab <- antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag',
                               aarsakInn = as.numeric(input$aarsakInn),
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               erMann=as.numeric(input$erMann))
-    #dodSh=as.numeric(input$dodSh))
-    #NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
     UtData <- KoronaUtvalg(RegData=KoroData,
                            enhetsNivaa=egetEnhetsNivaa, valgtEnhet=egenEnhet,
                            aarsakInn = as.numeric(input$aarsakInn),
@@ -482,6 +488,9 @@ server <- function(input, output, session) {
       Nrad <- nrow(AntTab$Tab)
       AntTab$Tab[(Nrad-10):Nrad,]}, rownames = T, digits=0, spacing="xs"
     )
+#Antall utskrevne
+    output$tvalgAntUtskr
+    output$tabAntUtskr <-
 
     #Tab status nå
     statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=egetEnhetsNivaa, #
