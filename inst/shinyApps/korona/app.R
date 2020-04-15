@@ -40,15 +40,16 @@ if (paaServer) {
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
-  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-11 21-11-32.txt', sep=';',
+  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-14 16-43-06.txt', sep=';',
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-11 21-11-32.txt', sep=';',
+  KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
+  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-14 16-43-06.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
-             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivingsdato')
+             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
   KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
                     by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 } #hente data
