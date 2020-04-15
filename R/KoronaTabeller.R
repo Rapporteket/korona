@@ -78,17 +78,23 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=9, erMann=9){
 
-  UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
+  UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
                          aarsakInn=aarsakInn, erMann=erMann)
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
   inneliggere <- is.na(RegData$UtDato)
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$InnTidspunkt[inneliggere], units='days'))
-  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 50], na.rm = T), 1)
+  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 90], na.rm = T), 1)
+
+  idag <- Sys.Date() #'2020-04-10' #
+  innIgaar <- length(which(RegData$InnDato == (as.Date(idag)-1)))
+  utIgaar <- length(which(RegData$UtDato == (as.Date(idag)-1)))
 
   statusTab <- rbind(
-    'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
+    'På sykehus nå' = c(AntPaaShNaa, paste0(LiggetidNaaGjsn, ' dager')),
+    'Innlagt i går' = c(innIgaar,''),
+    'Utskrevet i går' = c(utIgaar,'')
   )
   colnames(statusTab) <- c('Antall', 'Liggetid (gj.sn)')
   xtable::xtable(statusTab,

@@ -143,7 +143,7 @@ ui <- tagList(
                                 br(),
                                 fluidRow(
                                   column(width = 4,
-                                         h3('Inneliggende pasienter'),
+                                         h3('Status nå'),
                                          uiOutput('utvalgNaa'),
                                          tableOutput('statusNaaShTab'),
                                          #h6('Flere variabler?', style = "color:red"),
@@ -378,7 +378,7 @@ server <- function(input, output, session) {
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
   }
-print(finnesEgenResh)
+
   #Filtreringsnivå for data:
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
@@ -485,7 +485,7 @@ print(finnesEgenResh)
     )
 
     #Tab status nå
-    statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #
+    statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=egetEnhetsNivaa, #
                                  valgtEnhet=input$valgtEnhet,
                                  aarsakInn = as.numeric(input$aarsakInn))
     #erMann=as.numeric(input$erMann))
@@ -493,15 +493,20 @@ print(finnesEgenResh)
     output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
     #Skjema i kladd
-    AntKladdShus <- table(KoroData$ShNavn[which(KoroData$FormStatus==1)], dnn= 'Skjema i kladd')
+    KoroDataEget <- KoronaUtvalg(RegData=KoroData, valgtEnhet = egenEnhet, enhetsNivaa = egetEnhetsNivaa)$RegData
+    indKladdEget <- which(KoroDataEget$FormStatus==1)
+    if (length(indKladdEget)>0) {
+    AntKladdShus <- table(KoroDataEget$ShNavn[indKladdEget], dnn= 'Skjema i kladd')
     AntKladdShus <-  xtable::xtable(addmargins(sort(AntKladdShus, decreasing = T)))
     output$skjemaInnKladdTab <- renderTable({AntKladdShus}, rownames = T, digits=0, spacing="xs")
+    } else {output$skjemaInnKladdTab <- renderText('Alle inklusjonsskjema ferdigstilt!')}
 
 
     #Tab ferdigstilte
     TabFerdig <- FerdigeRegTab(RegData=KoroData,
                                aarsakInn = as.numeric(input$aarsakInn),
                                valgtEnhet=input$valgtEnhet,
+                               enhetsNivaa = egetEnhetsNivaa,
                                dodSh=as.numeric(input$dodSh),
                                erMann=as.numeric(input$erMann))
 
