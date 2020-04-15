@@ -11,15 +11,21 @@ erMann=9
 aarsakInn=9
 skjemastatusInn=9
 skjemastatusUt <- 9
-aarsakInn<- 9
+aarsakInn<- 9  #covid-19 som hovedårsak til innleggelse 1-ja, 2-nei
 dodSh=9
 minald <- 0
 maxald <- 110
+#reshID: 101719 (UNN HF), '100100' (Vestfold)
 valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
+
+FerdigeRegTab(RegData=Pandemi,
+              aarsakInn = 1,
+              valgtEnhet=valgtEnhet,
+              enhets)
 
 test <- RegData[ , c("FormDateUt", "Utskrivningsdato",'UtskrivningsdatoInnSkjema', "FormStatus", "FormStatusUt" )]
 
