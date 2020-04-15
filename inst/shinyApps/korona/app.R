@@ -163,19 +163,18 @@ ui <- tagList(
                                   )),
 
                                 fluidRow(
-                                  column(width=4,
+                                  #column(width=4,
                                 h3('Antall ny-innlagte siste 10 dager'),
                                 h5('Overføringer telles ikke med'),
                                 uiOutput('utvalgAntOpph'),
                                 tableOutput('tabAntOpph'),
                                   ),
-                                column(width=5, offset = 3,
+                                fluidRow(#column(width=5, offset = 3,
                                        br(),
                                        h3('Antall utskrevne siste 10 dager'),
                                        uiOutput('utvalgAntUtskr'),
                                        br(),
                                        tableOutput('tabAntUtskr')
-                                       )
                                 ),
                                 br(),
                                 fluidRow(
