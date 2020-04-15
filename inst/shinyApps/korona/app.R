@@ -142,7 +142,7 @@ ui <- tagList(
                                 #h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
                                 fluidRow(
-                                  column(width = 4,
+                                  column(width = 5,
                                          h3('Status nå'),
                                          uiOutput('utvalgNaa'),
                                          tableOutput('statusNaaShTab'),
@@ -151,26 +151,30 @@ ui <- tagList(
                                          # HTML('<hr size="10" />'),
                                          hr(),
                                          h4('WALL OF SHAME'),
-                                         tableOutput('skjemaInnKladdTab')
-                                         #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
+                                         column(width=4,
+                                         tableOutput('skjemaInnKladdTab')),
+                                         column(width=4, offset=2,
+                                                tableOutput('skjemaUtKladdTab')                                                )
                                   ),
-                                  column(width=5, offset=1,
+                                  column(width=5, #offset=1,
                                          uiOutput('tittelFerdigeReg'),
                                          uiOutput('utvalgFerdigeReg'),
                                          tableOutput('tabFerdigeReg')
                                   )),
 
                                 fluidRow(
-                                  column(width=6,
+                                  column(width=4,
                                 h3('Antall ny-innlagte siste 10 dager'),
                                 h5('Overføringer telles ikke med'),
                                 uiOutput('utvalgAntOpph'),
                                 tableOutput('tabAntOpph'),
                                   ),
-                                column(width=6, offset = 1,
+                                column(width=5, offset = 3,
+                                       br(),
                                        h3('Antall utskrevne siste 10 dager'),
-                                       #uiOutput('utvalgAntUtskr'),
-                                       #tableOutput('tabAntUtskr')
+                                       uiOutput('utvalgAntUtskr'),
+                                       br(),
+                                       tableOutput('tabAntUtskr')
                                        )
                                 ),
                                 br(),
@@ -490,8 +494,16 @@ server <- function(input, output, session) {
       AntTab$Tab[(Nrad-10):Nrad,]}, rownames = T, digits=0, spacing="xs"
     )
 #Antall utskrevne
-    #output$tvalgAntUtskr
-    #output$tabAntUtskr <-
+    AntUtskr <- antallTidUtskrevne(RegData=KoroData, tilgangsNivaa=rolle,
+                                             valgtEnhet= egenEnhet, #enhetsnivå avgjort av rolle
+                                             tidsenhet='dag',
+                                             aarsakInn = as.numeric(input$aarsakInn),
+                                             skjemastatusInn=as.numeric(input$skjemastatusInn),
+                                             erMann=as.numeric(input$erMann))
+    output$tabAntUtskr <- renderTable({
+      Nrad <- nrow(AntUtskr$Tab)
+      AntUtskr$Tab[(Nrad-10):Nrad,]}, rownames = T, digits=0, spacing="xs")
+    output$utvalgAntUtskr <- renderUI(h5(HTML(paste0(AntTab$utvalgTxt, '<br />'))))
 
     #Tab status nå
     statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=egetEnhetsNivaa, #
@@ -505,10 +517,17 @@ server <- function(input, output, session) {
     KoroDataEget <- KoronaUtvalg(RegData=KoroData, valgtEnhet = egenEnhet, enhetsNivaa = egetEnhetsNivaa)$RegData
     indKladdEget <- which(KoroDataEget$FormStatus==1)
     if (length(indKladdEget)>0) {
-    AntKladdShus <- table(KoroDataEget$ShNavn[indKladdEget], dnn= 'Skjema i kladd')
+    AntKladdShus <- table(KoroDataEget$ShNavn[indKladdEget], dnn= 'Inkl.skjema i kladd')
     AntKladdShus <-  xtable::xtable(addmargins(sort(AntKladdShus, decreasing = T)))
     output$skjemaInnKladdTab <- renderTable({AntKladdShus}, rownames = T, digits=0, spacing="xs")
     } else {output$skjemaInnKladdTab <- renderText('Alle inklusjonsskjema ferdigstilt!')}
+
+    indKladdUtEget <- which(KoroDataEget$FormStatusUt==1)
+    if (length(indKladdUtEget)>0) {
+      AntKladdUtShus <- table(KoroDataEget$ShNavn[indKladdUtEget], dnn= 'Ut.skjema i kladd')
+      AntKladdUtShus <-  xtable::xtable(addmargins(sort(AntKladdUtShus, decreasing = T)))
+      output$skjemaUtKladdTab <- renderTable({AntKladdUtShus}, rownames = T, digits=0, spacing="xs")
+    } else {output$skjemaUtKladdTab <- renderText('Alle utskrivingsskjema ferdigstilt!')}
 
 
     #Tab ferdigstilte
