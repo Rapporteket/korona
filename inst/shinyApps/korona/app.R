@@ -782,7 +782,7 @@ server <- function(input, output, session) {
     email <- rapbase::getUserEmail(session)
     if (input$subscriptionRep == "Koronarapport") {
       synopsis <- "Rapporteket-Pandemi: Koronarapport"
-      rnwFil <- "KoronaRapp.Rnw" #Navn på fila
+      rnwFil <- "KoronaRapport.Rnw" #Navn på fila
     }
     fun <- "abonnementKorona"
     paramNames <- c('rnwFil', 'brukernavn', "reshID") #, "valgtEnhet")
@@ -790,7 +790,7 @@ server <- function(input, output, session) {
     paramValues <- c(rnwFil, brukernavn, reshID) #, as.character(input$valgtEnhetabb))
     #test <- abonnementKorona(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
     #                       reshID=105460)
-
+    #abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,Rpakke='korona')
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
                               fun = fun, paramNames = paramNames,
                               paramValues = paramValues, owner = owner,
