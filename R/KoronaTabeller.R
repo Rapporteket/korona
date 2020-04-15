@@ -13,7 +13,7 @@
 #' @return
 #' @export
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, #valgtVar='innlagt',
-                            tilgangsNivaa='SC', valgtEnhet='Alle', enhetsNivaa='RHF',
+                            tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF',
                             skjemastatusInn=9, aarsakInn=9, dodSh=9){
   #valgtEnhet representerer eget RHF/HF
 #if (valgtVar == 'utskrevet') {}
@@ -32,9 +32,9 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, #valgtVar='innla
   #Trenger utvalg når totalen ikke er summen av det som vises.
   # RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   # } else {
-  #   enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
   #   subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
   # }
+  enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
 
   #Skal også ha oppsummering for hele landet
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110
