@@ -34,7 +34,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 #vil første innleggesle komme først, eller må det sorteres på FormDate?
    RegDataRed <- RegData %>% group_by(PasientID) %>%
       summarise(Alder = Alder[1],
-                #AceHemmerInnkomst,
+                AceHemmerInnkomst=AceHemmerInnkomst[1],
                 AkuttNyresvikt = AkuttNyresvikt[1], #1-ja, 2-nei, 3-ukjent
                 AkuttRespirasjonsvikt = AkuttRespirasjonsvikt[1], #1-nei, 2:5 ja, 999 ukjent
                 AkuttSirkulasjonsvikt = AkuttSirkulasjonsvikt[1], #1-nei, 2:5 ja, 999 ukjent
@@ -56,7 +56,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 ErHelsepersonell = ErHelsepersonell[1], #1-ja, 2-nei, 3-ukjent
                 FormStatus = min(FormStatus, na.rm=T), #1-kladd, 2-ferdigstilt
                 Gravid = sum(Gravid)>0,
-                HF = HF[1],
+                HF = first(HF, order_by = FormDate),
                 #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
                 Isolert = Isolert[1], #1-ja, 2-nei, 3-ukjent
@@ -131,7 +131,12 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
       # Enhetsnivånavn
       RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
+      RegData$HFresh[RegData$ReshId==108595] <- 100091
+      RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
+      #Endrer til kortnavn på HF:
+      #RegData$HFny <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
+
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
       #Får encoding-feil hvis bruker denne:
       #RegData$RHF <- ReshNivaa$RHFnavn[match(RegData$HFresh, ReshNivaa$HFresh)]
@@ -139,10 +144,8 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       #Kode om private
       RegData$RHF <- as.factor(RegData$RHFresh)
       levels(RegData$RHF) <- c('Vest','Nord','Midt', 'Sør-Øst')
-      #head(as.character(RegData$RHF))
       #RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
 
-      #RegData$HF <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive

@@ -22,6 +22,17 @@ enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
 
+tab <- unique(RegData[,c("HFresh", 'HF', 'HFny')])
+tab[order(tab$HFresh),]
+
+tab2 <- unique(RegData[,c("HFresh", 'HF')])
+tab2[order(tab2$HFresh),]
+
+unique(RegData[, c("UnitId", 'HelseenhetKortNavn')])
+
+RegData[RegData$UnitId==100065,] #108595
+table(RegData$ShNavn[RegData$HF=='Helgelandssykehuset HF'])
+
 FerdigeRegTab(RegData=Pandemi,
               aarsakInn = 1,
               valgtEnhet=valgtEnhet,
