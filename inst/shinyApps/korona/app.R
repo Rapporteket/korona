@@ -42,13 +42,14 @@ if (paaServer) {
 } else {
   KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-14 16-43-06.txt', sep=';',
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
   KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-14 16-43-06.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
-             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
   KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
                     by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 } #hente data
@@ -102,11 +103,11 @@ ui <- tagList(
                                    #             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
                                    # ),
 
+                                   selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
+                                               choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                                   ),
                                    selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
                                                choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                                   ),
-                                   selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
-                                               choices = c("Alle"=9, "Ja"=1, "Nei"=2)
                                    ),
                                    selectInput(inputId = "dodSh", label="Utskrevne, tilstand",
                                                choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
@@ -159,8 +160,9 @@ ui <- tagList(
                                          tableOutput('tabFerdigeReg')
                                   )),
 
-                                h3('Antall innleggelser siste 10 dager'),
-                                h4('Hele tidsperioden, se fanen Resultater'),
+                                h3('Antall ny-innlagte siste 10 dager'),
+                                h5('Overføringer telles ikke med'),
+                                #h4('Hele tidsperioden, se fanen Resultater'),
                                 uiOutput('utvalgAntOpph'),
                                 tableOutput('tabAntOpph'),
                                 br(),
@@ -200,18 +202,19 @@ ui <- tagList(
                                               #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
                                               selectInput(inputId = 'valgtVarFord', label='Velg variabel',
                                                           choices = c("Alder"='alder',
+                                                                      'Demografi' = 'demografi',
                                                                       "Liggetid"='liggetid',
                                                                       'Risikofaktorer, innleggelse'='risikoInn',
                                                                       'Antibiotika, innleggelse'='antibiotikaInn',
                                                                       'Antibiotika, utskriving'='antibiotikaUt',
-                                                                      'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',
-                                                                      'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
                                                                       'Respirasjonssvikt, innleggelse' = 'respSviktInn',
                                                                       'Respirasjonssvikt på sykehus' = 'respSviktUt',
-                                                                      'Tilstand ved innleggelse' = 'tilstandInn',
+                                                                      'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',
+                                                                      'Sirkulasjonssvikt på sykehus' = 'sirkSviktUt',
+                                                                      'Tilstand ved innleggelse' = 'tilstandInn'
                                                                       #'Kommer: nyre/sirk/respsvikt, inn(+forvirring)/ut',
                                                                       #'Kommer: sanns. smittested' = 'smittested',
-                                                                      'Demografi' = 'demografi'
+
                                                           )
                                               ),
                                               selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
@@ -221,11 +224,11 @@ ui <- tagList(
                                               selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
                                                           choices = 'Alle'
                                               ),
+                                              selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
+                                                          choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                                              ),
                                               selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
                                                           choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                                              ),
-                                              selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
-                                                          choices = c("Alle"=9, "Ja"=1, "Nei"=2)
                                               ),
                                               selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
                                                           choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
@@ -375,7 +378,7 @@ server <- function(input, output, session) {
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
   }
-
+print(finnesEgenResh)
   #Filtreringsnivå for data:
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes

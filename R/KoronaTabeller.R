@@ -127,9 +127,6 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
     #x[is.na(x)]<-0
     c(sprintf('%.1f',x[4]), sprintf('%.1f',x[3]), paste(sprintf('%.1f',x[2]), sprintf('%.1f',x[5]), sep=' - '))
   }
-  # x <- Liggetid
-  #  test <- sprintf('%.2f',c(x[2],x[5]))
-  # test <- med_IQR(ECMOtid)
   TabFerdigeReg <- rbind(
     'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
@@ -139,8 +136,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   )
   TabFerdigeReg[4:5,5] <- paste0(sprintf('%.f', as.numeric(TabFerdigeReg[4:5,5])),' %')
   colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall opphold', 'Andel opphold')
-  # TabFerdigeReg[c(1:2),'Andel opphold'] <-
-  #   paste0(sprintf('%.0f', as.numeric(TabFerdigeReg[c(1:2),'Andel opphold'])),'%')
+
   xtable::xtable(TabFerdigeReg,
                  digits=0,
                  align = c('l','r','r','c', 'r','r'),

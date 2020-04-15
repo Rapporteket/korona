@@ -9,29 +9,22 @@ koronaresultater_UI <- function(id){
                         br(),
                         h3('Velg variabel/tema og filtreringer i data'),
 
-                        #conditionalPanel(condition = paste0("input['", ns("resultater"), "'] == 'Tellinger'"),
                         selectInput(inputId = ns('valgtVar'), label='Velg variabel',
                                     choices = c('Antall innleggelser'='antreg',
                                                 'Antall døde'='antdod',
                                                 'Antall utskrivinger'= 'antut',
                                                 'Antall inneliggende'='antinn')
                         ),
-                        # selectInput(inputId = ns("valgtEnhetRes"), label="Velg enhet",
-                        #             choices = 'Alle'
-                        # ),
                         selectInput(inputId = ns("velgTidsenhet"), label="Velg tidsenhet",
                                     choices = c("Dag"="dag", "Uke"="uke", "Måned"="maaned")),
                         selectInput(inputId = ns("velgAntVisning"), label="Velg antall dager",
                                     choices = c(10, 20, 30, 50, 100, 200), selected = 30),
+                        selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
+                                    choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                        ),
                         selectInput(inputId = ns("skjemastatusInnRes"), label="Skjemastatus, inklusjon",
                                     choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                         ),
-                        selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
-                                    choices = c("Alle"=9, "Ja"=1, "Nei"=2)
-                        ),
-                        # selectInput(inputId = ns("dodShRes"), label="Utskrevne, tilstand",
-                        #             choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
-                        # ),
                         selectInput(inputId = ns("erMannRes"), label="Kjønn",
                                     choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
                         ),
@@ -40,10 +33,6 @@ koronaresultater_UI <- function(id){
                         )
     ),
     mainPanel(
-      #tabsetPanel(id=ns("resultater"),
-      # tabPanel('Antall registreringer',
-      #          value = 'Tellinger',
-      #          br(),
       h2('Tellinger:'),
       h4('Merk at i figur/tabell over antall døde så benyttes inndato i de tilfeller det ikke
                               finnes utskrivingsdato. Dette kan skje når man inkluderer registreringer i kladd.'),
@@ -55,9 +44,6 @@ koronaresultater_UI <- function(id){
       br(),
       DT::DTOutput(ns("tabTidEnhet_DT")),
       downloadButton(ns("lastNed"), "Last ned tabell")
-      #)
-
-      #)
     )
   )
 }
@@ -84,9 +70,9 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
   )
 
   datoFra <- reactive(datoFra <- switch (input$velgTidsenhet,
-                                         "dag" = Sys.Date() - days(as.numeric(input$velgAntVisning)),
-                                         "uke" = Sys.Date() - weeks(as.numeric(input$velgAntVisning)),
-                                         "maaned" = Sys.Date() - months(as.numeric(input$velgAntVisning))
+                                         "dag" = Sys.Date() - days(as.numeric(input$velgAntVisning)-1),
+                                         "uke" = floor_date(Sys.Date() - weeks(as.numeric(input$velgAntVisning)-1), unit = 'week', week_start = 1),
+                                         "maaned" = floor_date(Sys.Date() - months(as.numeric(input$velgAntVisning)-1), unit = 'month')
   )
   )
 
@@ -108,13 +94,15 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
                                                erMann=as.numeric(input$erMannRes)),
                      'antut'=antallTidUtskrevne(RegData=KoroData, tilgangsNivaa=rolle,
                                                 valgtEnhet= egenEnhet, #nivå avgjort av rolle
-                                                tidsenhet='dag',
+                                                tidsenhet=input$velgTidsenhet,
+                                                datoFra=datoFra(),
                                                 aarsakInn = as.numeric(input$aarsakInnRes),
                                                 skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                 erMann=as.numeric(input$erMannRes)),
                      'antinn'= antallTidInneliggende(RegData=KoroData, tilgangsNivaa=rolle,
                                                      valgtEnhet= egenEnhet, #nivå avgjort av rolle
-                                                     tidsenhet='dag',
+                                                     tidsenhet=input$velgTidsenhet,
+                                                     datoFra=datoFra(),
                                                      aarsakInn = as.numeric(input$aarsakInnRes),
                                                      skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                      erMann=as.numeric(input$erMannRes))
@@ -185,11 +173,11 @@ koronabelegg_UI <- function(id){
                         br(),
                         h3('Velg variabel/tema og filtreringer i data'),
 
-                        selectInput(inputId = ns("skjemastatusInn"), label="Skjemastatus, inklusjon",
-                                    choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                        ),
                         selectInput(inputId = ns("aarsakInn"), label="Covid-19 hovedårsak til innleggelse?",
                                     choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                        ),
+                        selectInput(inputId = ns("skjemastatusInn"), label="Skjemastatus, inklusjon",
+                                    choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                         ),
                         selectInput(inputId = ns("erMann"), label="Kjønn",
                                     choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
