@@ -42,7 +42,8 @@ koronaresultater_UI <- function(id){
       # downloadButton(ns("LastNedFig"), label = 'Last ned figur'),
       br(),
       br(),
-      DT::DTOutput(ns("tabTidEnhet_DT")),
+      # DT::DTOutput(ns("tabTidEnhet_DT")),
+      tableOutput(ns("tabTidEnhet_plain")),
       downloadButton(ns("lastNed"), "Last ned tabell")
     )
   )
@@ -118,12 +119,17 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
     AntTab
   }
 
-  output$tabTidEnhet_DT = DT::renderDT(
-    DT::datatable(AntTab()$ant_skjema[-dim(AntTab()$ant_skjema)[1], ],
-                  container = AntTab()$sketch,
-                  rownames = F,
-                  options = list(pageLength = 40)
-    )
+  # output$tabTidEnhet_DT = DT::renderDT(
+  #   DT::datatable(AntTab()$ant_skjema[-dim(AntTab()$ant_skjema)[1], ],
+  #                 container = AntTab()$sketch,
+  #                 rownames = F,
+  #                 options = list(pageLength = 40)
+  #   )
+  # )
+
+  output$tabTidEnhet_plain = renderTable(
+    AntTab()$ant_skjema,
+    digits = 0
   )
 
   output$FigurTidEnhet <- renderPlot({
