@@ -76,8 +76,10 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 NerkontaktCovid = NerkontaktCovid[1], #1-ja, 2-nei, 3-ukjent
                 Nyresykdom = sum(Nyresykdom)>0,
                 #Oksygenmetning
-                # OverfortAnnetSykehusInnleggelse,
-                # OverfortAnnetSykehusUtskrivning,
+                Overf = ifelse(1 %in% c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning), 1,
+                               ifelse(2 %in% c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning),2,3)),
+                # OverfortAnnetSykehusInnleggelse,  #1-ja, 2-nei, 3-ukjent
+                # OverfortAnnetSykehusUtskrivning,  #1-ja, 2-nei, 3-ukjent
                 PatientGender = PatientGender[1],
                 Penicillin = sum(Penicillin)>0,
                 PenicillinEnzymhemmer = sum(PenicillinEnzymhemmer)>0,
@@ -135,6 +137,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
       #Endrer til kortnavn på HF:
+      #RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
       #RegData$HFny <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
 
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
