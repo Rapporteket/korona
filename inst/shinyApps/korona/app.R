@@ -514,15 +514,26 @@ server <- function(input, output, session) {
     indKladdEget <- which(KoroDataEget$FormStatus==1)
     if (length(indKladdEget)>0) {
     AntKladdShus <- table(KoroDataEget$ShNavn[indKladdEget], dnn= 'Inkl.skjema i kladd')
-    AntKladdShus <-  xtable::xtable(addmargins(sort(AntKladdShus, decreasing = T)))
-    output$skjemaInnKladdTab <- renderTable({AntKladdShus}, rownames = T, digits=0, spacing="xs")
-    } else {output$skjemaInnKladdTab <- renderText('Alle inklusjonsskjema ferdigstilt!')}
+    output$skjemaInnKladdTab <-
+      if (length(AntKladdShus) > 1) {AntKladdShus <-  xtable::xtable(sort(AntKladdShus, decreasing = T))
+      renderTable({AntKladdShus}, rownames = T, digits=0, spacing="xs")
+      } else {AntKladdShus <-  as.data.frame(AntKladdShus)
+      names(AntKladdShus) <- c('', 'Inkl.skjema i kladd')
+      renderTable({AntKladdShus}, rownames = F, digits=0, spacing="xs")}
+    } else {
+      output$skjemaInnKladdTab <- renderText('Alle inklusjonsskjema ferdigstilt!')}
 
     indKladdUtEget <- which(KoroDataEget$FormStatusUt==1)
     if (length(indKladdUtEget)>0) {
       AntKladdUtShus <- table(KoroDataEget$ShNavn[indKladdUtEget], dnn= 'Ut.skjema i kladd')
-      AntKladdUtShus <-  xtable::xtable(addmargins(sort(AntKladdUtShus, decreasing = T)))
-      output$skjemaUtKladdTab <- renderTable({AntKladdUtShus}, rownames = T, digits=0, spacing="xs")
+      output$skjemaUtKladdTab <-
+        if (length(AntKladdUtShus) > 1) {
+          AntKladdUtShus <-  xtable::xtable(sort(AntKladdUtShus, decreasing = T))
+          renderTable({AntKladdUtShus}, rownames = T, digits=0, spacing="xs")
+        } else {
+          AntKladdUtShus <-  as.data.frame(AntKladdUtShus)
+        names(AntKladdUtShus) <- c('', 'Inkl.skjema i kladd')
+        renderTable({AntKladdUtShus}, rownames = F, digits=0, spacing="xs")}
     } else {output$skjemaUtKladdTab <- renderText('Alle utskrivingsskjema ferdigstilt!')}
 
 
