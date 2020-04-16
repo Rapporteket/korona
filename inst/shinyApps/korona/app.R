@@ -641,7 +641,6 @@ server <- function(input, output, session) {
                                    kjemastatusUt=as.numeric(input$skjemastatusUtRes),
                                    session = session)
     tab <- lagTabavFigFord(UtDataFraFig = UtDataFord)
-    print(tab)
 
     output$tittelFord <- renderUI({
       tagList(
@@ -651,7 +650,6 @@ server <- function(input, output, session) {
     output$fordelingTab <- function() { #gr1=UtDataFord$hovedgrTxt, gr2=UtDataFord$smltxt renderTable(
       #       kable_styling("hover", full_width = F)
       antKol <- ncol(tab)
-      print(antKol)
       kableExtra::kable(tab, format = 'html'
                         , full_width=F
                         , digits = c(0,0,1,0,0,1)[1:antKol]
