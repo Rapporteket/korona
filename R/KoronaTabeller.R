@@ -291,14 +291,16 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' @export
 lagTabavFigFord <- function(UtDataFraFig){
   tab <-cbind(UtDataFraFig$Ngr$Hoved,
+              UtDataFraFig$N$Hoved,
               UtDataFraFig$AggVerdier$Hoved,
               UtDataFraFig$Ngr$Rest,
+              UtDataFraFig$N$Rest,
               UtDataFraFig$AggVerdier$Rest)
   grtxt <- UtDataFraFig$grtxt
   if ((min(nchar(grtxt)) == 5) & (max(nchar(grtxt)) == 5)) {
     grtxt <- paste(substr(grtxt, 1,3), substr(grtxt, 4,5))}
   rownames(tab) <- grtxt
-  kolnavn <- c('Antall' , 'Andel (%)')
+  kolnavn <- c('Teller', 'Nevner' , 'Andel (%)')
   colnames(tab) <- c(kolnavn, if(!is.null(UtDataFraFig$Ngr$Rest)){kolnavn})
   # colnames(tab) <- c(paste0(UtDataFraFig$hovedgrTxt,', Antall'),
   #                    paste0(UtDataFraFig$hovedgrTxt, ', Andel (%)'),

@@ -85,9 +85,6 @@ ui <- tagList(
                       sidebarPanel(id = 'brukervalgStartside',
                                    width = 3,
                                    uiOutput('KoroRappTxt'),
-                                   h3('Koronarapport med samling av resultater'),
-                                   h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                                      Gå til fanen "Abonnement" for å bestille dette.'),
                                    downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
                                    tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                    br(),
@@ -394,14 +391,14 @@ server <- function(input, output, session) {
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
 
-  # observe({if ((rolle != 'SC') & !(finnesEgenResh)) {
-  #   shinyjs::hide(id = 'KoroRappInt.pdf')
-  #   shinyjs::hide(id = 'KoroRappTxtInt')
-  #   shinyjs::hide(id = 'KoroRapp.pdf')
-  #   shinyjs::hide(id = 'KoroRappTxt')
-  #   hideTab(inputId = "hovedark", target = "Abonnement")
-  # }
-  #})
+  observe({if (rolle != 'SC') {
+    shinyjs::hide(id = 'KoroRappInt.pdf')
+    shinyjs::hide(id = 'KoroRappTxtInt')
+    shinyjs::hide(id = 'KoroRapp.pdf')
+    shinyjs::hide(id = 'KoroRappTxt')
+    hideTab(inputId = "hovedark", target = "Abonnement")
+  }
+  })
 
   # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
   enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
@@ -449,11 +446,11 @@ server <- function(input, output, session) {
     )
   })
 
-  # output$KoroRappTxt <- renderUI(tagList(
-  #   h3(HTML('Koronarapport med samling av resultater'))
-  #   # h5(HTML('Koronarapporten kan man få regelmessig tilsendt på e-post.
-  #   #                 Gå til fanen "Abonnement" for å bestille dette'))
-  #   )
+  output$KoroRappTxt <- renderUI(tagList(
+    h3(HTML('Koronarapport med samling av resultater')),
+     h5(HTML('Koronarapporten kan man få regelmessig tilsendt på e-post.
+                     Gå til fanen "Abonnement" for å bestille dette'))
+    ))
 
   #----------Dæsjbord, Korona----------------------------
 
@@ -644,6 +641,7 @@ server <- function(input, output, session) {
                                    kjemastatusUt=as.numeric(input$skjemastatusUtRes),
                                    session = session)
     tab <- lagTabavFigFord(UtDataFraFig = UtDataFord)
+    print(tab)
 
     output$tittelFord <- renderUI({
       tagList(
@@ -653,11 +651,12 @@ server <- function(input, output, session) {
     output$fordelingTab <- function() { #gr1=UtDataFord$hovedgrTxt, gr2=UtDataFord$smltxt renderTable(
       #       kable_styling("hover", full_width = F)
       antKol <- ncol(tab)
+      print(antKol)
       kableExtra::kable(tab, format = 'html'
                         , full_width=F
-                        , digits = c(0,1,0,1)[1:antKol]
+                        , digits = c(0,0,1,0,0,1)[1:antKol]
       ) %>%
-        add_header_above(c(" "=1, 'Egen enhet/gruppe' = 2, 'Resten' = 2)[1:(antKol/2+1)]) %>%
+        add_header_above(c(" "=1, 'Egen enhet/gruppe' = 3, 'Resten' = 3)[1:(antKol/3+1)]) %>%
         column_spec(column = 1, width_min = '7em') %>%
         column_spec(column = 2:(ncol(tab)+1), width = '7em') %>%
         row_spec(0, bold = T)
