@@ -30,12 +30,12 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
-   a <- as.data.frame(matrix(c(1,1,1,2,2, 999,3:4,NA, NA),5,2))
-   colnames(a) <- c('Var1', 'Var2')
-   test <- a %>% group_by(Var1) %>% summarise(#Var3 = min(Var2, na.rm = T),
-                                              Var6 = sort(Var2)[1],
-                                              Var4 = JaNeiUkjVar(Var2),
-                                              Var5 = SviktVar(Var2))
+   # a <- as.data.frame(matrix(c(1,1,1,2,2, 999,3:4,NA, NA),5,2))
+   # colnames(a) <- c('Var1', 'Var2')
+   # test <- a %>% group_by(Var1) %>% summarise(#Var3 = min(Var2, na.rm = T),
+   #                                            Var6 = sort(Var2)[1],
+   #                                            Var4 = JaNeiUkjVar(Var2),
+   #                                            Var5 = SviktVar(Var2))
 
    #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
    JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
