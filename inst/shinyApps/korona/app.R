@@ -86,8 +86,8 @@ ui <- tagList(
                                    width = 3,
                                    uiOutput('KoroRappTxt'),
                                    h3('Koronarapport med samling av resultater'),
-                                   # h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                                   #    Gå til fanen "Abonnement" for å bestille dette.'),
+                                   h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
+                                      Gå til fanen "Abonnement" for å bestille dette.'),
                                    downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
                                    tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                    br(),
@@ -771,7 +771,6 @@ server <- function(input, output, session) {
 
   ## nye abonnement
   observeEvent (input$subscribe, { #MÅ HA
-    #package <- "intensiv"
     owner <- rapbase::getUserName(session)
     interval <- strsplit(input$subscriptionFreq, "-")[[1]][2]
     intervalName <- strsplit(input$subscriptionFreq, "-")[[1]][1]
@@ -786,8 +785,8 @@ server <- function(input, output, session) {
     }
     fun <- "abonnementKorona"
     paramNames <- c('rnwFil', 'brukernavn', "reshID") #, "valgtEnhet")
-
     paramValues <- c(rnwFil, brukernavn, reshID) #, as.character(input$valgtEnhetabb))
+
     #test <- abonnementKorona(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
     #                       reshID=105460)
     #abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,Rpakke='korona')
