@@ -159,11 +159,11 @@ indOverf <- which(RegData$PasientGUID %in% pas3)
 var <- c('PasientGUID',"UnitId",  "HelseenhetKortNavn", 'ShNavnUt', "FormStatus", "Innleggelse",
          "Utskrivningsdato", "FormStatusUt", "OverfortAnnetSykehusInnleggelse", "OverfortAnnetSykehusUtskrivning")
 data3opph <- RegData[indOverf, var] #RegData$PasientGUID == '3E6F196C-EF7B-EA11-A96B-00155D0B4F09'
-write.csv(data3opph[order(data3opph$PasientGUID),], file='Data3opph.csv' ,fileEncoding = 'UTF-8')
+write.csv2(data3opph[order(data3opph$PasientGUID),], file='Data3opph.csv' ,fileEncoding = 'UTF-8', row.names = F)
 
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 varAgg <- c('PasientID',"ReshId",  "ShNavn",  'ShNavnUt', "FormStatus", "InnTidspunkt",
             "Utskrivningsdato", "FormStatusUt", "Overf")
 data3opphAgg <- Pandemi[which(Pandemi$PasientID %in% pas3), varAgg]
 UtAgg <- data3opphAgg[order(data3opphAgg$PasientID),]
-write.csv(UtAgg, file='Data3opphAgg.csv' ,fileEncoding = 'UTF-8')
+write.csv2(UtAgg, file='Data3opphAgg.csv' ,fileEncoding = 'UTF-8', row.names = F)
