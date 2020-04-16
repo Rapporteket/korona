@@ -1,14 +1,43 @@
 #Kjørefil for Rapporteket-Pandemi
+library(tidyverse)
 library(korona)
-PandemiInn <- KoronaPreprosesser(KoronaDataSQL(skjema=1))
-
+RegData <- KoronaDataSQL(koble=1)
+Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
+RegData <- Pandemi
 tidsenhet='dag'
+datoFra <- '2020-01-01'
+datoTil <- Sys.Date()
 erMann=9
-bekr=9
-skjemastatus=9
+aarsakInn=9
+skjemastatusInn=9
+skjemastatusUt <- 9
+aarsakInn<- 9
 dodSh=9
-valgtEnhet='Alle'
-tilgangsNivaa <- 'SC'
+minald <- 0
+maxald <- 110
+valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
+enhetsNivaa <- 'HF'
+enhetsUtvalg <- 0
+valgtVar <- 'demografi'
+
+
+test <- RegData[ , c("FormDateUt", "Utskrivningsdato",'UtskrivningsdatoInnSkjema', "FormStatus", "FormStatusUt" )]
+
+test <- KoronaUtvalg(RegData=RegData, erMann=1, skjemastatusInn=2, aarsakInn=1)
+test$utvalgTxt
+test$hovedgrTxt
+
+Utdata <- KoronaFigAndeler(valgtVar='demografi', RegData=Pandemi,
+                 minald=minald, maxald=maxald, aarsakInn=aarsakInn,
+                 erMann=erMann, dodSh=dodSh,
+                 skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,
+                 enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet,
+                 enhetsUtvalg=1)
+
+Tab <- FerdigeRegTab(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, dodSh=9)$Tab
+
+
+RisikoInnTab(Pandemi, valgtEnhet = valgtEnhet, enhetsNivaa = enhetsNivaa)
 
 AlderTab(RegData=RegData)$Tab
 
@@ -48,12 +77,11 @@ KoroDataUt <- KoronaDataSQL(skjema=2)
 #            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
 # KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
 #                   by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
-
 KoroDataInn <- KoronaDataSQL(skjema=1, koble = 0)
 KoroDataUt <- KoronaDataSQL(skjema=2, koble=0)
-KoroData <- KoronaPreprosesser(RegData = KoroData)
 
-RegData <- KoronaPreprosesser(RegData = KoroData)
+KoroData <- KoronaPreprosesser(RegData = KoronaDataSQL(koble=1))
+RegData <- KoroData
 
 UtData <- KoronaUtvalg(RegData=KoroData, dodSh = 2)
 
@@ -94,6 +122,11 @@ RisikoInnTab(RegData, erMann='', skjemastatus=2, dodSh=9,
 
 AlderTab(RegData)
 
+#Fra KEvin
+h3('Aldersfordeling'),
+plotOutput("FigurAldersfordeling", height="auto"),
+br(),
+downloadButton("lastNedAldKj", "Last ned tabell")
 
 
 

@@ -7,7 +7,6 @@
 RisikoInnTab(
   RegData,
   datoTil = Sys.Date(),
-  reshID = 0,
   erMann = "",
   skjemastatusInn = 9,
   dodSh = 9,
@@ -23,15 +22,20 @@ RisikoInnTab(
 
 \item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
-\item{reshID}{reshID fra innlogging}
-
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{dodSh}{død på sykehus 0-nei, 1-ja}
+\item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 
-\item{aarsakInn}{covid-19 som hovedårsak til innleggelse}
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, 2-nei}
+
+\item{valgtEnhet}{- gis ut fra resh}
+
+\item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
+RHF (SC og LC-brukere), HF (LU-brukere)}
+
+\item{minald}{kjønn, 0-kvinne, 1-mann}
 }
 \value{
 Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
