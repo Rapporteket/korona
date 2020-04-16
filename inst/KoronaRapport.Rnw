@@ -229,12 +229,13 @@ xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #
 % \end{frame}
 
 
-\begin{frame}[fragile] {Sykehus med pandemiskjema i kladd}
+\begin{frame}[fragile] {Sykehus med inklusjonsskjema i kladd}
 <<'KladdSh', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-AntKladdShus <- table(Pandemi$ShNavn[which(Pandemi$FormStatus==1)], dnn= 'Skjema i kladd')
+AntKladdShus <- table(PandemiAlle$ShNavn[which(PandemiAlle$FormStatus==1)], dnn= 'Skjema i kladd')
 xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Pandemiskjema i kladd')
+                              caption='Pandemiskjema i kladd, alle pasienter med Covid-19
+               (også de som er innlagt av andre årsaker)')
 @
 \end{frame}
 
