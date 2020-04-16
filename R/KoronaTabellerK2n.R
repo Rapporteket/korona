@@ -216,7 +216,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
 
   RegDataAlle <- UtData$RegData
-  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$InnDato >= datoFra), ]} # filtrerer på dato
+  # if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$InnDato >= datoFra), ]} # filtrerer på dato
   # datoer <- seq(min(RegDataAlle$InnDato), today(), by="day")
   datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), today(), by="day")
 
