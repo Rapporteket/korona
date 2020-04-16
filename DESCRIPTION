@@ -1,7 +1,7 @@
 Package: korona
 Title: Resultattjeneste for registrering av Korona-pandemi
-Version: 0.9
-Date: 2020-04-14
+Version: 0.9.1
+Date: 2020-04-16
 Authors@R: 
     person(given = "Lena Ringstad",
            family = "Olsen",
