@@ -11,15 +11,32 @@ erMann=9
 aarsakInn=9
 skjemastatusInn=9
 skjemastatusUt <- 9
-aarsakInn<- 9
+aarsakInn<- 9  #covid-19 som hovedårsak til innleggelse 1-ja, 2-nei
 dodSh=9
 minald <- 0
 maxald <- 110
+#reshID: 101719 (UNN HF), '100100' (Vestfold)
 valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
 enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
+
+tab <- unique(RegData[,c("HFresh", 'HF', 'HFny')])
+tab[order(tab$HFresh),]
+
+tab2 <- unique(RegData[,c("HFresh", 'HF')])
+tab2[order(tab2$HFresh),]
+
+unique(RegData[, c("UnitId", 'HelseenhetKortNavn')])
+
+RegData[RegData$UnitId==100065,] #108595
+table(RegData$ShNavn[RegData$HF=='Helgelandssykehuset HF'])
+
+FerdigeRegTab(RegData=Pandemi,
+              aarsakInn = 1,
+              valgtEnhet=valgtEnhet,
+              enhets)
 
 test <- RegData[ , c("FormDateUt", "Utskrivningsdato",'UtskrivningsdatoInnSkjema', "FormStatus", "FormStatusUt" )]
 
@@ -120,17 +137,6 @@ RisikoInnTab(RegData, erMann='', skjemastatus=2, dodSh=9,
                          valgtEnhet='Alle', enhetsNivaa='RHF',
                          minald=0, maxald=110)
 
-AlderTab(RegData)
-
-#Fra KEvin
-h3('Aldersfordeling'),
-plotOutput("FigurAldersfordeling", height="auto"),
-br(),
-downloadButton("lastNedAldKj", "Last ned tabell")
-
-
-
-
 
 Pandemiskjema:
 Utskrivningsdato
@@ -145,5 +151,19 @@ TimerSidenRelevantDato
 RelevantDato
 FormDate
 
+library(korona)
+#Overførte pasienter - SJEKK AV PASIENTAGGREGERING
+RegData <- KoronaDataSQL(koble=1)
+pas3 <- names(table(RegData$PasientGUID)[table(RegData$PasientGUID)>2])
+indOverf <- which(RegData$PasientGUID %in% pas3)
+var <- c('PasientGUID',"UnitId",  "HelseenhetKortNavn", 'ShNavnUt', "FormStatus", "Innleggelse",
+         "Utskrivningsdato", "FormStatusUt", "OverfortAnnetSykehusInnleggelse", "OverfortAnnetSykehusUtskrivning")
+data3opph <- RegData[indOverf, var] #RegData$PasientGUID == '3E6F196C-EF7B-EA11-A96B-00155D0B4F09'
+write.csv2(data3opph[order(data3opph$PasientGUID),], file='Data3opph.csv' ,fileEncoding = 'UTF-8', row.names = F)
 
-
+Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
+varAgg <- c('PasientID',"ReshId",  "ShNavn",  'ShNavnUt', "FormStatus", "InnTidspunkt",
+            "Utskrivningsdato", "FormStatusUt", "Overf")
+data3opphAgg <- Pandemi[which(Pandemi$PasientID %in% pas3), varAgg]
+UtAgg <- data3opphAgg[order(data3opphAgg$PasientID),]
+write.csv2(UtAgg, file='Data3opphAgg.csv' ,fileEncoding = 'UTF-8', row.names = F)

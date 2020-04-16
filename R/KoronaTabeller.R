@@ -12,36 +12,48 @@
 #'
 #' @return
 #' @export
-antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', #enhetsNivaa='RHF',
-                            skjemastatusInn=9, aarsakInn=9, dodSh=9, valgtEnhet='Alle'){
+antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valgtVar='innlagt',
+                            tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF',
+                            skjemastatusInn=9, aarsakInn=9, dodSh=9){
   #valgtEnhet representerer eget RHF/HF
+#if (valgtVar == 'utskrevet') {}
 
-  RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
-                                                 dag = 'Dag',
-                                                 uke = 'UkeNr',
-                                                 maaned = 'MndAar')])
+  # RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
+  #                                                dag = 'Dag',
+  #                                                uke = 'UkeNr',
+  #                                                maaned = 'MndAar')])
+  if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
+  RegData$TidsVar <- switch (tidsenhet,
+                                 dag = factor(format(RegData$InnDato, '%d.%B'),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 day'))), '%d.%B')),
+                                 uke = factor(format(RegData$InnDato, '%V'),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 week'))), '%V')),
+                                 maaned = factor(format(RegData$InnDato, '%b.%Y'),
+                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 month'))), '%b.%Y')))
+
+  RegData <- RegData[!is.na(RegData$TidsVar), ]
 
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
-  RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
+  RegData$EnhNivaaVis <- switch(tilgangsNivaa,
                                 SC = RegData$RHF,
                                 LC = RegData$HF,
                                 LU = RegData$ShNavn)
 
+  #Trenger utvalg når totalen ikke er summen av det som vises.
+  # RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
+  # } else {
+  #   subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
+  # }
+  enhetsNivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
 
-  #Benytter ikke utvalgsfila til enhetsfiltrering. Skal også ha oppsummering for hele landet
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+  #Skal også ha oppsummering for hele landet
+  UtData <- KoronaUtvalg(RegData=RegData, datoFra=, datoTil=0, erMann=erMann, #minald=0, maxald=110
+                         enhetsNivaa = enhetsNivaa, valgtEnhet = valgtEnhet,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
                          dodSh=dodSh)
 
-
-  RegDataAlle <- UtData$RegData
-
-  #Trenger utvalg når totalen ikke er summen av det som vises.
-  RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
-  } else {
-    enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
-    subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
-  }
+  RegDataAlle <- UtData$RegDataAlle
+  RegData <- UtData$RegData
 
   Ntest <- dim(RegData)[1]
 
@@ -53,7 +65,7 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                         dimnames = list(c(levels(RegData$TidsVar), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
   }else{
     TabTidEnh <- table(RegData[ , c('TidsVar', 'EnhNivaaVis')]) #ftable(RegData[ , c(TidsVar, enhetsNivaa, 'Korona')], row.vars =TidsVar)
-    TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt, 2020'=sum, 'Hele landet' = sum), quiet=TRUE)
+    TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt'=sum, 'Hele landet' = sum), quiet=TRUE)
     colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
   }
 
@@ -78,17 +90,23 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=9, erMann=9){
 
-  UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet,
+  UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
                          aarsakInn=aarsakInn, erMann=erMann)
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
   inneliggere <- is.na(RegData$UtDato)
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$InnTidspunkt[inneliggere], units='days'))
-  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 50], na.rm = T), 1)
+  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 90], na.rm = T), 1)
+
+  idag <- Sys.Date() #'2020-04-10' #
+  innIgaar <- length(which(RegData$InnDato == (as.Date(idag)-1)))
+  utIgaar <- length(which(RegData$UtDato == (as.Date(idag)-1)))
 
   statusTab <- rbind(
-    'På sykehus nå' = c(AntPaaShNaa, LiggetidNaaGjsn)
+    'På sykehus nå' = c(AntPaaShNaa, paste0(LiggetidNaaGjsn, ' dager')),
+    'Innlagt i går' = c(innIgaar,''),
+    'Utskrevet i går' = c(utIgaar,'')
   )
   colnames(statusTab) <- c('Antall', 'Liggetid (gj.sn)')
   xtable::xtable(statusTab,
@@ -273,14 +291,16 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' @export
 lagTabavFigFord <- function(UtDataFraFig){
   tab <-cbind(UtDataFraFig$Ngr$Hoved,
+              UtDataFraFig$N$Hoved,
               UtDataFraFig$AggVerdier$Hoved,
               UtDataFraFig$Ngr$Rest,
+              UtDataFraFig$N$Rest,
               UtDataFraFig$AggVerdier$Rest)
   grtxt <- UtDataFraFig$grtxt
   if ((min(nchar(grtxt)) == 5) & (max(nchar(grtxt)) == 5)) {
     grtxt <- paste(substr(grtxt, 1,3), substr(grtxt, 4,5))}
   rownames(tab) <- grtxt
-  kolnavn <- c('Antall' , 'Andel (%)')
+  kolnavn <- c('Teller', 'Nevner' , 'Andel (%)')
   colnames(tab) <- c(kolnavn, if(!is.null(UtDataFraFig$Ngr$Rest)){kolnavn})
   # colnames(tab) <- c(paste0(UtDataFraFig$hovedgrTxt,', Antall'),
   #                    paste0(UtDataFraFig$hovedgrTxt, ', Andel (%)'),

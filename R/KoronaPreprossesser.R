@@ -30,39 +30,52 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
-#SJEKK ALLE SOM HAR FÅTT [1] -
-#vil første innleggesle komme først, eller må det sorteres på FormDate?
+   # a <- as.data.frame(matrix(c(1,1,1,2,2, 999,3:4,NA, NA),5,2))
+   # colnames(a) <- c('Var1', 'Var2')
+   # test <- a %>% group_by(Var1) %>% summarise(#Var3 = min(Var2, na.rm = T),
+   #                                            Var6 = sort(Var2)[1],
+   #                                            Var4 = JaNeiUkjVar(Var2),
+   #                                            Var5 = SviktVar(Var2))
+
+   #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
+   JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
+
+   #Variabler med 1-nei, 2:5 ja, 999 ukjent. Velger mest alvorlige (høyeste) nivå. Ikke utfylt får også ukjent
+   SviktVar <- function(x) {
+      test <- x %in% 1:5
+      ifelse(sum(test)>0, max(x[test]), 999)} #1-nei, 2:5 ja, 999 ukjent.
+
    RegDataRed <- RegData %>% group_by(PasientID) %>%
       summarise(Alder = Alder[1],
-                #AceHemmerInnkomst,
-                AkuttNyresvikt = AkuttNyresvikt[1], #1-ja, 2-nei, 3-ukjent
-                AkuttRespirasjonsvikt = AkuttRespirasjonsvikt[1], #1-nei, 2:5 ja, 999 ukjent
-                AkuttSirkulasjonsvikt = AkuttSirkulasjonsvikt[1], #1-nei, 2:5 ja, 999 ukjent
+                AceHemmerInnkomst= JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
+                AkuttNyresvikt = JaNeiUkjVar(AkuttNyresvikt), #1-ja, 2-nei, 3-ukjent
+                AkuttRespirasjonsvikt = SviktVar(AkuttRespirasjonsvikt), #1-nei, 2:5 ja, 999 ukjent
+                AkuttSirkulasjonsvikt = SviktVar(AkuttSirkulasjonsvikt),  #1-nei, 2:5 ja, 999 ukjent
                 Aminoglykosid = sum(Aminoglykosid)>0,
                 AndreGencefalosporin = sum(AndreGencefalosporin)>0,
                 Antibiotika = Antibiotika[1], #1 ja, 2-nei 3-ukjent
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
-                ArsakInnleggelse = ArsakInnleggelse[1], #1-ja, 2-nei, 3-ukjent
+                ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
                 Astma = sum(Astma)>0,
                 #Bilirubin,
-                BMI = mean(BMI, na.rm = T),
-                CurrentMunicipalNumber = CurrentMunicipalNumber[1],
+                BMI = sort(BMI, decreasing = T)[1],
+                CurrentMunicipalNumber = first(CurrentMunicipalNumber, order_by = FormDate),
                 #Ddimer,
                 Diabetes = sum(Diabetes)>0,
                 #DiastoliskBlodtrykk,
-                DistrictCode = DistrictCode[1],
-                EndretBevissthet = EndretBevissthet[1], #1-ja, 2-nei, 3-ukjent
-                ErAnsattMikrobiologisk = ErAnsattMikrobiologisk[1], #1-ja, 2-nei, 3-ukjent
-                ErHelsepersonell = ErHelsepersonell[1], #1-ja, 2-nei, 3-ukjent
-                FormStatus = min(FormStatus, na.rm=T), #1-kladd, 2-ferdigstilt
+                DistrictCode = first(DistrictCode, order_by = FormDate),
+                EndretBevissthet = JaNeiUkjVar(EndretBevissthet), #1-ja, 2-nei, 3-ukjent
+                ErAnsattMikrobiologisk = JaNeiUkjVar(ErAnsattMikrobiologisk), #1-ja, 2-nei, 3-ukjent
+                ErHelsepersonell = JaNeiUkjVar(ErHelsepersonell), #1-ja, 2-nei, 3-ukjent
+                FormStatus = sort(FormStatus)[1], #1-kladd, 2-ferdigstilt
                 Gravid = sum(Gravid)>0,
-                HF = HF[1],
+                HF = first(HF, order_by = FormDate),
                 #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
-                Isolert = Isolert[1], #1-ja, 2-nei, 3-ukjent
+                Isolert = JaNeiUkjVar(Isolert), #1-ja, 2-nei, 3-ukjent
                 Karbapenem = sum(Karbapenem)>0,
                 Kinolon = sum(Kinolon),
-                KjentRisikofaktor = KjentRisikofaktor[1], #1-ja, 2-nei, 3-ukjent
+                KjentRisikofaktor = JaNeiUkjVar(KjentRisikofaktor), #1-ja, 2-nei, 3-ukjent
                 #Kreatinin,
                 Kreft = sum(Kreft),
                 KroniskLungesykdom = sum(KroniskLungesykdom),
@@ -73,38 +86,37 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 #Municipal
                 #MunicipalNumber,
                 NedsattimmunHIV = sum(NedsattimmunHIV)>0,
-                NerkontaktCovid = NerkontaktCovid[1], #1-ja, 2-nei, 3-ukjent
+                NerkontaktCovid = JaNeiUkjVar(NerkontaktCovid), #1-ja, 2-nei, 3-ukjent
                 Nyresykdom = sum(Nyresykdom)>0,
                 #Oksygenmetning
-                # OverfortAnnetSykehusInnleggelse,
-                # OverfortAnnetSykehusUtskrivning,
+                Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)),
+                # OverfortAnnetSykehusInnleggelse,  #1-ja, 2-nei, 3-ukjent
+                # OverfortAnnetSykehusUtskrivning,  #1-ja, 2-nei, 3-ukjent
                 PatientGender = PatientGender[1],
                 Penicillin = sum(Penicillin)>0,
                 PenicillinEnzymhemmer = sum(PenicillinEnzymhemmer)>0,
-                ReiseUtenfor = ReiseUtenfor[1], #1-ja, 2-nei, 3-ukjent
+                ReiseUtenfor = JaNeiUkjVar(ReiseUtenfor), #1-ja, 2-nei, 3-ukjent
                 ReshId = first(ReshId, order_by = FormDate),
                 #Respirasjonsfrekvens,
                 #RHF,
                 RontgenThorax = RontgenThorax[1], #1-5...?
                 Royker = sum(Royker)>0,
                 #Sykehus"
-                Status30Dager = sort(Status30Dager)[1],
-                Status90Dager= sort(Status90Dager)[1],
                 #SystoliskBlodtrykk,
                 #Temp,
                 TredjeGencefalosporin = sum(TredjeGencefalosporin)>0,
                 #Trombocytter,
-                UtsAkuttNyresvikt = UtsAkuttNyresvikt[1],  #1-ja, 2-nei, 3-ukjent
-                UtsAkuttRespirasjonsvikt = UtsAkuttRespirasjonsvikt[1], #1-nei, 2:5-ja, 999-ukjent
-                UtsAkuttSirkulasjonsvikt = UtsAkuttSirkulasjonsvikt[1], #1-nei, 2:5-ja, 999-ukjent
+                UtsAkuttNyresvikt = JaNeiUkjVar(UtsAkuttNyresvikt),  #1-ja, 2-nei, 3-ukjent
+                UtsAkuttRespirasjonsvikt = SviktVar(UtsAkuttRespirasjonsvikt), #1-nei, 2:5-ja, 999-ukjent
+                UtsAkuttSirkulasjonsvikt = SviktVar(UtsAkuttSirkulasjonsvikt), #1-nei, 2:5-ja, 999-ukjent
                 UtsAminoglykosid = sum(UtsAminoglykosid)>0,
                 UtsAndreGencefalosporin = sum(UtsAndreGencefalosporin)>0,
                 UtsAntibiotika = UtsAntibiotika[1], #1-ja, 2-nei, 3-ukjent
                 UtsAntibiotikaAnnet = sum(UtsAntibiotikaAnnet)>0,
                 #?Antifungalbehandling = Antifungalbehandling[1], #1-ja, 2-nei, 3-ukjent
                 #?AntiviralBehandling"
-                UtsAntifungalbehandling = UtsAntifungalbehandling[1], #1-ja, 2-nei, 3-ukjent
-                UtsAntiviralBehandling = UtsAntiviralBehandling[1],  #1-ja, 2-nei, 3-ukjent
+                UtsAntifungalbehandling = JaNeiUkjVar(UtsAntifungalbehandling), #1-ja, 2-nei, 3-ukjent
+                UtsAntiviralBehandling = JaNeiUkjVar(UtsAntiviralBehandling),  #1-ja, 2-nei, 3-ukjent
                 UtsKarbapenem = sum(UtsKarbapenem)>0,
                 UtsKinolon = sum(UtsKinolon)>0,
                 Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate),
@@ -115,6 +127,8 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 #HovedskjemaGUID
                 #OverfortAnnetSykehusUtskrivning #1-ja, 2-nei
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
+                Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død
+                Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
                 ShNavn = first(ShNavn, order_by = FormDate),
                 ShNavnUt = last(ShNavnUt, order_by = FormDate),
                 FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
@@ -131,7 +145,13 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
       # Enhetsnivånavn
       RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
+      RegData$HFresh[RegData$ReshId==108595] <- 100091
+      RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
+      #Endrer til kortnavn på HF:
+      #RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
+      #RegData$HFny <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
+
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
       #Får encoding-feil hvis bruker denne:
       #RegData$RHF <- ReshNivaa$RHFnavn[match(RegData$HFresh, ReshNivaa$HFresh)]
@@ -139,8 +159,8 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       #Kode om private
       RegData$RHF <- as.factor(RegData$RHFresh)
       levels(RegData$RHF) <- c('Vest','Nord','Midt', 'Sør-Øst')
-      #head(as.character(RegData$RHF))
       #RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
+
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive

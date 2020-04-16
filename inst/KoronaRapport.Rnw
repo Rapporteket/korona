@@ -29,7 +29,7 @@ library(korona)
 
 \begin{document}
 
-\title[Pandemiregister]{Koronainnlagte på sykehus} %\\\today}
+\title[Pandemiregister \\\today]{Koronainnlagte på sykehus} %\\\today}
 %\title[Norsk Intensivregister, Corona \\\today] {%\textit{Coronadata, NIR} \\}
 
 \maketitle
@@ -94,6 +94,24 @@ er aggregert til ett forløp per pasient.
 \end{itemize}
 
 \end{frame}
+
+\begin{frame}[fragile] {Status og oppsummering}
+
+<<'Oppsum', results='asis'>>=
+StatusNaa <- statusNaaTab(RegData=Pandemi)$Tab
+xtable::xtable(StatusNaa, align=c('l','r','r'),
+                              caption='Status nå')
+
+#Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
+FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
+
+xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
+               #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Oppsummering, utskrevne pasienter hvor både
+               inklusjons- og utskrivingsskjema er ferdigstilt.')
+@
+\end{frame}
+
 
 
 \begin{frame}[fragile] {Antall registrerte pasienter}
@@ -229,12 +247,13 @@ xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #
 % \end{frame}
 
 
-\begin{frame}[fragile] {Sykehus med pandemiskjema i kladd}
+\begin{frame}[fragile] {Sykehus med inklusjonsskjema i kladd}
 <<'KladdSh', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-AntKladdShus <- table(Pandemi$ShNavn[which(Pandemi$FormStatus==1)], dnn= 'Skjema i kladd')
+AntKladdShus <- table(PandemiAlle$ShNavn[which(PandemiAlle$FormStatus==1)], dnn= 'Skjema i kladd')
 xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Pandemiskjema i kladd')
+                              caption='Pandemiskjema i kladd, alle pasienter med Covid-19
+               (også de som er innlagt av andre årsaker)')
 @
 \end{frame}
 
@@ -257,19 +276,6 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', n
                               caption='Risikofaktorer ved innleggelse')
 @
 \end{frame}
-
-\begin{frame}[fragile] {Oppsummering av ferdigstilte registreringer}
-
-<<'Oppsum', results='asis'>>=
-#Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
-
-xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
-               #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Oppsummering, utskrevne pasienter')
-@
-\end{frame}
-
 
 
 \end{tiny}

@@ -85,9 +85,6 @@ ui <- tagList(
                       sidebarPanel(id = 'brukervalgStartside',
                                    width = 3,
                                    uiOutput('KoroRappTxt'),
-                                   h3('Koronarapport med samling av resultater'),
-                                   # h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                                   #    Gå til fanen "Abonnement" for å bestille dette.'),
                                    downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
                                    tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                    br(),
@@ -142,8 +139,8 @@ ui <- tagList(
                                 #h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
                                 fluidRow(
-                                  column(width = 4,
-                                         h3('Inneliggende pasienter'),
+                                  column(width = 5,
+                                         h3('Status nå'),
                                          uiOutput('utvalgNaa'),
                                          tableOutput('statusNaaShTab'),
                                          #h6('Flere variabler?', style = "color:red"),
@@ -151,20 +148,31 @@ ui <- tagList(
                                          # HTML('<hr size="10" />'),
                                          hr(),
                                          h4('WALL OF SHAME'),
-                                         tableOutput('skjemaInnKladdTab')
-                                         #          h4('Opphold uten ferdigstilt innleggelsesskjema innen 24t'), #, align='center'),
+                                         column(width=4,
+                                         tableOutput('skjemaInnKladdTab')),
+                                         column(width=4, offset=2,
+                                                tableOutput('skjemaUtKladdTab')                                                )
                                   ),
-                                  column(width=5, offset=1,
+                                  column(width=5, #offset=1,
                                          uiOutput('tittelFerdigeReg'),
                                          uiOutput('utvalgFerdigeReg'),
                                          tableOutput('tabFerdigeReg')
                                   )),
 
+                                fluidRow(
+                                  #column(width=4,
                                 h3('Antall ny-innlagte siste 10 dager'),
                                 h5('Overføringer telles ikke med'),
-                                #h4('Hele tidsperioden, se fanen Resultater'),
                                 uiOutput('utvalgAntOpph'),
                                 tableOutput('tabAntOpph'),
+                                  ),
+                                fluidRow(#column(width=5, offset = 3,
+                                       br(),
+                                       h3('Antall utskrevne siste 10 dager'),
+                                       uiOutput('utvalgAntUtskr'),
+                                       br(),
+                                       tableOutput('tabAntUtskr')
+                                ),
                                 br(),
                                 fluidRow(
                                   column(width=3,
@@ -378,19 +386,19 @@ server <- function(input, output, session) {
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
   }
-print(finnesEgenResh)
+
   #Filtreringsnivå for data:
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
 
-  # observe({if ((rolle != 'SC') & !(finnesEgenResh)) {
-  #   shinyjs::hide(id = 'KoroRappInt.pdf')
-  #   shinyjs::hide(id = 'KoroRappTxtInt')
-  #   shinyjs::hide(id = 'KoroRapp.pdf')
-  #   shinyjs::hide(id = 'KoroRappTxt')
-  #   hideTab(inputId = "hovedark", target = "Abonnement")
-  # }
-  #})
+  observe({if (rolle != 'SC') {
+    shinyjs::hide(id = 'KoroRappInt.pdf')
+    shinyjs::hide(id = 'KoroRappTxtInt')
+    shinyjs::hide(id = 'KoroRapp.pdf')
+    shinyjs::hide(id = 'KoroRappTxt')
+    hideTab(inputId = "hovedark", target = "Abonnement")
+  }
+  })
 
   # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
   enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
@@ -438,11 +446,11 @@ print(finnesEgenResh)
     )
   })
 
-  # output$KoroRappTxt <- renderUI(tagList(
-  #   h3(HTML('Koronarapport med samling av resultater'))
-  #   # h5(HTML('Koronarapporten kan man få regelmessig tilsendt på e-post.
-  #   #                 Gå til fanen "Abonnement" for å bestille dette'))
-  #   )
+  output$KoroRappTxt <- renderUI(tagList(
+    h3(HTML('Koronarapport med samling av resultater')),
+     h5(HTML('Koronarapporten kan man få regelmessig tilsendt på e-post.
+                     Gå til fanen "Abonnement" for å bestille dette'))
+    ))
 
   #----------Dæsjbord, Korona----------------------------
 
@@ -450,15 +458,13 @@ print(finnesEgenResh)
   observeEvent(input$tilbakestillValgRes, shinyjs::reset("brukervalgRes"))
 
   observe({
-
+#Antall innleggelser
     AntTab <- antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag',
                               aarsakInn = as.numeric(input$aarsakInn),
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               erMann=as.numeric(input$erMann))
-    #dodSh=as.numeric(input$dodSh))
-    #NB: Per nå henger ikke UtData (mangler filtrering på enhet) og AntTab sammen
     UtData <- KoronaUtvalg(RegData=KoroData,
                            enhetsNivaa=egetEnhetsNivaa, valgtEnhet=egenEnhet,
                            aarsakInn = as.numeric(input$aarsakInn),
@@ -483,9 +489,20 @@ print(finnesEgenResh)
       Nrad <- nrow(AntTab$Tab)
       AntTab$Tab[(Nrad-10):Nrad,]}, rownames = T, digits=0, spacing="xs"
     )
+#Antall utskrevne
+    AntUtskr <- antallTidUtskrevne(RegData=KoroData, tilgangsNivaa=rolle,
+                                             valgtEnhet= egenEnhet, #enhetsnivå avgjort av rolle
+                                             tidsenhet='dag',
+                                             aarsakInn = as.numeric(input$aarsakInn),
+                                             skjemastatusInn=as.numeric(input$skjemastatusInn),
+                                             erMann=as.numeric(input$erMann))
+    output$tabAntUtskr <- renderTable({
+      Nrad <- nrow(AntUtskr$Tab)
+      AntUtskr$Tab[(Nrad-10):Nrad,]}, rownames = T, digits=0, spacing="xs")
+    output$utvalgAntUtskr <- renderUI(h5(HTML(paste0(AntTab$utvalgTxt, '<br />'))))
 
     #Tab status nå
-    statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=enhetsNivaa, #
+    statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=egetEnhetsNivaa, #
                                  valgtEnhet=input$valgtEnhet,
                                  aarsakInn = as.numeric(input$aarsakInn))
     #erMann=as.numeric(input$erMann))
@@ -493,15 +510,27 @@ print(finnesEgenResh)
     output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
     #Skjema i kladd
-    AntKladdShus <- table(KoroData$ShNavn[which(KoroData$FormStatus==1)], dnn= 'Skjema i kladd')
+    KoroDataEget <- KoronaUtvalg(RegData=KoroData, valgtEnhet = egenEnhet, enhetsNivaa = egetEnhetsNivaa)$RegData
+    indKladdEget <- which(KoroDataEget$FormStatus==1)
+    if (length(indKladdEget)>0) {
+    AntKladdShus <- table(KoroDataEget$ShNavn[indKladdEget], dnn= 'Inkl.skjema i kladd')
     AntKladdShus <-  xtable::xtable(addmargins(sort(AntKladdShus, decreasing = T)))
     output$skjemaInnKladdTab <- renderTable({AntKladdShus}, rownames = T, digits=0, spacing="xs")
+    } else {output$skjemaInnKladdTab <- renderText('Alle inklusjonsskjema ferdigstilt!')}
+
+    indKladdUtEget <- which(KoroDataEget$FormStatusUt==1)
+    if (length(indKladdUtEget)>0) {
+      AntKladdUtShus <- table(KoroDataEget$ShNavn[indKladdUtEget], dnn= 'Ut.skjema i kladd')
+      AntKladdUtShus <-  xtable::xtable(addmargins(sort(AntKladdUtShus, decreasing = T)))
+      output$skjemaUtKladdTab <- renderTable({AntKladdUtShus}, rownames = T, digits=0, spacing="xs")
+    } else {output$skjemaUtKladdTab <- renderText('Alle utskrivingsskjema ferdigstilt!')}
 
 
     #Tab ferdigstilte
     TabFerdig <- FerdigeRegTab(RegData=KoroData,
                                aarsakInn = as.numeric(input$aarsakInn),
                                valgtEnhet=input$valgtEnhet,
+                               enhetsNivaa = egetEnhetsNivaa,
                                dodSh=as.numeric(input$dodSh),
                                erMann=as.numeric(input$erMann))
 
@@ -623,9 +652,9 @@ print(finnesEgenResh)
       antKol <- ncol(tab)
       kableExtra::kable(tab, format = 'html'
                         , full_width=F
-                        , digits = c(0,1,0,1)[1:antKol]
+                        , digits = c(0,0,1,0,0,1)[1:antKol]
       ) %>%
-        add_header_above(c(" "=1, 'Egen enhet/gruppe' = 2, 'Resten' = 2)[1:(antKol/2+1)]) %>%
+        add_header_above(c(" "=1, 'Egen enhet/gruppe' = 3, 'Resten' = 3)[1:(antKol/3+1)]) %>%
         column_spec(column = 1, width_min = '7em') %>%
         column_spec(column = 2:(ncol(tab)+1), width = '7em') %>%
         row_spec(0, bold = T)
@@ -739,7 +768,6 @@ print(finnesEgenResh)
 
   ## nye abonnement
   observeEvent (input$subscribe, { #MÅ HA
-    #package <- "intensiv"
     owner <- rapbase::getUserName(session)
     interval <- strsplit(input$subscriptionFreq, "-")[[1]][2]
     intervalName <- strsplit(input$subscriptionFreq, "-")[[1]][1]
@@ -750,15 +778,15 @@ print(finnesEgenResh)
     email <- rapbase::getUserEmail(session)
     if (input$subscriptionRep == "Koronarapport") {
       synopsis <- "Rapporteket-Pandemi: Koronarapport"
-      rnwFil <- "KoronaRapp.Rnw" #Navn på fila
+      rnwFil <- "KoronaRapport.Rnw" #Navn på fila
     }
     fun <- "abonnementKorona"
     paramNames <- c('rnwFil', 'brukernavn', "reshID") #, "valgtEnhet")
-
     paramValues <- c(rnwFil, brukernavn, reshID) #, as.character(input$valgtEnhetabb))
+
     #test <- abonnementKorona(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
     #                       reshID=105460)
-
+    #abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,Rpakke='korona')
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
                               fun = fun, paramNames = paramNames,
                               paramValues = paramValues, owner = owner,

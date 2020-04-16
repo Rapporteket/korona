@@ -1,6 +1,6 @@
 Package: korona
 Title: Resultattjeneste for registrering av Korona-pandemi
-Version: 0.8.1
+Version: 0.9
 Date: 2020-04-14
 Authors@R: 
     person(given = "Lena Ringstad",
@@ -14,7 +14,8 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.5.0),
-    rapbase (>= 1.0.0)
+    rapbase (>= 1.0.0),
+    tidyverse
 Remotes: 
       Rapporteket/rapbase,
       Rapporteket/rapFigurer,
