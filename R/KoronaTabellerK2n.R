@@ -28,7 +28,7 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
 
   RegDataAlle <- UtData$RegData
-  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- RegDataAlle$InnDato[is.na(RegDataAlle$UtDato)]
+  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)]
   if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
@@ -57,7 +57,7 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                         dimnames = list(c(levels(RegData$TidsVar), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
   }else{
     TabTidEnh <- table(RegData[ , c('TidsVar', 'EnhNivaaVis')]) #ftable(RegData[ , c(TidsVar, enhetsNivaa, 'Korona')], row.vars =TidsVar)
-    TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt, 2020'=sum, 'Hele landet' = sum), quiet=TRUE)
+    TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt'=sum, 'Hele landet' = sum), quiet=TRUE)
     colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
   }
 
@@ -132,7 +132,7 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                         dimnames = list(c(levels(RegData$TidsVar), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
   }else{
     TabTidEnh <- table(RegData[ , c('TidsVar', 'EnhNivaaVis')]) #ftable(RegData[ , c(TidsVar, enhetsNivaa, 'Korona')], row.vars =TidsVar)
-    TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt, 2020'=sum, 'Hele landet' = sum), quiet=TRUE)
+    TabTidEnh <- addmargins(TabTidEnh, FUN=list('Totalt'=sum, 'Hele landet' = sum), quiet=TRUE)
     colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
   }
 
@@ -269,7 +269,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
       summarise_all(sum) %>%
       tr_summarize_output(grvarnavn = 'Dato') %>%
       mutate('Hele landet' = select(., names(.)[-1]) %>% rowSums()) %>%
-      bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Totalt, 2020")))
+      bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Totalt")))
     colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
   }
 
