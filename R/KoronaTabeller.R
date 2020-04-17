@@ -18,18 +18,17 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valg
   #valgtEnhet representerer eget RHF/HF
 #if (valgtVar == 'utskrevet') {}
 
-  # RegData$TidsVar <- as.factor(RegData[ ,switch (tidsenhet,
-  #                                                dag = 'Dag',
-  #                                                uke = 'UkeNr',
-  #                                                maaned = 'MndAar')])
   if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
   RegData$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegData$InnDato, '%d.%B'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 day'))), '%d.%B')),
-                                 uke = factor(format(RegData$InnDato, '%V'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 week'))), '%V')),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
+                                                                      by=paste0('-1 day'))), '%d.%B')),
+                                 uke = factor(paste0('Uke ', format(RegData$InnDato, '%V')),
+                                              levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
+                                                                      by=paste0('-1 week'))), '%V'))),
                                  maaned = factor(format(RegData$InnDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato), by=paste0('-1 month'))), '%b.%Y')))
+                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
+                                                                         by=paste0('-1 month'))), '%b.%Y')))
 
   RegData <- RegData[!is.na(RegData$TidsVar), ]
 
@@ -39,11 +38,6 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valg
                                 LC = RegData$HF,
                                 LU = RegData$ShNavn)
 
-  #Trenger utvalg når totalen ikke er summen av det som vises.
-  # RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
-  # } else {
-  #   subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
-  # }
   enhetsNivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
 
   #Skal også ha oppsummering for hele landet
@@ -73,7 +67,7 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valg
     TabTidEnh <- cbind(TabTidEnh,
                        'Hele landet'= c(table(RegDataAlle$TidsVar), dim(RegDataAlle)[1]))}
 
-  Tab_tidy <- tidyr::as_tibble(as.data.frame.matrix(TabTidEnh), rownames = "Dato")
+  Tab_tidy <- tidyr::as_tibble(as.data.frame.matrix(TabTidEnh), rownames = "Tid")
   TabTidEnh <- xtable::xtable(TabTidEnh, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall Coronatilfeller.')
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
