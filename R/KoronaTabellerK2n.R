@@ -16,11 +16,13 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                             skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
+  RegData$ShNavnUt[is.na(RegData$ShNavnUt)] <- RegData$ShNavn[is.na(RegData$ShNavnUt)] # der ShNavnUt mangler, benytt ShNavn
+
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
                                 SC = RegData$RHF,
-                                LC = RegData$HF,
-                                LU = RegData$ShNavn)
+                                LC = RegData$HFut,
+                                LU = RegData$ShNavnUt)
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
@@ -94,11 +96,13 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                                skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
+  RegData$ShNavnUt[is.na(RegData$ShNavnUt)] <- RegData$ShNavn[is.na(RegData$ShNavnUt)] # der ShNavnUt mangler, benytt ShNavn
+
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
                                 SC = RegData$RHF,
-                                LC = RegData$HF,
-                                LU = RegData$ShNavn)
+                                LC = RegData$HFut,
+                                LU = RegData$ShNavnUt)
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
@@ -237,7 +241,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi)
     aux$Tid <- as.Date(aux$Tid)
     aux$Tid <- switch (tidsenhet,
-                        'uke' = format(aux$Tid, "%V"),
+                        'uke' = paste0('Uke ', format(aux$Tid, "%V")),
                         'maaned' = format(aux$Tid, "%b.%Y")
     )
     aux <- aux %>% group_by(PasientID, Tid) %>%
@@ -247,7 +251,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   }
 
     switch (tidsenhet,
-                    uke = datoer <- unique(format(datoer, '%V')),
+                    uke = datoer <- unique(paste0('Uke ', format(datoer, '%V'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
   if (tidsenhet %in% c("uke", "maaned")) {
     names(datoer) <- datoer

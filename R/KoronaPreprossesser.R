@@ -69,6 +69,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 ErHelsepersonell = JaNeiUkjVar(ErHelsepersonell), #1-ja, 2-nei, 3-ukjent
                 FormStatus = sort(FormStatus)[1], #1-kladd, 2-ferdigstilt
                 Gravid = sum(Gravid)>0,
+                HFut = last(HF, order_by = FormDate),
                 HF = first(HF, order_by = FormDate),
                 #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
@@ -129,8 +130,8 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
                 Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død
                 Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
+                ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
-                ShNavnUt = last(ShNavnUt, order_by = FormDate),
                 FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
                 FormDateUt = sort(FormDateUt, decreasing = T)[1],
                 FormDate = sort(FormDate)[1])
@@ -166,8 +167,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
       RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
-      RegData$FormDateUt <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d")
-      RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d")
+      RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Evt. FormDateUt
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
 
