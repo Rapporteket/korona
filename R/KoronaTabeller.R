@@ -99,14 +99,16 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   LiggetidNaa <- as.numeric(difftime(Sys.Date(), RegData$InnTidspunkt[inneliggere], units='days'))
   LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 90], na.rm = T), 1)
 
-  idag <- Sys.Date() #'2020-04-10' #
-  innIgaar <- length(which(RegData$InnDato == (as.Date(idag)-1)))
-  utIgaar <- length(which(RegData$UtDato == (as.Date(idag)-1)))
+  igaar <- Sys.Date()-1 #'2020-04-10' #
+  innIgaar <- length(which(RegData$InnDato == as.Date(igaar)))
+  utIgaar <- length(which(RegData$UtDato == as.Date(igaar)))
+  dodIgaar <- length(which(RegData$FormDateUt[RegData$StatusVedUtskriving==2] == as.Date(igaar)))
 
   statusTab <- rbind(
     'På sykehus nå' = c(AntPaaShNaa, paste0(LiggetidNaaGjsn, ' dager')),
     'Innlagt i går' = c(innIgaar,''),
-    'Utskrevet i går' = c(utIgaar,'')
+    'Utskrevet i går' = c(utIgaar,''),
+    'Døde i går' = c(dodIgaar,'')
   )
   colnames(statusTab) <- c('Antall', 'Liggetid (gj.sn)')
   xtable::xtable(statusTab,
