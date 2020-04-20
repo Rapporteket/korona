@@ -226,6 +226,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
 
   RegDataAlle <- UtData$RegData
+  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)], tz= 'UTC', format="%Y-%m-%d")
   # if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$InnDato >= datoFra), ]} # filtrerer på dato
   # datoer <- seq(min(RegDataAlle$InnDato), today(), by="day")
   datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), today(), by="day")
@@ -257,6 +258,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     names(datoer) <- datoer
   }
 
+  # if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$InnDato >= datoFra, ]}
   #Trenger utvalg når totalen ikke er summen av det som vises.
   RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   } else {
@@ -273,18 +275,26 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     TabTidEnh <- matrix(0, ncol=1, nrow=length(datoer) + 1,
                         dimnames = list(c(names(datoer), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
   }else{
+    total <- RegData %>%
+      group_by(EnhNivaaVis) %>%
+      summarise(Totalt = length(unique(PasientID))) %>%
+      tr_summarize_output(grvarnavn = 'Tid')
     TabTidEnh <-
       RegData[,c("EnhNivaaVis", names(datoer))] %>%
       group_by(EnhNivaaVis) %>%
       summarise_all(sum) %>%
       tr_summarize_output(grvarnavn = 'Tid') %>%
-      mutate('Hele landet' = select(., names(.)[-1]) %>% rowSums()) %>%
-      bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Totalt")))
+      bind_rows(total) %>%
+      mutate('Hele landet' = select(., names(.)[-1]) %>% rowSums())
+      # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Totalt")))
     colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
   }
 
   if (tilgangsNivaa != 'SC'){
-    TabTidEnh[, "Hele landet"] <- c(colSums(RegDataAlle[, names(datoer)]), sum(colSums(RegDataAlle[, names(datoer)])))
+    aux <- bind_cols(kol1 = 'Hele landet', RegDataAlle[, c(names(datoer))] %>% summarise_all(sum)) %>%
+      tr_summarize_output(grvarnavn = 'Tid') %>%
+      bind_rows(tibble(Tid = "Totalt", "Hele landet"=as.integer(length(unique(RegDataAlle$PasientID)))))
+    TabTidEnh[, "Hele landet"] <- aux[, "Hele landet"]
   }
 
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
