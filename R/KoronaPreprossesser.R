@@ -120,7 +120,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 UtsAntiviralBehandling = JaNeiUkjVar(UtsAntiviralBehandling),  #1-ja, 2-nei, 3-ukjent
                 UtsKarbapenem = sum(UtsKarbapenem)>0,
                 UtsKinolon = sum(UtsKinolon)>0,
-                Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate),
+                Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 UtsMakrolid = sum(UtsMakrolid)>0,
                 UtsPenicillin = sum(UtsPenicillin)>0,
                 UtsPenicillinEnzymhemmer = sum(UtsPenicillinEnzymhemmer)>0,
