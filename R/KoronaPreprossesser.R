@@ -154,7 +154,7 @@ if (aggPers == 1) {
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
       #Endrer til kortnavn på HF:
       #RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
-      #RegData$HFny <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
+      RegData$HFkort <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
 
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
       #Får encoding-feil hvis bruker denne:
