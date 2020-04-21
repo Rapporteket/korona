@@ -9,7 +9,7 @@
 #'
 #' @export
 #'
-KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
+KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
 {
    # Endre variabelnavn:
    names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
@@ -24,7 +24,8 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                          RegData$Vekt/(RegData$Hoyde/100)^2,
                          NA)
 
-   boolske_var_inklusjon <- as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
+   boolske_var_inklusjon <-
+      as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
    RegData[, intersect(names(RegData), boolske_var_inklusjon)] <-
       apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
 
@@ -36,7 +37,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
    #                                            Var6 = sort(Var2)[1],
    #                                            Var4 = JaNeiUkjVar(Var2),
    #                                            Var5 = SviktVar(Var2))
-
+if (aggPers == 1) {
    #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
    JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
 
@@ -137,7 +138,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
                 FormDate = sort(FormDate)[1])
   #----------------------------
    RegData <- data.frame(RegDataRed)
-
+}
       #Kjønn
       RegData$erMann <- NA #1=Mann, 2=Kvinne, 0=Ukjent
       RegData$erMann[RegData$PatientGender == 1] <- 1
@@ -179,7 +180,7 @@ KoronaPreprosesser <- function(RegData=RegData)	#, reshID=reshID)
 
 
 #Fjerne feilregisteringer
-      RegData <- RegData[which((RegData$InnDato>'2020-02-15') & (RegData$InnDato <= Sys.Date())),]
+      RegData <- RegData[which((RegData$InnDato>'2020-03-07') & (RegData$InnDato <= Sys.Date())),]
 
       # Nye tidsvariable:
       # RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',

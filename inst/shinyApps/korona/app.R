@@ -34,7 +34,7 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020 ',
 if (paaServer) {
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
-  KoroData <-  KoronaDataSQL(koble=1)
+  KoroDataRaa <-  KoronaDataSQL(koble=1)
   KoroDataInn <- KoronaDataSQL(skjema = 1, koble=0)
   KoroDataUt <- KoronaDataSQL(skjema=2, koble = 0) #Inneholder dobbeltregistrering!
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
@@ -50,12 +50,12 @@ if (paaServer) {
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
              'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
-  KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+  KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
                     by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 } #hente data
 
 
-KoroData <- KoronaPreprosesser(RegData = KoroData)
+KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
@@ -510,7 +510,8 @@ server <- function(input, output, session) {
     output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
     #Skjema i kladd
-    KoroDataEget <- KoronaUtvalg(RegData=KoroData, valgtEnhet = egenEnhet, enhetsNivaa = egetEnhetsNivaa)$RegData
+    KoroDataEget <- KoronaUtvalg(RegData=KoronaPreprosesser(KoroDataRaa, aggPers = 0),
+                                 valgtEnhet = egenEnhet, enhetsNivaa = egetEnhetsNivaa)$RegData
     indKladdEget <- which(KoroDataEget$FormStatus==1)
     if (length(indKladdEget)>0) {
     AntKladdShus <- table(KoroDataEget$ShNavn[indKladdEget], dnn= 'Inkl.skjema i kladd')
