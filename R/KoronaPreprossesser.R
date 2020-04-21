@@ -121,7 +121,7 @@ if (aggPers == 1) {
                 UtsAntiviralBehandling = JaNeiUkjVar(UtsAntiviralBehandling),  #1-ja, 2-nei, 3-ukjent
                 UtsKarbapenem = sum(UtsKarbapenem)>0,
                 UtsKinolon = sum(UtsKinolon)>0,
-                Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
+                UtskrivningsdatoSort = sort(Utskrivningsdato, decreasing = T)[1], #, FormDateUt
                 UtsMakrolid = sum(UtsMakrolid)>0,
                 UtsPenicillin = sum(UtsPenicillin)>0,
                 UtsPenicillinEnzymhemmer = sum(UtsPenicillinEnzymhemmer)>0,
@@ -134,7 +134,9 @@ if (aggPers == 1) {
                 ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
                 FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
-                FormDateUt = sort(FormDateUt, decreasing = T)[1],
+                Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
+                FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
+                #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),
                 FormDate = sort(FormDate)[1])
   #----------------------------
    RegData <- data.frame(RegDataRed)

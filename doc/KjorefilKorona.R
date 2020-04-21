@@ -2,6 +2,7 @@
 library(tidyverse)
 library(korona)
 RegData <- KoronaDataSQL(koble=1)
+RegData <- KoronaPreprosesser(RegData = RegData)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
 tidsenhet='dag'
@@ -21,6 +22,18 @@ enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
+indNaa <- which(is.na(RegData$UtDato)) #dokument
+inneliggere <- sum(is.na(RegData$FormDateUt)) #statustab
+sum(is.na(RegData$UtDato))
+test <- RegData[ ,c("UtDato", "FormDateUt")]
+sum(is.na(KoroDataInn$Utskrivningsdato))
+sum(is.na(KoroDataUt$Utskrivningsdato))
+sum(is.na(KoroDataRaa$Utskrivningsdato))
+sum(is.na(KoroDataRaa$FormDateUt))
+setdiff(sort(unique(KoroDataUt$HovedskjemaGUID)), sort(unique(KoroDataInn$SkjemaGUID)))
+RegData <- KoronaPreprosesser(RegData=KoronaDataSQL(koble=1))
+FormDateUtLastForm
+UtskrivningsdatoSort
 
 tab <- unique(RegData[,c("HFresh", 'HF', 'HFny')])
 tab[order(tab$HFresh),]
