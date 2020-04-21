@@ -137,7 +137,7 @@ if (aggPers == 1) {
                 Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),
-                FormDate = sort(FormDate)[1])
+                FormDate = first(FormDate, order_by = FormDate)) #sort(FormDate)[1])
   #----------------------------
    RegData <- data.frame(RegDataRed)
 }
@@ -172,7 +172,7 @@ if (aggPers == 1) {
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
-      RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Evt. FormDateUt
+      RegData$UtDato <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d") #Evt. Utskrivningsdato
       RegData$FormDateUt <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d")
 
       #Beregnede variabler
