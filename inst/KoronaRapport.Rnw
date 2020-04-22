@@ -270,11 +270,12 @@ xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 AntKladdShus <- table(PandemiAlleInnlEgen$ShNavn[which(PandemiAlleInnlEgen$FormStatus==1)], dnn= 'Skjema i kladd')
 kladdTxt <- ''
-Kladd <- if (length(AntKladdShus)>0) {
+if (length(AntKladdShus)>0) {
   xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Pandemiskjema i kladd, alle pasienter med Covid-19
                (også de som er innlagt av andre årsaker)')
- } else {kladdTxt <- paste0 ('Ingen skjema i kladd i ', valgtEnhet)}
+} else {
+   kladdTxt <- paste0 ('Ingen skjema i kladd i ', valgtEnhet)}
 @
 \Sexpr{kladdTxt}
 \end{frame}

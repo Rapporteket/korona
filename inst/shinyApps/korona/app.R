@@ -58,7 +58,7 @@ if (paaServer) {
 KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
-KoroData$HFkort2 <- ReshNivaa$HFnavnKort[match(KoroData$HFresh, ReshNivaa$HFresh)]
+#KoroData$HFkort2 <- ReshNivaa$HFnavnKort[match(KoroData$HFresh, ReshNivaa$HFresh)] #HFkort2
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
@@ -428,9 +428,6 @@ server <- function(input, output, session) {
   #-------- Laste ned Samlerapporter------------
   observe({
     #valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
-    print(reshID)
-    print(egenEnhet)
-    print(rolle)
     output$KoroRapp.pdf <- downloadHandler(
       filename = function(){
         paste0('KoronaRapport', Sys.time(), '.pdf')},
