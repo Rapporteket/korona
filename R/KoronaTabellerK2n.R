@@ -101,7 +101,8 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
                                 SC = RegData$RHF,
-                                LC = RegData$HFut,
+                                # LC = RegData$HFut,
+                                LC = RegData$HFkort2,
                                 LU = RegData$ShNavnUt)
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,

@@ -58,6 +58,8 @@ if (paaServer) {
 KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
 
+KoroData$HFkort2 <- ReshNivaa$HFnavnKort[match(KoroData$HFresh, ReshNivaa$HFresh)]
+
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
 
