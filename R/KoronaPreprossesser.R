@@ -121,7 +121,7 @@ if (aggPers == 1) {
                 UtsAntiviralBehandling = JaNeiUkjVar(UtsAntiviralBehandling),  #1-ja, 2-nei, 3-ukjent
                 UtsKarbapenem = sum(UtsKarbapenem)>0,
                 UtsKinolon = sum(UtsKinolon)>0,
-                UtskrivningsdatoSort = sort(Utskrivningsdato, decreasing = T)[1], #, FormDateUt
+                Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 UtsMakrolid = sum(UtsMakrolid)>0,
                 UtsPenicillin = sum(UtsPenicillin)>0,
                 UtsPenicillinEnzymhemmer = sum(UtsPenicillinEnzymhemmer)>0,
@@ -134,10 +134,8 @@ if (aggPers == 1) {
                 ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
                 FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
-                Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
-                FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
-                #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),
-                FormDate = first(FormDate, order_by = FormDate)) #sort(FormDate)[1])
+                FormDateUt = sort(FormDateUt, decreasing = T)[1],
+                FormDate = sort(FormDate)[1])
   #----------------------------
    RegData <- data.frame(RegDataRed)
 }
@@ -153,10 +151,8 @@ if (aggPers == 1) {
       RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
       #Endrer til kortnavn på HF:
-      RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
-
-      RegData$HFkort <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
-      RegData$HFkort <- enc2utf8(RegData$HFkort)
+      #RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
+      #RegData$HFny <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
 
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
       #Får encoding-feil hvis bruker denne:
@@ -172,10 +168,9 @@ if (aggPers == 1) {
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
       RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
+      RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Evt. FormDateUt
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
-      RegData$UtDato <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d") #Evt. Utskrivningsdato
-      RegData$FormDateUt <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d")
 
       #Beregnede variabler
       #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
