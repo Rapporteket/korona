@@ -38,6 +38,7 @@ Imports:
     tidyverse,
     xtable,
     zoo,
+    enc
 VignetteBuilder: knitr
 Suggests: 
     testthat (>= 2.1.0)
