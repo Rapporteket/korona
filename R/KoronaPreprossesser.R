@@ -153,8 +153,10 @@ if (aggPers == 1) {
       RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
       #Endrer til kortnavn på HF:
-      #RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
+      RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
+
       RegData$HFkort <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
+      RegData$HFkort <- enc2utf8(RegData$HFkort)
 
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
       #Får encoding-feil hvis bruker denne:
