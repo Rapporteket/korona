@@ -321,7 +321,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
 
   RegData <- UtData$RegData
-  datoer <- seq(min(RegData$InnDato), today(), by="day")
+  datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
   names(datoer) <- format(datoer, '%d.%B')
   aux <- erInneliggende(datoer = datoer, regdata = RegData)
   RegData <- bind_cols(RegData, aux)

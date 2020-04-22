@@ -1,7 +1,7 @@
 #Kjørefil for Rapporteket-Pandemi
 library(tidyverse)
 library(korona)
-RegData <- KoronaDataSQL(koble=1)
+RegData <- KoronaDataSQL()
 RegData <- KoronaPreprosesser(RegData = RegData)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
@@ -67,6 +67,11 @@ antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNi
 
 library(knitr)
 library(korona)
+
+valgtEnhet='Sør-Øst' #'Alle'
+enhetsNivaa <- 'RHF'
+rolle <- 'LC'
+reshID <- 100091
 #setwd('C:/ResultattjenesteGIT/korona/inst')
 setwd('/home/rstudio/korona/inst')
 knitr::knit('KoronaRapport.Rnw', encoding = 'UTF-8')

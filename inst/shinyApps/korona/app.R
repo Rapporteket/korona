@@ -280,16 +280,9 @@ ui <- tagList(
 
                       sidebarPanel(id = 'intensiv',
                                    width = 3,
-                                   # h3('Koronarapport fra intensivregisteret'),
-                                   # h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                                   # Gå til fanen "Abonnement" for å bestille dette.'),
-                                   # downloadButton(outputId = 'KoroRappInt.pdf',
-                                   #                label=HTML('Last ned Koronarapport <br /> for intensivopphold'), class = "butt"),
-                                   # tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                    br(),
                                    br(),
                                    h3('Gjør filtreringer/utvalg:'),
-                                   #br(),
 
                                    selectInput(inputId = "bekrInt", label="Bekreftet/Mistenkt",
                                                choices = c("Alle"=9, "Bekreftet"=1, "Mistenkt"=0)
@@ -347,9 +340,9 @@ ui <- tagList(
                                                       Ukentlig="Ukentlig-week",
                                                       Daglig="Daglig-DSTday"),
                                                  selected = "Ukentlig-week"),
-                                     selectInput(inputId = "valgtEnhetabb", label="Velg enhet",
-                                                 choices = 'Alle'
-                                     ),
+                                     # selectInput(inputId = "valgtEnhetabb", label="Velg enhet",
+                                     #             choices = 'Alle'
+                                     # ),
                                      actionButton("subscribe", "Bestill!")
                         ),
                         mainPanel(
@@ -394,9 +387,9 @@ server <- function(input, output, session) {
   observe({if (rolle != 'SC') {
     shinyjs::hide(id = 'KoroRappInt.pdf')
     shinyjs::hide(id = 'KoroRappTxtInt')
-    shinyjs::hide(id = 'KoroRapp.pdf')
-    shinyjs::hide(id = 'KoroRappTxt')
-    hideTab(inputId = "hovedark", target = "Abonnement")
+    #shinyjs::hide(id = 'KoroRapp.pdf')
+    #shinyjs::hide(id = 'KoroRappTxt')
+    #hideTab(inputId = "hovedark", target = "Abonnement")
   }
   })
 
@@ -432,14 +425,18 @@ server <- function(input, output, session) {
 
   #-------- Laste ned Samlerapporter------------
   observe({
-    valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
+    #valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
+    print(reshID)
+    print(egenEnhet)
+    print(rolle)
     output$KoroRapp.pdf <- downloadHandler(
       filename = function(){
         paste0('KoronaRapport', Sys.time(), '.pdf')},
       content = function(file){
-        henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw"
-                                  #rolle = rolle,
-                                  #valgtEnhet = valgtEnhet, #as.character(input$valgtEnhet),
+        henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
+                                  rolle = rolle,
+                                  valgtEnhet = egenEnhet, #as.character(input$valgtEnhet),
+                                  enhetsNivaa = egetEnhetsNivaa
                                   #reshID = reshID
         ) #Vurder å ta med tidsinndeling eller startdato
       }
@@ -751,7 +748,6 @@ server <- function(input, output, session) {
     output$utvalgAlderInt <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })
   })
 
-  #------------- Abonnement----------------
   #------------------ Abonnement ----------------------------------------------
   ## reaktive verdier for å holde rede på endringer som skjer mens
   ## applikasjonen kjører
@@ -793,11 +789,11 @@ server <- function(input, output, session) {
       rnwFil <- "KoronaRapport.Rnw" #Navn på fila
     }
     fun <- "abonnementKorona"
-    paramNames <- c('rnwFil', 'brukernavn', "reshID") #, "valgtEnhet")
-    paramValues <- c(rnwFil, brukernavn, reshID) #, as.character(input$valgtEnhetabb))
+    paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
+     paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
 
     #test <- abonnementKorona(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
-    #                       reshID=105460)
+    #                       reshID=105460, valgtEnhet=')
     #abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,Rpakke='korona')
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
                               fun = fun, paramNames = paramNames,

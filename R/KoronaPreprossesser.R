@@ -154,16 +154,29 @@ if (aggPers == 1) {
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
       #Endrer til kortnavn på HF:
       #RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
-      RegData$HFkort <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
+      # ReshNivaa <- as.data.frame(ReshNivaa, stringsAsFactors=FALSE)
+      # RegData$HF <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
+       #HFmap <- unique(ReshNivaa[order(ReshNivaa$HFresh), c('HFnavnKort', 'HFresh')])
+      HFmap <- as.data.frame(cbind(
+       HFresh = c("100065", "100082", "100083", "100084", "100085", "100089", "100091", "100092",
+         "100093", "100100", "100132", "100133", "100170", "100317", "100320", "101051",
+         "101719", "101971", "106635", "106640", "106816", "106819", "106834", "106838",
+         "106839", "107505", "110628", "700272", "4001031", "4201115", "4208278", "4216267"),
+       HFnavn = c("Helgeland", "Bergen", "Stavanger", "Fonna",  "Førde",  "AHUS", "Innlandet",
+                   "Østfold",  "Sunnaas", "Vestfold", "Telemark", "Sørlandet", "Haraldspl.",
+                   "N-Trøndelag", "St.Olavs", "Nordland", "UNN", "Finnmark", "Lovisenb.",
+                   "MEDI 3", "Olaviken", "NKS", "Haugesund", "Solli", "Voss", "Diakonhj.",
+                   "Martina H.", "V. Viken", "OUS", "Møre og Romsdal", "LHL", "Betanien")))
+       RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
 
       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
       #Får encoding-feil hvis bruker denne:
       #RegData$RHF <- ReshNivaa$RHFnavn[match(RegData$HFresh, ReshNivaa$HFresh)]
       #RegData$RHF <- gsub('HELSE | RHF', '', RegData$RHF) #factor()
       #Kode om private
-      RegData$RHF <- as.factor(RegData$RHFresh)
-      levels(RegData$RHF) <- c('Vest','Nord','Midt', 'Sør-Øst')
-      #RegData$RHF <- sub('Helse ', '', RegData$RHF) #factor()
+      #RegData$RHF <- as.factor(RegData$RHFresh)
+      #levels(RegData$RHF) <- c('Vest','Nord','Midt', 'Sør-Øst')
+      RegData$RHF <- as.character(factor(RegData$RHFresh, labels = c('Vest','Nord','Midt', 'Sør-Øst')))
 
 
       #Riktig format på datovariable:
