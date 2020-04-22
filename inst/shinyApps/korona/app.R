@@ -374,7 +374,7 @@ server <- function(input, output, session) {
   if (context %in% c('QA', 'PRODUCTION')){
     raplog::appLogger(session = session, msg = "Starter Pandemi-app")}
 
-  reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100089) # 100089
+  reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100082) # 100089
 
   rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'LC')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
