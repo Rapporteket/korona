@@ -127,7 +127,8 @@ write.csv2(UtAgg, file='Data3opphAgg.csv' ,fileEncoding = 'UTF-8', row.names = F
 library(korona)
 library(intensivberedskap)
 library(tidyverse)
-IntensivData <- read.table('A:/BeredskapPers2020-04-23.csv', sep=';',
+
+IntensivData <- read.table('A:/Intensiv/BeredskapPers2020-04-23.csv', sep=';',
                           stringsAsFactors=FALSE, header=T) #, encoding = 'UTF-8')
 var <- c("Fodselsnummer", "SkjemaGUID", 'FormDate', "HealthUnitShortName", "HF", "RHF")
 IntDataPers <- IntensivData %>%
@@ -140,7 +141,7 @@ IntDataPers <- IntensivData %>%
     FormDate = first(FormDate, order_by = FormDate)
   )
 
-PandemiData <- read.table('A:/PandemiPers2020-04-23.csv', sep=';',
+PandemiData <- read.table('A:/Pandemi/PandemiPers2020-04-23.csv', sep=';',
                          stringsAsFactors=FALSE, header=T) #, encoding = 'UTF-8')
 PanData <- PandemiData[which(PandemiData$Skjematype=='Pandemiskjema'), var]
 
@@ -172,32 +173,40 @@ TabSh <- PanInt %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
     AntPas = n(),
-    AndelPaaInt = sum(PaaInt)/n()*100
+    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
   )
 TabHF <- PanInt %>%
   dplyr::group_by(RHFPan, HFPan) %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
     AntPas = n(),
-    AndelPaaInt = sum(PaaInt)/n()*100
+    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
   )
 TabRHF <- PanInt %>%
   dplyr::group_by(RHFPan) %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
     AntPas = n(),
-    AndelPaaInt = sum(PaaInt)/n()*100
+    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
   )
 TabNasj <- PanInt %>%
    dplyr::summarise(
     AntPaaInt = sum(PaaInt),
     AntPas = n(),
-    AndelPaaInt = sum(PaaInt)/n()*100
+    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
   )
-TabSh
-TabHF
-TabRHF
-TabNasj
+install.packages(c("xlsx","openxlsx"))
+library(openxlsx)
+OUT <- openxlsx::createWorkbook()
+tabeller <- list('IntIkkePan'=IntIkkePan, 'TabSh'=TabSh, 'TabHF'=TabHF, 'TabRHF'=TabRHF, 'TabNasj'=TabNasj)
+for(a in 1:5){
+  tab <- data.frame(tabeller[[a]])
+  arknavn <- names(tabeller)[a]
+  addWorksheet(OUT, arknavn)
+  writeData(OUT, sheet = arknavn, x = tab)
+}
+saveWorkbook(OUT,'AndelPaaInt.xlsx')
+
 
 
 round(prop.table(table(PanInt[ ,c('ShNavnPan', 'PaaInt')]), margin = 1)*100,1)
