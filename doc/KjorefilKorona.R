@@ -124,16 +124,81 @@ UtAgg <- data3opphAgg[order(data3opphAgg$PasientID),]
 write.csv2(UtAgg, file='Data3opphAgg.csv' ,fileEncoding = 'UTF-8', row.names = F)
 
 #-----------------------------Koble Intensiv og Pandemi------------------------------
+library(korona)
+library(intensivberedskap)
+library(tidyverse)
+IntensivData <- read.table('A:/BeredskapPers2020-04-23.csv', sep=';',
+                          stringsAsFactors=FALSE, header=T) #, encoding = 'UTF-8')
+var <- c("Fodselsnummer", "SkjemaGUID", 'FormDate', "HealthUnitShortName", "HF", "RHF")
+IntDataPers <- IntensivData %>%
+  group_by(Fodselsnummer) %>%
+  summarise(
+    SkjemaGUID = first(SkjemaGUID, order_by = FormDate),
+    RHF = first(RHF, order_by = FormDate),
+    HF = first(HF, order_by = FormDate),
+    ShNavn =  first(HealthUnitShortName, order_by = FormDate),
+    FormDate = first(FormDate, order_by = FormDate)
+  )
 
-IntensivData <- read.table('A:/Intensiv/BeredskapPers2020-04-23.csv', sep=';',
-                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-PandemiData <- read.table('A:/Pandemi/PandemiPers2020-04-23.csv', sep=';',
-                         stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+PandemiData <- read.table('A:/PandemiPers2020-04-23.csv', sep=';',
+                         stringsAsFactors=FALSE, header=T) #, encoding = 'UTF-8')
+PanData <- PandemiData[which(PandemiData$Skjematype=='Pandemiskjema'), var]
+
+PanDataPers <- PanData %>%
+  group_by(Fodselsnummer) %>%
+  summarise(
+    SkjemaGUID = first(SkjemaGUID, order_by = FormDate),
+    RHF = first(RHF, order_by = FormDate),
+    HF = first(HF, order_by = FormDate),
+    ShNavn =  first(HealthUnitShortName, order_by = FormDate),
+    FormDate = first(FormDate, order_by = FormDate)
+  )
+
+#Manglende registrering
+IntPan <- merge(IntDataPers, PanDataPers, suffixes = c('Int','Pan'),
+                     by = 'Fodselsnummer', all.x = T, all.y=F)
+IntIkkePan <- IntPan[which(is.na(IntPan$SkjemaGUIDPan)),
+                     c('RHFInt', 'HFInt', 'ShNavnInt', 'FormDateInt', 'SkjemaGUIDInt')]
+data.frame(IntIkkePan[order(IntIkkePan$RHFInt), ], row.names = 'SkjemaGUIDInt')
 
 
+#Andel som har vært på intensiv
+PanInt <- merge(IntDataPers, PanDataPers, suffixes = c('Int','Pan'),
+                       by = 'Fodselsnummer', all.x = F, all.y=T)[,-1]
+PanInt$PaaInt <- ifelse(is.na(PanInt$FormDateInt),0,1)
+
+TabSh <- PanInt %>%
+  dplyr::group_by(RHFPan, HFPan, ShNavnPan) %>%
+  dplyr::summarise(
+    AntPaaInt = sum(PaaInt),
+    AntPas = n(),
+    AndelPaaInt = sum(PaaInt)/n()*100
+  )
+TabHF <- PanInt %>%
+  dplyr::group_by(RHFPan, HFPan) %>%
+  dplyr::summarise(
+    AntPaaInt = sum(PaaInt),
+    AntPas = n(),
+    AndelPaaInt = sum(PaaInt)/n()*100
+  )
+TabRHF <- PanInt %>%
+  dplyr::group_by(RHFPan) %>%
+  dplyr::summarise(
+    AntPaaInt = sum(PaaInt),
+    AntPas = n(),
+    AndelPaaInt = sum(PaaInt)/n()*100
+  )
+TabNasj <- PanInt %>%
+   dplyr::summarise(
+    AntPaaInt = sum(PaaInt),
+    AntPas = n(),
+    AndelPaaInt = sum(PaaInt)/n()*100
+  )
+TabSh
+TabHF
+TabRHF
+TabNasj
 
 
-
-
-
+round(prop.table(table(PanInt[ ,c('ShNavnPan', 'PaaInt')]), margin = 1)*100,1)
 
