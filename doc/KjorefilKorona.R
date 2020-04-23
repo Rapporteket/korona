@@ -22,29 +22,12 @@ enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
-RegData[order(as.Date(RegData$FormDate)) ,c('HF', "UnitId", "Sykehus", "SkjemaGUID", "FormDate")][1:10,]
-
-tab <- unique(RegData[,c("HFresh", 'HF', 'HFny')])
-tab[order(tab$HFresh),]
-
-tab2 <- unique(RegData[,c("HFresh", 'HF')])
-tab2[order(tab2$HFresh),]
-
-unique(RegData[, c("UnitId", 'HelseenhetKortNavn')])
-
-RegData[RegData$UnitId==100065,] #108595
-table(RegData$ShNavn[RegData$HF=='Helgelandssykehuset HF'])
-
 FerdigeRegTab(RegData=Pandemi,
               aarsakInn = 1,
               valgtEnhet=valgtEnhet,
               enhets)
 
 test <- RegData[ , c("FormDateUt", "Utskrivningsdato","FormStatus", "FormStatusUt" )]
-
-test <- KoronaUtvalg(RegData=RegData, erMann=1, skjemastatusInn=2, aarsakInn=1)
-test$utvalgTxt
-test$hovedgrTxt
 
 Utdata <- KoronaFigAndeler(valgtVar='demografi', RegData=Pandemi,
                  minald=minald, maxald=maxald, aarsakInn=aarsakInn,
@@ -90,10 +73,6 @@ PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y")
 PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')
 
 
-# Antall uferdige registreringer (skjemastatus = 1?) - se på data
-
-# Antall med fristbrudd (24t) - også ferdigstilte? Kun fra 1.april? Spør
-
 library(korona)
 KoroDataInn <- KoronaDataSQL(skjema=1, koble=0)
 KoroDataUt <- KoronaDataSQL(skjema=2)
@@ -108,8 +87,6 @@ KoroData <- KoronaPreprosesser(RegData = KoronaDataSQL(koble=1))
 RegData <- KoroData
 
 UtData <- KoronaUtvalg(RegData=KoroData, dodSh = 2)
-
-RisikoInnTab(RegData = RegData, dodSh = 2)
 
 
 KoroDataInn <- read.table('A:/Pandemi/InklusjonSkjemaDataContract2020-04-06.csv', sep=';',
@@ -127,36 +104,6 @@ ind <- which(KoroDataUt$HovedskjemaGUID==('D403C085-3F28-4840-AF72-9A6AF7954066'
 KoroDataUt$SkjemaGUID[ind] #= 'D403C085-3F28-4840-AF72-9A6AF7954066'
 KoroDataUt[ind, "FormStatus"]
 
-datoTil=Sys.Date()
-reshID=0
-erMann=''
-bekr=9
-skjemastatus=9
-dodSh=9
-valgtEnhet='Alle'
-enhetsNivaa='RHF'
-minald=0
-maxald=110
-
-
-
-RisikoInnTab(RegData, erMann='', skjemastatus=2, dodSh=9,
-                         valgtEnhet='Alle', enhetsNivaa='RHF',
-                         minald=0, maxald=110)
-
-
-Pandemiskjema:
-Utskrivningsdato
-TimerSidenRelevantDato
-RelevantDato
-Innleggelse (dato)
-FormDate
-
-Utskriving:
-Utskrivningsdato
-TimerSidenRelevantDato
-RelevantDato
-FormDate
 
 library(korona)
 #Overførte pasienter - SJEKK AV PASIENTAGGREGERING
@@ -175,3 +122,18 @@ varAgg <- c('PasientID',"ReshId",  "ShNavn",  'ShNavnUt', "FormStatus", "InnTids
 data3opphAgg <- Pandemi[which(Pandemi$PasientID %in% pas3), ] #varAgg]
 UtAgg <- data3opphAgg[order(data3opphAgg$PasientID),]
 write.csv2(UtAgg, file='Data3opphAgg.csv' ,fileEncoding = 'UTF-8', row.names = F)
+
+#-----------------------------Koble Intensiv og Pandemi------------------------------
+
+IntensivData <- read.table('A:/Intensiv/BeredskapPers2020-04-23.csv', sep=';',
+                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+PandemiData <- read.table('A:/Pandemi/PandemiPers2020-04-23.csv', sep=';',
+                         stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+
+
+
+
+
+
+
+
