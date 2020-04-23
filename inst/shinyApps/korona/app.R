@@ -774,7 +774,7 @@ server <- function(input, output, session) {
 
 
   ## nye abonnement
-  observeEvent (input$subscribe, { #MÅ HA
+  observeEvent(input$subscribe, { #MÅ HA
     owner <- rapbase::getUserName(session)
     interval <- strsplit(input$subscriptionFreq, "-")[[1]][2]
     intervalName <- strsplit(input$subscriptionFreq, "-")[[1]][1]
@@ -790,10 +790,15 @@ server <- function(input, output, session) {
     fun <- "abonnementKorona"
     paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
      paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
-
-    #test <- abonnementKorona(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
-    #                       reshID=105460, valgtEnhet=')
-    #abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,Rpakke='korona')
+# print(rnwFil)
+# print(brukernavn)
+# print(reshID)
+# print(egenEnhet)
+# print(egetEnhetsNivaa)
+# print(rolle)
+#     test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
+#                            reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
+#     print(test)
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
                               fun = fun, paramNames = paramNames,
                               paramValues = paramValues, owner = owner,
