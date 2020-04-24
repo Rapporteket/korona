@@ -24,6 +24,7 @@ Remotes:
 Imports:
     digest,
     DT,
+    intensivberedskap,
     kableExtra,
     knitr,
     lifecycle,

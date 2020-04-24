@@ -8,6 +8,7 @@
 \usepackage{booktabs}
 \usepackage{rotating}
 \usepackage{graphicx}
+%\usepackage{tabularx}
 
 % \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 % \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
@@ -18,6 +19,7 @@
 <<'initOpts',include=FALSE>>=
 knitr::opts_chunk$set(warnings=FALSE,echo=FALSE)
 knitr::opts_knit$set(root.dir = './')
+options(knitr.table.format = "latex")
 library(intensivberedskap)
 library(tidyverse)
 library(lubridate)
@@ -125,11 +127,11 @@ print(xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
 # AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
 #                               valgtEnhet= valgtEnhet, HFkort = 1)$Tab_tidy
 
+#\resizebox function or
+#\adjustbox.
 
 AntTab <- table(Pandemi$InnDag, Pandemi$EnhNivaaVis)
 AntTab <- addmargins(AntTab)
-endre <- ""
-names(endre) <- " "
 #kable(AntTab, format = 'latex')
 xTab <- xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
                method='compact', #align=c('l', rep('r', ncol(alderDIV))),
@@ -137,16 +139,16 @@ xTab <- xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
                samt totalt antall for hele pandemiperioden.')
 
 #kable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], format = 'latex', booktabs=TRUE) %>%
-xTab %>%
-  xtable2kable() %>%
-  kableExtra::kable_styling(latex_options="scale_down")
-
-#print(xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
-#               method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-#               caption='Antall registrerte pasienter med korona siste 20 dager,
-#               samt totalt antall for hele pandemiperioden.'),
-#      include.rownames = FALSE,
-#      scalebox = 0.7)
+#xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
+antEnh <- dim(AntTab)[2]
+skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
+print(
+  xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
+               method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+               caption='Antall registrerte pasienter med korona siste 20 dager,
+               samt totalt antall for hele pandemiperioden.')
+      #include.rownames = FALSE,
+      ,scalebox = skalering)
 @
 \end{frame}
 
@@ -239,12 +241,11 @@ xtable::xtable(BeleggTab[fra:AntRader, ], digits=1, #-which(names(AntRader)=='He
 AntUt <- table(Pandemi$UtDato, Pandemi$EnhNivaaVis)
 AntUt <- addmargins(AntUt)
 fra <- max(1, (nrow(AntUt)-20))
-xTab <- xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall utskrevne per dag siste 20 utskrivningsdager, samt totalt.')
+print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Antall utskrevne per dag siste 20 utskrivningsdager, samt totalt.'),
+scalebox = skalering)
 
-xTab %>%
-  xtable2kable() %>%
-  kableExtra::kable_styling(latex_options="scale_down")
+#xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
 
 @
 \end{frame}
@@ -258,8 +259,8 @@ fra <- max(1, (nrow(AntDodeTab)-20))
 xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall døde per dag, siste 20 dødsdager,
                samt totalt for hele pandemiperioden.') %>%
- xtable2kable() %>%
-  kableExtra::kable_styling(latex_options="scale_down")
+ print(scalebox = skalering)
+  #xtable2kable() %>%   kableExtra::kable_styling(latex_options="scale_down")
 
 @
 \end{frame}

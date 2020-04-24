@@ -105,9 +105,20 @@ KoroDataUt$SkjemaGUID[ind] #= 'D403C085-3F28-4840-AF72-9A6AF7954066'
 KoroDataUt[ind, "FormStatus"]
 
 
+#-------------Overførte pasienter - SJEKK AV PASIENTAGGREGERING------------------------
 library(korona)
-#Overførte pasienter - SJEKK AV PASIENTAGGREGERING
-RegData <- KoronaDataSQL(koble=1)
+RegData <- KoronaDataSQL() #1026
+length(unique(RegData$PasientGUID)) #935 ->91 overføringer?
+JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
+RegDataRed <- RegData %>% group_by(PasientID) %>%
+  summarise(Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)))
+# OverfortAnnetSykehusInnleggelse,  #1-ja, 2-nei, 3-ukjent
+# OverfortAnnetSykehusUtskrivning,  #1-ja, 2-nei, 3-ukjent
+
+RegData <- KoronaPreprosesser(RegData = RegData)
+length(unique(RegData$PasientID)) #926 sjekk ant før 8.mars : 9 stk OK
+RegData <- KoronaUtvalg(RegData=RegData, aarsakInn = 1)$RegData #767
+
 pas3 <- names(table(RegData$PasientGUID)[table(RegData$PasientGUID)>2])
 indOverf <- which(RegData$PasientGUID %in% pas3)
 var <- c('PasientGUID',"UnitId",  "HelseenhetKortNavn", 'ShNavnUt', "FormStatus", "Innleggelse",
