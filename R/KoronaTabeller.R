@@ -133,7 +133,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   N <- dim(RegData)[1]
   Liggetid <- summary(RegData$Liggetid, na.rm = T)
   Alder <- summary(RegData$Alder, na.rm = T)
-  BMI <- summary(RegData$BMI)
+  BMI <- summary(RegData$BMI[RegData$BMI<60]) #Filtrerer bort de med BMI over 60
   AntDod <- sum(RegData$StatusVedUtskriving==2, na.rm=T)
   NrisikoKjent <- sum(RegData$KjentRisikofaktor %in% 1:2, na.rm=T)
   pstRisiko <- 100*sum(RegData$KjentRisikofaktor==1, na.rm=T)/NrisikoKjent
