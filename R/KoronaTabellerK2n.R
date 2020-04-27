@@ -228,8 +228,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
   RegDataAlle <- UtData$RegData
   RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)], tz= 'UTC', format="%Y-%m-%d")
-  # if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$InnDato >= datoFra), ]} # filtrerer på dato
-  # datoer <- seq(min(RegDataAlle$InnDato), today(), by="day")
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$UtDato >= datoFra | is.na(RegDataAlle$UtDato), ]} # filtrerer på dato
   datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), today(), by="day")
 
   if (tidsenhet=='dag') {

@@ -40,10 +40,10 @@ if (paaServer) {
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
-  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-16 15-54-14.txt', sep=';',
+  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-27 12-20-09.txt', sep=';',
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
-  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-16 15-54-14.txt', sep=';',
+  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-27 12-20-09.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
   KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
@@ -371,7 +371,7 @@ server <- function(input, output, session) {
 
   reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100082) # 100089
 
-  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'LC')
+  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'SC')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
 
   finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
