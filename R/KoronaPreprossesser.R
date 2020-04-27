@@ -145,16 +145,15 @@ if (aggPers == 1) {
                 Reinn8 = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
                                ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                    hours)) <= 8, 0, 1)),
+                                                    units = "hours")) <= 8, 0, 1)),
                 Reinn = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
                                 ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                      FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                     hours)) <= 24, 0, 1)),
-
+                                                     units = "hours")) <= 24, 0, 1)),
                 AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
                                   sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                               hours) > 8)),
+                                               units = "hours") > 8)),
                 # LiggetidSum = , #sum av liggetider. Vanskelig siden ikke ferdigstilt...
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate)) #sort(FormDate)[1])
