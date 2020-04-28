@@ -87,7 +87,7 @@ if (aggPers == 1) {
                 #Leukocytter,
                 Leversykdom = sum(Leversykdom)>0,
                 Makrolid = sum(Makrolid)>0,
-                #Municipal
+                Municipal = first(Municipal, order_by = FormDate),
                 #MunicipalNumber,
                 NedsattimmunHIV = sum(NedsattimmunHIV)>0,
                 NerkontaktCovid = JaNeiUkjVar(NerkontaktCovid), #1-ja, 2-nei, 3-ukjent
