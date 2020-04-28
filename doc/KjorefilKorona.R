@@ -48,6 +48,10 @@ FerdigeRegTab(RegData=Pandemi,
 
 test <- RegData[ , c("FormDateUt", "Utskrivningsdato","FormStatus", "FormStatusUt" )]
 
+RegData <- KoronaUtvalg(RegData=RegData, aarsakInn = 1)$RegData
+table(RegData$Reinn,is.na(RegData$FormDateUt))
+table(is.na(RegData$FormDateUt))
+
 Utdata <- KoronaFigAndeler(valgtVar='demografi', RegData=Pandemi,
                  minald=minald, maxald=maxald, aarsakInn=aarsakInn,
                  erMann=erMann, dodSh=dodSh,
