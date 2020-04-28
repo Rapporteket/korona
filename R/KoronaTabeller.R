@@ -131,7 +131,8 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   RegData <- Utvalg$RegData
 
   N <- dim(RegData)[1]
-  Liggetid <- summary(RegData$Liggetid, na.rm = T)
+indUreinn <- which(RegData$Reinn==0)
+  Liggetid <- summary(RegData$Liggetid[indUreinn], na.rm = T)
   Alder <- summary(RegData$Alder, na.rm = T)
   BMI <- summary(RegData$BMI[RegData$BMI<60]) #Filtrerer bort de med BMI over 60
   AntReinn <- sum(RegData$Reinn, na.rm = T)
@@ -149,11 +150,11 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   #formatPst(2.343, 1)
 
   TabFerdigeReg <- rbind(
-    'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
+    'Liggetid u/reinn (døgn)' = c(med_IQR(Liggetid), length(indUreinn), ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'KMI' = c(med_IQR(BMI), N, ''),
     'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
-    'Reinnleggelse' = c('','','', AntReinn, PstReinn),
+    'Reinnleggelse (>48t)' = c('','','', AntReinn, PstReinn),
     'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
   TabFerdigeReg[4:6,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:6,5])),' %')

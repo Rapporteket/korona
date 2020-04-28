@@ -123,7 +123,6 @@ if (aggPers == 1) {
                 UtsAntiviralBehandling = JaNeiUkjVar(UtsAntiviralBehandling),  #1-ja, 2-nei, 3-ukjent
                 UtsKarbapenem = sum(UtsKarbapenem)>0,
                 UtsKinolon = sum(UtsKinolon)>0,
-                UtskrivningsdatoSort = sort(Utskrivningsdato, decreasing = T)[1], #, FormDateUt
                 UtsMakrolid = sum(UtsMakrolid)>0,
                 UtsPenicillin = sum(UtsPenicillin)>0,
                 UtsPenicillinEnzymhemmer = sum(UtsPenicillinEnzymhemmer)>0,
@@ -135,26 +134,28 @@ if (aggPers == 1) {
                 Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
                 ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
-                FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
+                FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1,
+                                      as.numeric(sort(FormStatusUt)[1])), #1-kladd, 2-ferdigstilt
                 Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),
                 AntInnSkjema = n(),
                 # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
                 # Overf = , #Beregn, ja nei
                 # AntOverf = , #Antall overføringer
-                Reinn8 = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
-                               ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                                                    FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                    units = "hours")) <= 8, 0, 1)),
-                Reinn = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
-                                ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                     units = "hours")) <= 24, 0, 1)),
+                # Reinn8 = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
+                #                ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
+                #                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+                #                                     units = "hours"), decreasing = T)[1] <= 8, 0, 1)),
+                ReinnTid = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
+                                 sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
+                                                      FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+                                                      units = "hours"), decreasing = T)[1]),
+                Reinn = ifelse(ReinnTid>48, 1, 0),
                 AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
                                   sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                               units = "hours") > 8)),
-                # LiggetidSum = , #sum av liggetider. Vanskelig siden ikke ferdigstilt...
+                                               units = "hours") > 48, na.rm = T)),
+                # LiggetidSum = , #sum av liggetider. Bare for ferdigstilte...
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate)) #sort(FormDate)[1])
    #Reinnleggelse
@@ -210,6 +211,8 @@ if (aggPers == 1) {
 
       #Beregnede variabler
       #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
+      #!! MÅ TA HENSYN TIL REINNLEGGELSE
+      #indUReinn <- RegData$Reinn==0
       RegData$Liggetid <- as.numeric(difftime(RegData$UtTidspunkt,
                                               RegData$InnTidspunkt,
                                               units = 'days'))

@@ -1,8 +1,8 @@
 #Kjørefil for Rapporteket-Pandemi
 library(tidyverse)
 library(korona)
-RegData <- KoronaDataSQL()
-RegData <- KoronaPreprosesser(RegData = RegData)
+RegDataRaa <- KoronaDataSQL()
+RegData <- KoronaPreprosesser(RegData = RegDataRaa)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
 tidsenhet='dag'
@@ -22,10 +22,29 @@ enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
+ifelse(0 > 0, 1,
+       sort(RegDataRaa$FormStatusUt)[1])
+ifelse(1<0, 0, 'a')
+
+table(RegData$Reinn8)
+table(RegData$Reinn24)
+table(RegData$Reinn48)
+table(RegData$Reinn7d)
+table(RegData$ReinnTid>24)
+pas <- RegData$PasientID[which(as.numeric(RegData$ReinnTid) < -10)]
+tab <- RegDataRaa[which(RegDataRaa$PasientGUID %in% pas),
+           c('PasientGUID', "FormDate", "FormDateUt", 'HelseenhetKortNavn')]
+tab[order(tab$PasientGUID), ]
+RegData[RegData$PasientID=='80572CB4-6E77-EA11-A96B-00155D0B4F09', ]
+
+
+tab <- table(RegDataRaa$PasientGUID)
+tab[tab>1]
+table(round(RegData$Liggetid), useNA = 'a')
 FerdigeRegTab(RegData=Pandemi,
-              aarsakInn = 1,
-              valgtEnhet=valgtEnhet,
-              enhets)
+              aarsakInn = 1)$Tab
+              #,valgtEnhet=valgtEnhet,
+              #enhetsNivaa = enhetsNivaa)
 
 test <- RegData[ , c("FormDateUt", "Utskrivningsdato","FormStatus", "FormStatusUt" )]
 
@@ -103,6 +122,7 @@ sort(table(KoroDataUt$PasientGUID)) #[table(KoroDataUt$PasientGUID)>1]
 ind <- which(KoroDataUt$HovedskjemaGUID==('D403C085-3F28-4840-AF72-9A6AF7954066'))
 KoroDataUt$SkjemaGUID[ind] #= 'D403C085-3F28-4840-AF72-9A6AF7954066'
 KoroDataUt[ind, "FormStatus"]
+
 #----------- Datavask--------------------------------
 #Feilreg, BMI
 RegData[order(RegData$BMI, decreasing = T)[1:10],c('PasientID', 'InnDag', 'BMI')]
@@ -113,53 +133,52 @@ RegDataRaa[union(which(RegDataRaa$PasientGUID %in% PasIDBMI),
            c('Hoyde', 'Vekt', "PatientAge", "SkjemaGUID")]
 
 
+RegDataRaa <- KoronaDataSQL()
+RegData <- KoronaPreprosesser(RegData = RegDataRaa)
 
+#Dato inn/ut
+sjekk <- 240 #-10
+pas <- RegData$PasientID[which(as.numeric(RegData$ReinnTid) > sjekk)]
+tab <- RegDataRaa[which(RegDataRaa$PasientGUID %in% pas),
+                  c('PasientGUID', "FormDate", "FormDateUt", 'HelseenhetKortNavn')]
+pas <- RegData$PasientID[RegData$AntReinn>1]
+tab[order(tab$PasientGUID), ]
+sort(table(RegData$AntReinn))
+
+#FINN DOBBELTREGISTERERING - overlapp to avdelinger > 24?t
 
 #-------------Overførte pasienter - SJEKK AV PASIENTAGGREGERING------------------------
 library(korona)
-RegData <- KoronaDataSQL() #1026
-length(unique(RegData$PasientGUID)) #935 ->91 overføringer?
+RegDataRaa <- KoronaDataSQL() #1026
+length(unique(RegDataRaa$PasientGUID)) #935 ->91 overføringer?
+RegData <- KoronaPreprosesser(RegDataRaa)
 JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
 # OverfortAnnetSykehusInnleggelse,  #1-ja, 2-nei, 3-ukjent
 # OverfortAnnetSykehusUtskrivning,  #1-ja, 2-nei, 3-ukjent
-RegDataRed <- RegData %>% group_by(PasientGUID) %>%
-  summarise(Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)),
-            AntInnSkjema = n(),
-            Reinn = ifelse(AntInnSkjema==1, 0,
-                           ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                                    FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                    hours)) <= 8, 0, 1)), #Beregn ja/nei. Xt
-            AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
-                              sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                                           FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                           hours) > 8))
+# RegDataRed <- RegData %>% group_by(PasientGUID) %>%
+#   summarise(Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)),
+#             AntInnSkjema = n(),
+#             Reinn = ifelse(AntInnSkjema==1, 0,
+#                            ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
+#                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+#                                     hours)) <= 8, 0, 1)), #Beregn ja/nei. Xt
+#             AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
+#                               sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
+#                                            FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+#                                            hours) > 8))
             # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
             # Overf = , #Beregn, ja nei
             # AntOverf = , #Antall overføringer
             # LiggetidSum = , #sum av liggetider
-  )
+#  )
 #sort(difftime(RegData$FormDateUt[1:2], c(RegData$FormDate[1], NA)))
 
-sum(RegDataRed$Reinn, na.rm = T)
-hvilkePas <- RegDataRed$PasientGUID[which(RegDataRed$Reinn==1)]
-ReinnData <- RegData[which(RegData$PasientGUID %in% hvilkePas), c('PasientGUID', "FormDate", "FormDateUt", "HelseenhetKortNavn")]
-
-RegDataSort <- RegData[order(RegData[ ,'PasientGUID'], RegData$FormDate,     #Denne tar mest tid
-              RegData$FormDateUt), ]
-
-#FinnReinnleggelser <- function(RegData, PasientID='PasientID'){
-  #RegData må inneholde DateAdmittedIntensive, DateDischargedIntensive og PasientID
-  RegDataSort <- RegData[order(RegData[ ,PasientID], RegData$DateAdmittedIntensive,     #Denne tar mest tid
-                               RegData$DateDischargedIntensive), ]
-  RegDataSort$OpphNr <- ave(RegDataSort[ ,PasientID], RegDataSort[ ,PasientID], FUN=seq_along)
-  indPasFlereOpph <- which(RegDataSort$OpphNr>1) #intersect(which(RegDataSort$AntOpph>1), which(RegDataSort$OpphNr>1))
-  RegDataSort$TidUtInn <- NA
-  RegDataSort$TidUtInn[indPasFlereOpph] <-
-    difftime(as.POSIXlt(RegDataSort$DateAdmittedIntensive[indPasFlereOpph], tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
-             as.POSIXlt(RegDataSort$DateDischargedIntensive[indPasFlereOpph-1], tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
-             units = 'hour')
-  RegDataSort$Reinn <- 2 #Ikke reinnleggelse
-  RegDataSort$Reinn[RegDataSort$TidUtInn<72 & RegDataSort$TidUtInn >= 0] <- 1 #Reinnleggelse
+sum(RegData$Reinn, na.rm = T)
+hvilkePas <- RegData$PasientID[which(RegData$Reinn==1)]
+ReinnData <- RegDataRaa[which(RegDataRaa$PasientGUID %in% hvilkePas),
+                        c('PasientGUID', "FormDate", "FormDateUt", "HelseenhetKortNavn", "SkjemaGUID")]
+test <- ReinnData[order(ReinnData$PasientGUID, ReinnData$FormDate),]
+#FINN DOBBEL
 
 table(RegDataRed$Overf) #50 overf
 tab <- table(RegData$PasientGUID)

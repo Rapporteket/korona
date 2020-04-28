@@ -112,11 +112,12 @@ xtable::xtable(StatusNaa, align=c('l','r','r'),
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 
-print(xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
+#print(
+  xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
                #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Oppsummering, utskrevne pasienter hvor både
-               inklusjons- og utskrivingsskjema er ferdigstilt.'),
-      include.rownames = FALSE)
+               inklusjons- og utskrivingsskjema er ferdigstilt.')
+      #, include.rownames = FALSE)
 @
 \end{frame}
 
