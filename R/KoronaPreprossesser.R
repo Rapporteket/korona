@@ -23,20 +23,29 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                          RegData$Vekt/(RegData$Hoyde/100)^2,
                          NA)
+#FEIL I KODEBOK LAGER KRØLL!
+   # boolske_var_inklusjon <-
+   #    as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
+   # RegData[, intersect(names(RegData), boolske_var_inklusjon)] <-
+   #    apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
 
-   boolske_var_inklusjon <-
-      as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
-   RegData[, intersect(names(RegData), boolske_var_inklusjon)] <-
-      apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
+   #Konvertere boolske variable fra tekst til boolske variable...
+   TilLogiskeVar <- function(Skjema){
+     verdiGML <- c('True','False')
+     verdiNY <- c(TRUE,FALSE)
+     mapping <- data.frame(verdiGML,verdiNY)
+     LogVar <- names(Skjema)[which(Skjema[1,] %in% verdiGML)]
+     if (length(LogVar)>0) {
+       for (k in 1:length(LogVar)) {
+         Skjema[,LogVar[k]] <- mapping$verdiNY[match(Skjema[,LogVar[k]], mapping$verdiGML)]
+       }}
+     return(Skjema)
+   }
+
+   RegData <- TilLogiskeVar(RegData)
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
-   # a <- as.data.frame(matrix(c(1,1,1,2,2, 999,3:4,NA, NA),5,2))
-   # colnames(a) <- c('Var1', 'Var2')
-   # test <- a %>% group_by(Var1) %>% summarise(#Var3 = min(Var2, na.rm = T),
-   #                                            Var6 = sort(Var2)[1],
-   #                                            Var4 = JaNeiUkjVar(Var2),
-   #                                            Var5 = SviktVar(Var2))
 if (aggPers == 1) {
    #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
    JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
@@ -50,7 +59,7 @@ if (aggPers == 1) {
 
    RegDataRed <- RegData %>% group_by(PasientID) %>%
       summarise(Alder = Alder[1],
-                AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst2), #1-ja, 2-nei, 3-ukjent
+                AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
                 AkuttNyresvikt = JaNeiUkjVar(AkuttNyresvikt), #1-ja, 2-nei, 3-ukjent
                 AkuttRespirasjonsvikt = SviktVar(AkuttRespirasjonsvikt), #1-nei, 2:5 ja, 999 ukjent
                 AkuttSirkulasjonsvikt = SviktVar(AkuttSirkulasjonsvikt),  #1-nei, 2:5 ja, 999 ukjent
