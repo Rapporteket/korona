@@ -68,6 +68,7 @@ varFHIraa <- c('PasientGUID',
 ,'ReiseUtenfor'
 ,'RHF'
 ,'Royker'
+,'StatusVedUtskriving'
 ,'Status30Dager'
 ,'UtsAntibiotika'
 ,'UtsAntifungalbehandling'
