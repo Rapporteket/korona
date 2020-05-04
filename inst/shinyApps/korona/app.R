@@ -46,8 +46,14 @@ if (paaServer) {
   KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-27 12-20-09.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
-  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
+  # KoroDataInt_gml <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
+  #                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-27 16-11-27.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  # KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-27 16-19-32.txt', sep=';',
+  #                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataInt$EcmoEnd[KoroDataInt$EcmoEnd == ""] <- NA
+  KoroDataInt$EcmoStart[KoroDataInt$EcmoStart == ""] <- NA
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
              'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
   KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
