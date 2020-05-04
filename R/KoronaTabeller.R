@@ -317,3 +317,29 @@ lagTabavFigFord <- function(UtDataFraFig){
 
   return(tab)
 }
+
+#' Finn innleggelser som mangler utskriving
+#'
+#' @param RegData Koblet dataramme uten aggregering
+#' @param valgtEnhet egen/valgt enhet
+#' @param enhetsNivaa eget/valgt enhetsnivå
+#'
+#' @return
+#' @export
+innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
+  RegData <- KoronaPreprosesser(RegData, aggPers = 0)
+
+  UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa)
+  RegData <- UtData$RegData
+  N <- dim(RegData)[1]
+
+  #RegData <- RegDataRaa
+  ind <- which(is.na(RegData$HovedskjemaGUID))
+  variabler <- c('HF', 'ShNavn', 'InnDato', 'SkjemaGUID')
+  tab <- RegData[ind, variabler]
+  tab$InnDato <- as.character(tab$InnDato)
+  tabUt <- tab[with(tab, order(HF, ShNavn, InnDato)), ] #
+}
+
+
+

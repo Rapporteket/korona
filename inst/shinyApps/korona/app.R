@@ -281,7 +281,14 @@ ui <- tagList(
              ), #Resultater
 
 
-             #---------Intensivregistreringer--------------------------------
+#----------Datakvalitet-------------------------
+tabPanel('Datakvalitet',
+         h3('Innleggelsesskjema som mangler utskrivning'),
+         downloadButton(outputId = 'lastNed_innManglerUt', label='Last ned tabell'),
+         tableOutput('innManglerUtTab')
+
+), #Datakvalitet
+                          #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
                       value = 'Intensiv',
@@ -682,6 +689,18 @@ server <- function(input, output, session) {
         write.csv2(tab, file, row.names = F, na = '')
       })
   }) #observe
+
+  #----------Datakvalitet-------------------------
+  innManglerUtTab <- innManglerUt(RegData=RegDataRaa, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa)
+  output$innManglerUtTab <- renderTable(innManglerUtTab)
+
+  output$lastNed_innManglerUt <- downloadHandler(
+    filename = function(){
+      paste0('ManglerUtSkjema.csv')
+    },
+    content = function(file, filename){
+      write.csv2(innManglerUtTab, file, row.names = F, na = '')
+    })
 
   #-------------Intensivregistreringer------------------------
 

@@ -22,6 +22,9 @@ enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
+test <- innManglerUt(RegData = RegDataRaa) #, valgtEnhet = )
+
+
 ifelse(0 > 0, 1,
        sort(RegDataRaa$FormStatusUt)[1])
 ifelse(1<0, 0, 'a')
