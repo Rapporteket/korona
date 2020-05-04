@@ -691,7 +691,7 @@ server <- function(input, output, session) {
   }) #observe
 
   #----------Datakvalitet-------------------------
-  innManglerUtTab <- innManglerUt(RegData=RegDataRaa, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa)
+  innManglerUtTab <- innManglerUt(RegData=KoroDataRaa, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa)
   output$innManglerUtTab <- renderTable(innManglerUtTab)
 
   output$lastNed_innManglerUt <- downloadHandler(
