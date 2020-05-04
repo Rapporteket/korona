@@ -81,9 +81,10 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
 
       if (valgtVar == 'liggetid') { #Andeler #GjsnGrVar
             #Liggetid bare >0
+        #indUreinn <- which(RegData$Reinn==0)
             RegData$Variabel  <- as.numeric(RegData$Liggetid)
-            RegData <- RegData[which(RegData$Liggetid>0), ]
-            tittel <- 'Liggetid'
+            RegData <- RegData[which(RegData$Liggetid>0 & RegData$Reinn==0 & RegData$FormStatusUt==2), ]
+            tittel <- 'Liggetid, utskrevne uten reinnlagte'
             #if (figurtype %in% c('gjsnGrVar', 'gjsnTid')) {tittel <- 'liggetid'}
             gr <- c(0, 2, 4, 6, 8, 10, 12, 14, 21, 1000)  #c(0, 1, 2, 3, 4, 5, 6, 7, 14, 1000)
             RegData$VariabelGr <- cut(RegData$Liggetid, breaks=gr, include.lowest=TRUE, right=FALSE)
@@ -165,7 +166,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
             statusInn <- 2
             variable <- c('Kreft',  'NedsattimmunHIV', 'Diabetes', 'Hjertesykdom', 'Astma',
                           'KroniskLungesykdom', 'Nyresykdom', 'Leversykdom', 'KroniskNevro',
-                          'KroniskNevro', 'Fedme', 'Royker', 'KjentRisikofaktor')
+                          'Gravid', 'Fedme', 'Royker', 'KjentRisikofaktor')
             grtxt <- c('Kreft', 'Nedsatt immunforsvar', 'Diabetes', 'Hjertesykdom', 'Astma',
                        'Kronisk lungesykdom', 'Nyresykdom', 'Leversykdom', 'Nevrologisk/nevromusk.',
                        'Gravid', 'Fedme (KMI>30)', 'Røyker', 'Risikofaktorer (minst en)')

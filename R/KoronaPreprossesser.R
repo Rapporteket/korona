@@ -23,20 +23,29 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                          RegData$Vekt/(RegData$Hoyde/100)^2,
                          NA)
+#FEIL I KODEBOK LAGER KRØLL!
+   # boolske_var_inklusjon <-
+   #    as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
+   # RegData[, intersect(names(RegData), boolske_var_inklusjon)] <-
+   #    apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
 
-   boolske_var_inklusjon <-
-      as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
-   RegData[, intersect(names(RegData), boolske_var_inklusjon)] <-
-      apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
+   #Konvertere boolske variable fra tekst til boolske variable...
+   TilLogiskeVar <- function(Skjema){
+     verdiGML <- c('True','False')
+     verdiNY <- c(TRUE,FALSE)
+     mapping <- data.frame(verdiGML,verdiNY)
+     LogVar <- names(Skjema)[which(Skjema[1,] %in% verdiGML)]
+     if (length(LogVar)>0) {
+       for (k in 1:length(LogVar)) {
+         Skjema[,LogVar[k]] <- mapping$verdiNY[match(Skjema[,LogVar[k]], mapping$verdiGML)]
+       }}
+     return(Skjema)
+   }
+
+   RegData <- TilLogiskeVar(RegData)
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
-   # a <- as.data.frame(matrix(c(1,1,1,2,2, 999,3:4,NA, NA),5,2))
-   # colnames(a) <- c('Var1', 'Var2')
-   # test <- a %>% group_by(Var1) %>% summarise(#Var3 = min(Var2, na.rm = T),
-   #                                            Var6 = sort(Var2)[1],
-   #                                            Var4 = JaNeiUkjVar(Var2),
-   #                                            Var5 = SviktVar(Var2))
 if (aggPers == 1) {
    #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
    JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
@@ -50,7 +59,7 @@ if (aggPers == 1) {
 
    RegDataRed <- RegData %>% group_by(PasientID) %>%
       summarise(Alder = Alder[1],
-                AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst2), #1-ja, 2-nei, 3-ukjent
+                AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
                 AkuttNyresvikt = JaNeiUkjVar(AkuttNyresvikt), #1-ja, 2-nei, 3-ukjent
                 AkuttRespirasjonsvikt = SviktVar(AkuttRespirasjonsvikt), #1-nei, 2:5 ja, 999 ukjent
                 AkuttSirkulasjonsvikt = SviktVar(AkuttSirkulasjonsvikt),  #1-nei, 2:5 ja, 999 ukjent
@@ -87,7 +96,7 @@ if (aggPers == 1) {
                 #Leukocytter,
                 Leversykdom = sum(Leversykdom)>0,
                 Makrolid = sum(Makrolid)>0,
-                #Municipal
+                Municipal = first(Municipal, order_by = FormDate),
                 #MunicipalNumber,
                 NedsattimmunHIV = sum(NedsattimmunHIV)>0,
                 NerkontaktCovid = JaNeiUkjVar(NerkontaktCovid), #1-ja, 2-nei, 3-ukjent
@@ -123,7 +132,6 @@ if (aggPers == 1) {
                 UtsAntiviralBehandling = JaNeiUkjVar(UtsAntiviralBehandling),  #1-ja, 2-nei, 3-ukjent
                 UtsKarbapenem = sum(UtsKarbapenem)>0,
                 UtsKinolon = sum(UtsKinolon)>0,
-                UtskrivningsdatoSort = sort(Utskrivningsdato, decreasing = T)[1], #, FormDateUt
                 UtsMakrolid = sum(UtsMakrolid)>0,
                 UtsPenicillin = sum(UtsPenicillin)>0,
                 UtsPenicillinEnzymhemmer = sum(UtsPenicillinEnzymhemmer)>0,
@@ -135,26 +143,28 @@ if (aggPers == 1) {
                 Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
                 ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
-                FormStatusUt = sort(FormStatusUt)[1], #1-kladd, 2-ferdigstilt
+                FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1,
+                                      as.numeric(sort(FormStatusUt)[1])), #1-kladd, 2-ferdigstilt
                 Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),
                 AntInnSkjema = n(),
                 # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
                 # Overf = , #Beregn, ja nei
                 # AntOverf = , #Antall overføringer
-                Reinn8 = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
-                               ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                                                    FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                    units = "hours")) <= 8, 0, 1)),
-                Reinn = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
-                                ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                     units = "hours")) <= 24, 0, 1)),
+                # Reinn8 = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
+                #                ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
+                #                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+                #                                     units = "hours"), decreasing = T)[1] <= 8, 0, 1)),
+                ReinnTid = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
+                                 sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
+                                                      FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+                                                      units = "hours"), decreasing = T)[1]),
+                Reinn = ifelse(ReinnTid>48, 1, 0),
                 AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
                                   sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                               units = "hours") > 8)),
-                # LiggetidSum = , #sum av liggetider. Vanskelig siden ikke ferdigstilt...
+                                               units = "hours") > 48, na.rm = T)),
+                # LiggetidSum = , #sum av liggetider. Bare for ferdigstilte...
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate)) #sort(FormDate)[1])
    #Reinnleggelse
@@ -210,6 +220,8 @@ if (aggPers == 1) {
 
       #Beregnede variabler
       #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
+      #!! MÅ TA HENSYN TIL REINNLEGGELSE
+      #indUReinn <- RegData$Reinn==0
       RegData$Liggetid <- as.numeric(difftime(RegData$UtTidspunkt,
                                               RegData$InnTidspunkt,
                                               units = 'days'))
