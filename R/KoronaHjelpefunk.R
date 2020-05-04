@@ -1,3 +1,21 @@
+#' Title
+#'
+#' @param RegData Koblet dataramme
+#' @param valgtEnhet
+#' @param enhetsNivaa
+#'
+#' @return
+#' @export
+innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
+  UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
+                         aarsakInn=aarsakInn, erMann=erMann)
+  RegData <- UtData$RegData
+  N <- dim(RegData)[1]
+
+
+}
+
+
 
 #' Funksjon som produserer rapporten som skal sendes til mottager.
 #'
