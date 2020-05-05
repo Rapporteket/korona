@@ -1,4 +1,3 @@
-
 #' Funksjon som produserer rapporten som skal sendes til mottager.
 #'
 #' @param rnwFil Navn på fila som skal kjøres. Angis uten ending (\emph{dvs uten  ".Rnw"})
@@ -10,9 +9,9 @@
 #' @return Full path of file produced
 #' @export
 
-henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona'
-                                 #    valgtRHF = 'Alle', #rolle='LU',
-                                #datoFra=Sys.Date()-180, datoTil=Sys.Date()
+henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='SC',
+                                      valgtEnhet = 'Alle', enhetsNivaa = 'RHF',
+                                      reshID = 0 #datoFra=Sys.Date()-180, datoTil=Sys.Date()
                                 ) {
   tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
@@ -42,16 +41,12 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona'
 #' @export
 
 abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
-                               Rpakke='korona') { #valgtRHF = 'Alle',
-
-  #function(baseName, reshId, registryName,author, hospitalName, type) {
+                               Rpakke='korona', valgtEnhet = 'Alle',
+                             enhetsNivaa = 'RHF', rolle = 'SC'){
   #valgtRHF <- valgtRHF[[1]]
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = "starter Abonnement: Pandemi-rapport")
-  # raplog::subLogger(author = author[[1]], registryName = registryName[[1]],
-  #                     reshId = reshId[[1]],
-  #                     msg = "Subscription report: stent/prosedyre")
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
   src <- normalizePath(system.file(rnwFil, package=Rpakke))

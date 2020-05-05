@@ -16,11 +16,13 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                             skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
+  RegData$ShNavnUt[is.na(RegData$ShNavnUt)] <- RegData$ShNavn[is.na(RegData$ShNavnUt)] # der ShNavnUt mangler, benytt ShNavn
+
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
                                 SC = RegData$RHF,
-                                LC = RegData$HF,
-                                LU = RegData$ShNavn)
+                                LC = RegData$HFut,
+                                LU = RegData$ShNavnUt)
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
@@ -33,11 +35,14 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 day'))), '%d.%B')),
-                                 uke = factor(format(RegDataAlle$UtDato, '%V'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 week'))), '%V')),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                                      by=paste0('-1 day'))), '%d.%B')),
+                                 uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
+                                              levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                                                     by=paste0('-1 week'))), '%V'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 month'))), '%b.%Y')))
+                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                                         by=paste0('-1 month'))), '%b.%Y')))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
 
@@ -65,7 +70,7 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
     TabTidEnh <- cbind(TabTidEnh,
                        'Hele landet'= c(table(RegDataAlle$TidsVar), dim(RegDataAlle)[1]))}
 
-  Tab_tidy <- tidyr::as_tibble(as.data.frame.matrix(TabTidEnh), rownames = "Dato")
+  Tab_tidy <- tidyr::as_tibble(as.data.frame.matrix(TabTidEnh), rownames = "Tid")
   TabTidEnh <- xtable::xtable(TabTidEnh, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall Coronatilfeller.')
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
@@ -91,11 +96,14 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                                skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
+  RegData$ShNavnUt[is.na(RegData$ShNavnUt)] <- RegData$ShNavn[is.na(RegData$ShNavnUt)] # der ShNavnUt mangler, benytt ShNavn
+
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
                                 SC = RegData$RHF,
-                                LC = RegData$HF,
-                                LU = RegData$ShNavn)
+                                LC = RegData$HFut,
+                                #LC = RegData$HFkort2,
+                                LU = RegData$ShNavnUt)
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
@@ -107,11 +115,14 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 day'))), '%d.%B')),
-                                 uke = factor(format(RegDataAlle$UtDato, '%V'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 week'))), '%V')),
+                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                                      by=paste0('-1 day'))), '%d.%B')),
+                                 uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
+                                              levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                                                     by=paste0('-1 week'))), '%V'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato), by=paste0('-1 month'))), '%b.%Y')))
+                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                                         by=paste0('-1 month'))), '%b.%Y')))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
 
@@ -140,7 +151,7 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
     TabTidEnh <- cbind(TabTidEnh,
                        'Hele landet'= c(table(RegDataAlle$TidsVar), dim(RegDataAlle)[1]))}
 
-  Tab_tidy <- tidyr::as_tibble(as.data.frame.matrix(TabTidEnh), rownames = "Dato")
+  Tab_tidy <- tidyr::as_tibble(as.data.frame.matrix(TabTidEnh), rownames = "Tid")
   TabTidEnh <- xtable::xtable(TabTidEnh, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall Coronatilfeller.')
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
@@ -216,8 +227,8 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
 
   RegDataAlle <- UtData$RegData
-  # if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$InnDato >= datoFra), ]} # filtrerer på dato
-  # datoer <- seq(min(RegDataAlle$InnDato), today(), by="day")
+  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)], tz= 'UTC', format="%Y-%m-%d")
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$UtDato >= datoFra | is.na(RegDataAlle$UtDato), ]} # filtrerer på dato
   datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), today(), by="day")
 
   if (tidsenhet=='dag') {
@@ -228,25 +239,26 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     names(datoer) <- datoer
     aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
     aux <- bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
-    aux <- aux %>% gather(names(aux)[-1], key=Dato, value = verdi)
-    aux$Dato <- as.Date(aux$Dato)
-    aux$Dato <- switch (tidsenhet,
-                        'uke' = format(aux$Dato, "%V"),
-                        'maaned' = format(aux$Dato, "%b.%Y")
+    aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi)
+    aux$Tid <- as.Date(aux$Tid)
+    aux$Tid <- switch (tidsenhet,
+                        'uke' = paste0('Uke ', format(aux$Tid, "%V")),
+                        'maaned' = format(aux$Tid, "%b.%Y")
     )
-    aux <- aux %>% group_by(PasientID, Dato) %>%
+    aux <- aux %>% group_by(PasientID, Tid) %>%
       summarise(er_inne = max(verdi))
-    aux <- aux %>% spread(key=Dato, value = er_inne)
+    aux <- aux %>% spread(key=Tid, value = er_inne)
     RegDataAlle <- merge(RegDataAlle, aux, by = 'PasientID')
   }
 
     switch (tidsenhet,
-                    uke = datoer <- unique(format(datoer, '%V')),
+                    uke = datoer <- unique(paste0('Uke ', format(datoer, '%V'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
   if (tidsenhet %in% c("uke", "maaned")) {
     names(datoer) <- datoer
   }
 
+  # if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$InnDato >= datoFra, ]}
   #Trenger utvalg når totalen ikke er summen av det som vises.
   RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   } else {
@@ -263,18 +275,26 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     TabTidEnh <- matrix(0, ncol=1, nrow=length(datoer) + 1,
                         dimnames = list(c(names(datoer), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
   }else{
+    total <- RegData %>%
+      group_by(EnhNivaaVis) %>%
+      summarise(Totalt = length(unique(PasientID))) %>%
+      tr_summarize_output(grvarnavn = 'Tid')
     TabTidEnh <-
       RegData[,c("EnhNivaaVis", names(datoer))] %>%
       group_by(EnhNivaaVis) %>%
       summarise_all(sum) %>%
-      tr_summarize_output(grvarnavn = 'Dato') %>%
-      mutate('Hele landet' = select(., names(.)[-1]) %>% rowSums()) %>%
-      bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Totalt")))
+      tr_summarize_output(grvarnavn = 'Tid') %>%
+      bind_rows(total) %>%
+      mutate('Hele landet' = select(., names(.)[-1]) %>% rowSums())
+      # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Totalt")))
     colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
   }
 
   if (tilgangsNivaa != 'SC'){
-    TabTidEnh[, "Hele landet"] <- c(colSums(RegDataAlle[, names(datoer)]), sum(colSums(RegDataAlle[, names(datoer)])))
+    aux <- bind_cols(kol1 = 'Hele landet', RegDataAlle[, c(names(datoer))] %>% summarise_all(sum)) %>%
+      tr_summarize_output(grvarnavn = 'Tid') %>%
+      bind_rows(tibble(Tid = "Totalt", "Hele landet"=as.integer(length(unique(RegDataAlle$PasientID)))))
+    TabTidEnh[, "Hele landet"] <- aux[, "Hele landet"]
   }
 
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
@@ -301,7 +321,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
 
   RegData <- UtData$RegData
-  datoer <- seq(min(RegData$InnDato), today(), by="day")
+  datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
   names(datoer) <- format(datoer, '%d.%B')
   aux <- erInneliggende(datoer = datoer, regdata = RegData)
   RegData <- bind_cols(RegData, aux)
@@ -313,7 +333,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
     merge(belegg_ssb[, c("HFresh", "Dognplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
     mutate(HFresh = HF) %>% select(-HF) %>%
     # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
-    tr_summarize_output(grvarnavn = 'Dato')
+    tr_summarize_output(grvarnavn = 'Tid')
 
   belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
   belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
@@ -326,7 +346,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
     merge(belegg_rhf[, c("RHFresh", "Dognplasser.2018", "RHF")], by.x = "RHFresh", by.y = "RHFresh", all.x = T) %>%
     mutate(RHFresh = RHF) %>% select(-RHF) %>%
     bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
-    tr_summarize_output(grvarnavn = 'Dato')
+    tr_summarize_output(grvarnavn = 'Tid')
 
   Samlet <- bind_cols(TabTidHF, TabTidRHF[,-1])
   reshID_rhf <- RegData[match(reshID, RegData$HFresh), "RHFresh"]
@@ -334,12 +354,12 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
   if (tilgangsNivaa == 'LU'){
     enhet <- c(belegg_ssb$HF[match(reshID, belegg_ssb$HFresh)],
                belegg_rhf$RHF[match(reshID_rhf, belegg_rhf$RHFresh)], "Hele landet")
-    TabTidEnh <- select(Samlet, c("Dato", intersect(enhet, names(Samlet))))
+    TabTidEnh <- select(Samlet, c("Tid", intersect(enhet, names(Samlet))))
   }
   if (tilgangsNivaa == 'LC'){
     enhet <- c(belegg_ssb$HF[belegg_ssb$RHFresh %in% reshID_rhf],
                belegg_rhf$RHF[match(reshID_rhf, belegg_rhf$RHFresh)], "Hele landet")
-    TabTidEnh <- select(Samlet, c("Dato", intersect(enhet, names(Samlet))))
+    TabTidEnh <- select(Samlet, c("Tid", intersect(enhet, names(Samlet))))
   }
   if (tilgangsNivaa == 'SC'){
     TabTidEnh <- TabTidRHF
@@ -347,7 +367,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   belegg_anslag <- TabTidEnh[,-1] %>% map_df(function(x) {x[-length(x)]/x[length(x)]*100})
   belegg_anslag <- bind_rows(belegg_anslag, TabTidEnh[dim(TabTidEnh)[1], 2:dim(TabTidEnh)[2]])
-  belegg_anslag$Dato <- TabTidEnh$Dato
+  belegg_anslag$Tid <- TabTidEnh$Tid
   belegg_anslag <- belegg_anslag[, c(dim(belegg_anslag)[2], 1:(dim(belegg_anslag)[2]-1))]
   belegg_anslag_txt <- belegg_anslag %>% map_df(as.character)
   belegg_anslag_txt[-dim(belegg_anslag_txt)[1], 2:dim(belegg_anslag_txt)[2]] <-

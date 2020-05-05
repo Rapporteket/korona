@@ -12,6 +12,7 @@ antallTidEnhTab(
   datoFra = 0,
   tilgangsNivaa = "SC",
   valgtEnhet = "Alle",
+  HFkort = 0,
   skjemastatusInn = 9,
   aarsakInn = 9,
   dodSh = 9
@@ -26,10 +27,12 @@ antallTidEnhTab(
 
 \item{datoFra}{startdato 'yyyy-mm-dd'}
 
-\item{tilgangsNivaa}{SC, LC og LU bestemmer hvilket enhetsNivaa
-('RHF', 'HF', 'ShNavn') resultatene skal vises for}
+\item{tilgangsNivaa}{SC, LC og LU bestemmer hvilket enhetsNivaa}
 
 \item{valgtEnhet}{NULL for SC-bruker, ellers eget RHF/HF}
+
+\item{HFkort}{benytte kortnavn for HF 0-nei, 1-ja
+('RHF', 'HF', 'ShNavn') resultatene skal vises for}
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 

@@ -8,6 +8,7 @@
 \usepackage{booktabs}
 \usepackage{rotating}
 \usepackage{graphicx}
+%\usepackage{tabularx}
 
 % \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 % \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
@@ -18,18 +19,22 @@
 <<'initOpts',include=FALSE>>=
 knitr::opts_chunk$set(warnings=FALSE,echo=FALSE)
 knitr::opts_knit$set(root.dir = './')
+options(knitr.table.format = "latex")
 library(intensivberedskap)
 library(tidyverse)
 library(lubridate)
 library(xtable)
+library(kableExtra)
 library(korona)
+forHvem <- ifelse(valgtEnhet=='Alle', 'hele landet', valgtEnhet)
+Tittel <- paste0('Koronainnlagte, ', forHvem)
 @
 
 
 
 \begin{document}
 
-\title[Pandemiregister \\\today]{Koronainnlagte på sykehus} %\\\today}
+\title[Pandemiregister \\\today]{\Sexpr{Tittel}} %\\\today}
 %\title[Norsk Intensivregister, Corona \\\today] {%\textit{Coronadata, NIR} \\}
 
 \maketitle
@@ -48,25 +53,27 @@ paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
     } else {
       Pandemi <- read.table('A:/Pandemi/XX.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+      rolle <- 'LC'
+      enhetsNivaa <- 'HF'
+      valgtEnhet <- 'Nord'
       }
 
 Pandemi <- KoronaPreprosesser(Pandemi)
-PandemiAlle <- Pandemi
-Pandemi <-  KoronaUtvalg(RegData=PandemiAlle, aarsakInn = 1)$RegData
-#PandemiInn <- KoronaPreprosesser(PandemiInn)
 
-# PandemiInn$InnDato <- as.Date(PandemiInn$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
-# PandemiInn$InnDag <-  factor(format(PandemiInn$InnDato, '%d.%B'),
-#                             levels = format(seq(min(PandemiInn$InnDato), max(PandemiInn$InnDato), by="day"), '%d.%B'))
-# PandemiInn$UtDato <- as.Date(PandemiInn$Utskrivningsdato, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
-# PandemiInn$UtDag <- factor(format(PandemiInn$UtDato, '%d.%B'),
-#                             levels = format(seq(min(PandemiInn$UtDato, na.rm=T),
-#                                                 max(PandemiInn$UtDato, na.rm=T), by="day"), '%d.%B'))
+#Innparametre:  enhetsNivaa, valgtEnhet, rolle?
+  #Filtreringsnivå for data:
+  #enhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+  #valgtEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
+Pandemi$EnhNivaaVis <- switch(rolle,
+                                'SC' = Pandemi$RHF,
+                                'LC' = Pandemi$HFkort,
+                                'LU' = Pandemi$ShNavn)
 
-# PandemiUt <- read.table('A:/Pandemi/UtskrivningSkjema2020-04-01.csv', sep=';',
-#                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-# PandemiUt$UtDato <- as.Date(PandemiUt$FormDate, tz= 'UTC', format="%d.%m.%Y") #DateAdmittedIntensive
-# PandemiUt$UtDag <- format(PandemiUt$UtDato, '%d.%B')
+PandemiLandet <- KoronaUtvalg(RegData=Pandemi, aarsakInn = 1)$RegData
+PandemiAlleInnlEgen <-  KoronaUtvalg(RegData=Pandemi,
+                         enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
+Pandemi <-  KoronaUtvalg(RegData=PandemiAlleInnlEgen, aarsakInn = 1)$RegData
+
 Ntot <- dim(Pandemi)[1]
 AlderGjsn <- round(mean(Pandemi$Alder, na.rm = T))
 andelMenn <- paste0(sprintf('%.0f', 100*sum(Pandemi$erMann)/Ntot), ' \\%')
@@ -77,16 +84,16 @@ antIkkeFerdig <- sum(Pandemi$FormStatus==1, na.rm = T)
 
 \begin{frame}[fragile] {Hva er dette?}
 Dette er en automatisk generert rapport fra pandemiregisteret for registerering av Covid-19 pasienter.
-Dokumentet inneholder oppsummering av disse registreringene. Med mindre annet er angitt, er \textit{kun pasienter
-hvor Covid-19 er hovedårsak til innleggelsen}, tatt med.
+Dokumentet inneholder oppsummering av disse registreringene for \textbf{\Sexpr{forHvem}}.
+Hvis ikke annet er angitt, er \textit{kun pasienter hvor Covid-19 er hovedårsak til innleggelsen}, tatt med.
 
 \begin{itemize}
 \item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke, med mindre dette er angitt
 Det er \Sexpr{antIkkeFerdig} av de \Sexpr{Ntot} pasientene som har uferdige inklusjonsskjema.
-\item For å luke bort feilregistreringer, er registrering av innleggelse før 15.februar
+\item For å luke bort feilregistreringer, er registrering av innleggelse før 8.mars
 og etter dagens dato, filtrert bort.
 \item Resultatene er basert på antall pasienter, dvs. at skjema for overflyttede pasienter
-er aggregert til ett forløp per pasient.
+er aggregert til ett forløp per pasient. NB: Det er foreløpig heller ikke tatt høyde for reinnleggelser.
 \item Gjennomsnittsalderen på innlagte pasienter er \Sexpr{AlderGjsn} år.
 \item Andelen menn er \Sexpr{andelMenn}.
 \item Det er registrert \Sexpr{antDod} døde.
@@ -105,10 +112,12 @@ xtable::xtable(StatusNaa, align=c('l','r','r'),
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 
-xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
+#print(
+  xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
                #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Oppsummering, utskrevne pasienter hvor både
                inklusjons- og utskrivingsskjema er ferdigstilt.')
+      #, include.rownames = FALSE)
 @
 \end{frame}
 
@@ -116,21 +125,45 @@ xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
 
 \begin{frame}[fragile] {Antall registrerte pasienter}
 <<'RegRHF', results='asis'>>=
-AntRegRHF <- table(Pandemi$InnDag, Pandemi$RHF)
-AntRegRHF <- addmargins(AntRegRHF)
-xtable::xtable(AntRegRHF[(nrow(AntRegRHF)-20):nrow(AntRegRHF), ], digits=0,
-               #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-               caption='Antall registrerte pasienter med korona siste 20 dager, samt totalt antall for hele pandemiperioden.')
+# AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
+#                               valgtEnhet= valgtEnhet, HFkort = 1)$Tab_tidy
+
+#\resizebox function or
+#\adjustbox.
+
+AntTab <- table(Pandemi$InnDag, Pandemi$EnhNivaaVis)
+AntTab <- addmargins(AntTab)
+#kable(AntTab, format = 'latex')
+xTab <- xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
+               method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+               caption='Antall registrerte pasienter p.g.a. korona siste 20 dager,
+               samt totalt antall for hele pandemiperioden.')
+
+#kable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], format = 'latex', booktabs=TRUE) %>%
+#xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
+antEnh <- dim(AntTab)[2]
+skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
+print(
+  xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
+               method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+               caption='Antall registrerte pasienter med korona siste 20 dager,
+               samt totalt antall for hele pandemiperioden.')
+      #include.rownames = FALSE,
+      ,scalebox = skalering)
 @
 \end{frame}
 
 
-\begin{frame}[fragile] {Registereringer i hvert HF}
+\begin{frame}[fragile] {Registereringer i hver enhet}
 <<'RegHF', results='asis'>>=
-RegHF <- Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
+#nivaa1 <- enhetsNivaa
+nivaa2 <- ifelse(rolle=='LU', 'ShNavn', 'HF')
+RegHF <- if (rolle == 'LU') {Pandemi %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = n())
+  } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
 #sort(table(Pandemi$HF), decreasing = T)
-xtable::xtable(RegHF, row.names=FALSE, digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Totalt antall registrerte pasienter i hvert HF')
+print(xtable::xtable(RegHF, row.names=FALSE, digits=0,
+                     caption='Totalt antall registrerte pasienter i hver enhet.'),
+      include.rownames = FALSE)
 @
 \end{frame}
 
@@ -142,25 +175,22 @@ AntReg <- dim(Pandemi)[1]
 AntPaaSh <- sum(is.na(Pandemi$UtDato))
 
 indNaa <- which(is.na(Pandemi$UtDato))
-InneliggHF <- Pandemi[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())
+InneliggHF <- if (rolle == 'LU') {
+  Pandemi[indNaa,] %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = n())
+  } else {Pandemi[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
 InneliggPas <- rbind(as.matrix(InneliggHF),
       c('','Totalt', AntPaaSh))
 
-xtable::xtable(InneliggPas, digits=0,
-                              caption='Antall inneliggende pasienter (mangler utskrivingsdato) på hvert HF, samt totalt.')
-# indNaa <- which(is.na(Pandemi$UtDato))
-# AntPaaRHFnaa <- table(Pandemi$InnDag[indNaa], Pandemi$RHF[indNaa])
-# AntPaaRHFnaa <- addmargins(AntPaaRHFnaa)
-# xtable::xtable(AntPaaRHFnaa[(nrow(AntPaaRHFnaa)-20):nrow(AntPaaRHFnaa), ], digits=0,
-#                             caption='Antall som ligger på sykehus (mangler utskrivingsdato), basert på innleggelsesdato.
-#               Siste 20 innleggelsesdager, samt totalt.')
+print(xtable::xtable(InneliggPas, digits=0,
+               caption='Antall inneliggende pasienter (mangler utskrivingsskjema) på hver enhet,
+               samt totalt.'), include.rownames=FALSE)
 @
 \end{frame}
 
 \begin{frame}[fragile] {Covid-19-smitte hos andre pasienter}
 <<'ShusNaaAndre', results='asis'>>=
 # Antall som ligger på sykehus nå
-PandemiAndre <- KoronaUtvalg(RegData = PandemiAlle, aarsakInn = 2)$RegData
+PandemiAndre <- KoronaUtvalg(RegData = PandemiAlleInnlEgen, aarsakInn = 2)$RegData
 AntAndre <- dim(PandemiAndre)[1]
 AntPaaShAndre <- sum(is.na(PandemiAndre$UtDato))
 
@@ -185,12 +215,6 @@ av de \Sexpr{AntAndre} som er døde.
 xtable::xtable(InneliggPasAndre, digits=0,
                               caption='Antall inneliggende pasienter med Covid-19 som
                er innlagt av andre årsaker enn Covid-19.')
-# indNaa <- which(is.na(PandemiAlle$UtDato))
-# AntPaaRHFnaa <- table(PandemiAlle$InnDag[indNaa], PandemiAlle$RHF[indNaa])
-# AntPaaRHFnaa <- addmargins(AntPaaRHFnaa)
-# xtable::xtable(AntPaaRHFnaa[(nrow(AntPaaRHFnaa)-20):nrow(AntPaaRHFnaa), ], digits=0,
-#                             caption='Antall som ligger på sykehus (mangler utskrivingsdato), basert på innleggelsesdato.
-#               Siste 20 innleggelsesdager, samt totalt.')
 @
 \end{frame}
 
@@ -199,12 +223,15 @@ xtable::xtable(InneliggPasAndre, digits=0,
 # Data <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)
 # Data$belegg_anslag
 # Data$belegg_anslag_txt
-BeleggTab <- as.data.frame(antallTidBelegg(RegData=Pandemi)$belegg_anslag_txt)
+BeleggTab <- as.data.frame(
+  antallTidBelegg(RegData=PandemiLandet
+                  #, reshID = reshID, valgtEnhet= valgtEnhet,tilgangsNivaa=rolle
+                  )$belegg_anslag_txt)
 #as.data.frame(BeleggTab)
 AntRader <- nrow(BeleggTab)
 fra <- max(1, (AntRader-20))
 #rownames(BeleggTab[AntRader,]) <- 'Ant. somatiske senger'
-xtable::xtable(BeleggTab[fra:AntRader, ], digits=1,
+xtable::xtable(BeleggTab[fra:AntRader, ], digits=1, #-which(names(AntRader)=='Hele landet')
                               caption='Andel av totalt antall senger som opptas av pasienter
                innlagt p.g.a. Covid-19')
 @
@@ -212,58 +239,56 @@ xtable::xtable(BeleggTab[fra:AntRader, ], digits=1,
 
 \begin{frame}[fragile] {Antall utskrevne}
 <<'Utskrevne', results='asis'>>=
-AntUtRHF <- table(Pandemi$UtDato, Pandemi$RHF)
-AntUtRHF <- addmargins(AntUtRHF)
-fra <- max(1, (nrow(AntUtRHF)-20))
-xtable::xtable(AntUtRHF[fra:nrow(AntUtRHF),], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall utskrevne per dag siste 20 dager, samt totalt.')
+AntUt <- table(Pandemi$UtDato, Pandemi$EnhNivaaVis)
+AntUt <- addmargins(AntUt)
+fra <- max(1, (nrow(AntUt)-20))
+print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              caption='Antall utskrevne per dag siste 20 utskrivningsdager, samt totalt.'),
+scalebox = skalering)
+
+#xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
+
 @
 \end{frame}
 
 \begin{frame}[fragile] {Antall døde}
 <<'Dode', results='asis'>>=
 indDod <- which(Pandemi$StatusVedUtskriving==2)
-AntDodeTab <- table(Pandemi$UtDato[indDod], Pandemi$RHF[indDod])
-AntDodeTab <- addmargins(AntDodeTab, FUN=list('Totalt i 2020:'=sum, 'Hele landet'=sum), quiet = T)
+AntDodeTab <- table(Pandemi$UtDato[indDod], Pandemi$EnhNivaaVis[indDod])
+AntDodeTab <- addmargins(AntDodeTab, FUN=list('Totalt:'=sum, 'Hele landet'=sum), quiet = T)
 fra <- max(1, (nrow(AntDodeTab)-20))
 xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall døde per dag, siste 20 dødsdager.') # ``dødsdager''.')
+                              caption='Antall døde per dag, siste 20 dødsdager,
+               samt totalt for hele pandemiperioden.') %>%
+ print(scalebox = skalering)
+  #xtable2kable() %>%   kableExtra::kable_styling(latex_options="scale_down")
+
 @
 \end{frame}
-
-
-% \begin{frame}[fragile] {Pandemiskjema i kladd}
-%
-% <<'Kladd', results='asis'>>=
-% #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-%
-% indKladd <- which(Pandemi$FormStatus==1)
-% AntKladdRHF <- table(Pandemi$InnDag[indKladd], Pandemi$RHF[indKladd])
-% AntKladdShus <- table(Pandemi$InnDag[indKladd], Pandemi$ShNavn[indKladd])
-%
-% xtable::xtable(addmargins(AntKladdRHF), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-%                               caption='Pandemiskjema i kladd, innleggelsesdato')
-% @
-% \end{frame}
 
 
 \begin{frame}[fragile] {Sykehus med inklusjonsskjema i kladd}
 <<'KladdSh', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-AntKladdShus <- table(PandemiAlle$ShNavn[which(PandemiAlle$FormStatus==1)], dnn= 'Skjema i kladd')
-xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+AntKladdShus <- table(PandemiAlleInnlEgen$ShNavn[which(PandemiAlleInnlEgen$FormStatus==1)], dnn= 'Skjema i kladd')
+kladdTxt <- ''
+if (length(AntKladdShus)>0) {
+  xtable::xtable(addmargins(AntKladdShus), digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Pandemiskjema i kladd, alle pasienter med Covid-19
                (også de som er innlagt av andre årsaker)')
+} else {
+   kladdTxt <- paste0 ('Ingen skjema i kladd i ', valgtEnhet)}
 @
+\Sexpr{kladdTxt}
 \end{frame}
 
 
-\begin{frame}[fragile] {Aldersfordeling, alle opphold}
+\begin{frame}[fragile] {Aldersfordeling}
 <<'Alder', results='asis'>>=
 AldersTab <- AlderTab(RegData=Pandemi)$Tab
 AldersTab[ ,'Antall'][as.numeric(AldersTab[ ,'Antall'])<3] <- '<3'
-xtable::xtable(AldersTab, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Aldersfordeling, alle innleggelser')
+xtable::xtable(AldersTab) #, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+                              #caption='Aldersfordeling')
 @
 \end{frame}
 

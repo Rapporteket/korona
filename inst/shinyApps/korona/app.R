@@ -34,29 +34,37 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020 ',
 if (paaServer) {
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
-  KoroData <-  KoronaDataSQL(koble=1)
+  KoroDataRaa <-  KoronaDataSQL(koble=1)
   KoroDataInn <- KoronaDataSQL(skjema = 1, koble=0)
   KoroDataUt <- KoronaDataSQL(skjema=2, koble = 0) #Inneholder dobbeltregistrering!
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
-  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-16 15-54-14.txt', sep=';',
+  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-27 12-20-09.txt', sep=';',
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
-  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-16 15-54-14.txt', sep=';',
+  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-27 12-20-09.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
-  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
+  # KoroDataInt_gml <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
+  #                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-27 16-11-27.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  # KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-27 16-19-32.txt', sep=';',
+  #                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataInt$EcmoEnd[KoroDataInt$EcmoEnd == ""] <- NA
+  KoroDataInt$EcmoStart[KoroDataInt$EcmoStart == ""] <- NA
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
              'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
-  KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+  KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
                     by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 } #hente data
 
 
-KoroData <- KoronaPreprosesser(RegData = KoroData)
+KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
 KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
+
+#KoroData$HFkort2 <- ReshNivaa$HFnavnKort[match(KoroData$HFresh, ReshNivaa$HFresh)] #HFkort2
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
@@ -78,6 +86,7 @@ ui <- tagList(
                          regTitle),
              windowTitle = regTitle,
              theme = "rap/bootstrap.css",
+
 
              #-------------Startside--------------
              tabPanel("Oversikt",
@@ -132,6 +141,7 @@ ui <- tagList(
                                 #,addUserInfo = TRUE),
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
 
+                                uiOutput('manglerRegResh'),
                                 h3('Resultater fra pandemiregistrering, korona.'),
                                 h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
                                 h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
@@ -273,23 +283,23 @@ ui <- tagList(
              ), #Resultater
 
 
-             #---------Intensivregistreringer--------------------------------
+#----------Datakvalitet-------------------------
+tabPanel('Datakvalitet',
+         h3('Innleggelsesskjema som mangler utskrivning'),
+         downloadButton(outputId = 'lastNed_innManglerUt', label='Last ned tabell'),
+         tableOutput('innManglerUtTab')
+
+), #Datakvalitet
+                          #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
                       value = 'Intensiv',
 
                       sidebarPanel(id = 'intensiv',
                                    width = 3,
-                                   # h3('Koronarapport fra intensivregisteret'),
-                                   # h5('Koronarapporten kan man få regelmessig tilsendt på e-post.
-                                   # Gå til fanen "Abonnement" for å bestille dette.'),
-                                   # downloadButton(outputId = 'KoroRappInt.pdf',
-                                   #                label=HTML('Last ned Koronarapport <br /> for intensivopphold'), class = "butt"),
-                                   # tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                                    br(),
                                    br(),
                                    h3('Gjør filtreringer/utvalg:'),
-                                   #br(),
 
                                    selectInput(inputId = "bekrInt", label="Bekreftet/Mistenkt",
                                                choices = c("Alle"=9, "Bekreftet"=1, "Mistenkt"=0)
@@ -347,9 +357,9 @@ ui <- tagList(
                                                       Ukentlig="Ukentlig-week",
                                                       Daglig="Daglig-DSTday"),
                                                  selected = "Ukentlig-week"),
-                                     selectInput(inputId = "valgtEnhetabb", label="Velg enhet",
-                                                 choices = 'Alle'
-                                     ),
+                                     # selectInput(inputId = "valgtEnhetabb", label="Velg enhet",
+                                     #             choices = 'Alle'
+                                     # ),
                                      actionButton("subscribe", "Bestill!")
                         ),
                         mainPanel(
@@ -374,12 +384,14 @@ server <- function(input, output, session) {
   if (context %in% c('QA', 'PRODUCTION')){
     raplog::appLogger(session = session, msg = "Starter Pandemi-app")}
 
-  reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100089) # 100089
+  reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100082) # 100089
 
   rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'SC')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
 
   finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
+  egetHF <- 'ReshUreg'
+  egetRHF <- 'ReshUreg'
   if (finnesEgenResh) {
     indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
     #egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
@@ -394,9 +406,9 @@ server <- function(input, output, session) {
   observe({if (rolle != 'SC') {
     shinyjs::hide(id = 'KoroRappInt.pdf')
     shinyjs::hide(id = 'KoroRappTxtInt')
-    shinyjs::hide(id = 'KoroRapp.pdf')
-    shinyjs::hide(id = 'KoroRappTxt')
-    hideTab(inputId = "hovedark", target = "Abonnement")
+    #shinyjs::hide(id = 'KoroRapp.pdf')
+    #shinyjs::hide(id = 'KoroRappTxt')
+    #hideTab(inputId = "hovedark", target = "Abonnement")
   }
   })
 
@@ -432,14 +444,15 @@ server <- function(input, output, session) {
 
   #-------- Laste ned Samlerapporter------------
   observe({
-    valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
+    #valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
     output$KoroRapp.pdf <- downloadHandler(
       filename = function(){
         paste0('KoronaRapport', Sys.time(), '.pdf')},
       content = function(file){
-        henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw"
-                                  #rolle = rolle,
-                                  #valgtEnhet = valgtEnhet, #as.character(input$valgtEnhet),
+        henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
+                                  rolle = rolle,
+                                  valgtEnhet = egenEnhet, #as.character(input$valgtEnhet),
+                                  enhetsNivaa = egetEnhetsNivaa
                                   #reshID = reshID
         ) #Vurder å ta med tidsinndeling eller startdato
       }
@@ -456,6 +469,10 @@ server <- function(input, output, session) {
 
   observeEvent(input$tilbakestillValg, shinyjs::reset("brukervalgStartside"))
   observeEvent(input$tilbakestillValgRes, shinyjs::reset("brukervalgRes"))
+
+  output$manglerRegResh <- renderUI(tagList(
+    if (finnesEgenResh) {''} else {
+           h2(HTML('Ingen registreringer på innlogget ReshID'), style = "color:red")}))
 
   observe({
 #Antall innleggelser
@@ -510,7 +527,8 @@ server <- function(input, output, session) {
     output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
     #Skjema i kladd
-    KoroDataEget <- KoronaUtvalg(RegData=KoroData, valgtEnhet = egenEnhet, enhetsNivaa = egetEnhetsNivaa)$RegData
+    KoroDataEget <- KoronaUtvalg(RegData=KoronaPreprosesser(KoroDataRaa, aggPers = 0),
+                                 valgtEnhet = egenEnhet, enhetsNivaa = egetEnhetsNivaa)$RegData
     indKladdEget <- which(KoroDataEget$FormStatus==1)
     if (length(indKladdEget)>0) {
     AntKladdShus <- table(KoroDataEget$ShNavn[indKladdEget], dnn= 'Inkl.skjema i kladd')
@@ -680,6 +698,18 @@ server <- function(input, output, session) {
       })
   }) #observe
 
+  #----------Datakvalitet-------------------------
+  innManglerUtTab <- innManglerUt(RegData=KoroDataRaa, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa)
+  output$innManglerUtTab <- renderTable(innManglerUtTab)
+
+  output$lastNed_innManglerUt <- downloadHandler(
+    filename = function(){
+      paste0('ManglerUtSkjema.csv')
+    },
+    content = function(file, filename){
+      write.csv2(innManglerUtTab, file, row.names = F, na = '')
+    })
+
   #-------------Intensivregistreringer------------------------
 
   observe({
@@ -750,7 +780,6 @@ server <- function(input, output, session) {
     output$utvalgAlderInt <- renderUI({h5(HTML(paste0(TabAlder$utvalgTxt, '<br />'))) })
   })
 
-  #------------- Abonnement----------------
   #------------------ Abonnement ----------------------------------------------
   ## reaktive verdier for å holde rede på endringer som skjer mens
   ## applikasjonen kjører
@@ -778,7 +807,7 @@ server <- function(input, output, session) {
 
 
   ## nye abonnement
-  observeEvent (input$subscribe, { #MÅ HA
+  observeEvent(input$subscribe, { #MÅ HA
     owner <- rapbase::getUserName(session)
     interval <- strsplit(input$subscriptionFreq, "-")[[1]][2]
     intervalName <- strsplit(input$subscriptionFreq, "-")[[1]][1]
@@ -792,12 +821,17 @@ server <- function(input, output, session) {
       rnwFil <- "KoronaRapport.Rnw" #Navn på fila
     }
     fun <- "abonnementKorona"
-    paramNames <- c('rnwFil', 'brukernavn', "reshID") #, "valgtEnhet")
-    paramValues <- c(rnwFil, brukernavn, reshID) #, as.character(input$valgtEnhetabb))
-
-    #test <- abonnementKorona(rnwFil="BeredskapKorona.Rnw", brukernavn='tullebukk',
-    #                       reshID=105460)
-    #abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,Rpakke='korona')
+    paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
+     paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
+# print(rnwFil)
+# print(brukernavn)
+# print(reshID)
+# print(egenEnhet)
+# print(egetEnhetsNivaa)
+# print(rolle)
+#     test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
+#                            reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
+#     print(test)
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
                               fun = fun, paramNames = paramNames,
                               paramValues = paramValues, owner = owner,

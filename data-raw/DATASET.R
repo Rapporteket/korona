@@ -11,8 +11,14 @@ ReshNivaa <- ReshNivaa %>% dplyr::mutate_if(is.character, enc2utf8)
 
 usethis::use_data(ReshNivaa, overwrite = TRUE, internal = FALSE)
 
-kodebok_inklusjon <- xlsx::read.xlsx2('I:/korona/Kodebok_pandemiregisteret01042020.xlsx', sheetIndex = '2. Pandemiskjema. Skjemaversjon')
-kodebok_utskrivning <- xlsx::read.xlsx2('I:/korona/Kodebok_pandemiregisteret01042020.xlsx', sheetIndex = '1. UtskrivningSkjema. Skjemaver')
+# kodebok_inklusjon <- xlsx::read.xlsx2('I:/korona/Kodebok_pandemiregisteret01042020.xlsx', sheetIndex = '2. Pandemiskjema. Skjemaversjon')
+# kodebok_utskrivning <- xlsx::read.xlsx2('I:/korona/Kodebok_pandemiregisteret01042020.xlsx', sheetIndex = '1. UtskrivningSkjema. Skjemaver')
+
+kodebok_inklusjon <- xlsx::read.xlsx2(system.file(file.path('extdata', 'KodebokPandemi2020-04-30.xlsx'),
+                                                  package = 'korona'), sheetIndex = '2. Pandemiskjema. Skjemaversjon')
+kodebok_utskrivning <- xlsx::read.xlsx2(system.file(file.path('extdata', 'KodebokPandemi2020-04-30.xlsx'),
+                                                    package = 'korona'), sheetIndex = '1. UtskrivningSkjema. Skjemaver')
+
 
 kodebok <- list("inklusjon" = kodebok_inklusjon, "utskrivning" = kodebok_utskrivning)
 

@@ -90,12 +90,12 @@ FigTidEnhet <- function(AntTab, outfile=''){
   FigTypUt <- rapFigurer::figtype(outfile=outfile, fargepalett = 'OffAlleFarger')
   if (NutvTxt!=0) {par('fig'=c(0.05, 1, 0, 1-0.02*(NutvTxt-1)))}
   farger <- FigTypUt$farger
-  x_labs <- AntTab$Tab_tidy$Dato[-dim(AntTab$Tab_tidy)[1]]
+  x_labs <- AntTab$Tab_tidy$Tid[-dim(AntTab$Tab_tidy)[1]]
   legendTxt <- names(AntTab$Tab_tidy[,-c(1, dim(AntTab$Tab_tidy)[2])])
   N_kat <- dim(AntTab$Tab_tidy)[2] - 2
   ymax <- max(rowSums(AntTab$Tab_tidy[-dim(AntTab$Tab_tidy)[1],-c(1, dim(AntTab$Tab_tidy)[2])], na.rm = T))
   pos <- barplot(t(as.matrix(AntTab$Tab_tidy[-dim(AntTab$Tab_tidy)[1],-c(1, dim(AntTab$Tab_tidy)[2])])),
-                 ylim = c(0,ymax), col = farger[1:N_kat], ylab = 'Antall', main = 'Antall tilfeller', names.arg = x_labs,
+                 ylim = c(0,ymax), col = farger[1:N_kat], ylab = 'Antall', main = 'Personer', names.arg = x_labs,
                  las = 2) #xaxt="n",
   # text(cex=1, x=pos-.25, y=-0.25, x_labs, xpd=TRUE, srt=45, adj = 1)
   legend('topleft', rev(legendTxt), ncol=1, fill=rev(farger[1:N_kat]), border=rev(farger[1:N_kat]),
