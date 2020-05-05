@@ -471,7 +471,7 @@ server <- function(input, output, session) {
   observeEvent(input$tilbakestillValgRes, shinyjs::reset("brukervalgRes"))
 
   output$manglerRegResh <- renderUI(tagList(
-    if (finnesEgenResh) {''} else {
+    if (finnesEgenResh | rolle=='SC') {''} else {
            h2(HTML('Ingen registreringer på innlogget ReshID'), style = "color:red")}))
 
   observe({
