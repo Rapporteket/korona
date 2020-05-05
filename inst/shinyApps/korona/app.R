@@ -87,6 +87,7 @@ ui <- tagList(
              windowTitle = regTitle,
              theme = "rap/bootstrap.css",
 
+
              #-------------Startside--------------
              tabPanel("Oversikt",
                       useShinyjs(),
@@ -140,6 +141,7 @@ ui <- tagList(
                                 #,addUserInfo = TRUE),
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
 
+                                uiOutput('manglerRegResh'),
                                 h3('Resultater fra pandemiregistrering, korona.'),
                                 h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
                                 h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
@@ -388,6 +390,8 @@ server <- function(input, output, session) {
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
 
   finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
+  egetHF <- 'ReshUreg'
+  egetRHF <- 'ReshUreg'
   if (finnesEgenResh) {
     indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
     #egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
@@ -465,6 +469,10 @@ server <- function(input, output, session) {
 
   observeEvent(input$tilbakestillValg, shinyjs::reset("brukervalgStartside"))
   observeEvent(input$tilbakestillValgRes, shinyjs::reset("brukervalgRes"))
+
+  output$manglerRegResh <- renderUI(tagList(
+    if (finnesEgenResh) {''} else {
+           h2(HTML('Ingen registreringer på innlogget ReshID'), style = "color:red")}))
 
   observe({
 #Antall innleggelser
