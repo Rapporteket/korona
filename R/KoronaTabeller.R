@@ -85,6 +85,8 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valg
 statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=9, erMann=9){
 
+  RegData$ShNavn <- RegData$ShNavnUt
+  RegData$HF <- RegData$HFut
   UtData <- KoronaUtvalg(RegData=RegData, valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
                          aarsakInn=aarsakInn, erMann=erMann)
   RegData <- UtData$RegData
@@ -134,7 +136,8 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
   N <- dim(RegData)[1]
 indUreinn <- which(RegData$Reinn==0)
-  Liggetid <- summary(RegData$Liggetid[indUreinn], na.rm = T)
+  LiggetidTot <- summary(RegData$LiggetidTot[indUreinn], na.rm = T)
+  Liggetid <- summary(RegData$Liggetid, na.rm = T)
   Alder <- summary(RegData$Alder, na.rm = T)
   BMI <- summary(RegData$BMI[RegData$BMI<60]) #Filtrerer bort de med BMI over 60
   AntReinn <- sum(RegData$Reinn, na.rm = T)
@@ -152,7 +155,8 @@ indUreinn <- which(RegData$Reinn==0)
   #formatPst(2.343, 1)
 
   TabFerdigeReg <- rbind(
-    'Liggetid u/reinn (døgn)' = c(med_IQR(Liggetid), length(indUreinn), ''),
+    'Liggetid u/reinn (døgn)' = c(med_IQR(LiggetidTot), length(indUreinn), ''),
+    'Liggetid ' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'KMI' = c(med_IQR(BMI), N, ''),
     'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),

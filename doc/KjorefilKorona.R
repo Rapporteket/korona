@@ -22,8 +22,22 @@ enhetsNivaa <- 'HF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
-test <- innManglerUt(RegData = RegDataRaa) #, valgtEnhet = )
+#tab <- FerdigeRegTab(RegData = RegData)$Tab
+alleInn <- innManglerUt(RegData = RegDataRaa)
+sort(alleInn$InnDato)
 
+test <- innManglerUt(RegData = RegDataRaa, enhetsNivaa = 'HF', valgtEnhet = egetHF) #, valgtEnhet = )
+ikkeut <- RegDataRaa[which(RegDataRaa$SkjemaGUID %in% test$SkjemaGUID), ]
+ikkeut[ ,c('HelseenhetKortNavn', 'SkjemaGUID', 'FormDate')]
+
+pas <- unique(ikkeut$PasientGUID)
+length(which(RegData$PasientID %in% pas))
+t1 <- RegData[which(RegData$PasientID %in% pas),c('ShNavn','ShNavnUt', 'FormStatus', "FormDate", "FormDateUt",'Overf',"PasientID")]
+t1[order(t1$PasientID), ]
+t2 <- RegDataRaa[which(RegDataRaa$PasientGUID %in% pas),
+           c('HelseenhetKortNavn', 'SkjemaGUID', 'FormDate', "FormDateUt",'PasientGUID')]
+             #'OverfortAnnetSykehusInnleggelse', 'OverfortAnnetSykehusUtskrivning',
+t2[order(t2$PasientGUID, t2$FormDate), ]
 
 ifelse(0 > 0, 1,
        sort(RegDataRaa$FormStatusUt)[1])

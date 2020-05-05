@@ -151,23 +151,22 @@ if (aggPers == 1) {
                 # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
                 # Overf = , #Beregn, ja nei
                 # AntOverf = , #Antall overføringer
-                # Reinn8 = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
-                #                ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                #                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                #                                     units = "hours"), decreasing = T)[1] <= 8, 0, 1)),
-                ReinnTid = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
+                ReinnTid = ifelse((AntInnSkjema > 1) & (FormStatusUt==2), #Tid mellom utskrivning og neste innleggelse.
                                  sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                       FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                      units = "hours"), decreasing = T)[1]),
+                                                      units = "hours"), decreasing = T)[1],
+                                 0),
                 Reinn = ifelse(ReinnTid>48, 1, 0),
                 AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
                                   sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                units = "hours") > 48, na.rm = T)),
-                # LiggetidSum = , #sum av liggetider. Bare for ferdigstilte...
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
-                FormDate = first(FormDate, order_by = FormDate)) #sort(FormDate)[1])
-   #Reinnleggelse
+                FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
+                Liggetid = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
+                                  difftime(FormDate, FormDateUt, units = "hours"), NA)
+                                  #difftime(FormDate, FormDateUt, units = "hours") - ReinnTid) #Får for lang tid hvis har flere enn 1 reinnleggelse
+      )
   #----------------------------
    RegData <- data.frame(RegDataRed)
 }
@@ -222,7 +221,7 @@ if (aggPers == 1) {
       #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
       #!! MÅ TA HENSYN TIL REINNLEGGELSE
       #indUReinn <- RegData$Reinn==0
-      RegData$Liggetid <- as.numeric(difftime(RegData$UtTidspunkt,
+      RegData$LiggetidTot <- as.numeric(difftime(RegData$UtTidspunkt,
                                               RegData$InnTidspunkt,
                                               units = 'days'))
 
