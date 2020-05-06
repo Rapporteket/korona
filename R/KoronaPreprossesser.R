@@ -161,6 +161,7 @@ if (aggPers == 1) {
                                   sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                units = "hours") > 48, na.rm = T)),
+                FormDateSiste = last(FormDate, order_by = FormDate),
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
                 Liggetid = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
@@ -169,6 +170,8 @@ if (aggPers == 1) {
       )
   #----------------------------
    RegData <- data.frame(RegDataRed)
+   RegData$InnTidspunktSiste <- as.POSIXct(RegData$FormDateSiste, tz= 'UTC',
+                                           format="%Y-%m-%d %H:%M:%S" )
 }
       #Kjønn
       RegData$erMann <- NA #1=Mann, 2=Kvinne, 0=Ukjent
@@ -212,6 +215,7 @@ if (aggPers == 1) {
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
       RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
+
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
       RegData$UtDato <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d") #Evt. Utskrivningsdato
