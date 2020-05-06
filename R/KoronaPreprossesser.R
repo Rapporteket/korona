@@ -90,9 +90,9 @@ if (aggPers == 1) {
                 Kinolon = sum(Kinolon),
                 KjentRisikofaktor = JaNeiUkjVar(KjentRisikofaktor), #1-ja, 2-nei, 3-ukjent
                 #Kreatinin,
-                Kreft = sum(Kreft),
-                KroniskLungesykdom = sum(KroniskLungesykdom),
-                KroniskNevro = sum(KroniskNevro),
+                Kreft = sum(Kreft)>0,
+                KroniskLungesykdom = sum(KroniskLungesykdom)>0,
+                KroniskNevro = sum(KroniskNevro)>0,
                 #Leukocytter,
                 Leversykdom = sum(Leversykdom)>0,
                 Makrolid = sum(Makrolid)>0,
@@ -151,25 +151,27 @@ if (aggPers == 1) {
                 # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
                 # Overf = , #Beregn, ja nei
                 # AntOverf = , #Antall overføringer
-                # Reinn8 = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
-                #                ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                #                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                #                                     units = "hours"), decreasing = T)[1] <= 8, 0, 1)),
-                ReinnTid = ifelse(AntInnSkjema==1, 0, #0-nei, 1-ja
+                ReinnTid = ifelse((AntInnSkjema > 1) & (FormStatusUt==2), #Tid mellom utskrivning og neste innleggelse.
                                  sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                       FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                      units = "hours"), decreasing = T)[1]),
+                                                      units = "hours"), decreasing = T)[1],
+                                 0),
                 Reinn = ifelse(ReinnTid>48, 1, 0),
                 AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
                                   sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                units = "hours") > 48, na.rm = T)),
-                # LiggetidSum = , #sum av liggetider. Bare for ferdigstilte...
+                FormDateSiste = last(FormDate, order_by = FormDate),
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
-                FormDate = first(FormDate, order_by = FormDate)) #sort(FormDate)[1])
-   #Reinnleggelse
+                FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
+                Liggetid = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
+                                  difftime(FormDateUt, FormDate, units = "days"),
+                                  difftime(FormDateUt, FormDate, units = "days") - ReinnTid/24) #Får for lang tid hvis har flere enn 1 reinnleggelse
+      )
   #----------------------------
    RegData <- data.frame(RegDataRed)
+   RegData$InnTidspunktSiste <- as.POSIXct(RegData$FormDateSiste, tz= 'UTC',
+                                           format="%Y-%m-%d %H:%M:%S" )
 }
       #Kjønn
       RegData$erMann <- NA #1=Mann, 2=Kvinne, 0=Ukjent
@@ -213,6 +215,7 @@ if (aggPers == 1) {
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
       RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
+
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
       RegData$UtDato <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d") #Evt. Utskrivningsdato
@@ -222,7 +225,7 @@ if (aggPers == 1) {
       #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
       #!! MÅ TA HENSYN TIL REINNLEGGELSE
       #indUReinn <- RegData$Reinn==0
-      RegData$Liggetid <- as.numeric(difftime(RegData$UtTidspunkt,
+      RegData$LiggetidTot <- as.numeric(difftime(RegData$UtTidspunkt,
                                               RegData$InnTidspunkt,
                                               units = 'days'))
 

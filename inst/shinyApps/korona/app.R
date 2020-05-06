@@ -302,7 +302,7 @@ tabPanel('Datakvalitet',
                                    h3('Gjør filtreringer/utvalg:'),
 
                                    selectInput(inputId = "bekrInt", label="Bekreftet/Mistenkt",
-                                               choices = c("Alle"=9, "Bekreftet"=1, "Mistenkt"=0)
+                                               choices = c("Bekreftet"=1, "Alle"=9, "Mistenkt"=0)
                                    ),
                       ),
                       mainPanel(width = 9,
@@ -694,7 +694,7 @@ server <- function(input, output, session) {
         paste0(input$valgtVarFord, '_fordeling.csv')
       },
       content = function(file, filename){
-        write.csv2(tab, file, row.names = F, na = '')
+        write.csv2(tab, file, row.names = T, na = '')
       })
   }) #observe
 

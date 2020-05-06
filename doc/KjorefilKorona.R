@@ -9,21 +9,44 @@ tidsenhet='dag'
 datoFra <- '2020-01-01'
 datoTil <- Sys.Date()
 erMann=9
-aarsakInn=9
+aarsakInn=1  #covid-19 som hovedårsak til innleggelse 1-ja, 2-nei
 skjemastatusInn=9
 skjemastatusUt <- 9
-aarsakInn<- 9  #covid-19 som hovedårsak til innleggelse 1-ja, 2-nei
+aarsakInn<- 1  #covid-19 som hovedårsak til innleggelse 1-ja, 2-nei
 dodSh=9
 minald <- 0
 maxald <- 110
 #reshID: 101719 (UNN HF), '100100' (Vestfold)
-valgtEnhet='Sykehuset i Vestfold HF' #'Alle'
-enhetsNivaa <- 'HF'
+valgtEnhet='Alle' #'Sykehuset i Vestfold HF' #
+enhetsNivaa <- 'RHF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
-test <- innManglerUt(RegData = RegDataRaa) #, valgtEnhet = )
+pas <- RegData$PasientID[which(RegData$ReinnTid<0,)] #Kan evt. brukes til å finne dbl.reg.
+test1 <- RegDataRaa[which(RegDataRaa$PasientGUID %in% pas),
+                   c('HelseenhetKortNavn','UnitId', 'PasientGUID', 'FormDate', "FormDateUt", 'SkjemaGUID')] #'Liggetid', 'LiggetidTot',
+test1[order(test$PasientGUID, test1$FormDate), ]
+test2 <- RegData[which(RegData$PasientID %in% pas),
+                    c('ShNavn','PasientID', 'FormDate', "FormDateUt", 'Liggetid', 'LiggetidTot')] #
+test2[order(test2$PasientID, test2$FormDate), ]
+RegData[which(RegData$Reinn==1), c('Liggetid', 'LiggetidTot')]
 
+#tab <- FerdigeRegTab(RegData = RegData)$Tab
+alleInn <- innManglerUt(RegData = RegDataRaa)
+sort(alleInn$InnDato)
+
+test <- innManglerUt(RegData = RegDataRaa, enhetsNivaa = 'HF', valgtEnhet = egetHF) #, valgtEnhet = )
+ikkeut <- RegDataRaa[which(RegDataRaa$SkjemaGUID %in% test$SkjemaGUID), ]
+ikkeut[ ,c('HelseenhetKortNavn', 'SkjemaGUID', 'FormDate')]
+
+pas <- unique(ikkeut$PasientGUID)
+length(which(RegData$PasientID %in% pas))
+t1 <- RegData[which(RegData$PasientID %in% pas),c('ShNavn','ShNavnUt', 'FormStatus', "FormDate", "FormDateUt",'Overf',"PasientID")]
+t1[order(t1$PasientID), ]
+t2 <- RegDataRaa[which(RegDataRaa$PasientGUID %in% pas),
+           c('HelseenhetKortNavn', 'SkjemaGUID', 'FormDate', "FormDateUt",'PasientGUID')]
+             #'OverfortAnnetSykehusInnleggelse', 'OverfortAnnetSykehusUtskrivning',
+t2[order(t2$PasientGUID, t2$FormDate), ]
 
 ifelse(0 > 0, 1,
        sort(RegDataRaa$FormStatusUt)[1])
