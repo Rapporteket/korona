@@ -136,7 +136,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
   N <- dim(RegData)[1]
 indUreinn <- which(RegData$Reinn==0)
-  LiggetidTot <- summary(RegData$LiggetidTot[indUreinn], na.rm = T)
+  #LiggetidTot <- summary(RegData$LiggetidTot[indUreinn], na.rm = T)
   Liggetid <- summary(RegData$Liggetid, na.rm = T)
   Alder <- summary(RegData$Alder, na.rm = T)
   BMI <- summary(RegData$BMI[RegData$BMI<60]) #Filtrerer bort de med BMI over 60
@@ -155,8 +155,8 @@ indUreinn <- which(RegData$Reinn==0)
   #formatPst(2.343, 1)
 
   TabFerdigeReg <- rbind(
-    'Liggetid u/reinn (døgn)' = c(med_IQR(LiggetidTot), length(indUreinn), ''),
-    'Liggetid ' = c(med_IQR(Liggetid), N, ''),
+    #'Liggetid u/reinn (døgn)' = c(med_IQR(LiggetidTot), length(indUreinn), ''),
+    'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'KMI' = c(med_IQR(BMI), N, ''),
     'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
@@ -193,8 +193,9 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
                          valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa)
 
   RegData <- UtData$RegData
+  RegData <- RegData[which(RegData$KjentRisikofaktor %in% 1:2), ]
 
-  N <- sum(RegData$KjentRisikofaktor %in% 1:2) #dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
+  N <- dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
 
   #AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
   AntAndel <- function(Var, Nevner){
@@ -208,6 +209,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
     'Nedsatt immunforsvar' = AntAndel(RegData$NedsattimmunHIV, N),
     Diabetes	= AntAndel(RegData$Diabetes, N),
     Hjertesykdom = AntAndel(RegData$Hjertesykdom, N),
+    'Bruker ACE-hemmer' = AntAndel(RegData$AceHemmerInnkomst==1, sum(RegData$AceHemmerInnkomst %in% 1:2)),
     Astma	= AntAndel(RegData$Astma, N),
     'Kronisk lungesykdom' = AntAndel(RegData$KroniskLungesykdom, N),
     Nyresykdom =	AntAndel(RegData$Nyresykdom, N),
@@ -216,7 +218,6 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
     Gravid	= AntAndel(RegData$Gravid, N),
     'Fedme (KMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
-    'Bruker ACE-hemmer' = AntAndel(RegData$AceHemmerInnkomst==1, sum(RegData$AceHemmerInnkomst %in% 1:2)),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
     'Antall pasienter (i tabellen)' = c(N, '')
     #'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])

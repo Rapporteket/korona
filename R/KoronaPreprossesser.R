@@ -90,9 +90,9 @@ if (aggPers == 1) {
                 Kinolon = sum(Kinolon),
                 KjentRisikofaktor = JaNeiUkjVar(KjentRisikofaktor), #1-ja, 2-nei, 3-ukjent
                 #Kreatinin,
-                Kreft = sum(Kreft),
-                KroniskLungesykdom = sum(KroniskLungesykdom),
-                KroniskNevro = sum(KroniskNevro),
+                Kreft = sum(Kreft)>0,
+                KroniskLungesykdom = sum(KroniskLungesykdom)>0,
+                KroniskNevro = sum(KroniskNevro)>0,
                 #Leukocytter,
                 Leversykdom = sum(Leversykdom)>0,
                 Makrolid = sum(Makrolid)>0,
@@ -164,8 +164,8 @@ if (aggPers == 1) {
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
                 Liggetid = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
-                                  difftime(FormDate, FormDateUt, units = "hours"), NA)
-                                  #difftime(FormDate, FormDateUt, units = "hours") - ReinnTid) #Får for lang tid hvis har flere enn 1 reinnleggelse
+                                  difftime(FormDateUt, FormDate, units = "days"),
+                                  difftime(FormDateUt, FormDate, units = "days") - ReinnTid/24) #Får for lang tid hvis har flere enn 1 reinnleggelse
       )
   #----------------------------
    RegData <- data.frame(RegDataRed)

@@ -163,11 +163,13 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
             flerevar <- 1
             RegData <- RegData[RegData$KjentRisikofaktor %in% 1:2, ]
             RegData$Fedme <- RegData$BMI>30
-            statusInn <- 2
-            variable <- c('Kreft',  'NedsattimmunHIV', 'Diabetes', 'Hjertesykdom', 'Astma',
+            RegData$ACEhemmmer <- RegData$AceHemmerInnkomst==1
+            RegData$ACEhemmmer[RegData$AceHemmerInnkomst==3] <- NA
+            #statusInn <- 2
+            variable <- c('Kreft',  'NedsattimmunHIV', 'Diabetes', 'Hjertesykdom', 'ACEhemmmer','Astma',
                           'KroniskLungesykdom', 'Nyresykdom', 'Leversykdom', 'KroniskNevro',
                           'Gravid', 'Fedme', 'Royker', 'KjentRisikofaktor')
-            grtxt <- c('Kreft', 'Nedsatt immunforsvar', 'Diabetes', 'Hjertesykdom', 'Astma',
+            grtxt <- c('Kreft', 'Nedsatt immunforsvar', 'Diabetes', 'Hjertesykdom', 'ACE-hemmer', 'Astma',
                        'Kronisk lungesykdom', 'Nyresykdom', 'Leversykdom', 'Nevrologisk/nevromusk.',
                        'Gravid', 'Fedme (KMI>30)', 'Røyker', 'Risikofaktorer (minst en)')
             #Trenger bare kode om Risikofaktorer:
