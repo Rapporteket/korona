@@ -22,13 +22,10 @@ enhetsNivaa <- 'RHF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
-toupper('3ed517e4-8a55-4ae9-a8e7-34ee0f65e1d5')
 
-which(RegData$SkjemaGUID == toupper('3ed517e4-8a55-4ae9-a8e7-34ee0f65e1d5'))
 
-pas <- RegDataRaa$PasientGUID[which(RegDataRaa$SkjemaGUID == 'D8341A7C-04D6-4382-BAE1-014F8C13FBD1')]
+pas <- RegDataRaa$PasientGUID[which(RegDataRaa$SkjemaGUID == '41FB2DF0-E9C6-4552-A10C-788C51A5B7B9')] #  'D8341A7C-04D6-4382-BAE1-014F8C13FBD1')]
 t(RegDataRaa[RegDataRaa$PasientGUID==pas,c("PasientGUID","SkjemaGUID","SkjemaGUIDut", "FormDate", "HelseenhetKortNavn")])
-
 table(RegData[RegData$Alder<18, c('Alder','ArsakInnleggelse')])
 
 pas <- RegData$PasientID[which(RegData$ReinnTid<0,)] #Kan evt. brukes til å finne dbl.reg.
