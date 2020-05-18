@@ -183,6 +183,7 @@ varUtKoblet <- c('UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.OverfortAnnetSykehusUtskrivning
   ,Ut.StatusVedUtskriving
   ,Ut.Utskrivningsdato
+  ,Ut.SkjemaGUID AS SkjemaGUIDut
   ')
 
 if (koble==0){
@@ -204,7 +205,7 @@ if (koble==1){
 
 
 
-
+#query <- 'select * from UtskrivningSkjemaDataContract'
 
       RegData <- rapbase::LoadRegData(registryName="korona", query=query, dbType="mysql")
       return(RegData)

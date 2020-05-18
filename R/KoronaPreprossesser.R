@@ -161,7 +161,11 @@ if (aggPers == 1) {
                                   sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                units = "hours") > 48, na.rm = T)),
-                FormDateSiste = last(FormDate, order_by = FormDate),
+                ReinnNaar = ifelse(Reinn==0, 0, #0-nei, 1-ja
+                                   max(which(difftime(sort(FormDate)[2:AntInnSkjema],
+                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+                                                units = "hours") > 48))),
+                FormDateSiste = nth(FormDate, ReinnNaar+1, order_by = FormDate),
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
                 Liggetid = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
