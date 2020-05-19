@@ -39,7 +39,6 @@ varFHIraa <- c('PasientGUID',
                ,'KroniskLungesykdom'
                ,'KroniskNevro'
                ,'Leversykdom'
-               ,'Liggetid'
                ,'Municipal'
                ,'NedsattimmunHIV'
                ,'NerkontaktCovid'
@@ -80,7 +79,7 @@ library(intensivberedskap)
 # BeredskapData <-read.table('A:/intensiv/ReadinessFormDataContract2020-04-29.csv', sep=';',
 #                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 ##setdiff(varFHIraa, sort(names(BeredskapData)))
-RegDataRaa <- KoronaDataSQL() #BeredskapData #
+RegDataRaa <- NIRberedskDataSQL() #BeredskapData #
 varFHIraa <- c(
   'PatientInRegistryGuid'
   ,'PatientAge'
@@ -119,7 +118,7 @@ BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 # write.table(BeredskapDataRaaFHI, file = paste0('A:/Pandemi/BeredskapDataRaaFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
-RegData <- NIRPreprosessBeredsk(RegDataRaa)
+RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa)
 #setdiff(varFHIpp, sort(names(RegData)))
 varBort <- c('PatientInRegistryGuid', 'PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive')
 varNy <- c('PasientID', 'Alder', 'erMann', 'Bekreftet', 'liggetid')

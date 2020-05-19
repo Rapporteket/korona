@@ -234,8 +234,8 @@ if (aggPers == 1) {
                                               units = 'days'))
 
 
-#Fjerne feilregisteringer
-      RegData <- RegData[which((RegData$InnDato>'2020-03-07') & (RegData$InnDato <= Sys.Date())),]
+#Fjerne feilregisteringer - skal være rettet
+      RegData <- RegData[which((RegData$InnDato>'2020-01-01') & (RegData$InnDato <= Sys.Date())),]
 
       # Nye tidsvariable:
       # RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
