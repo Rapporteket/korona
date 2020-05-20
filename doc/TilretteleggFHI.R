@@ -65,7 +65,7 @@ PandemiDataRaaFHI <- RegDataRaa[,varFHIraa]
 RegData <- KoronaPreprosesser(RegDataRaa)
 varBort <- c('PasientGUID', 'PatientAge', 'PatientGender',
              'Vekt', 'VektUkjent', 'Hoyde', 'HoydeUkjent')
-varNy <- c('PasientID', 'Alder', 'erMann', 'BMI')
+varNy <- c('PasientID', 'Alder', 'erMann', 'BMI', 'Reinn', 'FormDateSiste', 'Liggetid')
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)])
 PandemiDataPpFHI <- RegData[ ,varFHIpp]
 # write.table(PandemiDataPpFHI, file = paste0('A:/Pandemi/PandemiDataPpFHI', Sys.Date(), '.csv'),
@@ -121,9 +121,9 @@ BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa)
 #setdiff(varFHIpp, sort(names(RegData)))
 varBort <- c('PatientInRegistryGuid', 'PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive')
-varNy <- c('PasientID', 'Alder', 'erMann', 'Bekreftet', 'liggetid')
+varNy <- c('PasientID', 'Alder', 'erMann', 'Bekreftet', 'Liggetid', 'ReinnResp', 'RespTid')
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)])
-BeredskapDataPpFHI <- RegData[ ,varFHIpp]
+BeredskapDataPpFHI <- RegData[ ,varFHIpp[8]]
 # write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
