@@ -22,7 +22,7 @@ enhetsNivaa <- 'RHF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
-
+test <- unique(RegDataRaa[as.Date(RegDataRaa$FormDate) < '2020-03-08',c("SkjemaGUID", "FormDate", "HelseenhetKortNavn")])
 
 pas <- RegDataRaa$PasientGUID[which(RegDataRaa$SkjemaGUID == '41FB2DF0-E9C6-4552-A10C-788C51A5B7B9')] #  'D8341A7C-04D6-4382-BAE1-014F8C13FBD1')]
 t(RegDataRaa[RegDataRaa$PasientGUID==pas,c("PasientGUID","SkjemaGUID","SkjemaGUIDut", "FormDate", "HelseenhetKortNavn")])

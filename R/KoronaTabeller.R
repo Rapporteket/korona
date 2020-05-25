@@ -160,7 +160,7 @@ indUreinn <- which(RegData$Reinn==0)
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'KMI' = c(med_IQR(BMI), N, ''),
     'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
-    'Reinnleggelse (>48t)' = c('','','', AntReinn, PstReinn),
+    'Ny innleggelse (>12t)' = c('','','', AntReinn, PstReinn),
     'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
   TabFerdigeReg[4:6,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:6,5])),' %')
