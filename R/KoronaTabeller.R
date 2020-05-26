@@ -158,7 +158,7 @@ indUreinn <- which(RegData$Reinn==0)
     #'Liggetid u/reinn (døgn)' = c(med_IQR(LiggetidTot), length(indUreinn), ''),
     'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
-    'KMI' = c(med_IQR(BMI), N, ''),
+    'BMI' = c(med_IQR(BMI), N, ''),
     'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
     'Ny innleggelse (>12t)' = c('','','', AntReinn, PstReinn),
     'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
@@ -216,7 +216,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
     Leversykdom = AntAndel(RegData$Leversykdom, N),
     'Nevrologisk/nevromusk.' = AntAndel(RegData$KroniskNevro, N),
     Gravid	= AntAndel(RegData$Gravid, N),
-    'Fedme (KMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
+    'Fedme (BMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
     'Antall pasienter (i tabellen)' = c(N, '')
