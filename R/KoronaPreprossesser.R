@@ -139,8 +139,8 @@ if (aggPers == 1) {
                 #HovedskjemaGUID
                 #OverfortAnnetSykehusUtskrivning #1-ja, 2-nei
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
-                Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død
-                Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
+                #Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død
+                #Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
                 ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
                 FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1,

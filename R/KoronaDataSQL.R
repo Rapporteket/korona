@@ -27,6 +27,7 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.CurrentMunicipalNumber
   ,Inn.Ddimer
   ,Inn.DdimerUkjent
+  ,Inn.DeathDate
   ,Inn.Diabetes
   ,Inn.DiastoliskBlodtrykk
   ,Inn.DiastoliskBlodtrykkUkjent
@@ -48,7 +49,8 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   -- ,Inn.Hospital
   ,Inn.Hoyde
   ,Inn.HoydeUkjent
-  ,Innleggelse
+  ,Inn.Importert
+  ,Inn.Innleggelse
   ,Inn.Isolert
   ,Inn.Karbapenem
   ,Inn.Kinolon
@@ -88,8 +90,8 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.Royker
   ,Inn.SkreatininUkjent
   ,Inn.Sykehus
-  ,Inn.Status30Dager
-  ,Inn.Status90Dager
+  -- ,Inn.Status30Dager #Fjernet fra MRS ved oppdatering 4.juni
+  -- ,Inn.Status90Dager #Fjernet fra MRS ved oppdatering 4.juni
   ,Inn.SystoliskBlodtrykk
   ,Inn.SystoliskBlodtrykkUkjent
   ,Inn.Temp
@@ -180,6 +182,7 @@ varUtKoblet <- c('UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.HelseenhetKortNavn AS ShNavnUt
   ,Ut.FormStatus AS FormStatusUt
   ,Ut.FormDate AS FormDateUt
+  .Ut.Importert AS ImportertUt
   ,Ut.OverfortAnnetSykehusUtskrivning
   ,Ut.StatusVedUtskriving
   ,Ut.Utskrivningsdato
