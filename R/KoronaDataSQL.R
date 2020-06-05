@@ -182,7 +182,7 @@ varUtKoblet <- c('UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.HelseenhetKortNavn AS ShNavnUt
   ,Ut.FormStatus AS FormStatusUt
   ,Ut.FormDate AS FormDateUt
-  .Ut.Importert AS ImportertUt
+  ,Ut.Importert AS ImportertUt
   ,Ut.OverfortAnnetSykehusUtskrivning
   ,Ut.StatusVedUtskriving
   ,Ut.Utskrivningsdato
