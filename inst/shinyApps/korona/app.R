@@ -284,7 +284,7 @@ ui <- tagList(
 
 
 #----------Datakvalitet-------------------------
-tabPanel('Datakvalitet',
+tabPanel('Manglende ut-skjema',
          h3('Innleggelsesskjema som mangler utskrivning'),
          downloadButton(outputId = 'lastNed_innManglerUt', label='Last ned tabell'),
          tableOutput('innManglerUtTab')
@@ -302,7 +302,7 @@ tabPanel('Datakvalitet',
                                    h3('Gjør filtreringer/utvalg:'),
 
                                    selectInput(inputId = "bekrInt", label="Bekreftet/Mistenkt",
-                                               choices = c("Bekreftet"=1, "Alle"=9, "Mistenkt"=0)
+                                               choices = c("Alle"=9, "Bekreftet"=1, "Mistenkt"=0)
                                    ),
                       ),
                       mainPanel(width = 9,
@@ -328,7 +328,7 @@ tabPanel('Datakvalitet',
                                   )),
 
                                 h3('Antall intensivopphold'),
-                                h5('Innleggelser siste to uker, samt totalt siden 10.mars'),
+                                h5('Innleggelser siste to uker, samt totalt i 2020'),
                                 uiOutput('utvalgAntRegInt'),
                                 tableOutput('tabAntRegInt'),
                                 br(),

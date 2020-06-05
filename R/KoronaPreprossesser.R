@@ -139,8 +139,8 @@ if (aggPers == 1) {
                 #HovedskjemaGUID
                 #OverfortAnnetSykehusUtskrivning #1-ja, 2-nei
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
-                Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død
-                Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
+                #Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død
+                #Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
                 ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
                 FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1,
@@ -156,16 +156,16 @@ if (aggPers == 1) {
                                                       FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                       units = "hours"), decreasing = T)[1],
                                  0),
-                Reinn = ifelse(ReinnTid > 12 & ReinnTid <= 90*24, 1, 0),
+                Reinn = ifelse(ReinnTid > 24 & ReinnTid <= 90*24, 1, 0),
                 NyttTilfelle = ifelse(ReinnTid > 90*24, 1, 0),
                 AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
                                   sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
                                                FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                               units = "hours") > 12, na.rm = T)),
+                                               units = "hours") > 24, na.rm = T)),
                 ReinnNaar = ifelse(Reinn==0, 0, #0-nei, 1-ja
                                    max(which(difftime(sort(FormDate)[2:AntInnSkjema],
                                                 FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                                units = "hours") > 12))),
+                                                units = "hours") > 24))),
                 FormDateSiste = nth(FormDate, ReinnNaar+1, order_by = FormDate),
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
