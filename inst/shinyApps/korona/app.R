@@ -87,6 +87,7 @@ ui <- tagList(
              windowTitle = regTitle,
              theme = "rap/bootstrap.css",
 
+
              #-------------Startside--------------
              tabPanel("Oversikt",
                       useShinyjs(),
@@ -140,6 +141,7 @@ ui <- tagList(
                                 #,addUserInfo = TRUE),
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
 
+                                uiOutput('manglerRegResh'),
                                 h3('Resultater fra pandemiregistrering, korona.'),
                                 h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
                                 h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
@@ -281,7 +283,14 @@ ui <- tagList(
              ), #Resultater
 
 
-             #---------Intensivregistreringer--------------------------------
+#----------Datakvalitet-------------------------
+tabPanel('Manglende ut-skjema',
+         h3('Innleggelsesskjema som mangler utskrivning'),
+         downloadButton(outputId = 'lastNed_innManglerUt', label='Last ned tabell'),
+         tableOutput('innManglerUtTab')
+
+), #Datakvalitet
+                          #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
                       value = 'Intensiv',
@@ -319,7 +328,7 @@ ui <- tagList(
                                   )),
 
                                 h3('Antall intensivopphold'),
-                                h5('Innleggelser siste to uker, samt totalt siden 10.mars'),
+                                h5('Innleggelser siste to uker, samt totalt i 2020'),
                                 uiOutput('utvalgAntRegInt'),
                                 tableOutput('tabAntRegInt'),
                                 br(),
@@ -381,6 +390,8 @@ server <- function(input, output, session) {
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
 
   finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
+  egetHF <- 'ReshUreg'
+  egetRHF <- 'ReshUreg'
   if (finnesEgenResh) {
     indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
     #egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
@@ -458,6 +469,10 @@ server <- function(input, output, session) {
 
   observeEvent(input$tilbakestillValg, shinyjs::reset("brukervalgStartside"))
   observeEvent(input$tilbakestillValgRes, shinyjs::reset("brukervalgRes"))
+
+  output$manglerRegResh <- renderUI(tagList(
+    if (finnesEgenResh | rolle=='SC') {''} else {
+           h2(HTML('Ingen registreringer på innlogget ReshID'), style = "color:red")}))
 
   observe({
 #Antall innleggelser
@@ -679,9 +694,21 @@ server <- function(input, output, session) {
         paste0(input$valgtVarFord, '_fordeling.csv')
       },
       content = function(file, filename){
-        write.csv2(tab, file, row.names = F, na = '')
+        write.csv2(tab, file, row.names = T, na = '')
       })
   }) #observe
+
+  #----------Datakvalitet-------------------------
+  innManglerUtTab <- innManglerUt(RegData=KoroDataRaa, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa)
+  output$innManglerUtTab <- renderTable(innManglerUtTab)
+
+  output$lastNed_innManglerUt <- downloadHandler(
+    filename = function(){
+      paste0('ManglerUtSkjema.csv')
+    },
+    content = function(file, filename){
+      write.csv2(innManglerUtTab, file, row.names = F, na = '')
+    })
 
   #-------------Intensivregistreringer------------------------
 

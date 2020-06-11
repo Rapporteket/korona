@@ -1,4 +1,3 @@
-
 #' Funksjon som produserer rapporten som skal sendes til mottager.
 #'
 #' @param rnwFil Navn på fila som skal kjøres. Angis uten ending (\emph{dvs uten  ".Rnw"})
