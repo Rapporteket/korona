@@ -18,6 +18,7 @@
 
 <<'initOpts',include=FALSE>>=
 knitr::opts_chunk$set(warnings=FALSE,echo=FALSE)
+options(warn = -1)
 knitr::opts_knit$set(root.dir = './')
 options(knitr.table.format = "latex")
 library(intensivberedskap)
@@ -219,7 +220,7 @@ xtable::xtable(InneliggPasAndre, digits=0,
 \end{frame}
 
 \begin{frame}[fragile] {Belegg}
-<<'Belegg', results='asis'>>=
+<<'Belegg', results='asis', warnings=FALSE>>=
 # Data <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)
 # Data$belegg_anslag
 # Data$belegg_anslag_txt
