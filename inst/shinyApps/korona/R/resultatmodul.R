@@ -136,7 +136,7 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
 
   output$FigurTidEnhet <- renderPlot({
     AntTab <- AntTab()
-    if (rolle != 'SC') {
+    if (rolle != 'SC'  & dim(AntTab$Tab_tidy)[2] > 3) {
       AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
     }
     korona::FigTidEnhet(AntTab)
