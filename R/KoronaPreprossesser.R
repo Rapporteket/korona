@@ -233,7 +233,7 @@ if (aggPers == 1) {
       RegData$LiggetidTot <- as.numeric(difftime(RegData$UtTidspunkt,
                                               RegData$InnTidspunkt,
                                               units = 'days'))
-
+      RegData$Liggetid[RegData$Liggetid<0] <- 0
 
 #Fjerne feilregisteringer - skal være rettet
       RegData <- RegData[which((RegData$InnDato>'2020-01-01') & (RegData$InnDato <= Sys.Date())),]
