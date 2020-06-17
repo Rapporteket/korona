@@ -568,7 +568,7 @@ server <- function(input, output, session) {
         renderText('Få registreringer (N<5)')}
     output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
     output$tittelFerdigeReg <- renderUI(
-      h3(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' skjema)')))
+      h3(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' forløp)')))
 
 
     #Tab risiko
