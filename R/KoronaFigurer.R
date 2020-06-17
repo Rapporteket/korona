@@ -93,12 +93,12 @@ FigTidEnhet <- function(AntTab, outfile=''){
   x_labs <- AntTab$Tab_tidy$Tid[-dim(AntTab$Tab_tidy)[1]]
   legendTxt <- names(AntTab$Tab_tidy[,-c(1, dim(AntTab$Tab_tidy)[2])])
   N_kat <- dim(AntTab$Tab_tidy)[2] - 2
-  ymax <- max(rowSums(AntTab$Tab_tidy[-dim(AntTab$Tab_tidy)[1],-c(1, dim(AntTab$Tab_tidy)[2])], na.rm = T))
+  ymax <- max(c(max(rowSums(AntTab$Tab_tidy[-dim(AntTab$Tab_tidy)[1],-c(1, dim(AntTab$Tab_tidy)[2])], na.rm = T)), 1))
   pos <- barplot(t(as.matrix(AntTab$Tab_tidy[-dim(AntTab$Tab_tidy)[1],-c(1, dim(AntTab$Tab_tidy)[2])])),
                  ylim = c(0,ymax), col = farger[1:N_kat], ylab = 'Antall', main = 'Personer', names.arg = x_labs,
                  las = 2) #xaxt="n",
   # text(cex=1, x=pos-.25, y=-0.25, x_labs, xpd=TRUE, srt=45, adj = 1)
-  legend('topleft', rev(legendTxt), ncol=1, fill=rev(farger[1:N_kat]), border=rev(farger[1:N_kat]),
+  legend('topright', rev(legendTxt), ncol=1, fill=rev(farger[1:N_kat]), border=rev(farger[1:N_kat]),
          bty='n', cex=1, xpd = T, )
 
   mtext(AntTab$utvalgTxt, side=3, las=1, cex=0.9, adj=0, line=c(3+0.8*((NutvTxt-1):0)))

@@ -40,18 +40,18 @@ if (paaServer) {
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
-  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-04-27 12-20-09.txt', sep=';',
+  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-06-11 09-29-30.txt', sep=';',
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
-  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-04-27 12-20-09.txt', sep=';',
+  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-06-11 09-29-30.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
   # KoroDataInt_gml <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
   #                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-27 16-11-27.txt', sep=';',
+  # KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-27 16-11-27.txt', sep=';',
+                             # stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-06-11 09-31-13.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  # KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-27 16-19-32.txt', sep=';',
-  #                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInt$EcmoEnd[KoroDataInt$EcmoEnd == ""] <- NA
   KoroDataInt$EcmoStart[KoroDataInt$EcmoStart == ""] <- NA
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
@@ -386,7 +386,7 @@ server <- function(input, output, session) {
 
   reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100082) # 100089
 
-  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'SC')
+  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'LU')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
 
   finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
@@ -568,7 +568,7 @@ server <- function(input, output, session) {
         renderText('Få registreringer (N<5)')}
     output$utvalgFerdigeReg <- renderUI({h5(HTML(paste0(TabFerdig$utvalgTxt, '<br />'))) })
     output$tittelFerdigeReg <- renderUI(
-      h3(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' skjema)')))
+      h3(paste0('Utskrevne pasienter (', TabFerdig$Ntest, ' forløp)')))
 
 
     #Tab risiko
