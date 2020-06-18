@@ -67,3 +67,39 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                     msg = paste("Leverer: ", utfil))
   return(utfil)
 }
+
+#' Funksjon som henter filer som skal sendes til FHI. To filer fra intensivopphold
+#' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
+#' person, for hvert register
+#'
+#' @param rnwFil Navn på fila som skal kjøres.
+#' @param Rpakke hvilken R-pakke fila som lager rapporten ligger i
+#' @param parametre Liste med valgfrie parametre, avhengig av type rapport
+#'
+#' @return Full path of file produced
+#' @export
+
+sendDataFilerFHI <- function(rnwFil, brukernavn='lluring',
+                             Rpakke='korona', rolle = 'SC'){
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    msg = "starter filgenerering for dataoverføring")
+
+  Filer <- lagDatafilerTilFHI()
+
+  # filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
+  # tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
+  # src <- normalizePath(system.file(rnwFil, package=Rpakke))
+  # setwd(tempdir())
+  # dir <- getwd()
+  # file.copy(src, tmpFile, overwrite = TRUE)
+  # knitr::knit2pdf(input=tmpFile)
+  #
+  # #gc() #Opprydning gc-"garbage collection"
+  # utfil <- paste0(dir, '/', substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf')
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    msg = paste("Leverer data til NHN/FHI ")) #, utfil))
+  return(utfil)
+}
+

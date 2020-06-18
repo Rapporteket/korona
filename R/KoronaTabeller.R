@@ -98,7 +98,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                                      RegData$InnTidspunktSiste, units='days'))
   LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 90], na.rm = T), 1)
 
-  igaar <- Sys.Date()-1 #'2020-04-10' #
+  igaar <- Sys.Date()-1 #  '2020-04-10' #
   innIgaar <- length(which(RegData$InnDato == as.Date(igaar)))
   utIgaar <- length(which(RegData$FormDateUt == as.Date(igaar)))
   dodIgaar <- length(which(RegData$FormDateUt[RegData$StatusVedUtskriving==2] == as.Date(igaar)))
@@ -155,7 +155,7 @@ indUreinn <- which(RegData$Reinn==0)
   #formatPst(2.343, 1)
 
   TabFerdigeReg <- rbind(
-    #'Liggetid u/reinn (døgn)' = c(med_IQR(LiggetidTot), length(indUreinn), ''),
+    #  'Liggetid u/reinn (døgn)' = c(med_IQR(LiggetidTot), length(indUreinn), ''),
     'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'BMI' = c(med_IQR(BMI), N, ''),
@@ -220,7 +220,7 @@ RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
     'Antall pasienter (i tabellen)' = c(N, '')
-    #'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
+    #   'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
   )
 
   #TabRisiko[,2] <- paste0(sprintf('%.0f', 100*(TabRisiko[ ,2])),'%')

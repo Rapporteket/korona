@@ -1,7 +1,6 @@
 #Variabler til FHI
 
 #Pandemiregister
-library(korona)
 # KoroDataInn <- read.table('A:/Pandemi/InklusjonSkjemaDataContract2020-04-29.csv', sep=';',
 #                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 # KoroDataInn <- KoroDataInn[ ,-which(names(KoroDataInn)=='Utskrivningsdato')]
@@ -13,9 +12,17 @@ library(korona)
 # KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
 #                      by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 
+
+#' Henter data og tilrettelegger filer for overføring til FHI
+#'
+#' @return
+#' @export
+#'
+lagDatafilerTilFHI <- function(){
 #Rådata
 RegDataRaa <- KoronaDataSQL() #KoroDataRaa
-varFHIraa <- c('PasientGUID',
+varFHIraa <- c(
+  #PasientGUID',
                'AceHemmerInnkomst'
                ,'ArsakInnleggelse'
                ,'Astma'
@@ -40,6 +47,7 @@ varFHIraa <- c('PasientGUID',
                ,'KroniskNevro'
                ,'Leversykdom'
                ,'Municipal'
+               ,'MunicipalNumber'
                ,'NedsattimmunHIV'
                ,'NerkontaktCovid'
                ,'Nyresykdom'
@@ -49,7 +57,7 @@ varFHIraa <- c('PasientGUID',
                ,'RHF'
                ,'Royker'
                ,'StatusVedUtskriving'
-               ,'Status30Dager'
+               #,'Status30Dager'
                ,'UtsAntibiotika'
                ,'UtsAntifungalbehandling'
                ,'UtsAntiviralBehandling'
@@ -57,21 +65,20 @@ varFHIraa <- c('PasientGUID',
 
 
 PandemiDataRaaFHI <- RegDataRaa[,varFHIraa]
-##setdiff(varFHIraa, names(RegDataRaa))
+#setdiff(varFHIraa, names(RegDataRaa))
 # write.table(PandemiDataRaaFHI, file = paste0('A:/Pandemi/PandemiDataRaaFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
 #Preprossesserte data
 RegData <- KoronaPreprosesser(RegDataRaa)
-varBort <- c('PasientGUID', 'PatientAge', 'PatientGender',
+varBort <- c('PatientAge', 'PatientGender', #PasientIdXX
              'Vekt', 'VektUkjent', 'Hoyde', 'HoydeUkjent')
 varNy <- c('PasientID', 'Alder', 'erMann', 'BMI', 'Reinn', 'FormDateSiste', 'Liggetid')
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)])
+#setdiff(varFHIpp, names(RegData))
 PandemiDataPpFHI <- RegData[ ,varFHIpp]
 # write.table(PandemiDataPpFHI, file = paste0('A:/Pandemi/PandemiDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
-
-
 
 #---------Beredskap--------------
 
@@ -85,6 +92,7 @@ varFHIraa <- c(
   ,'PatientAge'
   ,'PatientGender'
   ,'Municipal'
+  ,'MunicipalNumber'
   ,'HF'
   ,'RHF'
   ,'DateAdmittedIntensive'
@@ -110,11 +118,11 @@ varFHIraa <- c(
   ,'EcmoStart'
   ,'EcmoEnd'
   ,'Morsdato'
-  ,'DischargedIntensivStatus'
+  ,'DischargedIntensiveStatus'
   ,'FormStatus'
   ,'FormDate')
 BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
-##setdiff(varFHIraa, names(RegDataRaa))
+#setdiff(varFHIraa, names(RegDataRaa))
 # write.table(BeredskapDataRaaFHI, file = paste0('A:/Pandemi/BeredskapDataRaaFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
@@ -127,6 +135,8 @@ BeredskapDataPpFHI <- RegData[ ,varFHIpp[8]]
 # write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
+UtData <- list(PandemiDataRaaFHI = PandemiDataRaaFHI, PandemiDataPpFHI = PandemiDataPpFHI,
+               BeredskapDataRaaFHI = BeredskapDataRaaFHI, BeredskapDataPpFHI = BeredskapDataPpFHI)
+return(UtData)
 
-
-
+}
