@@ -58,7 +58,8 @@ if (aggPers == 1) {
       ifelse(sum(test)>0, max(x[test]), 999)} #1-nei, 2:5 ja, 999 ukjent.
 
    RegDataRed <- RegData %>% group_by(PasientID) %>%
-      summarise(Alder = Alder[1],
+      summarise(PersonId = PersonId[1],
+               Alder = Alder[1],
                 AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
                 AkuttNyresvikt = JaNeiUkjVar(AkuttNyresvikt), #1-ja, 2-nei, 3-ukjent
                 AkuttRespirasjonsvikt = SviktVar(AkuttRespirasjonsvikt), #1-nei, 2:5 ja, 999 ukjent
