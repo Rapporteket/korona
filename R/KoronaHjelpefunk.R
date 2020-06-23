@@ -85,21 +85,27 @@ sendDataFilerFHI <- function(rnwFil, brukernavn='lluring',
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     msg = "starter filgenerering for dataoverføring")
 
-  Filer <- lagDatafilerTilFHI()
+   setwd(tempdir())
+   dir <- getwd()
 
-  # filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
-  # tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
-  # src <- normalizePath(system.file(rnwFil, package=Rpakke))
-  # setwd(tempdir())
-  # dir <- getwd()
-  # file.copy(src, tmpFile, overwrite = TRUE)
-  # knitr::knit2pdf(input=tmpFile)
-  #
-  # #gc() #Opprydning gc-"garbage collection"
-  # utfil <- paste0(dir, '/', substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf')
+   #Filer <- lagDatafilerTilFHI()
+   Testfil <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
+   write.table(Testfil, file = paste('Testfil', Sys.Date(), '.csv'),
+               fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+    utfil <- paste0(dir, '/', 'Testfil', '.csv')
+
+
+#For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
+#Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
+    sship(content=utfil,
+         recipient, #Character string: user name uniquely defining the recipient both in terms of the public
+         #key used for securing the content and any identity control upon docking
+         pubkey_holder = 'github', #Character string: the holder of the (recipient's) public key. Per nå kun github?
+         vessel = 'sftp', # ut fra beskrivelsen bare ftp
+         declaration = "")
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     msg = paste("Leverer data til NHN/FHI ")) #, utfil))
-  return(utfil)
+  #return(utfil)
 }
 

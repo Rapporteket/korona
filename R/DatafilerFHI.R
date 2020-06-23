@@ -111,16 +111,16 @@ varFHIraa <- c(
   ,'FormStatus'
   ,'FormDate')
 BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
-#setdiff(varFHIraa, names(RegDataRaa))
+setdiff(varFHIraa, names(RegDataRaa))
 # write.table(BeredskapDataRaaFHI, file = paste0('A:/Pandemi/BeredskapDataRaaFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
 RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa)
-#setdiff(varFHIpp, sort(names(RegData)))
-varBort <- c('PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive') #'PatientInRegistryGuid',
+setdiff(varFHIpp, sort(names(RegData)))
+varBort <- c('PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive', 'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
 varNy <- c('Alder', 'erMann', 'Bekreftet', 'Liggetid', 'ReinnResp', 'RespTid') #'PersonId',
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)])
-BeredskapDataPpFHI <- RegData[ ,varFHIpp[8]]
+BeredskapDataPpFHI <- RegData[ ,varFHIpp]
 # write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 

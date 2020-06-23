@@ -75,8 +75,8 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.Oksygenmetning
   ,Inn.OkysgenmetningUkjent
   ,Inn.OverfortAnnetSykehusInnleggelse
-  ,Inn.PersonId AS PasientID
-  -- ,Inn.PatientInRegistryGuid
+  ,Inn.PersonId
+  ,Inn.PatientInRegistryGuid
   -- ,Inn.PasientGUID
   ,Inn.PatientAge
   ,Inn.PatientGender
