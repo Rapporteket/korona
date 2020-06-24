@@ -20,7 +20,8 @@ Remotes:
       Rapporteket/rapbase,
       Rapporteket/rapFigurer,
       Rapporteket/raplog,
-      Rapporteket/intensivberedskap
+      Rapporteket/intensivberedskap,
+      Rapporteket/sship
 Imports:
     digest,
     DT,
@@ -33,6 +34,7 @@ Imports:
     rapbase,
     rapFigurer,
     raplog,
+    sship,
     shiny,
     shinyalert,
     shinyjs,
