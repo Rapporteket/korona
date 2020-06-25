@@ -13,6 +13,7 @@ library(magrittr)
 library(tidyverse)
 library(lubridate)
 library(kableExtra)
+library(sship)
 library(intensivberedskap)
 library(korona)
 
@@ -385,7 +386,14 @@ tabPanel(p("Registeradm",
                         downloadButton(outputId = 'lastNed_dataPandemiRaa',
                                        label='Last ned ubesudlede pandemidata', class = "butt"),
                         downloadButton(outputId = 'lastNed_dataPandemiPas',
-                                       label='Last ned pandemidata, pasientaggregert', class = "butt")
+                                       label='Last ned pandemidata, pasientaggregert', class = "butt"),
+                        br(),
+                        br(),
+
+                        downloadButton(outputId = 'lastNed_filstiDataNHN',
+                                       label='Send filer til NHN og last ned filsti', class = "butt")
+
+
            ),
            mainPanel(
              h3('Her kan vi samle opp ting og tang som bare adm. skal se')
@@ -917,6 +925,14 @@ server <- function(input, output, session) {
       write.csv2(KoroData, file, row.names = F, na = '')
     })
 
+  #Sjekk av filsti for filsending:
+    output$lastNed_filstiDataNHN <- downloadHandler(
+      filename = function(){
+        paste0('Filsti', Sys.time(), '.csv')},
+      content = function(file, filename){
+        Filsti <- sendDataFilerFHI() #brukernavn = brukernavn)
+        write.csv2(Filsti, file, row.names = F, na = '')
+  })
 
 }
 # Run the application

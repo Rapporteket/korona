@@ -79,7 +79,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
 sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
-  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = "starter filgenerering for dataoverføring")
 
    setwd(tempdir())
@@ -114,14 +114,14 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
 #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
 #Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
-    sship(content=utfil,
+    sship::sship(content=utfil,
          recipient = 'nhn', #Character string: user name uniquely defining the recipient both in terms of the public
          #key used for securing the content and any identity control upon docking
          pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
          vessel = 'sftp', # ut fra beskrivelsen bare ftp
          declaration = "HerErJeg")
 
-  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste("Leverer data til NHN/FHI ")) #, utfil))
   return(utfil)
 }
