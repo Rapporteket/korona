@@ -434,7 +434,7 @@ server <- function(input, output, session) {
     if (brukernavn != 'lenaro'){
     shinyjs::hide(id = 'bestillDataTilFHI')
       }
-    if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar'))) {
+    if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar', 'MarianneSaevik'))) {
     hideTab(inputId = "hovedark", target = "Registeradm")
     }
   })
