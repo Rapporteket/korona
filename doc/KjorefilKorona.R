@@ -1,4 +1,5 @@
 #Kjørefil for Rapporteket-Pandemi
+rm(list=(ls()))
 library(tidyverse)
 library(korona)
 RegDataRaa <- KoronaDataSQL()

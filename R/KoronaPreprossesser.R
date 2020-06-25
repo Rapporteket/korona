@@ -68,6 +68,7 @@ if (aggPers == 1) {
                 AndreGencefalosporin = sum(AndreGencefalosporin)>0,
                 Antibiotika = Antibiotika[1], #1 ja, 2-nei 3-ukjent
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
+               AntibiotikaUkjent = sum(AntibiotikaUkjent)>0,
                 ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
                 Astma = sum(Astma)>0,
                 #Bilirubin,
@@ -127,6 +128,7 @@ if (aggPers == 1) {
                 UtsAndreGencefalosporin = sum(UtsAndreGencefalosporin)>0,
                 UtsAntibiotika = UtsAntibiotika[1], #1-ja, 2-nei, 3-ukjent
                 UtsAntibiotikaAnnet = sum(UtsAntibiotikaAnnet)>0,
+               UtsAntibiotikaUkjent = sum(UtsAntibiotikaUkjent)>0,
                 #?Antifungalbehandling = Antifungalbehandling[1], #1-ja, 2-nei, 3-ukjent
                 #?AntiviralBehandling"
                 UtsAntifungalbehandling = JaNeiUkjVar(UtsAntifungalbehandling), #1-ja, 2-nei, 3-ukjent

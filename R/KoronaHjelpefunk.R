@@ -72,14 +72,12 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 #' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
 #' person, for hvert register
 #'
-#' @param rnwFil Navn på fila som skal kjøres.
-#' @param Rpakke hvilken R-pakke fila som lager rapporten ligger i
+#' @param zipFilNavn Navn på fila som skal kjøres.
 #' @param parametre Liste med valgfrie parametre, avhengig av type rapport
-#'
 #' @return Full path of file produced
 #' @export
 
-sendDataFilerFHI <- function(){
+sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     msg = "starter filgenerering for dataoverføring")
@@ -87,11 +85,31 @@ sendDataFilerFHI <- function(){
    setwd(tempdir())
    dir <- getwd()
 
+   zipFilNavn <- paste0(zipFilNavn, Sys.Date())
    #Filer <- lagDatafilerTilFHI()
-   Testfil <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
-   write.table(Testfil, file = paste('Testfil', Sys.Date(), '.csv'),
+   #Evt. gjør følgende i lagDatafilerTilFHI()
+   #datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
+   # for (fil in datasett){
+   #   Fil <- Filer[[fil]]
+   #   write.table(Fil, file = paste0(fil, '.csv'),
+       #          fileEncoding = 'UTF-8', row.names=F, sep=';', na='')}
+
+   #utils::zip(zipfile = 'PandemiBeredskapTilFHI', files = paste0(datasett, '.csv'))
+
+
+   Testfil1 <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
+   Testfil2 <- data.frame('Hei' = c(pi, 3,1), 'Nei' = c(log(2), 200, 3))
+   write.table(Testfil1, file = paste('Testfil1.csv'),
                fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
-    utfil <- paste0(dir, '/', 'Testfil', '.csv')
+   write.table(Testfil2, file = paste('Testfil2.csv'),
+               fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+   utils::zip(zipfile = zipFilNavn, files = c('Testfil1.csv', 'Testfil2.csv'))
+
+   file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
+   unzip(paste0(zipFilNavn, '.zip'), list = FALSE) #list	If TRUE, list the files and extract none
+
+   #utfil <- paste0(dir, '/', 'Testfil', '.csv')
+   utfil <- paste0(dir, '/', zipFilNavn, '.zip')
 
 
 #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
@@ -105,6 +123,6 @@ sendDataFilerFHI <- function(){
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     msg = paste("Leverer data til NHN/FHI ")) #, utfil))
-  #return(utfil)
+  return(utfil)
 }
 
