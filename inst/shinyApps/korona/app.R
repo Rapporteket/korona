@@ -441,6 +441,7 @@ server <- function(input, output, session) {
   }
     if (brukernavn != 'lenaro'){
     shinyjs::hide(id = 'bestillDataTilFHI')
+     # shinyjs::hide(id = 'lastNed_filstiDataNHN')
       }
     if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar', 'MarianneSaevik'))) {
     hideTab(inputId = "hovedark", target = "Registeradm")
@@ -930,7 +931,7 @@ server <- function(input, output, session) {
       filename = function(){
         paste0('Filsti', Sys.time(), '.csv')},
       content = function(file, filename){
-        Filsti <- sendDataFilerFHI() #brukernavn = brukernavn)
+        Filsti <- sendDataFilerFHI(zipFilNavn='Testfil') #brukernavn = brukernavn)
         write.csv2(Filsti, file, row.names = F, na = '')
   })
 

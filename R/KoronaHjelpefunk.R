@@ -86,7 +86,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
    dir <- getwd()
 
    zipFilNavn <- paste0(zipFilNavn, Sys.Date())
-   #Filer <- lagDatafilerTilFHI()
+   Filer <- lagDatafilerTilFHI()
    #Evt. gjør følgende i lagDatafilerTilFHI()
    #datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
    # for (fil in datasett){

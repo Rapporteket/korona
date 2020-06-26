@@ -34,7 +34,7 @@ varFHIraa <- c(
                ,'KroniskLungesykdom'
                ,'KroniskNevro'
                ,'Leversykdom'
-               ,'Municipal'
+              # ,'Municipal'
                ,'MunicipalNumber'
                ,'NedsattimmunHIV'
                ,'NerkontaktCovid'
@@ -80,7 +80,7 @@ varFHIraa <- c(
 #   ,'PersonId',
   'PatientAge'
   ,'PatientGender'
-  ,'Municipal'
+  #,'Municipal'
   ,'MunicipalNumber'
   ,'HF'
   ,'RHF'
