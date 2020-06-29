@@ -58,7 +58,8 @@ if (aggPers == 1) {
       ifelse(sum(test)>0, max(x[test]), 999)} #1-nei, 2:5 ja, 999 ukjent.
 
    RegDataRed <- RegData %>% group_by(PasientID) %>%
-      summarise(Alder = Alder[1],
+      summarise(PersonId = PersonId[1],
+               Alder = Alder[1],
                 AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
                 AkuttNyresvikt = JaNeiUkjVar(AkuttNyresvikt), #1-ja, 2-nei, 3-ukjent
                 AkuttRespirasjonsvikt = SviktVar(AkuttRespirasjonsvikt), #1-nei, 2:5 ja, 999 ukjent
@@ -67,6 +68,7 @@ if (aggPers == 1) {
                 AndreGencefalosporin = sum(AndreGencefalosporin)>0,
                 Antibiotika = Antibiotika[1], #1 ja, 2-nei 3-ukjent
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
+               AntibiotikaUkjent = sum(AntibiotikaUkjent)>0,
                 ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
                 Astma = sum(Astma)>0,
                 #Bilirubin,
@@ -97,7 +99,7 @@ if (aggPers == 1) {
                 Leversykdom = sum(Leversykdom)>0,
                 Makrolid = sum(Makrolid)>0,
                 Municipal = first(Municipal, order_by = FormDate),
-                #MunicipalNumber,
+                MunicipalNumber = first(MunicipalNumber, order_by = FormDate),
                 NedsattimmunHIV = sum(NedsattimmunHIV)>0,
                 NerkontaktCovid = JaNeiUkjVar(NerkontaktCovid), #1-ja, 2-nei, 3-ukjent
                 Nyresykdom = sum(Nyresykdom)>0,
@@ -126,6 +128,7 @@ if (aggPers == 1) {
                 UtsAndreGencefalosporin = sum(UtsAndreGencefalosporin)>0,
                 UtsAntibiotika = UtsAntibiotika[1], #1-ja, 2-nei, 3-ukjent
                 UtsAntibiotikaAnnet = sum(UtsAntibiotikaAnnet)>0,
+               UtsAntibiotikaUkjent = sum(UtsAntibiotikaUkjent)>0,
                 #?Antifungalbehandling = Antifungalbehandling[1], #1-ja, 2-nei, 3-ukjent
                 #?AntiviralBehandling"
                 UtsAntifungalbehandling = JaNeiUkjVar(UtsAntifungalbehandling), #1-ja, 2-nei, 3-ukjent

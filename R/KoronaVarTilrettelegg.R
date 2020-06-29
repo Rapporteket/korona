@@ -186,10 +186,10 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         statusUt <- 2
         variable <- c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
                       'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
-                      'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'Antibiotika')
+                      'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika')
         grtxt <- c('Penicillin', 'Penicillin m/enzymhemmer', 'Aminoglykosid',
                    '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
-                   'Karbapenem', 'Makrolid', 'Annet', 'Antibiotika, tot.')
+                   'Karbapenem', 'Makrolid', 'Annet', 'Ukjent type', 'Antibiotika, tot.')
         #Trenger bare kode om Antibiotika tot.:
         RegData$Antibiotika <- ifelse(RegData$Antibiotika==1, TRUE, FALSE)
         xAkseTxt <- 'Andel pasienter (%)'
@@ -202,10 +202,10 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         statusUt <- 2
         variable <- paste0('Uts', c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
                       'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
-                      'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'Antibiotika'))
+                      'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika'))
         grtxt <- c('Penicillin', 'Penicillin m/enzymhemmer', 'Aminoglykosid',
                    '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
-                   'Karbapenem', 'Makrolid', 'Annet', 'Antibiotika, tot.')
+                   'Karbapenem', 'Makrolid', 'Annet', 'Ukjent type', 'Antibiotika, tot.')
         #Trenger bare kode om Antibiotika tot.:
         RegData$UtsAntibiotika <- ifelse(RegData$UtsAntibiotika==1, TRUE, FALSE)
         #ind01 <- which(RegData[ ,variable] %in% ..., arr.ind = T) #Alle ja/nei

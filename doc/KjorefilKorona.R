@@ -1,4 +1,5 @@
 #Kjørefil for Rapporteket-Pandemi
+rm(list=(ls()))
 library(tidyverse)
 library(korona)
 RegDataRaa <- KoronaDataSQL()
@@ -327,4 +328,19 @@ saveWorkbook(OUT,'AndelPaaInt.xlsx')
 
 
 round(prop.table(table(PanInt[ ,c('ShNavnPan', 'PaaInt')]), margin = 1)*100,1)
+
+
+#Variabler til FHI
+
+#Pandemiregister
+# KoroDataInn <- read.table('A:/Pandemi/InklusjonSkjemaDataContract2020-04-29.csv', sep=';',
+#                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+# KoroDataInn <- KoroDataInn[ ,-which(names(KoroDataInn)=='Utskrivningsdato')]
+# KoroDataUt <- read.table('A:/Pandemi/UtskrivningSkjemaDataContract2020-04-29.csv', sep=';',
+#                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+# names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
+# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
+#            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
+# KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+#                      by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
 
