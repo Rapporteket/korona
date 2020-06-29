@@ -111,13 +111,12 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     #file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
     #unzip(paste0(zipFilNavn, '.zip'), list = FALSE) #list	If TRUE, list the files and extract none
   }
-  utfilSti <- paste0(dir, '/', zipFilNavn, '.zip')
-  utfil <- write.table(utfilSti, file = 'utfilSti.csv',fileEncoding = 'UTF-8')
+  zipfilSti <- paste0(dir, '/', zipFilNavn, '.zip')
 
 
   #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
   #Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
-  sship::sship(content=utfilSti,
+  sship::sship(content=zipfilSti,
                recipient = 'nhn', #Character string: user name uniquely defining the recipient both in terms of the public
                #key used for securing the content and any identity control upon docking
                pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
@@ -126,6 +125,9 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste("Leverer data til NHN/FHI ")) #, utfil))
-  return(utfil)
+  write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
+  utfil <- paste0(dir, '/', 'zipfilSti.csv')
+  utdata <- list('zipfilStiFil' = utfil, 'zipFilSti' = zipfilSti)
+  return(utdata)
 }
 

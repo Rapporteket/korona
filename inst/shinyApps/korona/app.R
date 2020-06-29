@@ -926,8 +926,8 @@ server <- function(input, output, session) {
       runDayOfYear <- rapbase::makeRunDayOfYearSequence(interval = interval)
       paramNames = c('brukernavn', 'zipFilNavn')
       paramValues = c(brukernavn, input$hvilkeFilerTilFHI)
-      print(input$hvilkeFilerTilFHI)
-      rapbase::createAutoReport(synopsis = "Datafiler, FHI",
+      #print(input$hvilkeFilerTilFHI)
+      rapbase::createAutoReport(synopsis = input$hvilkeFilerTilFHI,
                                 package = 'korona',
                                 fun = "sendDataFilerFHI",
                                 paramNames = paramNames,
