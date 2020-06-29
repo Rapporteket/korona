@@ -352,7 +352,7 @@ tabPanel('Manglende ut-skjema',
                       value = 'Abonnement',
                       sidebarLayout(
                         sidebarPanel(width = 3,
-                                     selectInput("subscriptionRep", "Dokument:", c("Koronarapport")), #Evt legg til intensivrapport
+                                     selectInput("subscriptionRep", "Dokument:", c("Koronarapport")), #Evt legg til influensarapport
                                      selectInput("subscriptionFreq", "Frekvens:",
                                                  list(Månedlig="Månedlig-month",
                                                       Ukentlig="Ukentlig-week",
@@ -365,8 +365,7 @@ tabPanel('Manglende ut-skjema',
                                      actionButton("subscribe", "Bestill!"),
                                      br(),
                                      br(),
-                                     br(),
-                                     actionButton("bestillDataTilFHI", "Bestill data til FHI")
+                                     br()
                         ),
                         mainPanel(
                           h4('NB: Abonnementet løper til det sies opp. '),
@@ -380,7 +379,7 @@ tabPanel(p("Registeradm",
            title='Side som bare vises for Eirik og Reidar'),
          value = 'Registeradm',
          sidebarLayout(
-           sidebarPanel(width = 3,
+           sidebarPanel(width = 4,
                         h4('Last ned data'),
                         br(),
                         downloadButton(outputId = 'lastNed_dataPandemiRaa',
@@ -389,9 +388,15 @@ tabPanel(p("Registeradm",
                                        label='Last ned pandemidata, pasientaggregert', class = "butt"),
                         br(),
                         br(),
-
+                        br(),
+                        #conditionalPanel(condition = "output$brukernavn == 'lenaro' ",
+                        selectInput("hvilkeFilerTilFHI", "Data:", c("Testfil" = "Testfil",
+                                                                    "Pandemi og beredskap" = "DataFHIPanBered")),
+                        actionButton("bestillDataTilFHI", "Bestill data til FHI"),
+                        br(),
                         downloadButton(outputId = 'lastNed_filstiDataNHN',
                                        label='Send filer til NHN og last ned filsti', class = "butt")
+                        #)
 
 
            ),
@@ -419,6 +424,7 @@ server <- function(input, output, session) {
 
   rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'LU')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
+  output$brukernavn <- renderText(brukernavn)
 
   finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
   egetHF <- 'ReshUreg'
@@ -434,19 +440,21 @@ server <- function(input, output, session) {
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
 
-  observe({
+  #observe({
     if (rolle != 'SC') {
     shinyjs::hide(id = 'KoroRappInt.pdf')
     shinyjs::hide(id = 'KoroRappTxtInt')
-  }
-    if (brukernavn != 'lenaro'){
-    shinyjs::hide(id = 'bestillDataTilFHI')
-     # shinyjs::hide(id = 'lastNed_filstiDataNHN')
-      }
-    if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar', 'MarianneSaevik'))) {
-    hideTab(inputId = "hovedark", target = "Registeradm")
     }
-  })
+    if (brukernavn != 'lenaro'){
+      shinyjs::hide(id = 'bestillDataTilFHI')
+      shinyjs::hide(id = 'hvilkeFilerTilFHI')
+      shinyjs::hide(id = 'lastNed_filstiDataNHN')
+    }
+
+    if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar', 'MarianneSaevik'))) {
+      hideTab(inputId = "hovedark", target = "Registeradm")
+    }
+  #})
 
   # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
   enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
@@ -463,7 +471,7 @@ server <- function(input, output, session) {
   # widget
   if (paaServer) {
     output$appUserName <- renderText(rapbase::getUserFullName(session))
-    output$appOrgName <- renderText(paste0('rolle: ', rolle,
+    output$appOrgName <- renderText(paste0('rolle: ', rolle, ', bruker: ', brukernavn,
                                            '<br> ReshID: ', reshID) )}
   #,'<br> Org: ', egenOrg) )}
 
@@ -875,28 +883,6 @@ server <- function(input, output, session) {
     rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
   })
 
-  observeEvent(input$bestillDataTilFHI, { #MÅ HA
-    owner <- rapbase::getUserName(session)
-    organization <- rapbase::getUserReshId(session)
-    email <- rapbase::getUserEmail(session)
-      interval <- "DSTday"
-      intervalName <- "Daglig"
-      runDayOfYear <- rapbase::makeRunDayOfYearSequence(interval = interval)
-
-      rapbase::createAutoReport(synopsis = "Datafiler, FHI",
-                                package = 'korona',
-                                fun = "sendDataFilerFHI",
-                                paramNames = c('brukernavn'),
-                                paramValues = c(brukernavn),
-                                owner = owner,
-                                email = email, organization = organization,
-                                runDayOfYear = runDayOfYear,
-                                interval = interval,
-                                intervalName = intervalName)
-
-      rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
-
-  })
 
 
   ## slett eksisterende abonnement
@@ -926,14 +912,42 @@ server <- function(input, output, session) {
       write.csv2(KoroData, file, row.names = F, na = '')
     })
 
-  #Sjekk av filsti for filsending:
+  #Send filer til FHI:
     output$lastNed_filstiDataNHN <- downloadHandler(
       filename = function(){
         paste0('Filsti', Sys.time(), '.csv')},
       content = function(file, filename){
-        Filsti <- sendDataFilerFHI(zipFilNavn='Testfil') #brukernavn = brukernavn)
+        Filsti <- sendDataFilerFHI(zipFilNavn=input$hvilkeFilerTilFHI) #brukernavn = brukernavn)
         write.csv2(Filsti, file, row.names = F, na = '')
   })
+
+    #Abonnement, filer til FHI
+    observeEvent(input$bestillDataTilFHI, { #MÅ HA
+      owner <- rapbase::getUserName(session)
+      organization <- rapbase::getUserReshId(session)
+      email <- rapbase::getUserEmail(session)
+      interval <- "DSTday"
+      intervalName <- "Daglig"
+      runDayOfYear <- rapbase::makeRunDayOfYearSequence(interval = interval)
+      paramNames = c('brukernavn', 'zipFilNavn')
+      paramValues = c(brukernavn, input$hvilkeFilerTilFHI)
+      #print(input$hvilkeFilerTilFHI)
+      rapbase::createAutoReport(synopsis = input$hvilkeFilerTilFHI,
+                                package = 'korona',
+                                fun = "sendDataFilerFHI",
+                                paramNames = paramNames,
+                                paramValues = paramValues,
+                                owner = owner,
+                                email = email, organization = organization,
+                                runDayOfYear = runDayOfYear,
+                                interval = interval,
+                                intervalName = intervalName)
+
+      rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
+
+    })
+
+
 
 }
 # Run the application

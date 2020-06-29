@@ -34,7 +34,6 @@ varFHIraa <- c(
                ,'KroniskLungesykdom'
                ,'KroniskNevro'
                ,'Leversykdom'
-              # ,'Municipal'
                ,'MunicipalNumber'
                ,'NedsattimmunHIV'
                ,'NerkontaktCovid'
@@ -76,11 +75,9 @@ library(intensivberedskap)
 ##setdiff(varFHIraa, sort(names(BeredskapData)))
 RegDataRaa <- NIRberedskDataSQL() #BeredskapData #
 varFHIraa <- c(
-#  'PatientInRegistryGuid'
-#   ,'PersonId',
+   'PersonId', #  'PatientInRegistryGuid'
   'PatientAge'
   ,'PatientGender'
-  #,'Municipal'
   ,'MunicipalNumber'
   ,'HF'
   ,'RHF'
@@ -99,7 +96,7 @@ varFHIraa <- c(
   ,'IsLiverDiseaseIncludingFailurePatient'
   ,'IsChronicNeurologicNeuromuscularPatient'
   ,'Graviditet'
-  ,'IsActivSmoker'
+  ,'IsActiveSmoker'
   ,'MechanicalRespirator'
   ,'MechanicalRespiratorStart'
   ,'MechanicalRespiratorEnd'
