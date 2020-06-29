@@ -75,8 +75,7 @@ library(intensivberedskap)
 ##setdiff(varFHIraa, sort(names(BeredskapData)))
 RegDataRaa <- NIRberedskDataSQL() #BeredskapData #
 varFHIraa <- c(
-#  'PatientInRegistryGuid'
-   'PersonId',
+   'PersonId', #  'PatientInRegistryGuid'
   'PatientAge'
   ,'PatientGender'
   ,'MunicipalNumber'

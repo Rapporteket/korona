@@ -72,7 +72,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 #' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
 #' person, for hvert register
 #'
-#' @param zipFilNavn Navn på fila som skal kjøres.
+#' @param zipFilNavn Navn på fila som skal kjøres. DataFHIPanBered, Testfil
 #' @param parametre Liste med valgfrie parametre, avhengig av type rapport
 #' @return Full path of file produced
 #' @export
@@ -82,44 +82,47 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = "starter filgenerering for dataoverføring")
 
-   setwd(tempdir())
-   dir <- getwd()
+  setwd(tempdir())
+  dir <- getwd()
 
-   zipFilNavn <- paste0(zipFilNavn, Sys.Date())
-   Filer <- lagDatafilerTilFHI()
-   #Evt. gjør følgende i lagDatafilerTilFHI()
-   #datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
-   # for (fil in datasett){
-   #   Fil <- Filer[[fil]]
-   #   write.table(Fil, file = paste0(fil, '.csv'),
-       #          fileEncoding = 'UTF-8', row.names=F, sep=';', na='')}
+  #zipFilNavn <- paste0(zipFilNavn, Sys.Date())
+  if (zipFilNavn == 'DataFHIPanBered') {
+    Filer <- lagDatafilerTilFHI()
+    #Følgende kan gjøres i lagDatafilerTilFHI()
+    datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
+    for (fil in datasett){
+      Fil <- Filer[[fil]]
+      write.table(Fil, file = paste0(fil, '.csv'),
+                  fileEncoding = 'UTF-8', row.names=F, sep=';', na='')}
 
-   #utils::zip(zipfile = 'PandemiBeredskapTilFHI', files = paste0(datasett, '.csv'))
+    utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
+  }
+
+  if (zipFilNavn == 'Testfil') {
+
+    Testfil1 <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
+    Testfil2 <- data.frame('Hei' = c(pi, 3,1), 'Nei' = c(log(2), 200, 3))
+    write.table(Testfil1, file = paste('Testfil1.csv'),
+                fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+    write.table(Testfil2, file = paste('Testfil2.csv'),
+                fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+    utils::zip(zipfile = zipFilNavn, files = c('Testfil1.csv', 'Testfil2.csv'))
+
+    #file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
+    #unzip(paste0(zipFilNavn, '.zip'), list = FALSE) #list	If TRUE, list the files and extract none
+  }
+  utfilSti <- paste0(dir, '/', zipFilNavn, '.zip')
+  utfil <- write.table(utfilSti, file = 'utfilSti.csv',fileEncoding = 'UTF-8')
 
 
-   Testfil1 <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
-   Testfil2 <- data.frame('Hei' = c(pi, 3,1), 'Nei' = c(log(2), 200, 3))
-   write.table(Testfil1, file = paste('Testfil1.csv'),
-               fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
-   write.table(Testfil2, file = paste('Testfil2.csv'),
-               fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
-   utils::zip(zipfile = zipFilNavn, files = c('Testfil1.csv', 'Testfil2.csv'))
-
-   file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
-   unzip(paste0(zipFilNavn, '.zip'), list = FALSE) #list	If TRUE, list the files and extract none
-
-   #utfil <- paste0(dir, '/', 'Testfil', '.csv')
-   utfil <- paste0(dir, '/', zipFilNavn, '.zip')
-
-
-#For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
-#Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
-    sship::sship(content=utfil,
-         recipient = 'nhn', #Character string: user name uniquely defining the recipient both in terms of the public
-         #key used for securing the content and any identity control upon docking
-         pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
-         vessel = 'sftp', # ut fra beskrivelsen bare ftp
-         declaration = "HerErJeg")
+  #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
+  #Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
+  sship::sship(content=utfilSti,
+               recipient = 'nhn', #Character string: user name uniquely defining the recipient both in terms of the public
+               #key used for securing the content and any identity control upon docking
+               pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
+               vessel = 'sftp', # ut fra beskrivelsen bare ftp
+               declaration = "HerErJeg")
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste("Leverer data til NHN/FHI ")) #, utfil))
