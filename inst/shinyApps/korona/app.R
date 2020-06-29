@@ -379,7 +379,7 @@ tabPanel(p("Registeradm",
            title='Side som bare vises for Eirik og Reidar'),
          value = 'Registeradm',
          sidebarLayout(
-           sidebarPanel(width = 3,
+           sidebarPanel(width = 4,
                         h4('Last ned data'),
                         br(),
                         downloadButton(outputId = 'lastNed_dataPandemiRaa',
@@ -389,12 +389,14 @@ tabPanel(p("Registeradm",
                         br(),
                         br(),
                         br(),
+                        #conditionalPanel(condition = "output$brukernavn == 'lenaro' ",
                         selectInput("hvilkeFilerTilFHI", "Data:", c("Testfil" = "Testfil",
                                                                     "Pandemi og beredskap" = "DataFHIPanBered")),
                         actionButton("bestillDataTilFHI", "Bestill data til FHI"),
                         br(),
                         downloadButton(outputId = 'lastNed_filstiDataNHN',
                                        label='Send filer til NHN og last ned filsti', class = "butt")
+                        #)
 
 
            ),
@@ -422,6 +424,7 @@ server <- function(input, output, session) {
 
   rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'LU')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
+  output$brukernavn <- renderText(brukernavn)
 
   finnesEgenResh <- reshID %in% unique(KoroData$HFresh)
   egetHF <- 'ReshUreg'
@@ -437,19 +440,21 @@ server <- function(input, output, session) {
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
 
-  observe({
+  #observe({
     if (rolle != 'SC') {
     shinyjs::hide(id = 'KoroRappInt.pdf')
     shinyjs::hide(id = 'KoroRappTxtInt')
-  }
-    if (brukernavn != 'lenaro'){
-    shinyjs::hide(id %in% 'bestillDataTilFHI', 'hvilketDokTilFHI')
-     # shinyjs::hide(id = 'lastNed_filstiDataNHN')
-      }
-    if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar', 'MarianneSaevik'))) {
-    hideTab(inputId = "hovedark", target = "Registeradm")
     }
-  })
+    if (brukernavn != 'lenaro'){
+      shinyjs::hide(id = 'bestillDataTilFHI')
+      shinyjs::hide(id = 'hvilkeFilerTilFHI')
+      shinyjs::hide(id = 'lastNed_filstiDataNHN')
+    }
+
+    if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar', 'MarianneSaevik'))) {
+      hideTab(inputId = "hovedark", target = "Registeradm")
+    }
+  #})
 
   # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
   enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
@@ -466,7 +471,7 @@ server <- function(input, output, session) {
   # widget
   if (paaServer) {
     output$appUserName <- renderText(rapbase::getUserFullName(session))
-    output$appOrgName <- renderText(paste0('rolle: ', rolle,
+    output$appOrgName <- renderText(paste0('rolle: ', rolle, ', bruker: ', brukernavn,
                                            '<br> ReshID: ', reshID) )}
   #,'<br> Org: ', egenOrg) )}
 
