@@ -124,10 +124,10 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                declaration = paste0("HerErJeg_hilsen_", zipFilNavn))
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                    msg = paste("Leverer data til NHN/FHI ")) #, utfil))
+                    msg = paste("Har levert data til NHN/FHI ")) #, utfil))
   write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
-  utfil <- paste0(dir, '/', 'zipfilSti.csv')
-  utdata <- list('zipfilStiFil' = utfil, 'zipFilSti' = zipfilSti)
-  return(utdata)
+  utfilsti <- paste0(dir, '/', 'zipfilSti.csv')
+  #utdata <- list('zipfilStiFil' = utfil, 'zipFilSti' = zipfilSti)
+  return(utfilsti)
 }
 
