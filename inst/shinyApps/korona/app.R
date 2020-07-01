@@ -376,7 +376,7 @@ tabPanel('Manglende ut-skjema',
 
 #----------Registeradministrasjon----------------------------------
 tabPanel(p("Registeradm",
-           title='Side som bare vises for Eirik og Reidar'),
+           title='Side som bare vises for Marianne S., Eirik og Reidar'),
          value = 'Registeradm',
          sidebarLayout(
            sidebarPanel(width = 4,
@@ -918,7 +918,7 @@ server <- function(input, output, session) {
         paste0('Filsti', Sys.time(), '.csv')},
       content = function(file, filename){
         Filsti <- sendDataFilerFHI(zipFilNavn=input$hvilkeFilerTilFHI) #brukernavn = brukernavn)
-        write.csv2(Filsti, file, row.names = F, na = '')
+        write.csv2(x=Filsti, file, row.names = F, na = '') #x - r-objektet
   })
 
     #Abonnement, filer til FHI
@@ -929,8 +929,8 @@ server <- function(input, output, session) {
       interval <- "DSTday"
       intervalName <- "Daglig"
       runDayOfYear <- rapbase::makeRunDayOfYearSequence(interval = interval)
-      paramNames = c('brukernavn', 'zipFilNavn')
-      paramValues = c(brukernavn, input$hvilkeFilerTilFHI)
+      paramNames = c('zipFilNavn', 'brukernavn')
+      paramValues = c(input$hvilkeFilerTilFHI, brukernavn)
       #print(input$hvilkeFilerTilFHI)
       rapbase::createAutoReport(synopsis = input$hvilkeFilerTilFHI,
                                 package = 'korona',
