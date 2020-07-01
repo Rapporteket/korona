@@ -95,8 +95,8 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   #indInneUreinn <- intersect(which(inneliggere), which(RegData$Reinn==0))
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(),
-                                     RegData$InnTidspunktSiste, units='days'))
-  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 90], na.rm = T), 1)
+                                     RegData$InnTidspunktSiste, units='days'))[inneliggere]
+  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 120], na.rm = T), 1)
 
   igaar <- Sys.Date()-1 #  '2020-04-10' #
   innIgaar <- length(which(RegData$InnDato == as.Date(igaar)))
