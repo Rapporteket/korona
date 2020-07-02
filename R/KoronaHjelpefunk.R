@@ -83,11 +83,11 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                     msg = "starter filgenerering for dataoverføring")
 
   setwd(tempdir())
-  dir <- getwd()
+  kat <- getwd()
 
   #zipFilNavn <- paste0(zipFilNavn, Sys.Date())
   if (zipFilNavn == 'DataFHIPanBered') {
-    Filer <- lagDatafilerTilFHI()
+    Filer <- korona::lagDatafilerTilFHI()
     #Følgende kan gjøres i lagDatafilerTilFHI()
     datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
     for (fil in datasett){
@@ -111,7 +111,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     #file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
     #unzip(paste0(zipFilNavn, '.zip'), list = FALSE) #list	If TRUE, list the files and extract none
   }
-  zipfilSti <- paste0(dir, '/', zipFilNavn, '.zip')
+  zipfilSti <- paste0(kat, '/', zipFilNavn, '.zip')
 
 
   #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
@@ -126,7 +126,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste("Har levert data til NHN/FHI ")) #, utfil))
   write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
-  utfilsti <- paste0(dir, '/', 'zipfilSti.csv')
+  utfilsti <- paste0(kat, '/', 'zipfilSti.csv')
   #utdata <- list('zipfilStiFil' = utfil, 'zipFilSti' = zipfilSti)
   return(utfilsti)
 }
