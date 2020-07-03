@@ -932,7 +932,7 @@ server <- function(input, output, session) {
       paramNames = c('zipFilNavn', 'brukernavn')
       paramValues = c(input$hvilkeFilerTilFHI, brukernavn)
       #print(input$hvilkeFilerTilFHI)
-      rapbase::createAutoReport(synopsis = input$hvilkeFilerTilFHI,
+      rapbase::createAutoReport(synopsis = paste0('Sendt til FHI: ',input$hvilkeFilerTilFHI),
                                 package = 'korona',
                                 fun = "sendDataFilerFHI",
                                 paramNames = paramNames,
