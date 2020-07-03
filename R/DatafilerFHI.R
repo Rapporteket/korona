@@ -49,7 +49,11 @@ varFHIraa <- c(
                ,'UtsAntibiotika'
                ,'UtsAntifungalbehandling'
                ,'UtsAntiviralBehandling'
-               ,'Utskrivningsdato')
+               ,'Utskrivningsdato'
+               ,'CreationDate'
+               ,'CreationDateUt'
+               ,'FirstTimeClosed'
+               ,'FirstTimeClosedUt')
 
 
 PandemiDataRaaFHI <- RegDataRaa[,varFHIraa]
@@ -60,10 +64,12 @@ PandemiDataRaaFHI <- RegDataRaa[,varFHIraa]
 #Preprossesserte data
 RegData <- KoronaPreprosesser(RegDataRaa)
 varBort <- c('PatientAge', 'PatientGender', #PasientIdXX
-             'Vekt', 'VektUkjent', 'Hoyde', 'HoydeUkjent')
+             'Vekt', 'VektUkjent', 'Hoyde', 'HoydeUkjent',
+             "CreationDate", "CreationDateUt", "FirstTimeClosed", "FirstTimeClosedUt")
 varNy <- c('Alder', 'erMann', 'BMI', 'Reinn', 'FormDateSiste', 'Liggetid') #'PasientID',
-varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)])
-#setdiff(varFHIpp, names(RegData))
+varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
+              'AntInnSkjema', 'ReinnTid', 'ReinnNaar')
+setdiff(varFHIpp, names(RegData))
 PandemiDataPpFHI <- RegData[ ,varFHIpp]
 # write.table(PandemiDataPpFHI, file = paste0('A:/Pandemi/PandemiDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
@@ -116,9 +122,11 @@ BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa)
 varBort <- c('PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive', 'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
 varNy <- c('Alder', 'erMann', 'Bekreftet', 'Liggetid', 'ReinnResp', 'RespTid') #'PersonId',
-varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)])
+varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
+              'FormDateSiste', 'Reinn', 'AntRegPrPas', 'ReinnTid', 'ReinnNaar',
+              'ReinnRespTid', 'ReinnRespNaar', 'MechanicalRespiratorStartSiste')
 BeredskapDataPpFHI <- RegData[ ,varFHIpp]
-#setdiff(varFHIpp, sort(names(RegData)))
+setdiff(varFHIpp, sort(names(RegData)))
 # write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 

@@ -25,6 +25,7 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.Bilirubin
   ,Inn.BilirubinUkjent
   ,Inn.CurrentMunicipalNumber
+  ,Inn.CreationDate
   ,Inn.Ddimer
   ,Inn.DdimerUkjent
   ,Inn.DeathDate
@@ -35,6 +36,7 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.EndretBevissthet
   ,Inn.ErAnsattMikrobiologisk
   ,Inn.ErHelsepersonell
+  ,Inn.FirstTimeClosed
   ,Inn.FormDate
   ,Inn.FormStatus
   ,Inn.FormTypeId
@@ -182,6 +184,8 @@ alle <- '*'
 varUtKoblet <- c('UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.Antifungalbehandling
   ,Ut.AntiviralBehandling
+  ,Ut.CreationDate AS CreationDateUt
+  ,Ut.FirstTimeClosed AS FirstTimeClosedUt
   ,Ut.HelseenhetKortNavn AS ShNavnUt
   ,Ut.FormStatus AS FormStatusUt
   ,Ut.FormDate AS FormDateUt
