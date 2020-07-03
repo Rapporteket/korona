@@ -6,22 +6,15 @@
 og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
 person, for hvert register}
 \usage{
-sendDataFilerFHI(
-  rnwFil,
-  brukernavn = "lluring",
-  Rpakke = "korona",
-  rolle = "SC"
-)
+sendDataFilerFHI(zipFilNavn = "Testfil", brukernavn = "testperson")
 }
 \arguments{
-\item{rnwFil}{Navn på fila som skal kjøres.}
+\item{zipFilNavn}{Navn på fila som skal kjøres. DataFHIPanBered, Testfil}
 
-\item{Rpakke}{hvilken R-pakke fila som lager rapporten ligger i}
-
-\item{parametre}{Liste med valgfrie parametre, avhengig av type rapport}
+\item{brukernavn}{Innlogget brukernavn}
 }
 \value{
-Full path of file produced
+Filsti til fil med filsti til zip...
 }
 \description{
 Funksjon som henter filer som skal sendes til FHI. To filer fra intensivopphold
