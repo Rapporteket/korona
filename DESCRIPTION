@@ -20,12 +20,10 @@ Remotes:
       Rapporteket/rapbase,
       Rapporteket/rapFigurer,
       Rapporteket/raplog,
-      Rapporteket/intensivberedskap,
       Rapporteket/sship
 Imports:
     digest,
     DT,
-    intensivberedskap,
     kableExtra,
     knitr,
     lifecycle,
