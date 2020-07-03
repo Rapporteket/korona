@@ -73,14 +73,14 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 #' person, for hvert register
 #'
 #' @param zipFilNavn Navn på fila som skal kjøres. DataFHIPanBered, Testfil
-#' @param parametre Liste med valgfrie parametre, avhengig av type rapport
-#' @return Full path of file produced
+#' @param brukernavn Innlogget brukernavn
+#' @return Filsti til fil med filsti til zip...
 #' @export
 
 sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                    msg = "starter filgenerering for dataoverføring")
+                    msg = paste0("Vil lage filer for dataoverføring: ", zipFilNavn))
 
   setwd(tempdir())
   kat <- getwd()
@@ -88,12 +88,18 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   #zipFilNavn <- paste0(zipFilNavn, Sys.Date())
   if (zipFilNavn == 'DataFHIPanBered') {
     Filer <- korona::lagDatafilerTilFHI()
+
+    raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+                      msg = paste0("Har hentet ekte filer"))
     #Følgende kan gjøres i lagDatafilerTilFHI()
     datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
     for (fil in datasett){
       Fil <- Filer[[fil]]
       write.table(Fil, file = paste0(fil, '.csv'),
                   fileEncoding = 'UTF-8', row.names=F, sep=';', na='')}
+
+    raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+                      msg = paste0("Har skrevet ekte filer"))
 
     utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
   }
@@ -106,6 +112,9 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                 fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
     write.table(Testfil2, file = paste('Testfil2.csv'),
                 fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+
+    raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+                      msg = paste0("Har skrevet testfiler"))
     utils::zip(zipfile = zipFilNavn, files = c('Testfil1.csv', 'Testfil2.csv'))
 
     #file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
@@ -113,6 +122,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   }
   zipfilSti <- paste0(kat, '/', zipFilNavn, '.zip')
 
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+                    msg = paste0("Har laget zip-fil: ", zipfilSti))
 
   #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
   #Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
