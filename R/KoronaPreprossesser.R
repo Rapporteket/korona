@@ -154,17 +154,21 @@ if (aggPers == 1) {
                 # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
                 # Overf = , #Beregn, ja nei
                 # AntOverf = , #Antall overføringer
-                ReinnTid = ifelse((AntInnSkjema > 1) & (FormStatusUt==2), #Tid mellom utskrivning og neste innleggelse.
-                                 sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
+                ReinnTidDum = ifelse((AntInnSkjema > 1) & (FormStatusUt==2), #Tid mellom utskrivning og neste innleggelse.
+                                 sort(difftime(sort(FormDate)[2:AntInnSkjema],
                                                       FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                       units = "hours"), decreasing = T)[1],
-                                 0),
-                Reinn = ifelse(ReinnTid > 24 & ReinnTid <= 90*24, 1, 0),
-                NyttTilfelle = ifelse(ReinnTid > 90*24, 1, 0),
-                AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
-                                  sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
-                                               FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
-                                               units = "hours") > 24, na.rm = T)),
+                                 0), #Sum når større enn 24
+               Reinn = ifelse(ReinnTidDum > 24 & ReinnTidDum <= 90*24, 1, 0),
+               AntReinn = ifelse(Reinn==0, 0, #0-nei, 1-ja
+                                 sum(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
+                                              FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+                                              units = "hours") > 24, na.rm = T)),
+               ReinnTid = ifelse(Reinn==0, 0,
+                                 sum(sort(difftime(sort(FormDate)[2:AntInnSkjema],
+                                                   FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
+                                                   units = "hours"), decreasing = T)[1:AntReinn])),
+               NyttTilfelle = ifelse(ReinnTidDum > 90*24, 1, 0),
                 ReinnNaar = ifelse(Reinn==0, 0, #0-nei, 1-ja
                                    max(which(difftime(sort(FormDate)[2:AntInnSkjema],
                                                 FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
@@ -172,6 +176,9 @@ if (aggPers == 1) {
                 FormDateSiste = nth(FormDate, ReinnNaar+1, order_by = FormDate),
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
+               LiggetidGml = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
+                                 difftime(FormDateUt, FormDate, units = "days"),
+                                 difftime(FormDateUt, FormDate, units = "days") - ReinnTidDum/24),
                 Liggetid = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
                                   difftime(FormDateUt, FormDate, units = "days"),
                                   difftime(FormDateUt, FormDate, units = "days") - ReinnTid/24) #Får for lang tid hvis har flere enn 1 reinnleggelse
@@ -216,7 +223,8 @@ if (aggPers == 1) {
       #Kode om private
       #RegData$RHF <- as.factor(RegData$RHFresh)
       #levels(RegData$RHF) <- c('Vest','Nord','Midt', 'Sør-Øst')
-      RegData$RHF <- as.character(factor(RegData$RHFresh, labels = c('Vest','Nord','Midt', 'Sør-Øst')))
+      RegData$RHF <- as.character(factor(RegData$RHFresh, levels=c(100021, 100022, 100024, 111919),
+                                         labels = c('Vest','Nord','Midt', 'Sør-Øst')))
 
 
       #Riktig format på datovariable:
