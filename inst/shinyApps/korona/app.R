@@ -390,8 +390,8 @@ tabPanel(p("Registeradm",
                         br(),
                         br(),
                         #conditionalPanel(condition = "output$brukernavn == 'lenaro' ",
-                        selectInput("hvilkeFilerTilFHI", "Data:", c("Testfil" = "Testfil",
-                                                                    "Pandemi og beredskap" = "DataFHIPanBered")),
+                        selectInput("hvilkeFilerTilFHI", "Data:", c("Pandemi og beredskap" = "DataFHIPanBered",
+                                                                    "Testfil" = "Testfil")),
                         actionButton("bestillDataTilFHI", "Bestill data til FHI"),
                         br(),
                         downloadButton(outputId = 'lastNed_filstiDataNHN',
@@ -445,13 +445,13 @@ server <- function(input, output, session) {
     shinyjs::hide(id = 'KoroRappInt.pdf')
     shinyjs::hide(id = 'KoroRappTxtInt')
     }
-    if (brukernavn != 'lenaro'){
+    if (!(brukernavn %in% c('lenaro', 'aed0903unn'))){
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
     }
 
-    if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar', 'MarianneSaevik'))) {
+    if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'eabu', 'Reidar', 'MarianneSaevik'))) {
       hideTab(inputId = "hovedark", target = "Registeradm")
     }
   #})
@@ -932,6 +932,7 @@ server <- function(input, output, session) {
       paramNames = c('zipFilNavn', 'brukernavn')
       paramValues = c(input$hvilkeFilerTilFHI, brukernavn)
       #print(input$hvilkeFilerTilFHI)
+      #print(brukernavn)
       rapbase::createAutoReport(synopsis = paste0('Sendt til FHI: ',input$hvilkeFilerTilFHI),
                                 package = 'korona',
                                 fun = "sendDataFilerFHI",

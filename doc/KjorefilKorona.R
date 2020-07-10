@@ -330,17 +330,16 @@ saveWorkbook(OUT,'AndelPaaInt.xlsx')
 round(prop.table(table(PanInt[ ,c('ShNavnPan', 'PaaInt')]), margin = 1)*100,1)
 
 
-#Variabler til FHI
+#------------Kontroll, Beregning av reinnleggelse
+RegDataRaa <- KoronaDataSQL()
+RegData <- KoronaPreprosesser(RegData = RegDataRaa)
 
-#Pandemiregister
-# KoroDataInn <- read.table('A:/Pandemi/InklusjonSkjemaDataContract2020-04-29.csv', sep=';',
-#                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-# KoroDataInn <- KoroDataInn[ ,-which(names(KoroDataInn)=='Utskrivningsdato')]
-# KoroDataUt <- read.table('A:/Pandemi/UtskrivningSkjemaDataContract2020-04-29.csv', sep=';',
-#                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-# names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
-# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
-#            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
-# KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
-#                      by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+#PersonID som skal sjekkes:'  '
+sjekkPers <- c('3d6hzE6rwd05cind5W8qRh8mqzCNUEcxWtsAemTUApU', 'V9r9pLkG3wVd7wvPt6SaEdrMDnTdxSnR9rk2bUokcQ',
+               'r9O7Q5p8Y0Hc8nUIIxGRxtfbpR2Y3n5iddHVqMF8No4', 'txIDdRvRmZrsFW6IRhh3gTytaPbFDRmIKUlcpl1CY')
+RaaSjekk <- RegDataRaa[which(RegDataRaa$PersonId %in% sjekkPers), ]
+RaaSjekk[order(RaaSjekk$PersonId, RaaSjekk$FormDate) ,c("PersonId", "FormDate", "FormDateUt", 'FormStatusUt', "UnitId")]
 
+Sjekk <- KoronaPreprosesser(RegData = RaaSjekk)
+Sjekk[order(Sjekk$PersonId, Sjekk$FormDate) ,c("PersonId", "FormDate", "FormDateUt", "AntReinn", 'Reinn',
+                                               'LiggetidSjekk', 'Liggetid')]
