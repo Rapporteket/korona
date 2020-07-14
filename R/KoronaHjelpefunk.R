@@ -122,7 +122,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     #src <- normalizePath(system.file(rnwFil, package=Rpakke))
     #utils::zip(zipfile = paste0(kat, '/', zipFilNavn), files = c(paste0(kat, '/Testfil1.csv'), paste0(kat, '/Testfil2.csv')))
     #file.path()
-    utils::zip(zipfile = file.path(kat, '/', zipFilNavn), files = c(file.path(kat, 'Testfil1.csv'), file.path(kat, 'Testfil2.csv')))
+    utils::zip(zipfile = file.path(kat, zipFilNavn), files = c(file.path(kat, 'Testfil1.csv'), file.path(kat, 'Testfil2.csv')))
 
 
     #file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
