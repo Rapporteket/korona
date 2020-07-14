@@ -37,6 +37,7 @@ Imports:
     shinyjs,
     tidyverse,
     xtable,
+    zip,
     zoo,
     enc
 VignetteBuilder: knitr
