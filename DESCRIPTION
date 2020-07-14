@@ -26,7 +26,6 @@ Imports:
     DT,
     kableExtra,
     knitr,
-    lifecycle,
     lubridate,
     plyr,
     rapbase,
