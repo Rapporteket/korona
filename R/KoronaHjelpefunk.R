@@ -104,7 +104,9 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har lagret ekte filer"))
 
-    utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
+    #utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
+
+    zip::zipr(zipfile = zipFilNavn, files = paste0(datasett, '.csv'))
 
   }
 
@@ -120,7 +122,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har lagret testfiler"))
     #src <- normalizePath(system.file(rnwFil, package=Rpakke))
-    #utils::zip(zipfile = paste0(kat, '/', zipFilNavn), files = c(paste0(kat, '/Testfil1.csv'), paste0(kat, '/Testfil2.csv')))
+    #utils::zip(zipfile = paste0(zipFilNavn), files = c('Testfil1.csv', 'Testfil2.csv'))
     #file.path()
     zipfilSti <- paste0(kat, '/', zipFilNavn, '.zip')
     #write.table(zipfilSti, file = 'zipfilSti.csv', fileEncoding = 'UTF-8')
