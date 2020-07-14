@@ -123,7 +123,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     #utils::zip(zipfile = paste0(kat, '/', zipFilNavn), files = c(paste0(kat, '/Testfil1.csv'), paste0(kat, '/Testfil2.csv')))
     #file.path()
     zipfilSti <- paste0(kat, '/', zipFilNavn, '.zip')
-    write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
+    write.table(zipfilSti, file = 'zipfilSti.csv', fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
     utils::zip(zipfile = file.path(kat, zipFilNavn), files = c(file.path(kat, 'Testfil1.csv'), file.path(kat, 'Testfil2.csv')))
 
 
