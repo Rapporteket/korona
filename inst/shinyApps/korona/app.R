@@ -28,7 +28,7 @@ shiny::addResourcePath('rap', system.file('www', package='rapbase'))
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
 paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
-regTitle <- paste0('Koronaregistreringer, pandemi 2020 ',
+regTitle <- paste0('Koronaregistreringer, pandemi 2020 TESTING',
                    ifelse(context=='QA', 'QA',''))
 
 #---------Hente data------------
