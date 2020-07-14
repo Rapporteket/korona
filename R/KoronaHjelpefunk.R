@@ -120,7 +120,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har lagret testfiler"))
     print(kat)
-    utils::zip(zipfile = zipFilNavn, files = c('Testfil1.csv', 'Testfil2.csv'))
+    utils::zip(zipfile = paste0(kat, '/', zipFilNavn), files = c(paste0(kat, '/Testfil1.csv'), paste0(kat, '/Testfil2.csv')))
 
 
     #file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
