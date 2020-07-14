@@ -119,7 +119,9 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har lagret testfiler"))
+    print(kat)
     utils::zip(zipfile = zipFilNavn, files = c('Testfil1.csv', 'Testfil2.csv'))
+
 
     #file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
     #unzip(paste0(zipFilNavn, '.zip'), list = FALSE) #list	If TRUE, list the files and extract none
