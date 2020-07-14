@@ -79,8 +79,8 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
 sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
-  brukernavn <- brukernavn[[1]]
-  zipFilNavn <- zipFilNavn[[1]]
+  # brukernavn <- brukernavn[[1]]
+  # zipFilNavn <- zipFilNavn[[1]]
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste0("Vil lage filer for dataoverføring: ", zipFilNavn))
