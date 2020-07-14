@@ -85,7 +85,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste0("Vil lage filer for dataoverføring: ", zipFilNavn))
 
-  setwd(tempdir())
+  #opprKat <- getwd()
+  opprKat <- setwd(tempdir())
   kat <- getwd()
 
   #zipFilNavn <- paste0(zipFilNavn, Sys.Date())
@@ -95,7 +96,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har hentet ekte filer"))
 
-    datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI') #, 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
+    datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
     for (fil in datasett){
       Fil <- Filer[[fil]]
       write.table(Fil, file = paste0(fil, '.csv'),
@@ -121,15 +122,9 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har lagret testfiler"))
-    #src <- normalizePath(system.file(rnwFil, package=Rpakke))
     #utils::zip(zipfile = paste0(zipFilNavn), files = c('Testfil1.csv', 'Testfil2.csv'))
-    #file.path()
-    zipfilSti <- paste0(kat, '/', zipFilNavn, '.zip')
-    #write.table(zipfilSti, file = 'zipfilSti.csv', fileEncoding = 'UTF-8')
-    save(zipfilSti, file = 'zipfilSti.txt', ascii = TRUE)
     #utils::zip(zipfile = file.path(kat, zipFilNavn), files = c(file.path(kat, 'Testfil1.csv'), file.path(kat, 'Testfil2.csv')))
 
-    #zip::zipr(zipfile = paste0(kat, '/', zipFilNavn, '.zip'), files = c(paste0(kat, '/Testfil1.csv'), paste0(kat, '/Testfil2.csv')))
     zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = c('Testfil1.csv', 'Testfil2.csv'))
 
 
@@ -151,10 +146,21 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                declaration = paste0("HerErJeg_hilsen_", zipFilNavn))
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+                    msg = warnings()) #, utfil))
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste("Har levert data til NHN/FHI ")) #, utfil))
   write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
   utfilsti <- paste0(kat, '/', 'zipfilSti.csv')
-  #utdata <- list('zipfilStiFil' = utfil, 'zipFilSti' = zipfilSti)
+
+  #Fjern filer.. unntatt filstifila
+  if (zipFilNavn == 'Testfil') {
+    dum <- file.remove(c('Testfil1.csv', 'Testfil2.csv', 'Testfil.zip')) }
+  if (zipFilNavn == 'DataFHIPanBered') {
+    dum <- file.remove(paste0(zipFilNavn, '.zip'), paste0(datasett, '.csv'))
+    }
+
+  setwd(opprKat)
+
   return(utfilsti)
 }
 
