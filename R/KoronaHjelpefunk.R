@@ -105,9 +105,9 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har lagret ekte filer"))
 
-    #utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
+    utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
 
-    zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = paste0(datasett, '.csv'))
+    #zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = paste0(datasett, '.csv'))
 
   }
 
@@ -144,9 +144,9 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
                vessel = 'sftp', # ut fra beskrivelsen bare ftp
                declaration = paste0("HerErJeg_hilsen_", zipFilNavn))
-  test <- warnings()
-  #if (length(test) >0 ){
-  #raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+  # test <- warnings()
+  # if (length(test) >0 ){
+  # raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
   #                  msg = warnings()) #, utfil))}
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste("Har levert data til NHN/FHI ")) #, utfil))
