@@ -144,9 +144,10 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
                vessel = 'sftp', # ut fra beskrivelsen bare ftp
                declaration = paste0("HerErJeg_hilsen_", zipFilNavn))
-
-  raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                    msg = warnings()) #, utfil))
+  test <- warnings()
+  #if (length(test) >0 ){
+  #raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+  #                  msg = warnings()) #, utfil))}
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                     msg = paste("Har levert data til NHN/FHI ")) #, utfil))
   write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
