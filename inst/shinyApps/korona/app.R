@@ -28,7 +28,7 @@ shiny::addResourcePath('rap', system.file('www', package='rapbase'))
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
 paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
-regTitle <- paste0('Koronaregistreringer, pandemi 2020 ',
+regTitle <- paste0('Koronaregistreringer, pandemi 2020',
                    ifelse(context=='QA', 'QA',''))
 
 #---------Hente data------------
@@ -445,15 +445,15 @@ server <- function(input, output, session) {
     shinyjs::hide(id = 'KoroRappInt.pdf')
     shinyjs::hide(id = 'KoroRappTxtInt')
     }
-    if (brukernavn != 'lenaro'){
+    if (!(brukernavn %in% c('lenaro', 'aed0903unn'))){
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
     }
 
-    if (!(brukernavn %in% c('lenaro', 'eabu', 'Reidar', 'MarianneSaevik'))) {
-      hideTab(inputId = "hovedark", target = "Registeradm")
-    }
+  if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'eabu', 'Reidar', 'MarianneSaevik'))) {
+    hideTab(inputId = "hovedark", target = "Registeradm")
+  }
   #})
 
   # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
@@ -932,6 +932,7 @@ server <- function(input, output, session) {
       paramNames = c('zipFilNavn', 'brukernavn')
       paramValues = c(input$hvilkeFilerTilFHI, brukernavn)
       #print(input$hvilkeFilerTilFHI)
+      #print(brukernavn)
       rapbase::createAutoReport(synopsis = paste0('Sendt til FHI: ',input$hvilkeFilerTilFHI),
                                 package = 'korona',
                                 fun = "sendDataFilerFHI",

@@ -79,7 +79,7 @@ PandemiDataPpFHI <- RegData[ ,varFHIpp]
 library(intensivberedskap)
 # BeredskapData <-read.table('A:/intensiv/ReadinessFormDataContract2020-04-29.csv', sep=';',
 #                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-##setdiff(varFHIraa, sort(names(BeredskapData)))
+#setdiff(varFHIraa, sort(names(BeredskapData)))
 RegDataRaa <- NIRberedskDataSQL() #BeredskapData #
 varFHIraa <- c(
    'PersonId', #  'PatientInRegistryGuid'
@@ -126,7 +126,7 @@ varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
               'FormDateSiste', 'Reinn', 'AntRegPrPas', 'ReinnTid', 'ReinnNaar',
               'ReinnRespTid', 'ReinnRespNaar', 'MechanicalRespiratorStartSiste')
 BeredskapDataPpFHI <- RegData[ ,varFHIpp]
-setdiff(varFHIpp, sort(names(RegData)))
+#setdiff(varFHIpp, sort(names(RegData)))
 # write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
