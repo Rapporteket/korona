@@ -23,6 +23,34 @@ enhetsNivaa <- 'RHF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
+
+table(RegData[RegDataRaa$StatusVedUtskriving==2, 'HF'])
+RegDataRaa[RegDataRaa$StatusVedUtskriving==2 & RegDataRaa$HF=='Helse Bergen HF',
+           c('SkjemaGUIDut', 'HelseenhetKortNavn')]
+RegData[which(RegData$StatusVedUtskriving==2 & RegData$HF=='Helse Bergen HF'), ]
+
+RegDataRaaHB <- RegDataRaa[RegDataRaa$HF=='Helse Bergen HF', ]
+RegDataHB <- KoronaPreprosesser(RegDataRaaHB)
+
+table(RegDataRaa$HF[which(RegDataRaa$StatusVedUtskriving==2)])
+
+ind <- which(RegDataRaa$SkjemaGUIDut %in% toupper(c('c33a60b6-0e4f-4fd4-8413-1f15081c9687',
+                                                    '508c6991-4dc5-4389-9f56-166e1647d5f3',
+                                                    'cee202cd-ecfe-498a-98e6-68e3a254b13b',
+                                                    'dd6c5606-cad0-4b17-9142-0bfff5944232',
+                                                    'dbdf559e-ae70-4eb0-bb17-c2478ed3fcda')))
+#
+
+RegDataRaa$HF[ind]
+RegDataRaa[ind,]
+UtData <- KoronaUtvalg(RegData=RegDataHB,
+                       enhetsNivaa='HF', valgtEnhet='Helse Bergen HF',
+                       aarsakInn = 9,
+                        skjemastatusInn=9,
+                        erMann=9)
+dim(UtData$RegData)
+sum(UtData$RegData$StatusVedUtskriving==2, na.rm=T)
+
 test <- unique(RegDataRaa[as.Date(RegDataRaa$FormDate) < '2020-03-08',c("SkjemaGUID", "FormDate", "HelseenhetKortNavn")])
 
 pas <- RegDataRaa$PasientGUID[which(RegDataRaa$SkjemaGUID == '41FB2DF0-E9C6-4552-A10C-788C51A5B7B9')] #  'D8341A7C-04D6-4382-BAE1-014F8C13FBD1')]
