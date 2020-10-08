@@ -371,3 +371,112 @@ RaaSjekk[order(RaaSjekk$PersonId, RaaSjekk$FormDate) ,c("PersonId", "FormDate", 
 Sjekk <- KoronaPreprosesser(RegData = RaaSjekk)
 Sjekk[order(Sjekk$PersonId, Sjekk$FormDate) ,c("PersonId", "FormDate", "FormDateUt", "AntReinn", 'Reinn',
                                                'LiggetidSjekk', 'Liggetid')]
+
+
+
+
+#----------------- COVID, belastning på sykehus-------------------------------
+
+data("belegg_ssb")
+#names(belegg_ssb)
+#datatest <- belegg_ssb
+#datatest$belegg - as.numeric(datatest[ ,'Beleggsprosent..OECD..2018'])
+#datatest$belegg <- 100*belegg_ssb$Liggedager.2018/(365*belegg_ssb$Dognplasser.2018)
+Kapasitet <- belegg_ssb[ ,c('HF', 'HFresh', 'Dognplasser.2018')]
+
+#Figur
+#Mars til mai.
+#Antall liggedøgn på sykehus per HF
+#Antall liggedøgn på intensiv per HF
+#Kapasitet, HF
+
+#Gjennomsnittlig liggetid, sykehus/intensiv, per HF
+library(korona)
+#Henter personid fra intensiv fordi vil ha liggetider fra intensiv. Vil derfor mangle beredskapspasienter
+#som ikke er registrert i intensiv. (Skal være svært få.)
+datoTil <- '2020-04-30'
+#test <- KoronaDataSQL(datoTil = datoTil, koble=0)
+KoroDataPers <- KoronaPreprosesser(
+  RegData = KoronaDataSQL(datoTil = datoTil, koble=1))
+
+#IntData <- intensivberedskap::BeredskIntensivData() #NIRberedskDataSQL()
+  BeredskRaa <- intensivberedskap::NIRberedskDataSQL()
+  datoFra <- min(as.Date(BeredskRaa$FormDate))
+  IntDataRaa <- intensiv::NIRRegDataSQL(datoFra = datoFra, datoTil = datoTil) #Kun ferdigstilte intensivdata på Rapporteket
+  #Felles variabler som skal hentes fra intensiv (= fjernes fra beredskap)
+  varFellesInt <- c('DateAdmittedIntensive', 'DateDischargedIntensive',	'DaysAdmittedIntensiv',
+                    'DeadPatientDuring24Hours',	'MechanicalRespirator',	'RHF', 'TransferredStatus',
+                    'VasoactiveInfusion',	'MoreThan24Hours',	'Morsdato',
+                    'MovedPatientToAnotherIntensivDuring24Hours',	'PatientAge',	'PatientGender',
+                    'UnitId') # PatientInRegistryGuid', 'FormStatus', 'ShNavn',
+  BeredRaa <- BeredskRaa[ ,-which(names(BeredskRaa) %in% varFellesInt)]
+  BeredIntRaa <- merge(BeredRaa, IntDataRaa, suffixes = c('','Int'),
+                        by.x = 'HovedskjemaGUID', by.y = 'SkjemaGUID', all.x = F, all.y=F)
+IntDataPers <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredIntRaa, kobletInt = 1)
+IntDataPers$Int <- 1
+
+KoroIntKoblet <- merge(KoroDataPers, IntDataPers, suffixes = c('','Int'),
+                       by = 'PersonId', all.x = T, all.y=F)
+
+
+#Kobler på kapasitet
+RegData <-  merge(KoroIntKoblet, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
+
+#Gjennomsnittlig liggetid på sykehus
+LiggetidKoroHFgjsn <- round(tapply(RegData$Liggetid, INDEX = RegData$HFkort,  FUN = function(x) {mean(x,na.rm=T)}))
+indInt <- which(RegData$Int==1)
+
+#Gjennomsnittlig liggetid på sykehus for intensivpasienter
+LiggetidIntHFgjsn <- round(tapply(RegData$LiggetidInt[indInt], INDEX = RegData$HFkort[indInt],  FUN = function(x) {mean(x,na.rm=T)}))
+#Gjennomsnittlig liggetid på intensiv
+LiggetidKoroHFgjsnIntpas <- round(tapply(RegData$Liggetid[indInt], INDEX = RegData$HFkort[indInt],  FUN = function(x) {mean(x,na.rm=T)}))
+
+
+#Total liggetid
+LiggetidKoroHFtot <- round(tapply(RegData$Liggetid, INDEX = RegData$HFkort,  sum, na.rm=T))
+KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HFkort,  median)
+antDager <- as.numeric(difftime(datoTil, datoFra, units = 'days'))
+BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
+
+
+
+
+
+
+
+
+datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
+names(datoer) <- format(datoer, '%d.%B')
+aux <- erInneliggende(datoer = datoer, regdata = RegData)
+RegData <- bind_cols(RegData, aux)
+
+TabTidHF <-
+  RegData[,c("HFresh", names(datoer))] %>%
+  group_by(HFresh) %>%
+  summarise_all(sum) %>%
+  merge(belegg_ssb[, c("HFresh", "Dognplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
+  mutate(HFresh = HF) %>% select(-HF) %>%
+  # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
+  tr_summarize_output(grvarnavn = 'Tid')
+
+belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
+belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
+belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
+
+TabTidRHF <-
+  RegData[,c("RHFresh", names(datoer))] %>%
+  group_by(RHFresh) %>%
+  summarise_all(sum) %>%
+  merge(belegg_rhf[, c("RHFresh", "Dognplasser.2018", "RHF")], by.x = "RHFresh", by.y = "RHFresh", all.x = T) %>%
+  mutate(RHFresh = RHF) %>% select(-RHF) %>%
+  bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
+  tr_summarize_output(grvarnavn = 'Tid')
+
+Samlet <- bind_cols(TabTidHF, TabTidRHF[,-1])
+reshID_rhf <- RegData[match(reshID, RegData$HFresh), "RHFresh"]
+
+
+
+
+
+
