@@ -4,7 +4,12 @@
 \alias{KoronaDataSQL}
 \title{Henter data fra database for koronaregisteringer.}
 \usage{
-KoronaDataSQL(skjema = 1, koble = 1)
+KoronaDataSQL(
+  datoFra = "2020-03-01",
+  datoTil = Sys.Date(),
+  skjema = 1,
+  koble = 1
+)
 }
 \arguments{
 \item{skjema}{1-innleggelse, 2-utskriving}

@@ -376,28 +376,16 @@ Sjekk[order(Sjekk$PersonId, Sjekk$FormDate) ,c("PersonId", "FormDate", "FormDate
 
 
 #----------------- COVID, belastning på sykehus-------------------------------
+library(korona)
 
-data("belegg_ssb")
-#names(belegg_ssb)
-#datatest <- belegg_ssb
-#datatest$belegg - as.numeric(datatest[ ,'Beleggsprosent..OECD..2018'])
-#datatest$belegg <- 100*belegg_ssb$Liggedager.2018/(365*belegg_ssb$Dognplasser.2018)
+#data("belegg_ssb")
 Kapasitet <- belegg_ssb[ ,c('HF', 'HFresh', 'Dognplasser.2018')]
 
-#Figur
-#Mars til mai.
-#Antall liggedøgn på sykehus per HF
-#Antall liggedøgn på intensiv per HF
-#Kapasitet, HF
-
-#Gjennomsnittlig liggetid, sykehus/intensiv, per HF
-library(korona)
 #Henter personid fra intensiv fordi vil ha liggetider fra intensiv. Vil derfor mangle beredskapspasienter
 #som ikke er registrert i intensiv. (Skal være svært få.)
-datoTil <- '2020-04-30'
-#test <- KoronaDataSQL(datoTil = datoTil, koble=0)
-KoroDataPers <- KoronaPreprosesser(
-  RegData = KoronaDataSQL(datoTil = datoTil, koble=1))
+datoTil <- '2020-08-31'
+KoroDataRaa <- KoronaDataSQL(datoTil = datoTil, koble=1)
+KoroDataPers <- KoronaPreprosesser(RegData = KoroDataRaa)
 
 #IntData <- intensivberedskap::BeredskIntensivData() #NIRberedskDataSQL()
   BeredskRaa <- intensivberedskap::NIRberedskDataSQL()
@@ -421,43 +409,142 @@ KoroIntKoblet <- merge(KoroDataPers, IntDataPers, suffixes = c('','Int'),
 
 #Kobler på kapasitet
 RegData <-  merge(KoroIntKoblet, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
+RegData$HFkort <- as.factor(RegData$HFkort)
 
 #Gjennomsnittlig liggetid på sykehus
-LiggetidKoroHFgjsn <- round(tapply(RegData$Liggetid, INDEX = RegData$HFkort,  FUN = function(x) {mean(x,na.rm=T)}))
+LiggetidKoroHFgjsn <- round(tapply(RegData$Liggetid, INDEX = RegData$HFkort,  FUN = function(x) {mean(x,na.rm=T)}),1)
 indInt <- which(RegData$Int==1)
 
 #Gjennomsnittlig liggetid på sykehus for intensivpasienter
-LiggetidIntHFgjsn <- round(tapply(RegData$LiggetidInt[indInt], INDEX = RegData$HFkort[indInt],  FUN = function(x) {mean(x,na.rm=T)}))
+LiggetidIntHFgjsn <- round(tapply(RegData$LiggetidInt[indInt], INDEX = RegData$HFkort[indInt],
+                                  FUN = function(x) {mean(x,na.rm=T)}),1)
 #Gjennomsnittlig liggetid på intensiv
-LiggetidKoroHFgjsnIntpas <- round(tapply(RegData$Liggetid[indInt], INDEX = RegData$HFkort[indInt],  FUN = function(x) {mean(x,na.rm=T)}))
+LiggetidKoroHFgjsnIntpas <- round(tapply(RegData$Liggetid[indInt], INDEX = RegData$HFkort[indInt],
+                                         mean, na.rm=T), 1)
 
 
 #Total liggetid
-LiggetidKoroHFtot <- round(tapply(RegData$Liggetid, INDEX = RegData$HFkort,  sum, na.rm=T))
+LiggetidKoroHFtot <- round(tapply(RegData$Liggetid, INDEX = RegData$HFkort,  sum, na.rm=T),1)
 KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HFkort,  median)
-antDager <- as.numeric(difftime(datoTil, datoFra, units = 'days'))
+antDager <- as.numeric(as.Date(datoTil) - as.Date(datoFra))+1
 BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
 
+Tab <- cbind('Antall pas.' = table(RegData$HFkort),
+      'Antall, intensiv' = table(RegData$HFkort[indInt]),
+  'Liggetid, alle' = LiggetidKoroHFgjsn,
+      'Liggetid, int.pas.' = LiggetidKoroHFgjsnIntpas,
+      'Liggetid på intensiv' = LiggetidIntHFgjsn,
+  'Belegg, prosent' = BeleggHF,
+  'Kapasitet/dag' = KapasitetHF
+      )
+
+write.table(Tab, file = 'CovBelastning.csv', fileEncoding = 'UTF-8', sep=';')
+
+
+#----Belegg per måned
+LiggetidKoroHFmnd <- tapply(RegData$Liggetid, INDEX = RegData[ ,c('HFkort', 'MndAar')],  sum, na.rm=T)
+KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HFkort,  median)
+antDager <- as.numeric(as.Date(datoTil) - as.Date(datoFra))+1
+BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
+tapply( KoroDataPers$MndAar, FUN)
+
+p <- ggplot(mpg, aes(displ, cty)) + geom_point()
+
+# Use vars() to supply variables from the dataset:
+p + facet_grid(rows = vars(drv))
 
 
 
 
+#Se på antall inneliggende per dag. Benytter rådata, dvs. ikke-personaggregerte data.
+#Lag datasett som inneholder liggetid per måned per HF
 
+RegData <- KoroDataRaa[ ,c("FormDate", 'FormDateUt', "UnitId")]
+RegData$InnDato <- as.Date(RegData$FormDate)
+RegData$UtDato <- as.Date(RegData$FormDateUt)
+#RegData$MndNum <- as.numeric(format(RegData$InnDato, '%m'))
+#RegData$MndAar <- format(RegData$InnDato, '%b%y')
+RegData <- RegData[,-which((names(RegData) %in% c("FormDate", 'FormDateUt')))]
 
+# Enhetsnivånavn
+RegData$HFresh <- ReshNivaa$HFresh[match(RegData$UnitId, ReshNivaa$ShResh)]
+RegData$HFresh[RegData$UnitId==108595] <- 100091
+RegData$HF[RegData$UnitId==108595] <- 'Sykehuset Innlandet HF'
+RegData$HFresh[is.na(RegData$HFresh)] <- RegData$UnitId[is.na(RegData$HFresh)]
+HFmap <- as.data.frame(cbind(
+  HFresh = c("100065", "100082", "100083", "100084", "100085", "100089", "100091", "100092",
+             "100093", "100100", "100132", "100133", "100170", "100317", "100320", "101051",
+             "101719", "101971", "106635", "106640", "106816", "106819", "106834", "106838",
+             "106839", "107505", "110628", "700272", "4001031", "4201115", "4208278", "4216267"),
+  HFnavn = c("Helgeland", "Bergen", "Stavanger", "Fonna",  "Førde",  "AHUS", "Innlandet",
+             "Østfold",  "Sunnaas", "Vestfold", "Telemark", "Sørlandet", "Haraldspl.",
+             "N-Trøndelag", "St.Olavs", "Nordland", "UNN", "Finnmark", "Lovisenb.",
+             "MEDI 3", "Olaviken", "NKS", "Haugesund", "Solli", "Voss", "Diakonhj.",
+             "Martina H.", "V. Viken", "OUS", "Møre og Romsdal", "LHL", "Betanien")))
+RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
 
-datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
+datoer <- seq(min(as.Date(RegData$InnDato)), as.Date(datoTil), by="day") #by="day"#
 names(datoer) <- format(datoer, '%d.%B')
-aux <- erInneliggende(datoer = datoer, regdata = RegData)
-RegData <- bind_cols(RegData, aux)
+
+inneliggende <- function(x) { #Om en pasient/skjema er inneliggende på gitt dato, TRUE/FALSAE
+  (x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato))}
+
+inneliggendeSum <- function(x) { #x-dato, summerer antall inneliggende for hver dato
+  sum((x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato)))}
+
+# inneligendeMatr <- as.data.frame(map_df(datoer, inneliggende))
+# RegDataAlleDatoer <- bind_cols(RegData, inneligendeMatr)
+
+datoerMars <- seq(as.Date('2020-03-01'), as.Date('2020-03-31'), by="day")
+names(datoerMars) <- format(datoerMars, '%d.%B')
+RegData$mars <- rowSums(as.data.frame(map_df(datoerMars, inneliggende)))
+
+datoerApril <- seq(as.Date('2020-04-01'), as.Date('2020-04-30'), by="day")
+names(datoerApril) <- format(datoerApril, '%d.%B')
+RegData$april <- rowSums(as.data.frame(map_df(datoerApril, inneliggende)))
+
+datoerMai <- seq(as.Date('2020-05-01'), as.Date('2020-05-31'), by="day")
+names(datoerMai) <- format(datoerMai, '%d.%B')
+RegData$mai <- rowSums(as.data.frame(map_df(datoerMai, inneliggende)))
+
+datoerJuni <- seq(as.Date('2020-06-01'), as.Date('2020-06-30'), by="day")
+names(datoerJuni) <- format(datoerJuni, '%d.%B')
+RegData$juni <- rowSums(as.data.frame(map_df(datoerJuni, inneliggende)))
+
+datoerJuli <- seq(as.Date('2020-07-01'), as.Date('2020-07-31'), by="day")
+names(datoerJuli) <- format(datoerJuli, '%d.%B')
+RegData$juli <- rowSums(as.data.frame(map_df(datoerJuli, inneliggende)))
+
+datoerAug <- seq(as.Date('2020-08-01'), as.Date('2020-08-31'), by="day")
+names(datoerAug) <- format(datoerAug, '%d.%B')
+RegData$aug <- rowSums(as.data.frame(map_df(datoerAug, inneliggende)))
+
+datoerSept <- seq(as.Date('2020-09-01'), as.Date('2020-09-30'), by="day")
+names(datoerSept) <- format(datoerSept, '%d.%B')
+RegData$sept <- rowSums(as.data.frame(map_df(datoerSept, inneliggende)))
+
+mnd <- c('mars', 'april', 'mai', 'juni', 'juli', 'aug', 'sept')
+LiggeDogn <-
+  RegData[,c('HFkort', mnd)] %>%
+  group_by(HFkort) %>%
+  summarise_all(sum)
+
+LiggeDogn$Tot <- rowSums(as.data.frame(LiggeDogn[,mnd]))
+tapply(KoroDataPers$Liggetid, KoroDataPers$HFkort, sum, na.rm=T)
+
+
 
 TabTidHF <-
-  RegData[,c("HFresh", names(datoer))] %>%
+  RegDataAlleDatoer[1:3,c("HFresh", names(datoer))] %>%
   group_by(HFresh) %>%
-  summarise_all(sum) %>%
-  merge(belegg_ssb[, c("HFresh", "Dognplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
-  mutate(HFresh = HF) %>% select(-HF) %>%
-  # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
-  tr_summarize_output(grvarnavn = 'Tid')
+  summarise(Mars = sum(names(datoer[4:7])))
+  #summarise_all(sum) #    #
+# %>%
+#   merge(belegg_ssb[, c("HFresh", "Dognplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
+#   mutate(HFresh = HF) %>% select(-HF) %>%
+#   # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
+#   tr_summarize_output(grvarnavn = 'Tid')
+# TabTidHF <- t(TabTidHF)
 
 belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
 belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))

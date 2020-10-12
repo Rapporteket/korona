@@ -165,3 +165,20 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   return(utfilsti)
 }
 
+#' Funksjon som avgjør om en pasient er inneliggende på aktuell dato
+#'
+#' Returnerer TRUE for datoer pasienten er inneliggende
+#'
+#' @param datoer datoer som inneligging skal avgjøres for
+#' @param regdata Dataramme som inneholder InnDato og Utdato per pasient
+#'
+#' @return
+#' @export
+erInneliggende <- function(datoer, regdata){
+  # regnes som inneliggende på aktuell dato hvis den faller mellom inn- og utdato eller
+  # er etter inndato og det ikke finnes utddato. Flere betingelser kan legges til.
+
+  auxfunc <- function(x) {(x >  regdata$InnDato & x <= regdata$UtDato) | (x >  regdata$InnDato & is.na( regdata$UtDato))}
+  map_df(datoer, auxfunc)
+}
+
