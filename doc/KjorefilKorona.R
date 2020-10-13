@@ -442,17 +442,10 @@ write.table(Tab, file = 'CovBelastning.csv', fileEncoding = 'UTF-8', sep=';')
 
 
 #----Belegg per måned
-LiggetidKoroHFmnd <- tapply(RegData$Liggetid, INDEX = RegData[ ,c('HFkort', 'MndAar')],  sum, na.rm=T)
+LiggetidKoroHFmnd <- round(tapply(RegData$Liggetid, INDEX = RegData[ ,c('HFkort', 'MndNum')],  sum, na.rm=T))
 KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HFkort,  median)
 antDager <- as.numeric(as.Date(datoTil) - as.Date(datoFra))+1
 BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
-tapply( KoroDataPers$MndAar, FUN)
-
-p <- ggplot(mpg, aes(displ, cty)) + geom_point()
-
-# Use vars() to supply variables from the dataset:
-p + facet_grid(rows = vars(drv))
-
 
 
 
@@ -469,7 +462,7 @@ RegData <- RegData[,-which((names(RegData) %in% c("FormDate", 'FormDateUt')))]
 # Enhetsnivånavn
 RegData$HFresh <- ReshNivaa$HFresh[match(RegData$UnitId, ReshNivaa$ShResh)]
 RegData$HFresh[RegData$UnitId==108595] <- 100091
-RegData$HF[RegData$UnitId==108595] <- 'Sykehuset Innlandet HF'
+#RegData$HF[RegData$UnitId==108595] <- 'Sykehuset Innlandet HF'
 RegData$HFresh[is.na(RegData$HFresh)] <- RegData$UnitId[is.na(RegData$HFresh)]
 HFmap <- as.data.frame(cbind(
   HFresh = c("100065", "100082", "100083", "100084", "100085", "100089", "100091", "100092",
@@ -482,55 +475,105 @@ HFmap <- as.data.frame(cbind(
              "MEDI 3", "Olaviken", "NKS", "Haugesund", "Solli", "Voss", "Diakonhj.",
              "Martina H.", "V. Viken", "OUS", "Møre og Romsdal", "LHL", "Betanien")))
 RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
+RegData <-  merge(RegData, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
 
-datoer <- seq(min(as.Date(RegData$InnDato)), as.Date(datoTil), by="day") #by="day"#
-names(datoer) <- format(datoer, '%d.%B')
+#datoer <- seq(min(as.Date(RegData$InnDato)), as.Date(datoTil), by="day") #by="day"#
+#names(datoer) <- format(datoer, '%d.%B')
 
-inneliggende <- function(x) { #Om en pasient/skjema er inneliggende på gitt dato, TRUE/FALSAE
-  (x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato))}
 
 inneliggendeSum <- function(x) { #x-dato, summerer antall inneliggende for hver dato
   sum((x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato)))}
 
+inneliggende <- function(x) { #Om en pasient/skjema er inneliggende på gitt dato, TRUE/FALSAE
+  (x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato))}
+
+
 # inneligendeMatr <- as.data.frame(map_df(datoer, inneliggende))
 # RegDataAlleDatoer <- bind_cols(RegData, inneligendeMatr)
 
+beregnBelegg <- function(datoer){
+  inneliggende <- function(dato) { #Om en pasient/skjema er inneliggende på gitt dato, TRUE/FALSAE
+    (dato >  RegData$InnDato & (dato <= RegData$UtDato) | is.na( RegData$UtDato))}
+
+  names(datoer) <- format(datoer, '%d.%B')
+  data <- as.data.frame(map_df(datoer, inneliggende))
+antDager <- length(datoer)
+  belegg <- 100*rowSums(data / (antDager*RegData$Dognplasser.2018))
+  tot <- 100*sum(colSums(data)) / (antDager*sum(Kapasitet$Dognplasser.2018))
+  return(utData = list(belegg=belegg, tot=tot))
+}
+
+
 datoerMars <- seq(as.Date('2020-03-01'), as.Date('2020-03-31'), by="day")
-names(datoerMars) <- format(datoerMars, '%d.%B')
-RegData$mars <- rowSums(as.data.frame(map_df(datoerMars, inneliggende)))
+RegData$mar <- beregnBelegg(datoerMars)$belegg
 
 datoerApril <- seq(as.Date('2020-04-01'), as.Date('2020-04-30'), by="day")
-names(datoerApril) <- format(datoerApril, '%d.%B')
-RegData$april <- rowSums(as.data.frame(map_df(datoerApril, inneliggende)))
+RegData$apr <- beregnBelegg(datoerApril)$belegg
 
 datoerMai <- seq(as.Date('2020-05-01'), as.Date('2020-05-31'), by="day")
-names(datoerMai) <- format(datoerMai, '%d.%B')
-RegData$mai <- rowSums(as.data.frame(map_df(datoerMai, inneliggende)))
+RegData$mai <- beregnBelegg(datoerMai)$belegg
 
-datoerJuni <- seq(as.Date('2020-06-01'), as.Date('2020-06-30'), by="day")
-names(datoerJuni) <- format(datoerJuni, '%d.%B')
-RegData$juni <- rowSums(as.data.frame(map_df(datoerJuni, inneliggende)))
+datoerJun <- seq(as.Date('2020-06-01'), as.Date('2020-06-30'), by="day")
+RegData$jun <- beregnBelegg(datoerApril)$belegg
 
 datoerJuli <- seq(as.Date('2020-07-01'), as.Date('2020-07-31'), by="day")
-names(datoerJuli) <- format(datoerJuli, '%d.%B')
-RegData$juli <- rowSums(as.data.frame(map_df(datoerJuli, inneliggende)))
+RegData$jul <- beregnBelegg(datoerJun)$belegg
 
 datoerAug <- seq(as.Date('2020-08-01'), as.Date('2020-08-31'), by="day")
-names(datoerAug) <- format(datoerAug, '%d.%B')
-RegData$aug <- rowSums(as.data.frame(map_df(datoerAug, inneliggende)))
+RegData$aug <- beregnBelegg(datoerAug)$belegg
 
 datoerSept <- seq(as.Date('2020-09-01'), as.Date('2020-09-30'), by="day")
-names(datoerSept) <- format(datoerSept, '%d.%B')
-RegData$sept <- rowSums(as.data.frame(map_df(datoerSept, inneliggende)))
+RegData$sep <- beregnBelegg(datoerSept)$belegg
 
-mnd <- c('mars', 'april', 'mai', 'juni', 'juli', 'aug', 'sept')
+mnd <- c('mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep')
+BeleggLandet <- c(beregnBelegg(datoerMars)$tot,
+                  beregnBelegg(datoerApril)$tot,
+                  beregnBelegg(datoerMai)$tot,
+                  beregnBelegg(datoerJun)$tot,
+                  beregnBelegg(datoerJuli)$tot,
+                  beregnBelegg(datoerAug)$tot,
+                  beregnBelegg(datoerSept)$tot)
+names(BeleggLandet) <- mnd
+#NB: Endre til å telle unike personid'er.
+
+
+mnd <- mnd[-7]
 LiggeDogn <-
   RegData[,c('HFkort', mnd)] %>%
   group_by(HFkort) %>%
   summarise_all(sum)
 
-LiggeDogn$Tot <- rowSums(as.data.frame(LiggeDogn[,mnd]))
-tapply(KoroDataPers$Liggetid, KoroDataPers$HFkort, sum, na.rm=T)
+#dplyr::add_row(LiggeDogn, c('Landet', BeleggLandet))
+#LiggeDogn <- data.frame(LiggeDogn, c('Landet', BeleggLandet))
+
+#LiggeDogn$Tot <- rowSums(as.data.frame(LiggeDogn[,mnd]))
+#tapply(KoroDataPers$Liggetid, KoroDataPers$HFkort, sum, na.rm=T)
+
+LiggeDognData <- as.data.frame(tidyr::gather(LiggeDogn, key = 'mnd', value='Belegg', mnd, factor_key=TRUE))
+
+p <- ggplot(LiggeDognData, aes(mnd, Belegg))
+p + geom_point() + facet_wrap(~ HFkort)
+# pdf(file = plott.pdf, width=7, height=7*height/width, family=fonttype, #family='arial',
+#     pointsize=pointsizePDF)
+#ggplot(LiggeDognData, aes(mnd, Belegg)) + geom_point() + facet_wrap(~ HFkort) +
+
+       # Use vars() to supply variables from the dataset:
+       p + facet_grid(rows = vars(drv))
+
+df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+  y = rnorm(30))
+ds <- do.call(rbind, lapply(split(df, df$gp),
+                            function(d) {data.frame(mean = mean(d$y), sd = sd(d$y), gp = d$gp)}))
+#ggplot(df, aes(gp, y)) +
+  geom_point(data = ds, aes(y = mean), colour = 'red', size = 3)
+
+p <-
+  ggplot(mpg, aes(displ, cty)) + geom_point()
+
+# Use vars() to supply variables from the dataset:
+p + facet_grid(rows = vars(drv))
+
+
 
 
 
