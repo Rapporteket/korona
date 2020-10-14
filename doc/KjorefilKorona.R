@@ -491,6 +491,8 @@ inneliggende <- function(x) { #Om en pasient/skjema er inneliggende på gitt dat
 RegData$InnDato[is.na( RegData$UtDato)]
 # inneligendeMatr <- as.data.frame(map_df(datoer, inneliggende))
 # RegDataAlleDatoer <- bind_cols(RegData, inneligendeMatr)
+
+#FEIL:
 AntInneliggendeGr <- function(dato) { #Antall inneliggende for gitt dato, gruppert på variabel "gr"
   #GrNavn <- levels(RegData[,gr])
   inne <- (dato >  RegData$InnDato & (dato <= RegData$UtDato) | is.na( RegData$UtDato))
@@ -498,7 +500,6 @@ AntInneliggendeGr <- function(dato) { #Antall inneliggende for gitt dato, gruppe
   return(data)
   #data$Grupper <- GrNavn
 }
-
 sum(AntInneliggendeGr('2020-07-03'), na.rm = T)
 
 # RegData$HFkort <- as.factor(RegData$HFkort)
@@ -513,8 +514,8 @@ sum(AntInneliggendeGr('2020-07-03'), na.rm = T)
 #    return(utData = list(belegg=belegg, tot=tot))
 #  }
 
-datoer <- seq(as.Date('2020-03-01'), as.Date('2020-09-30'), by="day")
-RegData <- KoroDataPers
+# datoer <- seq(as.Date('2020-03-01'), as.Date('2020-09-30'), by="day")
+# RegData <- KoroDataPers
 beregnBelegg <- function(datoer){
   names(datoer) <- format(datoer, '%d.%B')
   #data <- as.data.frame(map_df(datoer, inneliggende))
@@ -560,7 +561,6 @@ BeleggLandet <- c(beregnBelegg(datoerMars)$tot,
                   beregnBelegg(datoerSept)$tot)
 names(BeleggLandet) <- mnd
 #NB: Endre til å telle unike personid'er.
-100*sum(Kapasitet$Dognplasser.2018)
 
 LiggeDogn <-
   RegData[,c('HFkort', mnd)] %>%
