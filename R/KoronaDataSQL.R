@@ -218,6 +218,6 @@ if (koble==1){
 
 #query <- 'select * from UtskrivningSkjemaDataContract'
 
-      RegData <- rapbase::LoadRegData(registryName="korona", query=query, dbType="mysql")
+      RegData <- rapbase::loadRegData(registryName="korona", query=query, dbType="mysql")
       return(RegData)
 }

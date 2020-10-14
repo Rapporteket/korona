@@ -379,11 +379,13 @@ Sjekk[order(Sjekk$PersonId, Sjekk$FormDate) ,c("PersonId", "FormDate", "FormDate
 library(korona)
 
 #data("belegg_ssb")
+# belegg_ssb2019 <- read.table('C:/ResultattjenesteGIT/BeleggSSB2019.csv', sep=';',
+#                          stringsAsFactors=FALSE, header=T, row.names = T,  fileEncoding = 'latin1')
 Kapasitet <- belegg_ssb[ ,c('HF', 'HFresh', 'Dognplasser.2018')]
 
 #Henter personid fra intensiv fordi vil ha liggetider fra intensiv. Vil derfor mangle beredskapspasienter
 #som ikke er registrert i intensiv. (Skal være svært få.)
-datoTil <- '2020-08-31'
+datoTil <- '2020-09-30'
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil, koble=1)
 KoroDataPers <- KoronaPreprosesser(RegData = KoroDataRaa)
 
@@ -438,7 +440,7 @@ Tab <- cbind('Antall pas.' = table(RegData$HFkort),
   'Kapasitet/dag' = KapasitetHF
       )
 
-write.table(Tab, file = 'CovBelastning.csv', fileEncoding = 'UTF-8', sep=';')
+write.table(Tab, file = 'CovBelastning.csv', fileEncoding = 'ASCII', sep=';')
 
 
 #----Belegg per måned
@@ -449,10 +451,10 @@ BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
 
 
 
-#Se på antall inneliggende per dag. Benytter rådata, dvs. ikke-personaggregerte data.
+#--Se på antall inneliggende per dag. Benytter rådata, dvs. ikke-personaggregerte data.
 #Lag datasett som inneholder liggetid per måned per HF
 
-RegData <- KoroDataRaa[ ,c("FormDate", 'FormDateUt', "UnitId")]
+RegData <- KoroDataRaa[ ,c("FormDate", 'FormDateUt', "UnitId", 'PersonId')]
 RegData$InnDato <- as.Date(RegData$FormDate)
 RegData$UtDato <- as.Date(RegData$FormDateUt)
 #RegData$MndNum <- as.numeric(format(RegData$InnDato, '%m'))
@@ -476,9 +478,8 @@ HFmap <- as.data.frame(cbind(
              "Martina H.", "V. Viken", "OUS", "Møre og Romsdal", "LHL", "Betanien")))
 RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
 RegData <-  merge(RegData, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
-
-#datoer <- seq(min(as.Date(RegData$InnDato)), as.Date(datoTil), by="day") #by="day"#
-#names(datoer) <- format(datoer, '%d.%B')
+RegData$HFkort <- factor(RegData$HFkort)
+#levels(RegData$HFkort)
 
 
 inneliggendeSum <- function(x) { #x-dato, summerer antall inneliggende for hver dato
@@ -487,22 +488,47 @@ inneliggendeSum <- function(x) { #x-dato, summerer antall inneliggende for hver 
 inneliggende <- function(x) { #Om en pasient/skjema er inneliggende på gitt dato, TRUE/FALSAE
   (x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato))}
 
-
+RegData$InnDato[is.na( RegData$UtDato)]
 # inneligendeMatr <- as.data.frame(map_df(datoer, inneliggende))
 # RegDataAlleDatoer <- bind_cols(RegData, inneligendeMatr)
 
-beregnBelegg <- function(datoer){
-  inneliggende <- function(dato) { #Om en pasient/skjema er inneliggende på gitt dato, TRUE/FALSAE
-    (dato >  RegData$InnDato & (dato <= RegData$UtDato) | is.na( RegData$UtDato))}
+#FEIL:
+AntInneliggendeGr <- function(dato) { #Antall inneliggende for gitt dato, gruppert på variabel "gr"
+  #GrNavn <- levels(RegData[,gr])
+  inne <- (dato >  RegData$InnDato & (dato <= RegData$UtDato) | is.na( RegData$UtDato))
+  data <- tapply(RegData[inne,'PersonId'], INDEX = RegData[inne, 'HFkort'], FUN= function(x){length(unique(x))})
+  return(data)
+  #data$Grupper <- GrNavn
+}
+sum(AntInneliggendeGr('2020-07-03'), na.rm = T)
 
+# RegData$HFkort <- as.factor(RegData$HFkort)
+# beregnInneliggHF <- function(datoer){
+#   #datoer <- datoerMars #as.Date('2020-04-20')
+#   #test <- AntInneliggende(dato=datoer)
+#   names(datoer) <- format(datoer, '%d.%B')
+#   data <- as.data.frame(map_df(datoer, AntInneliggendeGr))
+#   antDager <- length(datoer)
+#   belegg <- 100*rowSums(data / (antDager*RegData$Dognplasser.2018))
+#   tot <- 100*sum(colSums(data), na.rm = T) / (antDager*sum(Kapasitet$Dognplasser.2018))
+#    return(utData = list(belegg=belegg, tot=tot))
+#  }
+
+# datoer <- seq(as.Date('2020-03-01'), as.Date('2020-09-30'), by="day")
+# RegData <- KoroDataPers
+beregnBelegg <- function(datoer){
   names(datoer) <- format(datoer, '%d.%B')
-  data <- as.data.frame(map_df(datoer, inneliggende))
+  #data <- as.data.frame(map_df(datoer, inneliggende))
+
+  data <- erInneliggende(datoer = datoer, regdata = RegData)
+  #RegData <- bind_cols(RegData, data)
+
 antDager <- length(datoer)
-  belegg <- 100*rowSums(data / (antDager*RegData$Dognplasser.2018))
+antPrDagPers <- colSums(data)
+  belegg <- 100*rowSums(data) / (antDager*RegData$Dognplasser.2018)
   tot <- 100*sum(colSums(data)) / (antDager*sum(Kapasitet$Dognplasser.2018))
   return(utData = list(belegg=belegg, tot=tot))
 }
-
 
 datoerMars <- seq(as.Date('2020-03-01'), as.Date('2020-03-31'), by="day")
 RegData$mar <- beregnBelegg(datoerMars)$belegg
@@ -514,10 +540,10 @@ datoerMai <- seq(as.Date('2020-05-01'), as.Date('2020-05-31'), by="day")
 RegData$mai <- beregnBelegg(datoerMai)$belegg
 
 datoerJun <- seq(as.Date('2020-06-01'), as.Date('2020-06-30'), by="day")
-RegData$jun <- beregnBelegg(datoerApril)$belegg
+RegData$jun <- beregnBelegg(datoerJun)$belegg
 
 datoerJuli <- seq(as.Date('2020-07-01'), as.Date('2020-07-31'), by="day")
-RegData$jul <- beregnBelegg(datoerJun)$belegg
+RegData$jul <- beregnBelegg(datoerJuli)$belegg
 
 datoerAug <- seq(as.Date('2020-08-01'), as.Date('2020-08-31'), by="day")
 RegData$aug <- beregnBelegg(datoerAug)$belegg
@@ -536,12 +562,16 @@ BeleggLandet <- c(beregnBelegg(datoerMars)$tot,
 names(BeleggLandet) <- mnd
 #NB: Endre til å telle unike personid'er.
 
-
-mnd <- mnd[-7]
 LiggeDogn <-
   RegData[,c('HFkort', mnd)] %>%
   group_by(HFkort) %>%
   summarise_all(sum)
+test <-
+
+BeleggData <- rbind(as.matrix(LiggeDogn),
+                    c('HeleLandet', BeleggLandet))
+
+write.table(BeleggData, file = 'BeleggData.csv', row.names = F, fileEncoding = 'UTF-8', sep = ';')
 
 #dplyr::add_row(LiggeDogn, c('Landet', BeleggLandet))
 #LiggeDogn <- data.frame(LiggeDogn, c('Landet', BeleggLandet))
