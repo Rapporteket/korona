@@ -538,7 +538,7 @@ server <- function(input, output, session) {
     # print(as.numeric(input$skjemastatusInn))
     # print(as.numeric(input$erMann))
     # print(sum(UtData$RegData$StatusVedUtskriving==2, na.rm=T))
-     print(dim(UtData$RegData)[1])
+    # print(dim(UtData$RegData)[1])
 
     txt <- if(dim(UtData$RegData)[1]>2) {
       paste0('For hele tidsperioden er gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
