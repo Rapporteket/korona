@@ -10,7 +10,7 @@ koronaresultater_UI <- function(id){
                         h3('Velg variabel/tema og filtreringer i data'),
 
                         selectInput(inputId = ns('valgtVar'), label='Velg variabel',
-                                    choices = c('Antall innleggelser'='antreg',
+                                    choices = c('Antall pasienter'='antreg',
                                                 'Antall døde'='antdod',
                                                 'Antall utskrivinger'= 'antut',
                                                 'Antall inneliggende'='antinn')
