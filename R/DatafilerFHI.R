@@ -11,7 +11,7 @@ lagDatafilerTilFHI <- function(){
 RegDataRaa <- KoronaDataSQL() #KoroDataRaa
 varFHIraa <- c(
   #PasientGUID',
-                'PersonId'
+                'PersonIdBC19Hash'
                ,'AceHemmerInnkomst'
                ,'ArsakInnleggelse'
                ,'Astma'
@@ -82,7 +82,7 @@ library(intensivberedskap)
 #setdiff(varFHIraa, sort(names(BeredskapData)))
 RegDataRaa <- NIRberedskDataSQL() #BeredskapData #
 varFHIraa <- c(
-   'PersonId', #  'PatientInRegistryGuid'
+   'PersonIdBC19Hash', #  'PatientInRegistryGuid'
   'PatientAge'
   ,'PatientGender'
   ,'MunicipalNumber'
