@@ -114,6 +114,7 @@ varFHIraa <- c(
   ,'DischargedIntensiveStatus'
   ,'FormStatus'
   ,'FormDate')
+#,'AgeAdmitted')
 BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 #setdiff(varFHIraa, names(RegDataRaa))
 # write.table(BeredskapDataRaaFHI, file = paste0('A:/Pandemi/BeredskapDataRaaFHI', Sys.Date(), '.csv'),

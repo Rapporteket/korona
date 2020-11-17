@@ -30,19 +30,33 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    #    apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
 
    #Konvertere boolske variable fra tekst til boolske variable...
-   TilLogiskeVar <- function(Skjema){
-     verdiGML <- c('True','False')
-     verdiNY <- c(TRUE,FALSE)
-     mapping <- data.frame(verdiGML,verdiNY)
-     LogVar <- names(Skjema)[which(Skjema[1,] %in% verdiGML)]
-     if (length(LogVar)>0) {
-       for (k in 1:length(LogVar)) {
-         Skjema[,LogVar[k]] <- mapping$verdiNY[match(Skjema[,LogVar[k]], mapping$verdiGML)]
-       }}
-     return(Skjema)
-   }
+   # TilLogiskeVar <- function(Skjema){
+   #   verdiGML <- c('True','False')
+   #   verdiNY <- c(TRUE,FALSE)
+   #   mapping <- data.frame(verdiGML,verdiNY)
+   #   LogVar <- names(Skjema)[which(Skjema[1,] %in% verdiGML)]
+   #   if (length(LogVar)>0) {
+   #     for (k in 1:length(LogVar)) {
+   #       Skjema[,LogVar[k]] <- mapping$verdiNY[match(Skjema[,LogVar[k]], mapping$verdiGML)]
+   #     }}
+   #   return(Skjema)
+   # }
+   # RegData <- TilLogiskeVar(RegData)
 
-   RegData <- TilLogiskeVar(RegData)
+   LogVarSjekk <- names(RegData)[unique(which(RegData[1,] %in% c('True','False')), which(RegData[15,] %in% c('True','False')))]
+   LogVar <- unique(c(LogVarSjekk,
+                      "Aminoglykosid", "AndreGencefalosporin", "AntibiotikaAnnet", "AntibiotikaUkjent", "Astma",
+                      "BilirubinUkjent", "DdimerUkjent",  "Diabetes", "DiastoliskBlodtrykkUkjent", "Gravid",
+                      "HjertefrekvensUkjent", "Hjertesykdom", "HoydeUkjent", "Importert", "Karbapenem", "Kinolon",
+                      "Kreft", "KroniskLungesykdom", "KroniskNevro", "LeukocytterUkjent", "Leversykdom", "Makrolid",
+                      "NedsattimmunHIV", "Nyresykdom", "OkysgenmetningUkjent" ,"Penicillin", "PenicillinEnzymhemmer",
+                      "RespirasjonsfrekvensUkjent", "Royker" ,"SkreatininUkjent", "SystoliskBlodtrykkUkjent", "TempUkjent",
+                      "TredjeGencefalosporin", "TrombocytterUkjent", "UtsAminoglykosid", "UtsAndreGencefalosporin",
+                      "UtsAntibiotikaAnnet", "UtsAntibiotikaUkjent", "UtsKarbapenem", "UtsKinolon", "UtsMakrolid",
+                      "UtsPenicillin", "UtsPenicillinEnzymhemmer", "UtsTredjeGencefalosporin", "VektUkjent", "ImportertUt"))
+
+   RegData[, intersect(names(RegData), LogVar)] <-
+     apply(RegData[, intersect(names(RegData), LogVar)], 2, as.logical)
 
 
    #------SLÅ SAMMEN TIL PER PASIENT

@@ -12,6 +12,7 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.AceHemmerInnkomst
   -- AS AceHemmerInnkomst2
   -- ,Inn.AddressQuality
+  -- ,Inn.AgeAdmitted
   ,Inn.AkuttNyresvikt
   ,Inn.AkuttRespirasjonsvikt
   ,Inn.AkuttSirkulasjonsvikt
@@ -218,6 +219,7 @@ if (koble==1){
 
 
 #query <- 'select * from UtskrivningSkjemaDataContract'
+#query <- 'select * from InklusjonSkjemaDataContract'
 
       RegData <- rapbase::loadRegData(registryName="korona", query=query, dbType="mysql")
       return(RegData)
