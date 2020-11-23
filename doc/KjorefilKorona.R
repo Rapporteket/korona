@@ -24,6 +24,9 @@ enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
 
+PandemiData <- korona::KoronaDataSQL()
+PandemiData$ArsakInnleggelse
+
 table(RegData[RegDataRaa$StatusVedUtskriving==2, 'HF'])
 RegDataRaa[RegDataRaa$StatusVedUtskriving==2 & RegDataRaa$HF=='Helse Bergen HF',
            c('SkjemaGUIDut', 'HelseenhetKortNavn')]

@@ -14,11 +14,13 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    # Endre variabelnavn:
    names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
    names(RegData)[which(names(RegData) == 'UnitId')] <- 'ReshId'
-   #Avvik ml. test og prod-data:
    names(RegData)[
       names(RegData) %in% c('PatientInRegistryGuid', 'PasientGUID')] <- 'PasientID'
    RegData$ShNavn <- trimws(as.character(RegData$HelseenhetKortNavn)) #Fjerner mellomrom (før) og etter navn
 
+   RegData$ShNavn[RegData$ReshId == 111487] <- 'Aker'
+   RegData$ShNavn[RegData$ReshId == 705757] <- 'Radiumhospitalet'
+   RegData$ShNavn[RegData$ReshId == 108595] <- 'Innlandet, psyk.'
 
    RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                          RegData$Vekt/(RegData$Hoyde/100)^2,
