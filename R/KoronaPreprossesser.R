@@ -18,9 +18,10 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
       names(RegData) %in% c('PatientInRegistryGuid', 'PasientGUID')] <- 'PasientID'
    RegData$ShNavn <- trimws(as.character(RegData$HelseenhetKortNavn)) #Fjerner mellomrom (før) og etter navn
 
+   RegData$ShNavn[RegData$ReshId == 108595] <- 'Innlandet, psyk.'
    RegData$ShNavn[RegData$ReshId == 111487] <- 'Aker'
    RegData$ShNavn[RegData$ReshId == 705757] <- 'Radiumhospitalet'
-   RegData$ShNavn[RegData$ReshId == 108595] <- 'Innlandet, psyk.'
+   #RegData$RHF[RegData$ReshId %in% c(108595, 111487, 705757)] <- 'Sør-Øst'
 
    RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                          RegData$Vekt/(RegData$Hoyde/100)^2,
@@ -216,6 +217,10 @@ if (aggPers == 1) {
       RegData$HFresh[RegData$ReshId==108595] <- 100091
       RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
+
+      RegData$HFresh[RegData$ReshId == 108595] <- 100092   #Innlandet, psyk.
+      RegData$HFresh[RegData$ReshId %in% c(111487, 705757)] <- 110628   #Aker, Radiumhospitalet
+
       #Endrer til kortnavn på HF:
       #RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
       # ReshNivaa <- as.data.frame(ReshNivaa, stringsAsFactors=FALSE)

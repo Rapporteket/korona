@@ -144,7 +144,7 @@ ui <- tagList(
 
                                 uiOutput('manglerRegResh'),
                                 h3('Resultater fra pandemiregistrering, korona.'),
-                                h4('Merk at resultatene er basert på til dels ikke-fullstendige registreringer'),
+                                h4('Merk at resultatene kan inkludere ufullstendige registreringer'),
                                 h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
                                    pandemiregisteret finnes under fanen "Resultater".'),
                                 #h5('Siden er under utvikling... ', style = "color:red"),

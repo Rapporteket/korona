@@ -24,6 +24,13 @@ enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
 
+
+FilerFHI <- lagDatafilerTilFHI()
+
+BeredskapDataPpFHI <- RegData[ ,varFHIpp[1:41]]
+BeredskapDataPpFHI$ReinnNaar
+
+
 PandemiData <- korona::KoronaDataSQL()
 PandemiData$ArsakInnleggelse
 

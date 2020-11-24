@@ -113,19 +113,20 @@ varFHIraa <- c(
   ,'Morsdato'
   ,'DischargedIntensiveStatus'
   ,'FormStatus'
-  ,'FormDate')
-#,'AgeAdmitted')
+  ,'FormDate'
+ ,'AgeAdmitted')
 BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 #setdiff(varFHIraa, names(RegDataRaa))
 # write.table(BeredskapDataRaaFHI, file = paste0('A:/Pandemi/BeredskapDataRaaFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
 RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa)
-varBort <- c('PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive', 'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
+varBort <- c('AgeAdmitted','PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive', 'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
 varNy <- c('Alder', 'erMann', 'Bekreftet', 'Liggetid', 'ReinnResp', 'RespTid') #'PersonId',
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
               'FormDateSiste', 'Reinn', 'AntRegPrPas', 'ReinnTid', 'ReinnNaar',
-              'ReinnRespTid', 'ReinnRespNaar', 'MechanicalRespiratorStartSiste')
+              'ReinnRespTid', 'ReinnRespNaar', 'MechanicalRespiratorStartSiste',
+              'AgeAdmitted')
 BeredskapDataPpFHI <- RegData[ ,varFHIpp]
 #setdiff(varFHIpp, sort(names(RegData)))
 # write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),
