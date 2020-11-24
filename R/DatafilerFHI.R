@@ -7,7 +7,7 @@
 #'
 lagDatafilerTilFHI <- function(){
 #Rådata
-  library(tidyverse)
+  #library(tidyverse)
 RegDataRaa <- KoronaDataSQL() #KoroDataRaa
 varFHIraa <- c(
   #PasientGUID',
@@ -69,7 +69,7 @@ varBort <- c('PatientAge', 'PatientGender', #PasientIdXX
 varNy <- c('Alder', 'erMann', 'BMI', 'Reinn', 'FormDateSiste', 'Liggetid') #'PasientID',
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
               'AntInnSkjema', 'ReinnTid', 'ReinnNaar')
-setdiff(varFHIpp, names(RegData))
+#setdiff(varFHIpp, names(RegData))
 PandemiDataPpFHI <- RegData[ ,varFHIpp]
 # write.table(PandemiDataPpFHI, file = paste0('A:/Pandemi/PandemiDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
