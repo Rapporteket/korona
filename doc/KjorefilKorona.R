@@ -25,14 +25,22 @@ valgtVar <- 'demografi'
 
 
 
-FilerFHI <- lagDatafilerTilFHI()
+PandemiDataRaa <- korona::KoronaDataSQL()
+PandemiData <- KoronaPreprosesser(PandemiDataRaa)
+table(PandemiDataRaa$ArsakInnleggelse)
+table(PandemiData$ArsakInnleggelse)
+table(PandemiData$ArsakInnleggelse_Recode)
+table(PandemiData$CovidJAalle)
+table(PandemiData$CovidJaSiste)
+table(PandemiData$CovidJaFinnes)
+table(PandemiData$CovidNei)
+table(PandemiData$CovidUkjent)
 
-BeredskapDataPpFHI <- RegData[ ,varFHIpp[1:41]]
-BeredskapDataPpFHI$ReinnNaar
+table(PandemiData$ArsakInnleggelse, useNA = 'a')
+table(PandemiData$ArsakInnleggelse_NyA, useNA = 'a')
+table(PandemiData$ArsakInnleggelse_NyAC, useNA = 'a')
 
-
-PandemiData <- korona::KoronaDataSQL()
-PandemiData$ArsakInnleggelse
+#Kan også teste ved å se på enkeltverdier
 
 table(RegData[RegDataRaa$StatusVedUtskriving==2, 'HF'])
 RegDataRaa[RegDataRaa$StatusVedUtskriving==2 & RegDataRaa$HF=='Helse Bergen HF',

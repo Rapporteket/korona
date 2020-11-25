@@ -74,6 +74,23 @@ if (aggPers == 1) {
       test <- x %in% 1:5
       ifelse(sum(test)>0, max(x[test]), 999)} #1-nei, 2:5 ja, 999 ukjent.
 
+   # Aarsak <- function(x, N, FormDate) {
+   #    ifelse(sum(x == 1) == N, 1,
+   #           ifelse(last(x, order_by = FormDate) == 1, 2,
+   #                  ifelse(1 %in% x, 3,
+   #                         ifelse(sum(x == 2) == N, 5, 9) )))} #sum (x == 3) == N
+
+   Aarsak <- function(x, N, FormDate) {
+      case_when(
+         sum(x == 1) == N ~ 1,
+         last(x, order_by = FormDate) == 1  ~ 2,
+         1 %in% x  ~ 3,
+         sum(x == 1) == N ~ 1,
+         sum(x == 2) == N  ~ 5,
+         (sum (x == 3) == N) | (sum(x == -1))  ~ 9
+         )}
+
+
    RegDataRed <- RegData %>% group_by(PasientID) %>%
       summarise(PersonId = PersonId[1],
                 PersonIdBC19Hash = PersonIdBC19Hash[1],
@@ -87,8 +104,16 @@ if (aggPers == 1) {
                 Antibiotika = Antibiotika[1], #1 ja, 2-nei 3-ukjent
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
                AntibiotikaUkjent = sum(AntibiotikaUkjent)>0,
-                ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
-                Astma = sum(Astma)>0,
+               AntInnSkjema = n(),
+               # CovidJAalle = ifelse(sum(ArsakInnleggelse == 1) == AntInnSkjema, 1,0),
+               # CovidJaSiste = ifelse(last(ArsakInnleggelse, order_by = FormDate) == 1, 2,0),
+               # CovidJaFinnes = ifelse(1 %in% ArsakInnleggelse, 3, 0),
+               # CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
+               # CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
+               ArsakInn_Ny = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate), #1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj
+               #ArsakInnleggelse_NyAC = AarsakCase(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate), #1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj
+               ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
+               Astma = sum(Astma)>0,
                 #Bilirubin,
                 BMI = sort(BMI, decreasing = T)[1],
                 CurrentMunicipalNumber = first(CurrentMunicipalNumber, order_by = FormDate),
@@ -168,7 +193,6 @@ if (aggPers == 1) {
                                       as.numeric(sort(FormStatusUt)[1])), #1-kladd, 2-ferdigstilt
                 Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),
-                AntInnSkjema = n(),
                 # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
                 # Overf = , #Beregn, ja nei
                 # AntOverf = , #Antall overføringer
