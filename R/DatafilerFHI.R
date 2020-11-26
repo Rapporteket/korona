@@ -68,7 +68,7 @@ varBort <- c('PatientAge', 'PatientGender', #PasientIdXX
              "CreationDate", "CreationDateUt", "FirstTimeClosed", "FirstTimeClosedUt")
 varNy <- c('Alder', 'erMann', 'BMI', 'Reinn', 'FormDateSiste', 'Liggetid') #'PasientID',
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
-              'AntInnSkjema', 'ReinnTid', 'ReinnNaar', 'ArsakInn_Ny')
+              'AntInnSkjema', 'ReinnTid', 'ReinnNaar', 'ArsakInnNy')
 #setdiff(varFHIpp, names(RegData))
 PandemiDataPpFHI <- RegData[ ,varFHIpp]
 # write.table(PandemiDataPpFHI, file = paste0('A:/Pandemi/PandemiDataPpFHI', Sys.Date(), '.csv'),
@@ -126,7 +126,7 @@ varNy <- c('Alder', 'erMann', 'Bekreftet', 'Liggetid', 'ReinnResp', 'RespTid') #
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
               'FormDateSiste', 'Reinn', 'AntRegPrPas', 'ReinnTid', 'ReinnNaar',
               'ReinnRespTid', 'ReinnRespNaar', 'MechanicalRespiratorStartSiste',
-              'AgeAdmitted', 'AarsakInn_Ny')
+              'AgeAdmitted')
 BeredskapDataPpFHI <- RegData[ ,varFHIpp]
 #setdiff(varFHIpp, sort(names(RegData)))
 # write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),

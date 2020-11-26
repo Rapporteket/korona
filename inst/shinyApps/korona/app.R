@@ -78,6 +78,15 @@ enhetsNavn <- rhfNavn
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
 #names(enhetsNivaa) <- c('RHF', 'HF')
 
+aarsakInnValg <- c(
+  "Ja, minst siste opphold" = 2,
+  "Ja, alle opphold"=1,
+  "Ja, minst ett opph" = 3,
+  "Alle registrerte"=0,
+  "Nei, ingen opphold" = 4)
+  #original variabel: c("Ja"=1, "Alle"=9, "Nei"=2)
+
+
 #last modul(er)
 source(system.file("shinyApps/korona/R/resultatmodul.R", package = "korona"), encoding = 'UTF-8')
 
@@ -111,8 +120,8 @@ ui <- tagList(
                                    # ),
 
                                    selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
-                                               choices = c("Ja"=1, "Alle"=9, "Nei"=2)
-                                   ),
+                                               choices = aarsakInnValg
+                                    ),
                                    selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
                                                choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                    ),
@@ -244,7 +253,7 @@ ui <- tagList(
                                                           choices = 'Alle'
                                               ),
                                               selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
-                                                          choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                                                          choices = aarsakInnValg
                                               ),
                                               selectInput(inputId = "skjemastatusInnRes", label="Skjemastatus, inklusjon",
                                                           choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)

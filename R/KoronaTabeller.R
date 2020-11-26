@@ -340,10 +340,10 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
 
   #RegData <- RegDataRaa
   ind <- which(is.na(RegData$HovedskjemaGUID))
-  variabler <- c('HF', 'ShNavn', 'InnDato', 'SkjemaGUID')
+  variabler <- c('HFkort', 'ShNavn', 'InnDato', 'SkjemaGUID')
   tab <- RegData[ind, variabler]
   tab$InnDato <- as.character(tab$InnDato)
-  tabUt <- tab[with(tab, order(HF, ShNavn, InnDato)), ] #
+  tabUt <- tab[with(tab, order(HFkort, ShNavn, InnDato)), ] #
 }
 
 

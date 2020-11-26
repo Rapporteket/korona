@@ -23,10 +23,13 @@ enhetsNivaa <- 'RHF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
-
+test <- lagDatafilerTilFHI()
+RegData <- PandemiData
 
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(PandemiDataRaa)
+
+
 table(PandemiDataRaa$ArsakInnleggelse)
 table(PandemiData$ArsakInnleggelse)
 table(PandemiData$ArsakInnleggelse_Recode)

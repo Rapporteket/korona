@@ -86,7 +86,7 @@ if (aggPers == 1) {
          last(x, order_by = FormDate) == 1  ~ 2,
          1 %in% x  ~ 3,
          sum(x == 1) == N ~ 1,
-         sum(x == 2) == N  ~ 5,
+         sum(x == 2) == N  ~ 4,
          (sum (x == 3) == N) | (sum(x == -1))  ~ 9
          )}
 
@@ -110,7 +110,8 @@ if (aggPers == 1) {
                # CovidJaFinnes = ifelse(1 %in% ArsakInnleggelse, 3, 0),
                # CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
                # CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
-               ArsakInn_Ny = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate), #1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj
+               ArsakInnNy = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate),
+               #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 5-nei, ingen opph, 9-ukj
                #ArsakInnleggelse_NyAC = AarsakCase(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate), #1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj
                ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
                Astma = sum(Astma)>0,

@@ -20,7 +20,8 @@
 #' @param erMann kjønn, 0-kvinne, 1-mann
 #' @param skjemastatusInn status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
 #' @param skjemastatusUt status på utskrivingsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
-#' @param aarsakInn covid-19 som hovedårsak til innleggelse 1-ja, 2-nei
+#' @param aarsakInn covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
+#' 3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj
 #' @param enhetsNivaa organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
 #'  RHF (SC og LC-brukere), HF (LU-brukere)
 #' @param valgtEnhet - gis ut fra resh
@@ -38,8 +39,17 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
 
  if (skjemastatusInn %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatusInn)}
  if (skjemastatusUt %in% 1:2){RegData <- subset(RegData, RegData$FormStatusUt==skjemastatusUt)}
- if (aarsakInn %in% 1:2){RegData <- subset(RegData, RegData$ArsakInnleggelse==aarsakInn)}
-if (dodSh %in% 1:3){
+# if (aarsakInn %in% 1:2){RegData <- subset(RegData, RegData$ArsakInnleggelse==aarsakInn)}
+  if (aarsakInn %in% 1:4){
+    ind <- switch(as.character(aarsakInn),
+                  '1' = which(RegData$ArsakInnNy==1),
+                  '2' = which(RegData$ArsakInnNy %in% 1:2),
+                  '3' = which(RegData$ArsakInnNy %in% 1:3),
+                  '4' = which(RegData$ArsakInnNy == 4)
+                  )
+    RegData <- RegData[ind, ]
+    }
+  if (dodSh %in% 1:3){
   RegData <- if (dodSh %in% 1:2) {subset(RegData, RegData$StatusVedUtskriving==dodSh)
     } else {subset(RegData, RegData$StatusVedUtskriving %in% 1:2)}} #Alle utskrevne
   if (erMann %in% 0:1){
@@ -49,7 +59,6 @@ if (dodSh %in% 1:3){
                                                RegData$Alder >= minald & RegData$Alder <= maxald)}
  if(datoFra!=0) {RegData <- subset(RegData, RegData$InnDato >= as.Date(datoFra, tz= 'UTC'))}
  if(datoTil!=0) {RegData <- subset(RegData, RegData$InnDato <= as.Date(datoTil, tz= 'UTC'))}
-
 
 
   N <- dim(RegData)[1]
@@ -63,7 +72,8 @@ if (dodSh %in% 1:3){
                                      c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
     if (skjemastatusUt %in% 0:5){paste('Skjemastatus, utskriving:',
                                         c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
-    if (aarsakInn %in% 1:2){paste0('Covid-19, hovedårsak? ', c('Ja','Nei')[aarsakInn])},
+    if (aarsakInn %in% 1:4){paste0('Covid-19, hovedårsak? ',
+                                   c('Ja, alle opph.', 'Ja, (minst) siste opph.', 'Ja, minst ett opph.', 'Nei, ingen opph.')[aarsakInn])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
     if (dodSh %in% 1:3) {paste0('Tilstand ved utskriving: ', c('Levende','Død','Alle utskrevne')[as.numeric(dodSh)])},
     if ((valgtEnhet != 'Alle') &(enhetsUtvalg == 2)) {paste('Valgt enhet:', valgtEnhet)}
