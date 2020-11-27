@@ -21,9 +21,9 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valg
 
   if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
   RegData$TidsVar <- switch (tidsenhet,
-                                 dag = factor(format(RegData$InnDato, '%d.%B'),
+                                 dag = factor(format(RegData$InnDato, '%d.%b'),
                                               levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
-                                                                      by=paste0('-1 day'))), '%d.%B')),
+                                                                      by=paste0('-1 day'))), '%d.%b')),
                                  uke = factor(paste0('Uke ', format(RegData$InnDato, '%V')),
                                               levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
                                                                       by=paste0('-1 week'))), '%V'))),

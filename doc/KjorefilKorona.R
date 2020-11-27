@@ -1,6 +1,5 @@
 #Kjørefil for Rapporteket-Pandemi
 rm(list=(ls()))
-library(tidyverse)
 library(korona)
 RegDataRaa <- KoronaDataSQL()
 RegData <- KoronaPreprosesser(RegData = RegDataRaa)
@@ -26,7 +25,6 @@ valgtVar <- 'demografi'
 RegData <- PandemiData
 
 PandemiDataRaa <- korona::KoronaDataSQL()
-indRaa <- PandemiDataRaa$
 PandemiData <- KoronaPreprosesser(PandemiDataRaa)
 
 

@@ -105,11 +105,11 @@ if (aggPers == 1) {
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
                AntibiotikaUkjent = sum(AntibiotikaUkjent)>0,
                AntInnSkjema = n(),
-               # CovidJAalle = ifelse(sum(ArsakInnleggelse == 1) == AntInnSkjema, 1,0),
-               # CovidJaSiste = ifelse(last(ArsakInnleggelse, order_by = FormDate) == 1, 2,0),
-               # CovidJaFinnes = ifelse(1 %in% ArsakInnleggelse, 3, 0),
-               # CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
-               # CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
+               CovidJAalle = ifelse(sum(ArsakInnleggelse == 1) == AntInnSkjema, 1,0),
+               CovidJaSiste = ifelse(last(ArsakInnleggelse, order_by = FormDate) == 1, 2,0),
+               CovidJaFinnes = ifelse(1 %in% ArsakInnleggelse, 3, 0),
+               CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
+               CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
                ArsakInnNy = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate),
                #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 5-nei, ingen opph, 9-ukj
                #ArsakInnleggelse_NyAC = AarsakCase(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate), #1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj

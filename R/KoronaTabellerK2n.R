@@ -34,9 +34,9 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
   if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
-                                 dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
+                                 dag = factor(format(RegDataAlle$UtDato, '%d.%b'),
                                               levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
-                                                                      by=paste0('-1 day'))), '%d.%B')),
+                                                                      by=paste0('-1 day'))), '%d.%b')),
                                  uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
                                               levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
                                                                                      by=paste0('-1 week'))), '%V'))),
@@ -114,9 +114,9 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
   if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
-                                 dag = factor(format(RegDataAlle$UtDato, '%d.%B'),
+                                 dag = factor(format(RegDataAlle$UtDato, '%d.%b'),
                                               levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
-                                                                      by=paste0('-1 day'))), '%d.%B')),
+                                                                      by=paste0('-1 day'))), '%d.%b')),
                                  uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
                                               levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
                                                                                      by=paste0('-1 week'))), '%V'))),
@@ -215,7 +215,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), today(), by="day")
 
   if (tidsenhet=='dag') {
-    names(datoer) <- format(datoer, '%d.%B')
+    names(datoer) <- format(datoer, '%d.%b')
     aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
     RegDataAlle <- bind_cols(RegDataAlle, aux)
   } else {
@@ -305,7 +305,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   RegData <- UtData$RegData
   datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
-  names(datoer) <- format(datoer, '%d.%B')
+  names(datoer) <- format(datoer, '%d.%b')
   aux <- erInneliggende(datoer = datoer, regdata = RegData)
   RegData <- bind_cols(RegData, aux)
 

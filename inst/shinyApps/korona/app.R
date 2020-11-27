@@ -159,7 +159,7 @@ ui <- tagList(
                                 #h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
                                 fluidRow(
-                                  column(width = 5,
+                                  column(width = 6,
                                          h3('Status nå'),
                                          uiOutput('utvalgNaa'),
                                          tableOutput('statusNaaShTab'),
@@ -168,12 +168,12 @@ ui <- tagList(
                                          # HTML('<hr size="10" />'),
                                          hr(),
                                          h4('WALL OF SHAME'),
-                                         column(width=4,
+                                         column(width=2,
                                          tableOutput('skjemaInnKladdTab')),
-                                         column(width=4, offset=2,
+                                         column(width=2, offset=5,
                                                 tableOutput('skjemaUtKladdTab')                                                )
                                   ),
-                                  column(width=5, #offset=1,
+                                  column(width=5, offset=1,
                                          uiOutput('tittelFerdigeReg'),
                                          uiOutput('utvalgFerdigeReg'),
                                          tableOutput('tabFerdigeReg')
