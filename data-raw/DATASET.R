@@ -1,10 +1,10 @@
 ## code to prepare `DATASET` dataset goes here
 
 
-# ReshNivaa <- read.table('data-raw/EnhetsnivaaerResh.csv', sep=';',
-#                         stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh_MW.csv'), package = 'korona'), sep=';',
-                        stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
+ ReshNivaa <- read.table('data-raw/EnhetsnivaaerResh .csv', sep=';',
+                         stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+#ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
+#                        stringsAsFactors=FALSE, header=T, fileEncoding = 'latin1')
 
 ReshNivaa <- ReshNivaa %>% dplyr::mutate_if(is.character, trimws)
 ReshNivaa <- ReshNivaa %>% dplyr::mutate_if(is.character, enc2utf8)
