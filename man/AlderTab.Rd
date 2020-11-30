@@ -23,7 +23,8 @@ AlderTab(
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, 2-nei}
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
+3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
 
 \item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 

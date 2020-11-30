@@ -30,8 +30,10 @@ RegData <- PandemiData
 
 PandemiDataRaa[PandemiDataRaa$UnitId == 4204086, c('HF', 'RHF', "HelseenhetKortNavn")]
 ReshNivaa[ReshNivaa$ShResh == 4204086, ]
+ReshNivaa[ReshNivaa$ShResh == 705476, ]
 table(RegData$HFresh, useNA = 'a')
 RegData[is.na(RegData$HFresh), c("ReshId", "ShNavn")]
+
 
 table(RegData$ShNavn, useNA = 'a')
 table(RegData$HFresh, useNA = 'a')

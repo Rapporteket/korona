@@ -68,9 +68,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
 if (aggPers == 1) {
    #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
    JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
-# x <- RegData$AceHemmerInnkomst2
-# table(x)
-# test <- ifelse(2 %in% x, 2, 3)
    #Variabler med 1-nei, 2:5 ja, 999 ukjent. Velger mest alvorlige (høyeste) nivå. Ikke utfylt får også ukjent
    SviktVar <- function(x) {
       test <- x %in% 1:5
@@ -265,16 +262,16 @@ if (aggPers == 1) {
       # 100092  Sykehuset Østfold HF - Østfold
       # 101971 Finnmarkssykehuset HF . Finnmark HF.
       # 101051 Nordlandssykehuset HF Nordland HF
-      #RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)] #Henter
+
       indRegHF <- which(RegData$ReshId %in% HFmap$HFresh)
       RegData$HFresh[indRegHF] <- RegData$ReshId[indRegHF]
 
-       RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
-       RegData$ShNavn[indRegHF] <- RegData$HFkort[indRegHF]
+        RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
+        RegData$ShNavn[indRegHF] <- RegData$HFkort[indRegHF]
 
-      RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
-      RegData$RHF <- as.character(factor(RegData$RHFresh, levels=c(100021, 100022, 100024, 111919),
-                                         labels = c('Vest','Nord','Midt', 'Sør-Øst')))
+       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
+       RegData$RHF <- as.character(factor(RegData$RHFresh, levels=c(100021, 100022, 100024, 111919),
+                                          labels = c('Vest','Nord','Midt', 'Sør-Øst')))
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive

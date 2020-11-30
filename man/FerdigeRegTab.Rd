@@ -21,7 +21,8 @@ FerdigeRegTab(
 \item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
 RHF (SC og LC-brukere), HF (LU-brukere)}
 
-\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, 2-nei}
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
+3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
