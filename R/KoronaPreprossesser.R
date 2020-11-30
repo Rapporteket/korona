@@ -281,7 +281,7 @@ if (aggPers == 1) {
 
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
-      RegData$UtDato <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d") #Evt. Utskrivningsdato
+      RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Endret fra FormDateUt siden noen oppretter ut-skjema før utskriving
       RegData$FormDateUt <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d")
 
       #Beregnede variabler

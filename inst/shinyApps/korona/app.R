@@ -36,8 +36,8 @@ if (paaServer) {
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
   KoroDataRaa <-  KoronaDataSQL(koble=1)
-  KoroDataInn <- KoronaDataSQL(skjema = 1, koble=0)
-  KoroDataUt <- KoronaDataSQL(skjema=2, koble = 0) #Inneholder dobbeltregistrering!
+  #KoroDataInn <- KoronaDataSQL(skjema = 1, koble=0)
+  #KoroDataUt <- KoronaDataSQL(skjema=2, koble = 0) #Inneholder dobbeltregistrering!
   KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {

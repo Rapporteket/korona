@@ -91,7 +91,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=aarsakInn, erMann=erMann)
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
-  inneliggere <- is.na(RegData$FormDateUt)
+  inneliggere <- is.na(RegData$Utskrivningsdato)
   #indInneUreinn <- intersect(which(inneliggere), which(RegData$Reinn==0))
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(),
@@ -100,8 +100,8 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
   igaar <- Sys.Date()-1 #  '2020-04-10' #
   innIgaar <- length(which(RegData$InnDato == as.Date(igaar)))
-  utIgaar <- length(which(RegData$FormDateUt == as.Date(igaar)))
-  dodIgaar <- length(which(RegData$FormDateUt[RegData$StatusVedUtskriving==2] == as.Date(igaar)))
+  utIgaar <- length(which(RegData$Utskrivningsdato == as.Date(igaar)))
+  dodIgaar <- length(which(RegData$Utskrivningsdato[RegData$StatusVedUtskriving==2] == as.Date(igaar)))
 
   statusTab <- rbind(
     'På sykehus nå' = c(AntPaaShNaa, paste0(LiggetidNaaGjsn, ' dager')),
