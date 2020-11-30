@@ -27,6 +27,10 @@ RegData <- PandemiData
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(PandemiDataRaa)
 
+893ea8aa-e6db-457d-9d4a-fe614dea8ac1
+ind <- which(PandemiDataRaa$SkjemaGUID=='893ea8aa-e6db-457d-9d4a-fe614dea8ac1')
+PandemiDataRaa[, ]
+
 
 table(PandemiDataRaa$ArsakInnleggelse)
 table(PandemiData$ArsakInnleggelse)

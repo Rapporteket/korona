@@ -1,6 +1,15 @@
+aarsakInnValg <- c(
+  "Ja, minst siste opphold" = 2,
+  "Ja, alle opphold"=1,
+  "Ja, minst ett opph" = 3,
+  "Alle registrerte"=0,
+  "Nei, ingen opphold" = 4)
+#original variabel: c("Ja"=1, "Alle"=9, "Nei"=2)
+
+
+
 koronaresultater_UI <- function(id){
   ns <- shiny::NS(id)
-
 
   shiny::sidebarLayout(
     shiny::sidebarPanel(id = ns('brukervalgRes'),
@@ -20,7 +29,7 @@ koronaresultater_UI <- function(id){
                         selectInput(inputId = ns("velgAntVisning"), label="Velg antall dager",
                                     choices = c(10, 20, 30, 50, 100, 200, 300), selected = 30),
                         selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
-                                    choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                                    choices = aarsakInnValg #c("Ja"=1, "Alle"=9, "Nei"=2)
                         ),
                         selectInput(inputId = ns("skjemastatusInnRes"), label="Skjemastatus, inklusjon",
                                     choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
@@ -182,8 +191,11 @@ koronabelegg_UI <- function(id){
                         br(),
                         h3('Velg variabel/tema og filtreringer i data'),
 
-                        selectInput(inputId = ns("aarsakInn"), label="Covid-19 hovedårsak til innleggelse?",
-                                    choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                        # selectInput(inputId = ns("aarsakInn"), label="Covid-19 hovedårsak til innleggelse?",
+                        #             choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                        # ),
+                        selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
+                                    choices = aarsakInnValg
                         ),
                         selectInput(inputId = ns("skjemastatusInn"), label="Skjemastatus, inklusjon",
                                     choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
