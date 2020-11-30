@@ -18,6 +18,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
       names(RegData) %in% c('PatientInRegistryGuid', 'PasientGUID')] <- 'PasientID'
    RegData$ShNavn <- trimws(as.character(RegData$HelseenhetKortNavn)) #Fjerner mellomrom (før) og etter navn
 
+   RegData$ShNavn[RegData$ReshId == 4204086] <- 'Drammen, psyk.'
    RegData$ShNavn[RegData$ReshId == 108595] <- 'Innlandet, psyk.'
    RegData$ShNavn[RegData$ReshId == 111487] <- 'Aker'
    RegData$ShNavn[RegData$ReshId == 705757] <- 'Radiumhospitalet'
@@ -241,7 +242,15 @@ if (aggPers == 1) {
       RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
       RegData$HFresh[RegData$ReshId==108595] <- 100091
       RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
+
+      #RegData$HFresh[RegData$ReshId==4204086] <-
+      #RegData$HF[RegData$ReshId==4204086] <- ''
+
+      #RHFresh;RHFnavn;HFresh;HFnavn;HFnavnKort;ShResh;Sykehus
+      #111919;HELSE S?R-?ST RHF;700272;Vestre Viken HF;Vestre Viken;4204082;Drammen Sykehus
+
       RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
+
 
       RegData$HFresh[RegData$ReshId == 108595] <- 100092   #Innlandet, psyk.
       RegData$HFresh[RegData$ReshId %in% c(111487, 705757)] <- 110628   #Aker, Radiumhospitalet

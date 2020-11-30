@@ -27,10 +27,18 @@ RegData <- PandemiData
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(PandemiDataRaa)
 
-PandemiData <- PandemiData[which(PandemiData$ArsakInnNy==4), ]
+PandemiData <- PandemiData[which(PandemiData$ArsakInnNy==4 & PandemiData$erMann == 0), ]
+PandemiData[is.na(PandemiData$RHF),'ReshId']
+4204086
+PandemiDataRaa[PandemiDataRaa$UnitId == 4204086, c("HFresh", 'HF', "RHFresh", 'RHF')]
+PandemiData[PandemiData$ReshId == 4204086, c("HFresh", 'HF', "RHFresh", 'RHF')]
 
+RegData <- PandemiDataRaa
+RegData$HFresh <- ReshNivaa$HFresh[match(RegData$UnitId, ReshNivaa$ShResh)]
+test <- RegData[is.na(RegData$HFresh), c("HFresh", "UnitId", 'RHF')]
 
-
+RegData[which(RegData$UnitId == 4204086), c("HFresh", 'RHF', 'HelseenhetKortNavn')]
+match(4204086, ReshNivaa$ShResh)
 
 ind <- which(PandemiDataRaa$SkjemaGUID==toupper('893ea8aa-e6db-457d-9d4a-fe614dea8ac1'))
 PandemiDataRaa[ind, "Utskrivningsdato"]
