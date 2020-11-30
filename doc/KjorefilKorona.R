@@ -22,15 +22,26 @@ enhetsNivaa <- 'RHF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
-RegData <- PandemiData
 
 PandemiDataRaa <- korona::KoronaDataSQL()
-PandemiData <- KoronaPreprosesser(PandemiDataRaa)
+PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 
-PandemiData <- PandemiData[which(PandemiData$ArsakInnNy==4 & PandemiData$erMann == 0), ]
-PandemiData[is.na(PandemiData$RHF),'ReshId']
-4204086
-PandemiDataRaa[PandemiDataRaa$UnitId == 4204086, c("HFresh", 'HF', "RHFresh", 'RHF')]
+RegData <- PandemiData
+
+PandemiDataRaa[PandemiDataRaa$UnitId == 4204086, c('HF', 'RHF', "HelseenhetKortNavn")]
+ReshNivaa[ReshNivaa$ShResh == 4204086, ]
+table(RegData$HFresh, useNA = 'a')
+RegData[is.na(RegData$HFresh), c("ReshId", "ShNavn")]
+
+table(RegData$ShNavn, useNA = 'a')
+table(RegData$HFresh, useNA = 'a')
+table(RegData$HFkort, useNA = 'a')
+table(RegData$RHFresh, useNA = 'a')
+table(RegData$RHF, useNA = 'a')
+RegData$ReshId[is.na(RegData$HFresh)]
+RegData$ShNavn[is.na(RegData$HFresh)]
+
+
 PandemiData[PandemiData$ReshId == 4204086, c("HFresh", 'HF', "RHFresh", 'RHF')]
 
 RegData <- PandemiDataRaa
