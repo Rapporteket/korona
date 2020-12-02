@@ -189,7 +189,7 @@ if (aggPers == 1) {
                 #Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
                 ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
-                FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1,
+                FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1, #Regnes som kladd hvis utskjema ikke opprettet.
                                       as.numeric(sort(FormStatusUt)[1])), #1-kladd, 2-ferdigstilt
                 Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),

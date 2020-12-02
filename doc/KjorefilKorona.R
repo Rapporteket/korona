@@ -25,15 +25,21 @@ valgtVar <- 'demografi'
 
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
-
 RegData <- PandemiData
+#Se nærmere på inneliggende basert på manglende utskrivingsdato.
+ManglerUtDatoRaa <- sum(is.na(PandemiDataRaa$Utskrivningsdato))
+ManglerUtDatoPers <- sum(is.na(PandemiData$Utskrivningsdato))
 
-PandemiDataRaa[PandemiDataRaa$UnitId == 4204086, c('HF', 'RHF', "HelseenhetKortNavn")]
-ReshNivaa[ReshNivaa$ShResh == 4204086, ]
-ReshNivaa[ReshNivaa$ShResh == 705476, ]
-table(RegData$HFresh, useNA = 'a')
-RegData[is.na(RegData$HFresh), c("ReshId", "ShNavn")]
+ManglerUtSkjemaRaa <- sum(is.na(PandemiDataRaa$FormStatusUt))
+ManglerKladdUtSkjemaPers <- sum(PandemiData$FormStatusUt == 1) #Regnes som kladd hvis utskjema ikke opprettet.
 
+#Er alle ut-skjema som mangler utdato i kladd? Ja
+table(PandemiDataRaa$FormStatusUt[is.na(PandemiDataRaa$Utskrivningsdato)], useNA = 'a')
+
+#Antall døde
+AntDodRaa <- sum(PandemiDataRaa$StatusVedUtskriving == 2, na.rm = T)
+AntDodPers <- sum(PandemiData$StatusVedUtskriving == 2, na.rm = T)
+table(PandemiDataRaa$StatusVedUtskriving, useNA = 'a')
 
 table(RegData$ShNavn, useNA = 'a')
 table(RegData$HFresh, useNA = 'a')
