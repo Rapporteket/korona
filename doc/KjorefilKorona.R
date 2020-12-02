@@ -25,10 +25,30 @@ valgtVar <- 'demografi'
 
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
+PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
-SkjemaDod <- PandemiDataRaa$SkjemaGUID[PandemiDataRaa$StatusVedUtskriving==2]
+sum(is.na(PandemiDataRaa$SkjemaGUIDut))
+SkjemaDod <- sort(PandemiDataRaa$SkjemaGUID[which(PandemiDataRaa$StatusVedUtskriving==2)])
+#SkjemaDod <- sort(PandemiUt[which(PandemiUt$StatusVedUtskriving==2), "SkjemaGUID"])
+statusUt <- PandemiDataRaa[,c("SkjemaGUID", "SkjemaGUIDut", "StatusVedUtskriving")]
+write.table(statusUt,
+            file = 'StatusUtSkjemaGUID', row.names = F, sep = ';')
 
+
+DodHSO <- read.table('DodHSO.csv', sep=';',
+                     stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+DodHSO <- sort(toupper(as.vector(t(DodHSO))))
+#setdiff(DodHSO, SkjemaDod)
+#setdiff(DodHSO, PandemiDataRaa$SkjemaGUID) #Skjema som ikke i mitt uttrekk
+
+test <- PandemiDataRaa[which(PandemiDataRaa$SkjemaGUID %in% DodHSO),
+                       c("FormDate", "SkjemaGUID", "SkjemaGUIDut", "FormStatus", "FormStatusUt",
+                         'StatusVedUtskriving')]
+write.table(test[order(test$FormDate),], file = 'SkjemaGUIDtestDod.csv', row.names = F, sep = ';')
+
+
+table(PandemiDataRaa$StatusVedUtskriving)
 
 #Dobbeltregistrering av inn-skjema. Kanskje enklest å sjekke i sammenslåinga?
 N <- dim(PandemiDataRaa)[1]
