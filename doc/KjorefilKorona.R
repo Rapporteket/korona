@@ -26,6 +26,19 @@ valgtVar <- 'demografi'
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 RegData <- PandemiData
+
+SkjemaDod <- PandemiDataRaa$SkjemaGUID[PandemiDataRaa$StatusVedUtskriving==2]
+
+
+#Dobbeltregistrering av inn-skjema. Kanskje enklest å sjekke i sammenslåinga?
+N <- dim(PandemiDataRaa)[1]
+PandemiRaa <- PandemiDataRaa[order(PandemiDataRaa$FormDate),]
+N <- 65
+start
+indDbl <- which(difftime(PandemiRaa$FormDate[1:(N-1)], PandemiRaa$FormDate[2:N], units = 'secs') == 0)
+PandemiDbl <- PandemiRaa[sort(c(indDbl, (indDbl-1))), c("FormDate", "HelseenhetKortNavn")]
+
+
 #Se nærmere på inneliggende basert på manglende utskrivingsdato.
 ManglerUtDatoRaa <- sum(is.na(PandemiDataRaa$Utskrivningsdato))
 ManglerUtDatoPers <- sum(is.na(PandemiData$Utskrivningsdato))
@@ -40,6 +53,12 @@ table(PandemiDataRaa$FormStatusUt[is.na(PandemiDataRaa$Utskrivningsdato)], useNA
 AntDodRaa <- sum(PandemiDataRaa$StatusVedUtskriving == 2, na.rm = T)
 AntDodPers <- sum(PandemiData$StatusVedUtskriving == 2, na.rm = T)
 table(PandemiDataRaa$StatusVedUtskriving, useNA = 'a')
+
+#Får utskrivingsskjema FormDate fra utskrivingsdato hvis denne finnes? JA
+PandemiUt <- KoronaDataSQL(skjema = 2, koble = 0)
+PandemiUt$Diff <- difftime(PandemiUt$FormDate, PandemiUt$Utskrivningsdato, units = 'mins')
+test <- PandemiUt[order(PandemiUt$FormDate),c('Diff', "FormDate", "Utskrivningsdato","FormStatus")]
+
 
 table(RegData$ShNavn, useNA = 'a')
 table(RegData$HFresh, useNA = 'a')
