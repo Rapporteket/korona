@@ -22,12 +22,44 @@ enhetsNivaa <- 'RHF'
 enhetsUtvalg <- 0
 valgtVar <- 'demografi'
 
-
+library(korona)
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+#Se nærmere på inneliggende basert på manglende utskrivingsdato.
+ManglerUtDatoRaa <- sum(is.na(PandemiDataRaa$Utskrivningsdato))
+ManglerUtDatoPers <- sum(is.na(PandemiData$Utskrivningsdato))
+
+ManglerUtSkjemaRaa <- sum(is.na(PandemiDataRaa$FormStatusUt))
+ManglerKladdUtSkjemaPers <- sum(PandemiData$FormStatusUt == 1) #Regnes som kladd hvis utskjema ikke opprettet.
+
+#Er alle ut-skjema som mangler utdato i kladd? Ja
+table(PandemiDataRaa$FormStatusUt[is.na(PandemiDataRaa$Utskrivningsdato)], useNA = 'a')
+
+
+#Får utskrivingsskjema FormDate fra utskrivingsdato hvis denne finnes? JA
+PandemiUt <- KoronaDataSQL(skjema = 2, koble = 0)
+PandemiUt$DiffForm <- difftime(PandemiUt$FormDate, PandemiUt$Utskrivningsdato, units = 'mins')
+#test <- PandemiUt[order(PandemiUt$FormDate),c('Diff', 'CreationDate', "FormDate", "Utskrivningsdato","FormStatus")]
+
+PandemiDataRaa$DiffFormUts <- difftime(PandemiDataRaa$FormDateUt, PandemiDataRaa$Utskrivningsdato, units = 'days')
+PandemiDataRaa$DiffCreUts <- difftime(PandemiDataRaa$CreationDateUt, PandemiDataRaa$Utskrivningsdato, units = 'days')
+PandemiDataRaa$DiffFerdigUts <- difftime(PandemiDataRaa$FirstTimeClosedUt, PandemiDataRaa$Utskrivningsdato, units = 'days')
+test <- PandemiDataRaa[order(PandemiDataRaa$FormDate),
+                  c('DiffFormUts','DiffCreUts','DiffFerdigUts', 'CreationDateUt', "FormDateUt", "Utskrivningsdato","FormStatus")]
+
+MedDiffFormUts <- median(as.numeric(PandemiDataRaa$DiffFormUts), na.rm = T)
+MedDiffCreUts <- median(as.numeric(PandemiDataRaa$DiffCreUts), na.rm = T)
+MedDiffFerdigUts<- median(as.numeric(PandemiDataRaa$DiffFerdigUts), na.rm = T)
+
+'CreationDate'
+'CreationDateUt'
+'FirstTimeClosed'
+'FirstTimeClosedUt'
+
+#Se nærmere på antall døde
 sum(is.na(PandemiDataRaa$SkjemaGUIDut))
 SkjemaDod <- sort(PandemiDataRaa$SkjemaGUID[which(PandemiDataRaa$StatusVedUtskriving==2)])
 #SkjemaDod <- sort(PandemiUt[which(PandemiUt$StatusVedUtskriving==2), "SkjemaGUID"])
@@ -53,8 +85,10 @@ write.table(StatusUt,
 
 #write.table(test[order(test$FormDate),], file = 'SkjemaGUIDtestDod.csv', row.names = F, sep = ';')
 
-
-table(PandemiDataRaa$StatusVedUtskriving)
+#Antall døde
+AntDodRaa <- sum(PandemiDataRaa$StatusVedUtskriving == 2, na.rm = T)
+AntDodPers <- sum(PandemiData$StatusVedUtskriving == 2, na.rm = T)
+table(PandemiDataRaa$StatusVedUtskriving, useNA = 'a')
 
 #Dobbeltregistrering av inn-skjema. Kanskje enklest å sjekke i sammenslåinga?
 N <- dim(PandemiDataRaa)[1]
@@ -64,26 +98,6 @@ start
 indDbl <- which(difftime(PandemiRaa$FormDate[1:(N-1)], PandemiRaa$FormDate[2:N], units = 'secs') == 0)
 PandemiDbl <- PandemiRaa[sort(c(indDbl, (indDbl-1))), c("FormDate", "HelseenhetKortNavn")]
 
-
-#Se nærmere på inneliggende basert på manglende utskrivingsdato.
-ManglerUtDatoRaa <- sum(is.na(PandemiDataRaa$Utskrivningsdato))
-ManglerUtDatoPers <- sum(is.na(PandemiData$Utskrivningsdato))
-
-ManglerUtSkjemaRaa <- sum(is.na(PandemiDataRaa$FormStatusUt))
-ManglerKladdUtSkjemaPers <- sum(PandemiData$FormStatusUt == 1) #Regnes som kladd hvis utskjema ikke opprettet.
-
-#Er alle ut-skjema som mangler utdato i kladd? Ja
-table(PandemiDataRaa$FormStatusUt[is.na(PandemiDataRaa$Utskrivningsdato)], useNA = 'a')
-
-#Antall døde
-AntDodRaa <- sum(PandemiDataRaa$StatusVedUtskriving == 2, na.rm = T)
-AntDodPers <- sum(PandemiData$StatusVedUtskriving == 2, na.rm = T)
-table(PandemiDataRaa$StatusVedUtskriving, useNA = 'a')
-
-#Får utskrivingsskjema FormDate fra utskrivingsdato hvis denne finnes? JA
-PandemiUt <- KoronaDataSQL(skjema = 2, koble = 0)
-PandemiUt$Diff <- difftime(PandemiUt$FormDate, PandemiUt$Utskrivningsdato, units = 'mins')
-test <- PandemiUt[order(PandemiUt$FormDate),c('Diff', "FormDate", "Utskrivningsdato","FormStatus")]
 
 
 table(RegData$ShNavn, useNA = 'a')

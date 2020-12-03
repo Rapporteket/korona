@@ -7,8 +7,9 @@
 #'
 lagDatafilerTilFHI <- function(){
 #Rådata
-library(tidyverse)
-RegDataRaa <- KoronaDataSQL() #KoroDataRaa
+library(korona) #  library(tidyverse) #
+
+  RegDataRaa <- KoronaDataSQL() #KoroDataRaa
 varFHIraa <- c(
   #PasientGUID',
                 'PersonIdBC19Hash'
