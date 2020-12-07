@@ -64,6 +64,14 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
      apply(RegData[, intersect(names(RegData), LogVar)], 2, as.logical)
 
 
+   #Justere inneliggene (UtDato) for ut-skjema som opprettes samme dag som innleggelse
+   indKladdUt <- which(RegData$FormStatusUt == 1 & is.na(RegData$Utskrivningsdato)) #I kladd og mangler utskr.dato
+   indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$FormDate,
+                                         units = 'days')) < 1)
+   RegData$UtDato <- RegData$FormDateUt
+   RegData$UtDato[intersect(indKladdUt, indSmDag)] <- NA
+
+
    #------SLÅ SAMMEN TIL PER PASIENT
 if (aggPers == 1) {
    #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
@@ -215,7 +223,8 @@ if (aggPers == 1) {
                                    max(which(difftime(sort(FormDate)[2:AntInnSkjema],
                                                 FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                 units = "hours") > 24))),
-                FormDateSiste = nth(FormDate, ReinnNaar+1, order_by = FormDate),
+               UtDato =  last(UtDato, order_by = FormDate),
+               FormDateSiste = nth(FormDate, ReinnNaar+1, order_by = FormDate),
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
                LiggetidGml = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
@@ -280,8 +289,9 @@ if (aggPers == 1) {
 
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
-      RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Endret fra FormDateUt siden noen oppretter ut-skjema før utskriving
       RegData$FormDateUt <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d")
+      #RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Endret fra FormDateUt siden noen oppretter ut-skjema før utskriving
+      RegData$UtDato <- as.Date(RegData$UtDato, tz= 'UTC', format="%Y-%m-%d")
 
       #Beregnede variabler
       #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'

@@ -140,8 +140,10 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,AntibiotikaUkjent
   ,Antifungalbehandling
   ,AntiviralBehandling
+  ,CreationDate
   -- ,CurrentMunicipalNumber
   -- ,DistrictCode
+  ,FirstTimeClosed
   ,FormDate
   ,FormStatus
   ,FormTypeId

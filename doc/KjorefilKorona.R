@@ -29,6 +29,59 @@ PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
 #Se nærmere på inneliggende basert på manglende utskrivingsdato.
+#Ca. 290 pasienter som har en dato for utskrivingsskjema før dato for utskrivning,
+#med en mediantid skjemadato - utskrivningsdato 6 dager (nedre og øvre kvartil: 3 – 14). -> Over 10% "skrives ut" omtrent når de legges inn
+#Ca. 1830 pasienter har dato for utskrivingsskjema (CreationDate?) ETTER utskrivning,
+# mediantid skjemadato - utskrivningsdato på 1 dag (nedre og øvre kvartil: 0,5 – 9).
+
+#Hvis vi tar alle med ‘FirstTimeClosedUt’ (ca. 1300 pasienter) er
+#mediantid mellom utskrivningsdato og skjemadato på 10 dager (nedre og øvre kvartil: 4 – 67).
+
+# Alle disse tallene er basert på pasientens siste opphold (som for de fleste er det sin eneste).
+# Jeg tolker derfor at det blir mer riktig å fortsette å bruke FormDate når utskrivningsdato mangler fordi det virker som
+# for de aller fleste at utskrivningsskjema fremdeles blir registrert etter utskrivning,
+# og at for halvparten at ferdigstilling av skjemaet tar 10 dager eller lengre.
+# Også, som nevnt ovenfor, gir beregningen basert på FormDate et riktigere bilde av situasjonen når man sammenligner med andre kilder.
+
+
+plot(PandemiDataRaa$CreationDate, PandemiDataRaa$CreationDateUt, col='blue', pch=20)
+points(PandemiDataRaa$CreationDate, PandemiDataRaa$Utskrivningsdato, col='red', pch=20)
+
+plot(PandemiUt$CreationDate, PandemiUt$FormDate)
+plot(PandemiUt$Utskrivningsdato, PandemiUt$CreationDate)
+points(PandemiUt$Utskrivningsdato, PandemiUt$FirstTimeClosed, col='red', pch=20, cex=0.5)
+#Få med utskriving etter opprettelse, og stort sett ikke så lenge etter
+#Mange skjema etterregistreres
+#Skjema ferdigstilles stort sett når de opprettes, men kan bli liggende noen dager. (Creation, FirstTimeClosed)
+plot(PandemiUt$CreationDate, as.Date(PandemiUt$FirstTimeClosed))
+
+#Etterregistrering av pasienter:
+plot(PandemiDataRaa$CreationDate, PandemiDataRaa$FormDate)
+
+plot(difftime(PandemiDataRaa$CreationDateUt, PandemiDataRaa$Utskrivningsdato,
+              units = 'days'))
+
+#Ut-skjema som opprettes før utskrivning - opprettes de samtidig med innleggelse? Mange gjør det, ca 114 av 158 (72%)
+indOpprettForUts <- which(as.numeric(difftime(PandemiDataRaa$CreationDateUt, PandemiDataRaa$Utskrivningsdato, units = 'mins')) <= 0)
+indSmDag <- which(as.numeric(difftime(PandemiDataRaa$CreationDateUt[indOpprettForUts], PandemiDataRaa$CreationDate[indOpprettForUts],
+                              units = 'days')) < 1)
+
+#Justere inneliggene basert på at ut-skjema opprettes samme dag som innleggelse
+indKladdUt <- which(PandemiDataRaa$FormStatusUt == 1 & is.na(PandemiDataRaa$Utskrivningsdato)) #I kladd og mangler utskr.dato
+indSmDag <- which(as.numeric(difftime(PandemiDataRaa$CreationDateUt, PandemiDataRaa$FormDate,
+                                   units = 'days')) < 1)
+PandemiDataRaa$UtDato <- PandemiDataRaa$FormDateUt
+PandemiDataRaa$UtDato[intersect(indKladdUt, indSmDag)] <- NA
+sum(is.na(PandemiDataRaa$UtDato))
+sum(is.na(PandemiDataRaa$Utskrivningsdato))
+
+#Hvor vanlig er det å inn og ut på samme dag? 258 av 2115, 12% (3% <0,5 dager)
+indFerdig <- which(PandemiDataRaa$FormStatusUt == 2)
+innUtSmdag <- sum(as.numeric(difftime(PandemiDataRaa$FormDateUt[indFerdig], PandemiDataRaa$FormDate[indFerdig],
+                           units = 'days')) < .25)
+
+
+
 ManglerUtDatoRaa <- sum(is.na(PandemiDataRaa$Utskrivningsdato))
 ManglerUtDatoPers <- sum(is.na(PandemiData$Utskrivningsdato))
 

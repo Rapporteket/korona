@@ -92,7 +92,9 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
   inneliggere <- is.na(RegData$UtDato)
-  #indInneUreinn <- intersect(which(inneliggere), which(RegData$Reinn==0))
+  # indKladdUt <- which(RegData$FormStatusUt == 1)
+  # ind <- which(as.numeric(difftime(RegData$CreationDateUt[indKladdUt], RegData$CreationDate[indKladdUt],
+  #                                  units = 'days')) < 1)
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(),
                                      RegData$InnTidspunktSiste, units='days'))[inneliggere]
