@@ -43,10 +43,9 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
 abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                                Rpakke='korona', valgtEnhet = 'Alle',
                              enhetsNivaa = 'RHF', rolle = 'SC'){
-  #valgtRHF <- valgtRHF[[1]]
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = "starter Abonnement: Pandemi-rapport")
+                    msg = "starter abonnementkjøring: Pandemi-rapport")
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
@@ -64,9 +63,10 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = paste("Leverer: ", utfil))
+                    msg = paste("Leverer abonnementsfil: ", utfil))
   return(utfil)
 }
+
 
 #' Funksjon som henter filer som skal sendes til FHI. To filer fra intensivopphold
 #' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til

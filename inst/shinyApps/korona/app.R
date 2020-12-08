@@ -878,27 +878,26 @@ server <- function(input, output, session) {
     if (input$subscriptionRep == "Koronarapport") {
       synopsis <- "Rapporteket-Pandemi: Koronarapport"
       rnwFil <- "KoronaRapport.Rnw" #Navn på fila
-
+      }
     fun <- "abonnementKorona"
     paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
-     paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
-#     test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
-#                            reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
-#     print(test)
-    }
+    paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
+    # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
+    #                        reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
+    # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
+    #                          reshID=100082) #, valgtEnhet=egenEnhet, enhetsNivaa='RHF', rolle='SC')
+    # print(test)
 
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
                               fun = fun, paramNames = paramNames,
                               paramValues = paramValues, owner = owner,
                               email = email, organization = organization,
-                              runDayOfYear = rapbase::makeRunDayOfYearSequence(
-                                interval = interval),
+                              runDayOfYear = runDayOfYear,
                               interval = interval,
                               intervalName = intervalName)
 
     rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
   })
-
 
 
   ## slett eksisterende abonnement

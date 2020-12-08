@@ -311,6 +311,9 @@ knitr::knit('KoronaRapport.Rnw', encoding = 'UTF-8')
 tools::texi2pdf(file='KoronaRapport.tex')
 knitr::knit2pdf('KoronaRapport.Rnw') #, encoding = 'UTF-8')
 
+korona::abonnementKorona(rnwFil=rnwFil, brukernavn='lluring', reshID=0,
+                 Rpakke='korona', valgtEnhet = 'Alle',
+                 enhetsNivaa = 'RHF', rolle = 'SC')
 
 unique(PandemiInn[,c('RHFresh','RHF')])
 PandemiInn %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = length(unique(HealthUnitShortName)))
