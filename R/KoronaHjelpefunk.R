@@ -45,15 +45,32 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                              enhetsNivaa = 'RHF', rolle = 'SC'){
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = "starter abonnementkjøring: Pandemi-rapport")
+                    msg = "1)starter abonnementkjøring: Pandemi-rapport")
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg = paste0('2)PARAMETRE: rnwFil: ', rnwFil, ', brukernavn: ', brukernavn,
+               ', reshID: ', reshID, ', Rpakke: ', Rpakke, ', valgtEnhet: ', valgtEnhet,
+  ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle))
+
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
-  # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg = "3) filbase, tmpFile, src ok")
+
+
+    # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
   #owd <-
   setwd(tempdir())
   dir <- getwd()
   file.copy(src, tmpFile, overwrite = TRUE)
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg = "4) setwd, dir, file.copy ok")
   knitr::knit2pdf(input=tmpFile)
 
   #gc() #Opprydning gc-"garbage collection"

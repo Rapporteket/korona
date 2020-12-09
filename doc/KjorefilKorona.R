@@ -28,18 +28,12 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
-#Dobbeltregistrering av inn-skjema. Kanskje enklest å sjekke i sammenslåinga?
-N <- dim(PandemiDataRaa)[1]
-PandemiRaa <- PandemiDataRaa[order(PandemiDataRaa$FormDate),]
-N <- 65
 
-
-indSmTid <- which(difftime(PandemiRaa$FormDate[2:N], PandemiRaa$FormDate[1:(N-1)], units = 'mins') < 60)
-PandemiDbl <- PandemiRaa[unique(sort(c(indDbl, (indDbl+1)))), c("FormDate", "HelseenhetKortNavn", "PatientInRegistryGuid")]
-difftime(PandemiRaa$FormDate[60], PandemiRaa$FormDate[61], units = 'mins')
-
-TabDbl <- PasMdblReg(RegData=PandemiDataRaa, tidsavvik=120)
-
+test <- korona::abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='lenaro', reshID=700720,
+                             Rpakke='korona', valgtEnhet = 'Alle',
+                             enhetsNivaa = 'RHF', rolle = 'SC')
+testBer <- intensivberedskap::abonnementBeredsk(rnwFil='BeredskapCorona.Rnw', brukernavn='beredskap', reshID=0,
+                                valgtRHF = 'Alle', Rpakke='intensivberedskap')
 
 #Se nærmere på inneliggende basert på manglende utskrivingsdato.
 #Ca. 290 pasienter som har en dato for utskrivingsskjema før dato for utskrivning,

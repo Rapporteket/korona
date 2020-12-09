@@ -22,11 +22,10 @@ options(warn = -1)
 knitr::opts_knit$set(root.dir = './')
 options(knitr.table.format = "latex")
 library(intensivberedskap)
-library(tidyverse)
+library(korona) #inkluderer tidyverse
 library(lubridate)
 library(xtable)
 library(kableExtra)
-library(korona)
 forHvem <- ifelse(valgtEnhet=='Alle', 'hele landet', valgtEnhet)
 Tittel <- paste0('Koronainnlagte, ', forHvem)
 @

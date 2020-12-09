@@ -905,7 +905,7 @@ server <- function(input, output, session) {
     #                        reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
     # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
     #                          reshID=100082) #, valgtEnhet=egenEnhet, enhetsNivaa='RHF', rolle='SC')
-    # print(test)
+     print(paramValues)
 
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
                               fun = fun, paramNames = paramNames,
