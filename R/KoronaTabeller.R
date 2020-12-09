@@ -349,4 +349,36 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
 }
 
 
+#' Finner pasienter med dobbeltregistrerte skjema
+#'
+#' @param RegData dataramme fra pandemi registeret, inn og utskr.skjema
+#' @param tidssavik - maks tidsavvik (minutter) mellom to påfølgende registreringer som sjekkes
+#'
+#' @return
+#' @export
+PasMdblReg <- function(RegData, tidsavvik=0){
+  DblReg <- RegData %>% group_by(PersonId) %>%
+    summarise(N = n(),
+              #MinTid = ifelse(N>1, min(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins'), na.rm = T), NA),
+              LikTid = ifelse(N>1,
+                              ifelse(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins') <= tidsavvik,
+                                     1, 0), 0),
+              PatientInRegistryGuid = PatientInRegistryGuid[1]
+    )
+
+
+
+  PasMdbl <- DblReg$PatientInRegistryGuid[which(DblReg$LikTid == 1)]
+  TabDbl <- RegData[which(RegData$PatientInRegistryGuid %in% PasMdbl),
+                           c("PatientInRegistryGuid", "FormDate", "HelseenhetKortNavn", "UnitId", 'SkjemaGUID', "FormDateUt",'SkjemaGUIDut')]
+  TabDbl <- TabDbl[order(TabDbl$FormDate), ]
+  N <- dim(TabDbl)[1]
+  indSmTid <- which(difftime(TabDbl$FormDate[2:N], TabDbl$FormDate[1:(N-1)], units = 'mins') <= tidsavvik)
+  TabDbl <- TabDbl[unique(sort(c(indSmTid, (indSmTid+1)))), ]
+  TabDbl$FormDate <- format(TabDbl$FormDate, "%Y-%m-%d %H:%M:%S")
+  TabDbl$FormDateUt <- format(TabDbl$FormDateUt, "%Y-%m-%d %H:%M:%S")
+
+  tabUt <- TabDbl[order(TabDbl$PatientInRegistryGuid, TabDbl$FormDate), ]
+}
+
 

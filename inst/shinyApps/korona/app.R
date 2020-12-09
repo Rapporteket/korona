@@ -294,12 +294,20 @@ ui <- tagList(
 
 
 #----------Datakvalitet-------------------------
-tabPanel('Manglende ut-skjema',
+tabPanel('Datakvalitet',
+  tabsetPanel(
+    tabPanel('Manglende ut-skjema',
          h3('Innleggelsesskjema som mangler utskrivning'),
          downloadButton(outputId = 'lastNed_innManglerUt', label='Last ned tabell'),
          tableOutput('innManglerUtTab')
+         ),
+    tabPanel('Dobbeltregistrering av inn-skjema',
+             h3('Pasienter som har to innleggelsesskjema med (tilnærmet) like innleggelsestidspunkt'),
+             downloadButton(outputId = 'lastNed_dblInn', label='Last ned tabell'),
+             tableOutput('dblInn')
+             )
 
-), #Datakvalitet
+)), #Datakvalitet
 #---------Intensivregistreringer--------------------------------
              tabPanel(p('Intensivpasienter',
                         title='Resultater fra koronaregistrering i intensivregisteret'),
@@ -768,6 +776,17 @@ server <- function(input, output, session) {
     },
     content = function(file, filename){
       write.csv2(innManglerUtTab, file, row.names = F, na = '')
+    })
+
+  TabDblInn <- PasMdblReg(RegData=KoroDataRaa, tidsavvik = 60)
+  output$dblInn <- renderTable(TabDblInn)
+
+  output$lastNed_dblInn <- downloadHandler(
+    filename = function(){
+      paste0('ToInnskjema.csv')
+    },
+    content = function(file, filename){
+      write.csv2(TabDblInn, file, row.names = F, na = '')
     })
 
   #-------------Intensivregistreringer------------------------

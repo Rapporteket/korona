@@ -28,6 +28,19 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+#Dobbeltregistrering av inn-skjema. Kanskje enklest å sjekke i sammenslåinga?
+N <- dim(PandemiDataRaa)[1]
+PandemiRaa <- PandemiDataRaa[order(PandemiDataRaa$FormDate),]
+N <- 65
+
+
+indSmTid <- which(difftime(PandemiRaa$FormDate[2:N], PandemiRaa$FormDate[1:(N-1)], units = 'mins') < 60)
+PandemiDbl <- PandemiRaa[unique(sort(c(indDbl, (indDbl+1)))), c("FormDate", "HelseenhetKortNavn", "PatientInRegistryGuid")]
+difftime(PandemiRaa$FormDate[60], PandemiRaa$FormDate[61], units = 'mins')
+
+TabDbl <- PasMdblReg(RegData=PandemiDataRaa, tidsavvik=120)
+
+
 #Se nærmere på inneliggende basert på manglende utskrivingsdato.
 #Ca. 290 pasienter som har en dato for utskrivingsskjema før dato for utskrivning,
 #med en mediantid skjemadato - utskrivningsdato 6 dager (nedre og øvre kvartil: 3 – 14). -> Over 10% "skrives ut" omtrent når de legges inn
@@ -142,14 +155,6 @@ write.table(StatusUt,
 AntDodRaa <- sum(PandemiDataRaa$StatusVedUtskriving == 2, na.rm = T)
 AntDodPers <- sum(PandemiData$StatusVedUtskriving == 2, na.rm = T)
 table(PandemiDataRaa$StatusVedUtskriving, useNA = 'a')
-
-#Dobbeltregistrering av inn-skjema. Kanskje enklest å sjekke i sammenslåinga?
-N <- dim(PandemiDataRaa)[1]
-PandemiRaa <- PandemiDataRaa[order(PandemiDataRaa$FormDate),]
-N <- 65
-start
-indDbl <- which(difftime(PandemiRaa$FormDate[1:(N-1)], PandemiRaa$FormDate[2:N], units = 'secs') == 0)
-PandemiDbl <- PandemiRaa[sort(c(indDbl, (indDbl-1))), c("FormDate", "HelseenhetKortNavn")]
 
 
 
