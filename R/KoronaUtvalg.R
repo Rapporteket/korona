@@ -35,8 +35,11 @@
 #'
 KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
                              skjemastatusInn=9, skjemastatusUt=9, dodSh=9, aarsakInn=9,
-                         enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=2) { #reshID=0,
+                         enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=2,
+                         beredPas=9) { #reshID=0,
 
+  if ('BeredPas' %in% names(RegData)) { #Sjekker om data koblet på beredskapsskjema
+    if (beredPas %in% 0:1) {RegData <- subset(RegData, RegData$BeredPas == beredPas)}}
  if (skjemastatusInn %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatusInn)}
  if (skjemastatusUt %in% 1:2){RegData <- subset(RegData, RegData$FormStatusUt==skjemastatusUt)}
 # if (aarsakInn %in% 1:2){RegData <- subset(RegData, RegData$ArsakInnleggelse==aarsakInn)}
@@ -76,7 +79,9 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
                                    c('Ja, alle opph.', 'Ja, (minst) siste opph.', 'Ja, minst ett opph.', 'Nei, ingen opph.')[aarsakInn])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
     if (dodSh %in% 1:3) {paste0('Tilstand ved utskriving: ', c('Levende','Død','Alle utskrevne')[as.numeric(dodSh)])},
-    if ((valgtEnhet != 'Alle') &(enhetsUtvalg == 2)) {paste('Valgt enhet:', valgtEnhet)}
+    if ((valgtEnhet != 'Alle') &(enhetsUtvalg == 2)) {paste('Valgt enhet:', valgtEnhet)},
+    if ('BeredPas' %in% names(RegData)) { #Sjekker om data koblet på beredskapsskjema
+      if (beredPas %in% 0:1) {paste0('Intensivpasient? ', c('Nei', 'Ja')[beredPas+1])}}
   )
 # utvalgTxt <- ifelse(is.null(utvalgTxt), '', utvalgTxt)
 if (is.null(utvalgTxt)) {utvalgTxt <- ''}

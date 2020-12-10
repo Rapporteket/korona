@@ -36,9 +36,7 @@ if (paaServer) {
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
   KoroDataRaa <-  KoronaDataSQL(koble=1)
-  #KoroDataInn <- KoronaDataSQL(skjema = 1, koble=0)
-  #KoroDataUt <- KoronaDataSQL(skjema=2, koble = 0) #Inneholder dobbeltregistrering!
-  KoroDataInt <- intensivberedskap::NIRberedskDataSQL()
+  BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
   KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-06-11 09-29-30.txt', sep=';',
@@ -47,14 +45,10 @@ if (paaServer) {
   KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-06-11 09-29-30.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
-  # KoroDataInt_gml <-  read.table('I:/nir/ReadinessFormDataContract2020-04-03 16-38-35.txt', sep=';',
-  #                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  # KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-04-27 16-11-27.txt', sep=';',
-                             # stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataInt <-  read.table('I:/nir/ReadinessFormDataContract2020-06-11 09-31-13.txt', sep=';',
+  BeredData <-  read.table('I:/nir/ReadinessFormDataContract2020-06-11 09-31-13.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataInt$EcmoEnd[KoroDataInt$EcmoEnd == ""] <- NA
-  KoroDataInt$EcmoStart[KoroDataInt$EcmoStart == ""] <- NA
+  BeredData$EcmoEnd[BeredData$EcmoEnd == ""] <- NA
+  BeredData$EcmoStart[BeredData$EcmoStart == ""] <- NA
   varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
              'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
   KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
@@ -63,7 +57,12 @@ if (paaServer) {
 
 
 KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
-KoroDataInt <- intensivberedskap::NIRPreprosessBeredsk(RegData=KoroDataInt)
+BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
+#Kobler pandemi og beredskap:
+KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
+                     by = 'PersonId')
+KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+#table(KoroDataBered$BeredPas)
 
 #KoroData$HFkort2 <- ReshNivaa$HFnavnKort[match(KoroData$HFresh, ReshNivaa$HFresh)] #HFkort2
 
@@ -261,7 +260,10 @@ ui <- tagList(
                                               selectInput(inputId = "dodShRes", label="Utskrevne, tilstand",
                                                           choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
                                               ),
-                                              selectInput(inputId = "erMannRes", label="Kjønn",
+                                              selectInput(inputId = "beredPasRes", label="Intensivpasient?",
+                                                          choices = c("Alle pasienter"=9, "Ja"=1, "Nei"=0)
+                                              ),
+                                              br(),selectInput(inputId = "erMannRes", label="Kjønn",
                                                           choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
                                               ),
                                               br(),
@@ -326,7 +328,7 @@ tabPanel('Datakvalitet',
                       mainPanel(width = 9,
                                 h3('Resultater fra koronaregistrering på INTENSIVavdelinger.'),
                                 h4('Mer detaljerte resultater fra intensivavdlingene
-                               finnes på Rapporteket-NIR-Beredskap'),
+                               finnes på Rapporteket-NIR-Beredskap og på Rapporteket-Intensiv'),
                                 #h4('Husk at andre tilgangsnivåer/resh enn i Rapporteket-Beredskap', style = "color:red"),
                                 #h5('Siden er under utvikling... ', style = "color:red"),
                                 br(),
@@ -346,7 +348,7 @@ tabPanel('Datakvalitet',
                                   )),
 
                                 h3('Antall intensivopphold'),
-                                h5('Innleggelser siste to uker, samt totalt i 2020'),
+                                h5('Innleggelser siste to uker, samt totalt'),
                                 uiOutput('utvalgAntRegInt'),
                                 tableOutput('tabAntRegInt'),
                                 br(),
@@ -719,6 +721,7 @@ server <- function(input, output, session) {
                      dodSh=as.numeric(input$dodShRes),
                      aarsakInn = as.numeric(input$aarsakInnRes),
                      erMann=as.numeric(input$erMannRes),
+                     beredPas = as.numeric(input$beredPasRes),
                      skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                      kjemastatusUt=as.numeric(input$skjemastatusUtRes),
                      session = session)
@@ -793,10 +796,10 @@ server <- function(input, output, session) {
 
   observe({
 
-    AntTab <- intensivberedskap::TabTidEnhet(RegData=KoroDataInt, tidsenhet='dag', #valgtRHF= 'Alle',
+    AntTab <- intensivberedskap::TabTidEnhet(RegData=BeredData, tidsenhet='dag', #valgtRHF= 'Alle',
                                              bekr=as.numeric(input$bekrInt)
     )
-    UtData <- NIRUtvalgBeredsk(RegData=KoroDataInt,
+    UtData <- NIRUtvalgBeredsk(RegData=BeredData,
                                bekr=as.numeric(input$bekrInt)
     )
     utvalg <- UtData$utvalgTxt
@@ -817,13 +820,13 @@ server <- function(input, output, session) {
 
 
     #Tab status nå
-    statusNaaIntTab <- intensivberedskap::statusECMOrespTab(RegData=KoroDataInt,
+    statusNaaIntTab <- intensivberedskap::statusECMOrespTab(RegData=BeredData,
                                                             bekr=as.numeric(input$bekrInt))
     output$tabIntensivNaa <- renderTable({statusNaaIntTab$Tab}, rownames = T, digits=0, spacing="xs")
     output$utvalgIntensivNaa <- renderUI({h5(HTML(paste0(statusNaaIntTab$utvalgTxt, '<br />'))) })
 
     #Tab ferdigstilte
-    TabFerdigInt <- intensivberedskap::oppsumFerdigeRegTab(RegData=KoroDataInt,
+    TabFerdigInt <- intensivberedskap::oppsumFerdigeRegTab(RegData=BeredData,
                                                            bekr = as.numeric(input$bekrInt))
 
     output$tabFerdigeRegInt <- if (TabFerdigInt$Ntest>2){
@@ -832,18 +835,18 @@ server <- function(input, output, session) {
 
     output$utvalgFerdigeRegInt <- renderUI({h5(HTML(paste0(TabFerdigInt$utvalgTxt, '<br />'))) })
     output$tittelFerdigeRegInt <- renderUI(
-      h4(paste0('Fullførte registreringer, intensiv (', TabFerdigInt$Ntest, ' skjema)')))
+      h4(paste0('Fullførte registreringer, intensiv (', TabFerdigInt$Ntest, ' forløp)')))
 
     #Registreringer i limbo:
     output$RegIlimboInt <- renderUI({
       finnBurdeFerdig <- function(RegData) {sum((!(is.na(RegData$DateDischargedIntensive)) & (RegData$FormStatus!=2)))}
-      AntBurdeFerdig <- paste0(finnBurdeFerdig(KoroDataInt), ' skjema for hele landet')
+      AntBurdeFerdig <- paste0(finnBurdeFerdig(BeredData), ' skjema for hele landet')
       h5(HTML(paste0('&nbsp;&nbsp;&nbsp;', AntBurdeFerdig, '<br />')))
     })
 
 
     #Tab risiko
-    RisikoTab <- intensivberedskap::RisikofaktorerTab(RegData=KoroDataInt, tidsenhet='Totalt',
+    RisikoTab <- intensivberedskap::RisikofaktorerTab(RegData=BeredData, tidsenhet='Totalt',
                                                       bekr=as.numeric(input$bekrInt))
 
     output$tabRisikofaktorerInt <- if (RisikoTab$Ntest>2){
@@ -852,7 +855,7 @@ server <- function(input, output, session) {
     output$utvalgRisikoInt <- renderUI({h5(HTML(paste0(RisikoTab$utvalgTxt, '<br />'))) #tagList()
     })
 
-    TabAlder <- intensivberedskap::TabAlder(RegData=KoroDataInt,
+    TabAlder <- intensivberedskap::TabAlder(RegData=BeredData,
                                             bekr=as.numeric(input$bekrInt)
     )
     output$tabAlderInt<- renderTable({xtable::xtable(TabAlder$Tab)}, rownames = T, digits=0, spacing="xs")
