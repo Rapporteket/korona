@@ -202,7 +202,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
                                 SC = RegData$RHF,
-                                LC = RegData$HF,
+                                LC = RegData$HFnavn,
                                 LU = RegData$ShNavn)
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
@@ -307,7 +307,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
   RegData <- UtData$RegData
   datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
   names(datoer) <- format(datoer, '%d.%b')
-  aux <- erInneliggende(datoer = datoer, regdata = RegData)
+  aux <- erInneliggende(datoer = datoer, regdata = RegData) #Matrise boolske verdier hver pasient/dag om inneliggende
   RegData <- bind_cols(RegData, aux)
 
   TabTidHF <-
@@ -320,7 +320,8 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
     tr_summarize_output(grvarnavn = 'Tid')
 
   belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
-  belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
+  belegg_rhf <- #table(belegg_ssb$Dognplasser.2018, useNA = 'a')
+    as.data.frame(belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018)))
   belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
 
   TabTidRHF <-
@@ -329,7 +330,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
     summarise_all(sum) %>%
     merge(belegg_rhf[, c("RHFresh", "Dognplasser.2018", "RHF")], by.x = "RHFresh", by.y = "RHFresh", all.x = T) %>%
     mutate(RHFresh = RHF) %>% select(-RHF) %>%
-    bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
+    # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>% #KAN DENNE FJERNES?
     tr_summarize_output(grvarnavn = 'Tid')
 
   Samlet <- bind_cols(TabTidHF, TabTidRHF[,-1])

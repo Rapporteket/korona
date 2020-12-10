@@ -231,7 +231,7 @@ koronabelegg <- function(input, output, session, KoroData, rolle, reshID, egetEn
     AntTab <- antallTidBelegg(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag', reshID = reshID,
-                              aarsakInn = as.numeric(input$aarsakInn),
+                              aarsakInn = as.numeric(input$aarsakInnRes),
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               erMann=as.numeric(input$erMann))
     ant_skjema <- AntTab$belegg_anslag_txt
