@@ -41,7 +41,7 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
 #' @export
 
 abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
-                               Rpakke='korona', valgtEnhet = 'Alle',
+                               valgtEnhet = 'Alle',
                              enhetsNivaa = 'RHF', rolle = 'SC'){
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
@@ -55,14 +55,14 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
-  src <- normalizePath(system.file(rnwFil, package=Rpakke))
+  src <- normalizePath(system.file(rnwFil, package='korona'))
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = "3) filbase, tmpFile, src ok")
 
 
-    # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
+# gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
   #owd <-
   setwd(tempdir())
   dir <- getwd()
@@ -73,6 +73,10 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                     msg = "4) setwd, dir, file.copy ok")
   knitr::knit2pdf(input=tmpFile)
 
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg ="5) Kjørt knit2pdf")
+
   #gc() #Opprydning gc-"garbage collection"
   utfil <- paste0(dir, '/', substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf')
   #utfil <- file.copy(from = paste0(substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf'),
@@ -80,7 +84,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = paste("Leverer abonnementsfil: ", utfil))
+                    msg = paste("6) Leverer abonnementsfil: ", utfil))
   return(utfil)
 }
 
