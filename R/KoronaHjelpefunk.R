@@ -116,7 +116,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     Filer <- korona::lagDatafilerTilFHI()
 
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                      msg = paste0("Har hentet ekte filer"))
+                      msg = paste0("Har hentet ekte filer for sending til FHI"))
 
     datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
     for (fil in datasett){
@@ -125,7 +125,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                   fileEncoding = 'UTF-8', row.names=F, sep=';', na='')}
 
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                      msg = paste0("Har lagret ekte filer"))
+                      msg = paste0("Har lagret ekte filer for sending til FHI"))
 
     #utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
 
