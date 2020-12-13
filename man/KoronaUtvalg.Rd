@@ -17,7 +17,8 @@ KoronaUtvalg(
   aarsakInn = 9,
   enhetsNivaa = "RHF",
   valgtEnhet = "Alle",
-  enhetsUtvalg = 2
+  enhetsUtvalg = 2,
+  beredPas = 9
 )
 }
 \arguments{

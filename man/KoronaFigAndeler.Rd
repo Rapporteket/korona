@@ -17,6 +17,7 @@ KoronaFigAndeler(
   enhetsNivaa = "RHF",
   valgtEnhet = "Alle",
   enhetsUtvalg = 0,
+  beredPas = 9,
   hentData = 0,
   outfile = "",
   lagFig = 1,

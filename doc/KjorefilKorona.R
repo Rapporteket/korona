@@ -30,8 +30,7 @@ RegData <- PandemiData
 
 
 test <- korona::abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='lenaro', reshID=700720,
-                             Rpakke='korona', valgtEnhet = 'Alle',
-                             enhetsNivaa = 'RHF', rolle = 'SC')
+                             valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SC')
 testBer <- intensivberedskap::abonnementBeredsk(rnwFil='BeredskapCorona.Rnw', brukernavn='beredskap', reshID=0,
                                 valgtRHF = 'Alle', Rpakke='intensivberedskap')
 
