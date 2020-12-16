@@ -31,6 +31,7 @@ RegData <- PandemiData
 
 test <- korona::abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='lenaro', reshID=700720,
                              valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SC')
+file.copy(from=test, to='~/korona/test.pdf')
 testBer <- intensivberedskap::abonnementBeredsk(rnwFil='BeredskapCorona.Rnw', brukernavn='beredskap', reshID=0,
                                 valgtRHF = 'Alle', Rpakke='intensivberedskap')
 
