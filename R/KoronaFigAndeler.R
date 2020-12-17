@@ -49,7 +49,7 @@
 KoronaFigAndeler  <- function(RegData, valgtVar='alder', erMann=9, minald=0, maxald=110, #datoFra=0, datoTil=0,
                               skjemastatusInn=9, skjemastatusUt=9, dodSh=9, aarsakInn=9,
                               enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=0,
-                           hentData=0, outfile='', lagFig=1, ...) {
+                              beredPas=9, hentData=0, outfile='', lagFig=1, ...) {
 
    if ("session" %in% names(list(...)) & rapbase::isRapContext()) {
       # Error: 'isRapContext' is not an exported object from 'namespace:rapbase'
@@ -68,7 +68,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder', erMann=9, minald=0, max
 
       Utvalg <- KoronaUtvalg(RegData=RegData, #datoFra=datoFra, datoTil=datoTil,
                                 minald=minald, maxald=maxald, aarsakInn=aarsakInn,
-                                erMann=erMann, dodSh=dodSh,
+                                erMann=erMann, dodSh=dodSh, beredPas=beredPas,
                                 skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,
                                 enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet,
                                 enhetsUtvalg=enhetsUtvalg)

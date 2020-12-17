@@ -14,11 +14,16 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    # Endre variabelnavn:
    names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
    names(RegData)[which(names(RegData) == 'UnitId')] <- 'ReshId'
-   #Avvik ml. test og prod-data:
    names(RegData)[
       names(RegData) %in% c('PatientInRegistryGuid', 'PasientGUID')] <- 'PasientID'
    RegData$ShNavn <- trimws(as.character(RegData$HelseenhetKortNavn)) #Fjerner mellomrom (før) og etter navn
 
+   RegData$ShNavn[RegData$ReshId == 4204086] <- 'Drammen, psyk.'
+   RegData$ShNavn[RegData$ReshId == 108595] <- 'Innlandet, psyk.'
+   RegData$ShNavn[RegData$ReshId == 111487] <- 'Aker'
+   RegData$ShNavn[RegData$ReshId == 705757] <- 'Radiumhospitalet'
+   RegData$ShNavn[RegData$ReshId == 4207357] <- 'Nordagutu'
+   #RegData$RHF[RegData$ReshId %in% c(108595, 111487, 705757)] <- 'Sør-Øst'
 
    RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                          RegData$Vekt/(RegData$Hoyde/100)^2,
@@ -30,35 +35,72 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    #    apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
 
    #Konvertere boolske variable fra tekst til boolske variable...
-   TilLogiskeVar <- function(Skjema){
-     verdiGML <- c('True','False')
-     verdiNY <- c(TRUE,FALSE)
-     mapping <- data.frame(verdiGML,verdiNY)
-     LogVar <- names(Skjema)[which(Skjema[1,] %in% verdiGML)]
-     if (length(LogVar)>0) {
-       for (k in 1:length(LogVar)) {
-         Skjema[,LogVar[k]] <- mapping$verdiNY[match(Skjema[,LogVar[k]], mapping$verdiGML)]
-       }}
-     return(Skjema)
-   }
+   # TilLogiskeVar <- function(Skjema){
+   #   verdiGML <- c('True','False')
+   #   verdiNY <- c(TRUE,FALSE)
+   #   mapping <- data.frame(verdiGML,verdiNY)
+   #   LogVar <- names(Skjema)[which(Skjema[1,] %in% verdiGML)]
+   #   if (length(LogVar)>0) {
+   #     for (k in 1:length(LogVar)) {
+   #       Skjema[,LogVar[k]] <- mapping$verdiNY[match(Skjema[,LogVar[k]], mapping$verdiGML)]
+   #     }}
+   #   return(Skjema)
+   # }
+   # RegData <- TilLogiskeVar(RegData)
 
-   RegData <- TilLogiskeVar(RegData)
+   LogVarSjekk <- names(RegData)[unique(which(RegData[1,] %in% c('True','False')), which(RegData[15,] %in% c('True','False')))]
+   LogVar <- unique(c(LogVarSjekk,
+                      "Aminoglykosid", "AndreGencefalosporin", "AntibiotikaAnnet", "AntibiotikaUkjent", "Astma",
+                      "BilirubinUkjent", "DdimerUkjent",  "Diabetes", "DiastoliskBlodtrykkUkjent", "Gravid",
+                      "HjertefrekvensUkjent", "Hjertesykdom", "HoydeUkjent", "Importert", "Karbapenem", "Kinolon",
+                      "Kreft", "KroniskLungesykdom", "KroniskNevro", "LeukocytterUkjent", "Leversykdom", "Makrolid",
+                      "NedsattimmunHIV", "Nyresykdom", "OkysgenmetningUkjent" ,"Penicillin", "PenicillinEnzymhemmer",
+                      "RespirasjonsfrekvensUkjent", "Royker" ,"SkreatininUkjent", "SystoliskBlodtrykkUkjent", "TempUkjent",
+                      "TredjeGencefalosporin", "TrombocytterUkjent", "UtsAminoglykosid", "UtsAndreGencefalosporin",
+                      "UtsAntibiotikaAnnet", "UtsAntibiotikaUkjent", "UtsKarbapenem", "UtsKinolon", "UtsMakrolid",
+                      "UtsPenicillin", "UtsPenicillinEnzymhemmer", "UtsTredjeGencefalosporin", "VektUkjent", "ImportertUt"))
+
+   RegData[, intersect(names(RegData), LogVar)] <-
+     apply(RegData[, intersect(names(RegData), LogVar)], 2, as.logical)
+
+
+   #Justere inneliggene (UtDato) for ut-skjema som opprettes samme dag som innleggelse
+   indKladdUt <- which(RegData$FormStatusUt == 1 & is.na(RegData$Utskrivningsdato)) #I kladd og mangler utskr.dato
+   indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$FormDate,
+                                         units = 'days')) < 1)
+   RegData$UtDato <- RegData$FormDateUt
+   RegData$UtDato[intersect(indKladdUt, indSmDag)] <- NA
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
 if (aggPers == 1) {
    #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
    JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
-# x <- RegData$AceHemmerInnkomst2
-# table(x)
-# test <- ifelse(2 %in% x, 2, 3)
    #Variabler med 1-nei, 2:5 ja, 999 ukjent. Velger mest alvorlige (høyeste) nivå. Ikke utfylt får også ukjent
    SviktVar <- function(x) {
       test <- x %in% 1:5
       ifelse(sum(test)>0, max(x[test]), 999)} #1-nei, 2:5 ja, 999 ukjent.
 
+   # Aarsak <- function(x, N, FormDate) {
+   #    ifelse(sum(x == 1) == N, 1,
+   #           ifelse(last(x, order_by = FormDate) == 1, 2,
+   #                  ifelse(1 %in% x, 3,
+   #                         ifelse(sum(x == 2) == N, 5, 9) )))} #sum (x == 3) == N
+
+   Aarsak <- function(x, N, FormDate) {
+      case_when(
+         sum(x == 1) == N ~ 1,
+         last(x, order_by = FormDate) == 1  ~ 2,
+         1 %in% x  ~ 3,
+         sum(x == 1) == N ~ 1,
+         sum(x == 2) == N  ~ 4,
+         (sum (x == 3) == N) | (sum(x == -1))  ~ 9
+         )}
+
+
    RegDataRed <- RegData %>% group_by(PasientID) %>%
       summarise(PersonId = PersonId[1],
+                PersonIdBC19Hash = PersonIdBC19Hash[1],
                Alder = Alder[1],
                 AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
                 AkuttNyresvikt = JaNeiUkjVar(AkuttNyresvikt), #1-ja, 2-nei, 3-ukjent
@@ -69,8 +111,17 @@ if (aggPers == 1) {
                 Antibiotika = Antibiotika[1], #1 ja, 2-nei 3-ukjent
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
                AntibiotikaUkjent = sum(AntibiotikaUkjent)>0,
-                ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
-                Astma = sum(Astma)>0,
+               AntInnSkjema = n(),
+               CovidJAalle = ifelse(sum(ArsakInnleggelse == 1) == AntInnSkjema, 1,0),
+               CovidJaSiste = ifelse(last(ArsakInnleggelse, order_by = FormDate) == 1, 2,0),
+               CovidJaFinnes = ifelse(1 %in% ArsakInnleggelse, 3, 0),
+               CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
+               CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
+               ArsakInnNy = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate),
+               #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 5-nei, ingen opph, 9-ukj
+               #ArsakInnleggelse_NyAC = AarsakCase(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate), #1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj
+               ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
+               Astma = sum(Astma)>0,
                 #Bilirubin,
                 BMI = sort(BMI, decreasing = T)[1],
                 CurrentMunicipalNumber = first(CurrentMunicipalNumber, order_by = FormDate),
@@ -146,11 +197,10 @@ if (aggPers == 1) {
                 #Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
                 ShNavnUt = last(ShNavn, order_by = FormDate),
                 ShNavn = first(ShNavn, order_by = FormDate),
-                FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1,
+                FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1, #Regnes som kladd hvis utskjema ikke opprettet.
                                       as.numeric(sort(FormStatusUt)[1])), #1-kladd, 2-ferdigstilt
                 Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),
-                AntInnSkjema = n(),
                 # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
                 # Overf = , #Beregn, ja nei
                 # AntOverf = , #Antall overføringer
@@ -173,7 +223,8 @@ if (aggPers == 1) {
                                    max(which(difftime(sort(FormDate)[2:AntInnSkjema],
                                                 FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                 units = "hours") > 24))),
-                FormDateSiste = nth(FormDate, ReinnNaar+1, order_by = FormDate),
+               UtDato =  last(UtDato, order_by = FormDate),
+               FormDateSiste = nth(FormDate, ReinnNaar+1, order_by = FormDate),
                 FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
                 FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
                LiggetidGml = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
@@ -194,38 +245,42 @@ if (aggPers == 1) {
       RegData$erMann[RegData$PatientGender == 2] <- 0
       RegData$Kjonn <- factor(RegData$erMann, levels=0:1, labels=c('kvinner','menn'))
 
-      # Enhetsnivånavn
+      # Enhetsnivå-mapping
+      #Legger på HFresh
       RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
-      RegData$HFresh[RegData$ReshId==108595] <- 100091
+      RegData$HFresh[RegData$ReshId==108595] <- 100091  #Innlandet, psyk.
       RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
-      RegData$HFresh[is.na(RegData$HFresh)] <- RegData$ReshId[is.na(RegData$HFresh)]
+      RegData$HFresh[RegData$ReshId %in% c(111487, 705757)] <- 110628   #Aker, Radiumhospitalet
+
+
+
       #Endrer til kortnavn på HF:
-      #RegData$HFny <- enc2utf8(ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)])
-      # ReshNivaa <- as.data.frame(ReshNivaa, stringsAsFactors=FALSE)
-      # RegData$HF <- ReshNivaa$HFnavnKort[match(RegData$HFresh, ReshNivaa$HFresh)]
-       #HFmap <- unique(ReshNivaa[order(ReshNivaa$HFresh), c('HFnavnKort', 'HFresh')])
       HFmap <- as.data.frame(cbind(
-       HFresh = c("100065", "100082", "100083", "100084", "100085", "100089", "100091", "100092",
-         "100093", "100100", "100132", "100133", "100170", "100317", "100320", "101051",
-         "101719", "101971", "106635", "106640", "106816", "106819", "106834", "106838",
-         "106839", "107505", "110628", "700272", "4001031", "4201115", "4208278", "4216267"),
+       HFresh = c("100065", "100082", "100083", "100084", "100085", "100089", "100091",
+                  "100092", "100093", "100100", "100132", "100133", "100170",
+                  "100317", "100320", "101051", "101719", "101971", "106635",
+                  "106640", "106816", "106819", "106834", "106838", "106839", "107505",
+                  "110628", "700272", "4001031", "4201115", "4208278", "4216267"),
        HFnavn = c("Helgeland", "Bergen", "Stavanger", "Fonna",  "Førde",  "AHUS", "Innlandet",
                    "Østfold",  "Sunnaas", "Vestfold", "Telemark", "Sørlandet", "Haraldspl.",
                    "N-Trøndelag", "St.Olavs", "Nordland", "UNN", "Finnmark", "Lovisenb.",
                    "MEDI 3", "Olaviken", "NKS", "Haugesund", "Solli", "Voss", "Diakonhj.",
                    "Martina H.", "V. Viken", "OUS", "Møre og Romsdal", "LHL", "Betanien")))
-       RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
 
-      RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
-      #Får encoding-feil hvis bruker denne:
-      #RegData$RHF <- ReshNivaa$RHFnavn[match(RegData$HFresh, ReshNivaa$HFresh)]
-      #RegData$RHF <- gsub('HELSE | RHF', '', RegData$RHF) #factor()
-      #Kode om private
-      #RegData$RHF <- as.factor(RegData$RHFresh)
-      #levels(RegData$RHF) <- c('Vest','Nord','Midt', 'Sør-Øst')
-      RegData$RHF <- as.character(factor(RegData$RHFresh, levels=c(100021, 100022, 100024, 111919),
-                                         labels = c('Vest','Nord','Midt', 'Sør-Øst')))
+      #Registreringer gjort på HF-nivå, dvs. HFresh registrert i ReshId..:
+      # 100092  Sykehuset Østfold HF - Østfold
+      # 101971 Finnmarkssykehuset HF . Finnmark HF.
+      # 101051 Nordlandssykehuset HF Nordland HF
 
+      indRegHF <- which(RegData$ReshId %in% HFmap$HFresh)
+      RegData$HFresh[indRegHF] <- RegData$ReshId[indRegHF]
+
+        RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
+        RegData$ShNavn[indRegHF] <- RegData$HFkort[indRegHF]
+
+       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
+       RegData$RHF <- as.character(factor(RegData$RHFresh, levels=c(100021, 100022, 100024, 111919),
+                                          labels = c('Vest','Nord','Midt', 'Sør-Øst')))
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
@@ -234,8 +289,9 @@ if (aggPers == 1) {
 
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
-      RegData$UtDato <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d") #Evt. Utskrivningsdato
       RegData$FormDateUt <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d")
+      #RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Endret fra FormDateUt siden noen oppretter ut-skjema før utskriving
+      RegData$UtDato <- as.Date(RegData$UtDato, tz= 'UTC', format="%Y-%m-%d")
 
       #Beregnede variabler
       #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'

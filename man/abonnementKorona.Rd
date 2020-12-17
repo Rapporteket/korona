@@ -11,7 +11,6 @@ abonnementKorona(
   rnwFil,
   brukernavn = "lluring",
   reshID = 0,
-  Rpakke = "korona",
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
   rolle = "SC"
@@ -22,9 +21,9 @@ abonnementKorona(
 
 \item{reshID}{Aktuell reshid}
 
-\item{Rpakke}{hvilken R-pakke fila som lager rapporten ligger i}
-
 \item{datoFra}{dato}
+
+\item{Rpakke}{hvilken R-pakke fila som lager rapporten ligger i}
 
 \item{parametre}{Liste med valgfrie parametre, avhengig av type rapport}
 }

@@ -21,9 +21,9 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valg
 
   if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
   RegData$TidsVar <- switch (tidsenhet,
-                                 dag = factor(format(RegData$InnDato, '%d.%B'),
+                                 dag = factor(format(RegData$InnDato, '%d.%b'),
                                               levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
-                                                                      by=paste0('-1 day'))), '%d.%B')),
+                                                                      by=paste0('-1 day'))), '%d.%b')),
                                  uke = factor(paste0('Uke ', format(RegData$InnDato, '%V')),
                                               levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
                                                                       by=paste0('-1 week'))), '%V'))),
@@ -91,8 +91,10 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=aarsakInn, erMann=erMann)
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
-  inneliggere <- is.na(RegData$FormDateUt)
-  #indInneUreinn <- intersect(which(inneliggere), which(RegData$Reinn==0))
+  inneliggere <- is.na(RegData$UtDato)
+  # indKladdUt <- which(RegData$FormStatusUt == 1)
+  # ind <- which(as.numeric(difftime(RegData$CreationDateUt[indKladdUt], RegData$CreationDate[indKladdUt],
+  #                                  units = 'days')) < 1)
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(),
                                      RegData$InnTidspunktSiste, units='days'))[inneliggere]
@@ -100,8 +102,8 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
   igaar <- Sys.Date()-1 #  '2020-04-10' #
   innIgaar <- length(which(RegData$InnDato == as.Date(igaar)))
-  utIgaar <- length(which(RegData$FormDateUt == as.Date(igaar)))
-  dodIgaar <- length(which(RegData$FormDateUt[RegData$StatusVedUtskriving==2] == as.Date(igaar)))
+  utIgaar <- length(which(RegData$UtDato == as.Date(igaar)))
+  dodIgaar <- length(which(RegData$UtDato[RegData$StatusVedUtskriving==2] == as.Date(igaar)))
 
   statusTab <- rbind(
     'På sykehus nå' = c(AntPaaShNaa, paste0(LiggetidNaaGjsn, ' dager')),
@@ -340,11 +342,43 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
 
   #RegData <- RegDataRaa
   ind <- which(is.na(RegData$HovedskjemaGUID))
-  variabler <- c('HF', 'ShNavn', 'InnDato', 'SkjemaGUID')
+  variabler <- c('HFkort', 'ShNavn', 'InnDato', 'SkjemaGUID')
   tab <- RegData[ind, variabler]
   tab$InnDato <- as.character(tab$InnDato)
-  tabUt <- tab[with(tab, order(HF, ShNavn, InnDato)), ] #
+  tabUt <- tab[with(tab, order(HFkort, ShNavn, InnDato)), ] #
 }
 
+
+#' Finner pasienter med dobbeltregistrerte skjema
+#'
+#' @param RegData dataramme fra pandemi registeret, inn og utskr.skjema
+#' @param tidssavik - maks tidsavvik (minutter) mellom to påfølgende registreringer som sjekkes
+#'
+#' @return
+#' @export
+PasMdblReg <- function(RegData, tidsavvik=0){
+  DblReg <- RegData %>% group_by(PersonId) %>%
+    summarise(N = n(),
+              #MinTid = ifelse(N>1, min(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins'), na.rm = T), NA),
+              LikTid = ifelse(N>1,
+                              ifelse(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins') <= tidsavvik,
+                                     1, 0), 0),
+              PatientInRegistryGuid = PatientInRegistryGuid[1]
+    )
+
+
+
+  PasMdbl <- DblReg$PatientInRegistryGuid[which(DblReg$LikTid == 1)]
+  TabDbl <- RegData[which(RegData$PatientInRegistryGuid %in% PasMdbl),
+                           c("PatientInRegistryGuid", "FormDate", "HelseenhetKortNavn", "UnitId", 'SkjemaGUID', "FormDateUt",'SkjemaGUIDut')]
+  TabDbl <- TabDbl[order(TabDbl$FormDate), ]
+  N <- dim(TabDbl)[1]
+  indSmTid <- which(difftime(TabDbl$FormDate[2:N], TabDbl$FormDate[1:(N-1)], units = 'mins') <= tidsavvik)
+  TabDbl <- TabDbl[unique(sort(c(indSmTid, (indSmTid+1)))), ]
+  TabDbl$FormDate <- format(TabDbl$FormDate, "%Y-%m-%d %H:%M:%S")
+  TabDbl$FormDateUt <- format(TabDbl$FormDateUt, "%Y-%m-%d %H:%M:%S")
+
+  tabUt <- TabDbl[order(TabDbl$PatientInRegistryGuid, TabDbl$FormDate), ]
+}
 
 

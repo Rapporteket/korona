@@ -1,7 +1,6 @@
 koronaresultater_UI <- function(id){
   ns <- shiny::NS(id)
 
-
   shiny::sidebarLayout(
     shiny::sidebarPanel(id = ns('brukervalgRes'),
 
@@ -10,7 +9,7 @@ koronaresultater_UI <- function(id){
                         h3('Velg variabel/tema og filtreringer i data'),
 
                         selectInput(inputId = ns('valgtVar'), label='Velg variabel',
-                                    choices = c('Antall innleggelser'='antreg',
+                                    choices = c('Antall pasienter'='antreg',
                                                 'Antall døde'='antdod',
                                                 'Antall utskrivinger'= 'antut',
                                                 'Antall inneliggende'='antinn')
@@ -18,9 +17,14 @@ koronaresultater_UI <- function(id){
                         selectInput(inputId = ns("velgTidsenhet"), label="Velg tidsenhet",
                                     choices = c("Dag"="dag", "Uke"="uke", "Måned"="maaned")),
                         selectInput(inputId = ns("velgAntVisning"), label="Velg antall dager",
-                                    choices = c(10, 20, 30, 50, 100, 200), selected = 30),
+                                    choices = c(10, 20, 30, 50, 100, 200, 300), selected = 30),
                         selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
-                                    choices = c("Ja"=1, "Alle"=9, "Nei"=2)
+                                    choices = c(
+                                      "Ja, minst siste opphold" = 2,
+                                      "Ja, alle opphold"=1,
+                                      "Ja, minst ett opph" = 3,
+                                      "Alle registrerte"=0,
+                                      "Nei, ingen opphold" = 4) #c("Ja"=1, "Alle"=9, "Nei"=2)
                         ),
                         selectInput(inputId = ns("skjemastatusInnRes"), label="Skjemastatus, inklusjon",
                                     choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
@@ -64,7 +68,7 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
   observe(
     switch (input$velgTidsenhet,
             "dag" = updateSelectInput(session, "velgAntVisning", label="Velg antall dager",
-                                      choices = c(10, 20, 30, 50, 100, 200), selected = 30),
+                                      choices = c(10, 20, 30, 50, 100, 200, 300), selected = 30),
             "uke" = updateSelectInput(session, "velgAntVisning", label="Velg antall uker",
                                       choices = c(4, 8, 12, 20, 40, 100), selected = 8),
             "maaned" = updateSelectInput(session, "velgAntVisning", label="Velg antall måneder",
@@ -182,8 +186,16 @@ koronabelegg_UI <- function(id){
                         br(),
                         h3('Velg variabel/tema og filtreringer i data'),
 
-                        selectInput(inputId = ns("aarsakInn"), label="Covid-19 hovedårsak til innleggelse?",
-                                    choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                        # selectInput(inputId = ns("aarsakInn"), label="Covid-19 hovedårsak til innleggelse?",
+                        #             choices = c("Alle"=9, "Ja"=1, "Nei"=2)
+                        # ),
+                        selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
+                                    choices = c(
+                                      "Ja, minst siste opphold" = 2,
+                                      "Ja, alle opphold"=1,
+                                      "Ja, minst ett opph" = 3,
+                                      "Alle registrerte"=0,
+                                      "Nei, ingen opphold" = 4)
                         ),
                         selectInput(inputId = ns("skjemastatusInn"), label="Skjemastatus, inklusjon",
                                     choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
@@ -219,7 +231,7 @@ koronabelegg <- function(input, output, session, KoroData, rolle, reshID, egetEn
     AntTab <- antallTidBelegg(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag', reshID = reshID,
-                              aarsakInn = as.numeric(input$aarsakInn),
+                              aarsakInn = as.numeric(input$aarsakInnRes),
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               erMann=as.numeric(input$erMann))
     ant_skjema <- AntTab$belegg_anslag_txt

@@ -41,21 +41,42 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
 #' @export
 
 abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
-                               Rpakke='korona', valgtEnhet = 'Alle',
+                               valgtEnhet = 'Alle',
                              enhetsNivaa = 'RHF', rolle = 'SC'){
-  #valgtRHF <- valgtRHF[[1]]
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = "starter Abonnement: Pandemi-rapport")
+                    msg = "1)starter abonnementkjøring: Pandemi-rapport")
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg = paste0('2)PARAMETRE: rnwFil: ', rnwFil, ', brukernavn: ', brukernavn,
+               ', reshID: ', reshID, ', valgtEnhet: ', valgtEnhet,
+  ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle)
+  )
+
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
-  src <- normalizePath(system.file(rnwFil, package=Rpakke))
-  # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
+  src <- normalizePath(system.file(rnwFil, package='korona'))
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg = "3) filbase, tmpFile, src ok")
+
+
+# gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
   #owd <-
   setwd(tempdir())
   dir <- getwd()
   file.copy(src, tmpFile, overwrite = TRUE)
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg = "4) setwd, dir, file.copy ok")
   knitr::knit2pdf(input=tmpFile)
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg ="5) Kjørt knit2pdf")
 
   #gc() #Opprydning gc-"garbage collection"
   utfil <- paste0(dir, '/', substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf')
@@ -64,9 +85,10 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = paste("Leverer: ", utfil))
+                    msg = paste("6) Leverer abonnementsfil: ", utfil))
   return(utfil)
 }
+
 
 #' Funksjon som henter filer som skal sendes til FHI. To filer fra intensivopphold
 #' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
@@ -94,7 +116,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
     Filer <- korona::lagDatafilerTilFHI()
 
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                      msg = paste0("Har hentet ekte filer"))
+                      msg = paste0("Har hentet ekte filer for sending til FHI"))
 
     datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
     for (fil in datasett){
@@ -103,7 +125,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                   fileEncoding = 'UTF-8', row.names=F, sep=';', na='')}
 
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                      msg = paste0("Har lagret ekte filer"))
+                      msg = paste0("Har lagret ekte filer for sending til FHI"))
 
     #utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
 
@@ -163,5 +185,22 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   setwd(opprKat)
 
   return(utfilsti)
+}
+
+#' Funksjon som avgjør om en pasient er inneliggende på aktuell dato
+#'
+#' Returnerer TRUE for datoer pasienten er inneliggende
+#'
+#' @param datoer datoer som inneligging skal avgjøres for
+#' @param regdata Dataramme som inneholder InnDato og Utdato per pasient
+#'
+#' @return
+#' @export
+erInneliggende <- function(datoer, regdata){
+  # regnes som inneliggende på aktuell dato hvis den faller mellom inn- og utdato eller
+  # er etter inndato og det ikke finnes utddato. Flere betingelser kan legges til.
+
+  auxfunc <- function(x) {(x >  regdata$InnDato & x <= regdata$UtDato) | (x >  regdata$InnDato & is.na( regdata$UtDato))}
+  map_df(datoer, auxfunc)
 }
 

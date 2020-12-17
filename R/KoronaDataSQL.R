@@ -6,12 +6,13 @@
 #' @export
 #'
 #'
-KoronaDataSQL <- function(skjema=1, koble=1) { #datoFra = '2020-03-01', datoTil = Sys.Date()
+KoronaDataSQL <- function(datoFra = '2020-03-01', datoTil = Sys.Date(), skjema=1, koble=1) { #
 
 varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.AceHemmerInnkomst
   -- AS AceHemmerInnkomst2
   -- ,Inn.AddressQuality
+  -- ,Inn.AgeAdmitted
   ,Inn.AkuttNyresvikt
   ,Inn.AkuttRespirasjonsvikt
   ,Inn.AkuttSirkulasjonsvikt
@@ -78,6 +79,7 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.OkysgenmetningUkjent
   ,Inn.OverfortAnnetSykehusInnleggelse
   ,Inn.PersonId
+  ,Inn.PersonIdBC19Hash
   ,Inn.PatientInRegistryGuid
   -- ,Inn.PasientGUID
   ,Inn.PatientAge
@@ -138,8 +140,10 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,AntibiotikaUkjent
   ,Antifungalbehandling
   ,AntiviralBehandling
+  ,CreationDate
   -- ,CurrentMunicipalNumber
   -- ,DistrictCode
+  ,FirstTimeClosed
   ,FormDate
   ,FormStatus
   ,FormTypeId
@@ -200,8 +204,8 @@ if (koble==0){
         query <- paste0('SELECT ',
                        ifelse(skjema==1, varPandemiInn, varPandemiUt),
                         ' FROM ',
-                        ifelse(skjema==1, 'InklusjonSkjemaDataContract Inn', 'UtskrivningSkjemaDataContract'))
-                      #WHERE cast(DateAdmittedIntensive as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
+                        ifelse(skjema==1, 'InklusjonSkjemaDataContract Inn', 'UtskrivningSkjemaDataContract') #)
+                      ,' WHERE cast(FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
 }
 if (koble==1){
         query <- paste0('SELECT ',
@@ -210,13 +214,15 @@ if (koble==1){
                         varUtKoblet,
                         ' FROM InklusjonSkjemaDataContract Inn
                         LEFT JOIN UtskrivningSkjemaDataContract Ut
-                        ON UPPER(Inn.SkjemaGUID) = UPPER(Ut.HovedskjemaGUID)')
+                        ON UPPER(Inn.SkjemaGUID) = UPPER(Ut.HovedskjemaGUID)' #)
+                        ,' WHERE cast(Inn.FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
         }
 
 
 
 #query <- 'select * from UtskrivningSkjemaDataContract'
+#query <- 'select * from InklusjonSkjemaDataContract'
 
-      RegData <- rapbase::LoadRegData(registryName="korona", query=query, dbType="mysql")
+      RegData <- rapbase::loadRegData(registryName="korona", query=query, dbType="mysql")
       return(RegData)
 }

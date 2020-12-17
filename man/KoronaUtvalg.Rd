@@ -17,7 +17,8 @@ KoronaUtvalg(
   aarsakInn = 9,
   enhetsNivaa = "RHF",
   valgtEnhet = "Alle",
-  enhetsUtvalg = 2
+  enhetsUtvalg = 2,
+  beredPas = 9
 )
 }
 \arguments{
@@ -37,7 +38,8 @@ KoronaUtvalg(
 
 \item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 
-\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, 2-nei}
+\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
+3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
 
 \item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
 RHF (SC og LC-brukere), HF (LU-brukere)}
