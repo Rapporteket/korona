@@ -69,11 +69,11 @@ Pandemi$EnhNivaaVis <- switch(rolle,
                                 'LC' = Pandemi$HFkort,
                                 'LU' = Pandemi$ShNavn)
 
-Pandemi$EnhNivaaVis <- as.factor(Pandemi$EnhNivaaVis)
 PandemiLandet <- KoronaUtvalg(RegData=Pandemi, aarsakInn = 2)$RegData
 PandemiAlleInnlEgen <-  KoronaUtvalg(RegData=Pandemi,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
 Pandemi <-  KoronaUtvalg(RegData=PandemiAlleInnlEgen, aarsakInn = 2)$RegData
+Pandemi$EnhNivaaVis <- as.factor(Pandemi$EnhNivaaVis)
 
 Ntot <- dim(Pandemi)[1]
 AlderGjsn <- round(mean(Pandemi$Alder, na.rm = T))
@@ -86,7 +86,7 @@ antIkkeFerdig <- sum(Pandemi$FormStatus==1, na.rm = T)
 \begin{frame}[fragile] {Hva er dette?}
 Dette er en automatisk generert rapport fra pandemiregisteret for registerering av Covid-19 pasienter.
 Dokumentet inneholder oppsummering av disse registreringene for \textbf{\Sexpr{forHvem}}.
-Hvis ikke annet er angitt, er \textit{kun pasienter hvor Covid-19 er hovedårsak til innleggelsen}, tatt med. Hvis pasienten er overført, skal minimum siste opphold ha Covid-19 som hovedårsak til innleggelsen.
+Hvis ikke annet er angitt, er \textit{kun pasienter hvor Covid-19 er hovedårsak til  siste innleggelsen i forløpet}, tatt med. Hvis pasienten er overført, skal minimum siste opphold ha Covid-19 som hovedårsak til innleggelsen.
 
 \begin{itemize}
 \item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke, med mindre dette er angitt
@@ -126,7 +126,7 @@ FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 
 \begin{frame}[fragile] {Antall registrerte pasienter}
 
-I abonnementet denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 <<'RegRHF', results='asis'>>=
 # AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
 #                               valgtEnhet= valgtEnhet, HFkort = 1)$Tab_tidy
