@@ -35,6 +35,9 @@ file.copy(from=test, to='~/korona/test.pdf')
 testBer <- intensivberedskap::abonnementBeredsk(rnwFil='BeredskapCorona.Rnw', brukernavn='beredskap', reshID=0,
                                 valgtRHF = 'Alle', Rpakke='intensivberedskap')
 
+head(format(seq(Sys.Date(), min(Pandemi$InnDag), by=paste0('-1 day')), '%d.%b'))
+class(seq(Sys.Date(), min(Pandemi$InnDag), by=paste0('-1 day')))
+
 #Se nærmere på inneliggende basert på manglende utskrivingsdato.
 #Ca. 290 pasienter som har en dato for utskrivingsskjema før dato for utskrivning,
 #med en mediantid skjemadato - utskrivningsdato 6 dager (nedre og øvre kvartil: 3 – 14). -> Over 10% "skrives ut" omtrent når de legges inn

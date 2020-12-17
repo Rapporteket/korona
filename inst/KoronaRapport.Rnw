@@ -69,6 +69,7 @@ Pandemi$EnhNivaaVis <- switch(rolle,
                                 'LC' = Pandemi$HFkort,
                                 'LU' = Pandemi$ShNavn)
 
+Pandemi$EnhNivaaVis <- as.factor(Pandemi$EnhNivaaVis)
 PandemiLandet <- KoronaUtvalg(RegData=Pandemi, aarsakInn = 2)$RegData
 PandemiAlleInnlEgen <-  KoronaUtvalg(RegData=Pandemi,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
@@ -124,12 +125,31 @@ FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 
 
 \begin{frame}[fragile] {Antall registrerte pasienter}
+
+I abonnementet denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 <<'RegRHF', results='asis'>>=
 # AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
 #                               valgtEnhet= valgtEnhet, HFkort = 1)$Tab_tidy
 
 #\resizebox function or
 #\adjustbox.
+
+# Pandemi <- KoronaDataSQL(koble = 1)
+# Pandemi <- KoronaPreprosesser(Pandemi)
+# Pandemi$EnhNivaaVis <- Pandemi$RHF
+# # switch(rolle,
+# #                                 'SC' = Pandemi$RHF,
+# #                                 'LC' = Pandemi$HFkort,
+# #                                 'LU' = Pandemi$ShNavn)
+#
+# Pandemi$EnhNivaaVis <- as.factor(Pandemi$EnhNivaaVis)
+
+# Pandemi$InnDag = factor(format(Pandemi$InnDag, '%d.%b'),
+#                         levels = format(seq(Sys.Date(), min(Pandemi$InnDag),
+#                                             by=paste0('-1 day')), '%d.%b'))
+#Pandemi$test <- Pandemi$InnDag
+  Pandemi$InnDag = factor(format(Pandemi$InnDag, '%y-%m-%d'),
+                          levels = format(seq(min(Pandemi$InnDag, na.rm = T), Sys.Date(), by=paste0('1 day')), '%y-%m-%d'))
 
 AntTab <- table(Pandemi$InnDag, Pandemi$EnhNivaaVis)
 AntTab <- addmargins(AntTab)
@@ -182,7 +202,7 @@ InneliggPas <- rbind(as.matrix(InneliggHF),
       c('','Totalt', AntPaaSh))
 
 print(xtable::xtable(InneliggPas, digits=0,
-               caption='Antall inneliggende pasienter (mangler utskrivingsskjema) på hver enhet,
+               caption='Antall inneliggende pasienter på hver enhet,
                samt totalt.'), include.rownames=FALSE)
 @
 \end{frame}
@@ -238,12 +258,17 @@ xtable::xtable(BeleggTab[fra:AntRader, ], digits=1, #-which(names(AntRader)=='He
 \end{frame}
 
 \begin{frame}[fragile] {Antall utskrevne}
+I abonnementet denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+
 <<'Utskrevne', results='asis'>>=
+  Pandemi$UtDato = factor(format(Pandemi$UtDato, '%y-%m-%d'),
+                          levels = format(seq(min(Pandemi$UtDato, na.rm = T), Sys.Date(), by=paste0('1 day')), '%y-%m-%d'))
+
 AntUt <- table(Pandemi$UtDato, Pandemi$EnhNivaaVis)
 AntUt <- addmargins(AntUt)
 fra <- max(1, (nrow(AntUt)-20))
 print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall utskrevne per dag siste 20 utskrivningsdager, samt totalt.'),
+                              caption='Antall utskrevne per dag siste 20 dager, samt totalt.'),
 scalebox = skalering)
 
 #xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
@@ -252,13 +277,15 @@ scalebox = skalering)
 \end{frame}
 
 \begin{frame}[fragile] {Antall døde}
+I abonnementet denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+
 <<'Dode', results='asis'>>=
 indDod <- which(Pandemi$StatusVedUtskriving==2)
 AntDodeTab <- table(Pandemi$UtDato[indDod], Pandemi$EnhNivaaVis[indDod])
 AntDodeTab <- addmargins(AntDodeTab, FUN=list('Totalt:'=sum, 'Hele landet'=sum), quiet = T)
 fra <- max(1, (nrow(AntDodeTab)-20))
 xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall døde per dag, siste 20 dødsdager,
+                              caption='Antall døde per dag, siste 20 dager,
                samt totalt for hele pandemiperioden.') %>%
  print(scalebox = skalering)
   #xtable2kable() %>%   kableExtra::kable_styling(latex_options="scale_down")
