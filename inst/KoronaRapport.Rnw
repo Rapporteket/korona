@@ -258,7 +258,7 @@ xtable::xtable(BeleggTab[fra:AntRader, ], digits=1, #-which(names(AntRader)=='He
 \end{frame}
 
 \begin{frame}[fragile] {Antall utskrevne}
-I abonnementet denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 
 <<'Utskrevne', results='asis'>>=
   Pandemi$UtDato = factor(format(Pandemi$UtDato, '%y-%m-%d'),
@@ -277,7 +277,7 @@ scalebox = skalering)
 \end{frame}
 
 \begin{frame}[fragile] {Antall døde}
-I abonnementet denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 
 <<'Dode', results='asis'>>=
 indDod <- which(Pandemi$StatusVedUtskriving==2)
