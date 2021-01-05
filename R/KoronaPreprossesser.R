@@ -67,7 +67,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    #Justere inneliggene (UtDato) for ut-skjema som opprettes samme dag som innleggelse
    indKladdUt <- which(RegData$FormStatusUt == 1 & is.na(RegData$Utskrivningsdato)) #I kladd og mangler utskr.dato
    indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$FormDate,
-                                         units = 'days')) < 1)
+                                         units = 'hours')) < 1)
    RegData$UtDato <- RegData$FormDateUt
    RegData$UtDato[intersect(indKladdUt, indSmDag)] <- NA
 
@@ -118,7 +118,7 @@ if (aggPers == 1) {
                CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
                CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
                ArsakInnNy = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate),
-               #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 5-nei, ingen opph, 9-ukj
+               #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 4-nei, ingen opph, 9-ukj
                #ArsakInnleggelse_NyAC = AarsakCase(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate), #1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj
                ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
                Astma = sum(Astma)>0,
@@ -250,7 +250,8 @@ if (aggPers == 1) {
       RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
       RegData$HFresh[RegData$ReshId==108595] <- 100091  #Innlandet, psyk.
       RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
-      RegData$HFresh[RegData$ReshId %in% c(111487, 705757)] <- 110628   #Aker, Radiumhospitalet
+      RegData$HF[RegData$ReshId==705757] <- 'Oslo universitetssykehus HF'
+      #FEIL! Skal være: 4001031 RegData$HFresh[RegData$ReshId %in% c(111487, 705757)] <- 110628   #Aker, Radiumhospitalet
 
 
 

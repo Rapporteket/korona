@@ -229,6 +229,7 @@ ui <- tagList(
                                               #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
                                               selectInput(inputId = 'valgtVarFord', label='Velg variabel',
                                                           choices = c("Alder"='alder',
+                                                                      'Covid-19 hovedårsak til innleggelse?' = 'aarsakInn4kat',
                                                                       'Demografi' = 'demografi',
                                                                       "Liggetid"='liggetid',
                                                                       'Risikofaktorer, innleggelse'='risikoInn',

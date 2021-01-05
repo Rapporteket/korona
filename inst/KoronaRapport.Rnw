@@ -177,9 +177,9 @@ print(
 \begin{frame}[fragile] {Registereringer i hver enhet}
 <<'RegHF', results='asis'>>=
 #nivaa1 <- enhetsNivaa
-nivaa2 <- ifelse(rolle=='LU', 'ShNavn', 'HF')
+nivaa2 <- ifelse(rolle=='LU', 'ShNavn', 'HFnavn')
 RegHF <- if (rolle == 'LU') {Pandemi %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = n())
-  } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
+  } else {Pandemi %>% dplyr::group_by(RHF, HFkort) %>% dplyr::summarise(Antall = n())}
 #sort(table(Pandemi$HF), decreasing = T)
 print(xtable::xtable(RegHF, row.names=FALSE, digits=0,
                      caption='Totalt antall registrerte pasienter i hver enhet.'),

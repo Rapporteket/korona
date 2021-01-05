@@ -28,7 +28,16 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+#Sjekke manglende HF i Sør-Øst
+unique(KoroDataRaa[ ,c("UnitId", "HelseenhetKortNavn", 'HF', 'RHF')])
+unique(KoroData[ ,c("ReshId", "ShNavn", 'HFkort', 'RHF')])
+Pandemi  <- KoronaUtvalg(RegData=KoroData, aarsakInn = 2)$RegData
+as.data.frame(Pandemi[Pandemi$HF=='',] %>% dplyr::group_by(RHF, HF, HFkort, ShNavn) %>% dplyr::summarise(Antall = n()))
+as.data.frame(Pandemi %>% dplyr::group_by(RHF, HF, HFkort, ShNavn) %>% dplyr::summarise(Antall = n()))
+Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
+705757
 
+#Samlerapport, sjekk
 test <- korona::abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='lenaro', reshID=700720,
                              valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SC')
 file.copy(from=test, to='~/korona/test.pdf')
@@ -281,12 +290,12 @@ RegData <- KoronaUtvalg(RegData=RegData, aarsakInn = 1)$RegData
 table(RegData$Reinn,is.na(RegData$FormDateUt))
 table(is.na(RegData$FormDateUt))
 
-Utdata <- KoronaFigAndeler(valgtVar='demografi', RegData=Pandemi,
-                 minald=minald, maxald=maxald, aarsakInn=aarsakInn,
-                 erMann=erMann, dodSh=dodSh,
-                 skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,
-                 enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet,
-                 enhetsUtvalg=1)
+Utdata <- KoronaFigAndeler(valgtVar='aarsakInn5kat', RegData=RegData)
+# ,minald=minald, maxald=maxald, aarsakInn=aarsakInn,
+#                  erMann=erMann, dodSh=dodSh,
+#                  skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,
+#                  enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet,
+#                  enhetsUtvalg=1)
 
 Tab <- FerdigeRegTab(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', erMann=9, dodSh=9)$Tab
 
