@@ -370,7 +370,8 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 
   PasMdbl <- DblReg$PatientInRegistryGuid[which(DblReg$LikTid == 1)]
   TabDbl <- RegData[which(RegData$PatientInRegistryGuid %in% PasMdbl),
-                           c("PatientInRegistryGuid", "FormDate", "HelseenhetKortNavn", "UnitId", 'SkjemaGUID', "FormDateUt",'SkjemaGUIDut')]
+                    c("PatientInRegistryGuid", "FormDate", "HelseenhetKortNavn", "UnitId",
+                      'SkjemaGUID', "FormDateUt",'SkjemaGUIDut')]
   TabDbl <- TabDbl[order(TabDbl$FormDate), ]
   N <- dim(TabDbl)[1]
   indSmTid <- which(difftime(TabDbl$FormDate[2:N], TabDbl$FormDate[1:(N-1)], units = 'mins') <= tidsavvik)

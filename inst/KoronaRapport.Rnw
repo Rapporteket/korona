@@ -66,7 +66,7 @@ Pandemi <- KoronaPreprosesser(Pandemi)
   #valgtEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
 Pandemi$EnhNivaaVis <- switch(rolle,
                                 'SC' = Pandemi$RHF,
-                                'LC' = Pandemi$HFkort,
+                                'LC' = Pandemi$HF,
                                 'LU' = Pandemi$ShNavn)
 
 PandemiLandet <- KoronaUtvalg(RegData=Pandemi, aarsakInn = 2)$RegData
@@ -129,7 +129,7 @@ FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 <<'RegRHF', results='asis'>>=
 # AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
-#                               valgtEnhet= valgtEnhet, HFkort = 1)$Tab_tidy
+#                               valgtEnhet= valgtEnhet, HF = 1)$Tab_tidy
 
 #\resizebox function or
 #\adjustbox.
@@ -139,7 +139,7 @@ I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandem
 # Pandemi$EnhNivaaVis <- Pandemi$RHF
 # # switch(rolle,
 # #                                 'SC' = Pandemi$RHF,
-# #                                 'LC' = Pandemi$HFkort,
+# #                                 'LC' = Pandemi$HF,
 # #                                 'LU' = Pandemi$ShNavn)
 #
 # Pandemi$EnhNivaaVis <- as.factor(Pandemi$EnhNivaaVis)
@@ -179,7 +179,7 @@ print(
 #nivaa1 <- enhetsNivaa
 nivaa2 <- ifelse(rolle=='LU', 'ShNavn', 'HFnavn')
 RegHF <- if (rolle == 'LU') {Pandemi %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = n())
-  } else {Pandemi %>% dplyr::group_by(RHF, HFkort) %>% dplyr::summarise(Antall = n())}
+  } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
 #sort(table(Pandemi$HF), decreasing = T)
 print(xtable::xtable(RegHF, row.names=FALSE, digits=0,
                      caption='Totalt antall registrerte pasienter i hver enhet.'),

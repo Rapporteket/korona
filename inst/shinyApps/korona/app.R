@@ -62,9 +62,6 @@ BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
 KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
                      by = 'PersonId')
 KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
-#table(KoroDataBered$BeredPas)
-
-#KoroData$HFkort2 <- ReshNivaa$HFnavnKort[match(KoroData$HFresh, ReshNivaa$HFresh)] #HFkort2
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
