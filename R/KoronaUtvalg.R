@@ -38,6 +38,8 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
                          enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=2,
                          beredPas=9) { #reshID=0,
 
+  #if (enhetsNivaa == 'HF') {enhetsNivaa <- 'HFkort'} #Vil benytte HFkort siden HF er mangelfull
+
   if ('BeredPas' %in% names(RegData)) { #Sjekker om data koblet på beredskapsskjema
     if (beredPas %in% 0:1) {RegData <- subset(RegData, RegData$BeredPas == beredPas)}}
  if (skjemastatusInn %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatusInn)}

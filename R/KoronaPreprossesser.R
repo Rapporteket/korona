@@ -25,6 +25,48 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    RegData$ShNavn[RegData$ReshId == 4207357] <- 'Nordagutu'
    #RegData$RHF[RegData$ReshId %in% c(108595, 111487, 705757)] <- 'Sør-Øst'
 
+   # Enhetsnivå-mapping
+   #Legger på HFresh
+   RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
+   RegData$HFresh[RegData$ReshId==108595] <- 100091  #Innlandet, psyk.
+   #RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
+   #RegData$HF[RegData$ReshId==705757] <- 'Oslo universitetssykehus HF'
+   #FEIL! Skal være: 4001031 RegData$HFresh[RegData$ReshId %in% c(111487, 705757)] <- 110628   #Aker, Radiumhospitalet
+
+
+
+   #Endrer til kortnavn på HF:
+   HFmap <- as.data.frame(cbind(
+      HFresh = c("100065", "100082", "100083", "100084", "100085", "100089", "100091",
+                 "100092", "100093", "100100", "100132", "100133", "100170",
+                 "100317", "100320", "101051", "101719", "101971", "106635",
+                 "106640", "106816", "106819", "106834", "106838", "106839", "107505",
+                 "110628", "700272", "4001031", "4201115", "4208278", "4216267"),
+      HFnavn = c("Helgeland", "Bergen", "Stavanger", "Fonna",  "Førde",  "AHUS", "Innlandet",
+                 "Østfold",  "Sunnaas", "Vestfold", "Telemark", "Sørlandet", "Haraldsplass",
+                 "N-Trøndelag", "St.Olavs", "Nordland", "UNN", "Finnmark", "Lovisenberg",
+                 "MEDI 3", "Olaviken", "NKS", "Haugesund", "Solli", "Voss", "Diakonhjemmet",
+                 "Martina H.", "V. Viken", "OUS", "Møre og Romsdal", "LHL", "Betanien")))
+
+   #Registreringer gjort på HF-nivå, dvs. HFresh registrert i ReshId..:
+   # 100092  Sykehuset Østfold HF - Østfold
+   # 101971 Finnmarkssykehuset HF . Finnmark HF.
+   # 101051 Nordlandssykehuset HF Nordland HF
+
+   indRegHF <- which(RegData$ReshId %in% HFmap$HFresh)
+   RegData$HFresh[indRegHF] <- RegData$ReshId[indRegHF]
+
+   RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
+   RegData$HFkort[RegData$HFkort==''] <- 'Mangler HF'
+   RegData$HF <- RegData$HFkort
+   RegData$ShNavn[indRegHF] <- RegData$HFkort[indRegHF]
+
+   RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
+   RegData$RHF <- as.character(factor(RegData$RHFresh, levels=c(100021, 100022, 100024, 111919),
+                                      labels = c('Vest','Nord','Midt', 'Sør-Øst')))
+
+
+
    RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                          RegData$Vekt/(RegData$Hoyde/100)^2,
                          NA)
@@ -136,6 +178,7 @@ if (aggPers == 1) {
                 Gravid = sum(Gravid)>0,
                 HFut = last(HF, order_by = FormDate),
                 HF = first(HF, order_by = FormDate),
+                HFresh = first(HFresh, order_by = FormDate),
                 #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
                 Isolert = JaNeiUkjVar(Isolert), #1-ja, 2-nei, 3-ukjent
@@ -165,6 +208,8 @@ if (aggPers == 1) {
                 ReshId = first(ReshId, order_by = FormDate),
                 #Respirasjonsfrekvens,
                 #RHF,
+                RHF = first(RHF, order_by = FormDate),
+                RHFresh = first(RHFresh, order_by = FormDate),
                 RontgenThorax = RontgenThorax[1], #1-5...?
                 Royker = sum(Royker)>0,
                 #Sykehus"
@@ -244,44 +289,6 @@ if (aggPers == 1) {
       RegData$erMann[RegData$PatientGender == 1] <- 1
       RegData$erMann[RegData$PatientGender == 2] <- 0
       RegData$Kjonn <- factor(RegData$erMann, levels=0:1, labels=c('kvinner','menn'))
-
-      # Enhetsnivå-mapping
-      #Legger på HFresh
-      RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
-      RegData$HFresh[RegData$ReshId==108595] <- 100091  #Innlandet, psyk.
-      RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
-      RegData$HF[RegData$ReshId==705757] <- 'Oslo universitetssykehus HF'
-      #FEIL! Skal være: 4001031 RegData$HFresh[RegData$ReshId %in% c(111487, 705757)] <- 110628   #Aker, Radiumhospitalet
-
-
-
-      #Endrer til kortnavn på HF:
-      HFmap <- as.data.frame(cbind(
-       HFresh = c("100065", "100082", "100083", "100084", "100085", "100089", "100091",
-                  "100092", "100093", "100100", "100132", "100133", "100170",
-                  "100317", "100320", "101051", "101719", "101971", "106635",
-                  "106640", "106816", "106819", "106834", "106838", "106839", "107505",
-                  "110628", "700272", "4001031", "4201115", "4208278", "4216267"),
-       HFnavn = c("Helgeland", "Bergen", "Stavanger", "Fonna",  "Førde",  "AHUS", "Innlandet",
-                   "Østfold",  "Sunnaas", "Vestfold", "Telemark", "Sørlandet", "Haraldspl.",
-                   "N-Trøndelag", "St.Olavs", "Nordland", "UNN", "Finnmark", "Lovisenb.",
-                   "MEDI 3", "Olaviken", "NKS", "Haugesund", "Solli", "Voss", "Diakonhj.",
-                   "Martina H.", "V. Viken", "OUS", "Møre og Romsdal", "LHL", "Betanien")))
-
-      #Registreringer gjort på HF-nivå, dvs. HFresh registrert i ReshId..:
-      # 100092  Sykehuset Østfold HF - Østfold
-      # 101971 Finnmarkssykehuset HF . Finnmark HF.
-      # 101051 Nordlandssykehuset HF Nordland HF
-
-      indRegHF <- which(RegData$ReshId %in% HFmap$HFresh)
-      RegData$HFresh[indRegHF] <- RegData$ReshId[indRegHF]
-
-        RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
-        RegData$ShNavn[indRegHF] <- RegData$HFkort[indRegHF]
-
-       RegData$RHFresh <- ReshNivaa$RHFresh[match(RegData$HFresh, ReshNivaa$HFresh)]
-       RegData$RHF <- as.character(factor(RegData$RHFresh, levels=c(100021, 100022, 100024, 111919),
-                                          labels = c('Vest','Nord','Midt', 'Sør-Øst')))
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive

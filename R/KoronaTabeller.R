@@ -6,7 +6,7 @@
 #' @param RegData dataramme med preprossesserte data
 #' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
-#' @param HFkort benytte kortnavn for HF 0-nei, 1-ja
+#' @param HF benytte kortnavn for HF 0-nei, 1-ja
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
@@ -15,7 +15,7 @@
 #' @export
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valgtVar='innlagt',
                             tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF',
-                            HFkort=0, skjemastatusInn=9, aarsakInn=9, dodSh=9){
+                            HF=0, skjemastatusInn=9, aarsakInn=9, dodSh=9){
   #valgtEnhet representerer eget RHF/HF
 #if (valgtVar == 'utskrevet') {}
 
@@ -342,10 +342,10 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
 
   #RegData <- RegDataRaa
   ind <- which(is.na(RegData$HovedskjemaGUID))
-  variabler <- c('HFkort', 'ShNavn', 'InnDato', 'SkjemaGUID')
+  variabler <- c('HF', 'ShNavn', 'InnDato', 'SkjemaGUID')
   tab <- RegData[ind, variabler]
   tab$InnDato <- as.character(tab$InnDato)
-  tabUt <- tab[with(tab, order(HFkort, ShNavn, InnDato)), ] #
+  tabUt <- tab[with(tab, order(HF, ShNavn, InnDato)), ] #
 }
 
 

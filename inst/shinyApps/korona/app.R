@@ -71,7 +71,7 @@ KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
 
 #Definere utvalgsinnhold
 rhfNavn <- c('Alle', as.character(sort(unique(KoroData$RHF))))
-hfNavn <- c('Alle', sort(unique(KoroData$HF))) #, index.return=T)
+hfNavn <- c('Alle', sort(unique(KoroData$HF))) #KoroData$HF, index.return=T)
 enhetsNavn <- rhfNavn
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som flge av et annet input.
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
@@ -593,7 +593,6 @@ server <- function(input, output, session) {
     statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=egetEnhetsNivaa, #
                                  valgtEnhet=input$valgtEnhet,
                                  aarsakInn = as.numeric(input$aarsakInn))
-    #erMann=as.numeric(input$erMann))
     output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
     output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 

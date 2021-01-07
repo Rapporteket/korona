@@ -28,6 +28,41 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+arning in grep("^[.][.](?:[.]|[1-9][0-9]*)$", names) :
+  input string 2 is invalid in this locale
+Warning in grep("^[.][.](?:[.]|[1-9][0-9]*)$", names) :
+  input string 6 is invalid in this locale
+Warning in grep("^[.][.](?:[.]|[1-9][0-9]*)$", names) :
+  input string 2 is invalid in this locale
+Warning in grep("^[.][.](?:[.]|[1-9][0-9]*)$", names) :
+  input string 6 is invalid in this locale
+Warning in grep("^[.][.](?:[.]|[1-9][0-9]*)$", names) :
+  input string 2 is invalid in this locale
+Warning in grep("^[.][.](?:[.]|[1-9][0-9]*)$", names) :
+  input string 6 is invalid in this locale
+Warning: Error in [<-: subscript out of bounds
+98: antallTidInneliggende [/home/rstudio/korona/R/KoronaTabellerK2n.R#281]
+97: AntTab [/home/rstudio/korona/inst/shinyApps/korona/R/resultatmodul.R#88]
+96: renderTable
+95: func
+82: origRenderFunc
+81: output$resultater_id-tabTidEnhet_plain
+1: shiny::runApp
+Warning: Error in [<-: subscript out of bounds
+169: antallTidInneliggende [/home/rstudio/korona/R/KoronaTabellerK2n.R#281]
+168: AntTab [/home/rstudio/korona/inst/shinyApps/korona/R/resultatmodul.R#88]
+167: renderPlot [/home/rstudio/korona/inst/shinyApps/korona/R/resultatmodul.R#142]
+
+
+
+
+statusNaaTab(RegData=KoroData, enhetsNivaa='HF', #
+             valgtEnhet='Bergen')
+
+UtData <- KoronaUtvalg(RegData=KoroData,  enhetsNivaa='HF', #
+                       valgtEnhet='Bergen')$RegData
+UtData <- KoronaUtvalg(RegData=KoroData, valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa)$RegData
+
 #Sjekke manglende HF i Sør-Øst
 unique(KoroDataRaa[ ,c("UnitId", "HelseenhetKortNavn", 'HF', 'RHF')])
 unique(KoroData[ ,c("ReshId", "ShNavn", 'HFkort', 'RHF')])
