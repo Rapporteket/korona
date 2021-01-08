@@ -1,8 +1,8 @@
 #Kjørefil for Rapporteket-Pandemi
 rm(list=(ls()))
 library(korona)
-RegDataRaa <- KoronaDataSQL()
-RegData <- KoronaPreprosesser(RegData = RegDataRaa, aggPers = 0)
+RegDataRaa <- KoronaDataSQL(datoFra = '2020-09-01')
+RegData <- KoronaPreprosesser(RegData = RegDataRaa, aggPers = 1)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
 tidsenhet='dag'
@@ -28,6 +28,20 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+velgTidsenhet <- 'dag'
+datoTil <- as.Date("2020-11-01")
+datoFra <- switch (velgTidsenhet,
+                   "dag" = datoTil - days(50-1),
+                   "uke" = floor_date(datoTil - weeks(30-1), unit = 'week', week_start = 1),
+                   "maaned" = floor_date(datoTil - months(20-1), unit = 'month')
+)
+
+
+test <- antallTidEnhTab(RegData=PandemiData, datoFra=datoFra, datoTil = )
+                        # , tidsenhet='dag', erMann=9, datoFra=0, datoTil=Sys.Date(), #valgtVar='innlagt',
+                        #     tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF',
+                        #     HF=0, skjemastatusInn=9, aarsakInn=9, dodSh=9)
+test$Tab
 
 statusNaaTab(RegData=KoroData, enhetsNivaa='HF', #
              valgtEnhet='Bergen')

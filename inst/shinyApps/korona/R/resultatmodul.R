@@ -1,6 +1,7 @@
 koronaresultater_UI <- function(id){
   ns <- shiny::NS(id)
 
+
   shiny::sidebarLayout(
     shiny::sidebarPanel(id = ns('brukervalgRes'),
 
@@ -17,7 +18,9 @@ koronaresultater_UI <- function(id){
                         selectInput(inputId = ns("velgTidsenhet"), label="Velg tidsenhet",
                                     choices = c("Dag"="dag", "Uke"="uke", "Måned"="maaned")),
                         selectInput(inputId = ns("velgAntVisning"), label="Velg antall dager",
-                                    choices = c(10, 20, 30, 50, 100, 200, 300), selected = 30),
+                                    choices = c(10, 30, 50, 100, 200, 365), selected = 30),
+                        dateInput(inputId = ns("velgSluttdatoRes"), label = 'Velg sluttdato', language="nb",
+                                  value = Sys.Date(), max = Sys.Date()),
                         selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
                                     choices = c(
                                       "Ja, minst siste opphold" = 2,
@@ -68,28 +71,38 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
   observe(
     switch (input$velgTidsenhet,
             "dag" = updateSelectInput(session, "velgAntVisning", label="Velg antall dager",
-                                      choices = c(10, 20, 30, 50, 100, 200, 300), selected = 30),
+                                      choices = c(10, 30, 50, 100, 200, 365), selected = 30), #c(10, 20, 30, 50, 100, 200, 300, 500)
             "uke" = updateSelectInput(session, "velgAntVisning", label="Velg antall uker",
-                                      choices = c(4, 8, 12, 20, 40, 100), selected = 8),
+                                      choices = c(4, 8, 12, 26, 53), selected = 8),
             "maaned" = updateSelectInput(session, "velgAntVisning", label="Velg antall måneder",
                                          choices = c(2, 4, 8, 12, 20), selected = 4)
     )
   )
 
-  datoFra <- reactive(datoFra <- switch (input$velgTidsenhet,
-                                         "dag" = Sys.Date() - days(as.numeric(input$velgAntVisning)-1),
-                                         "uke" = floor_date(Sys.Date() - weeks(as.numeric(input$velgAntVisning)-1), unit = 'week', week_start = 1),
-                                         "maaned" = floor_date(Sys.Date() - months(as.numeric(input$velgAntVisning)-1), unit = 'month')
+  datoFra <- reactive(
+    datoFra <- switch (input$velgTidsenhet,
+                       "dag" = input$velgSluttdatoRes - days(as.numeric(input$velgAntVisning)-1),
+                       "uke" = floor_date(input$velgSluttdatoRes - weeks(as.numeric(input$velgAntVisning)-1),
+                                          unit = 'week', week_start = 1),
+                       "maaned" = floor_date(input$velgSluttdatoRes - months(as.numeric(input$velgAntVisning)-1),
+                                             unit = 'month')
+    # datoFra <- switch (input$velgTidsenhet,
+    #                    "dag" = Sys.Date() - days(as.numeric(input$velgAntVisning)-1),
+    #                    "uke" = floor_date(Sys.Date() - weeks(as.numeric(input$velgAntVisning)-1),
+    #                                       unit = 'week', week_start = 1),
+    #                    "maaned" = floor_date(Sys.Date() - months(as.numeric(input$velgAntVisning)-1),
+    #                                          unit = 'month')
+   )
   )
-  )
-
 
   AntTab <- function() {
+    #datoFra bestemmes av valgt tidsenhet og valgt antall enheter
     AntTab <- switch(input$valgtVar,
                      'antreg'= antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
                                                valgtEnhet= egenEnhet, #nivå avgjort av rolle
                                                tidsenhet=input$velgTidsenhet,
                                                datoFra=datoFra(),
+                                               datoTil=input$velgSluttdatoRes,
                                                aarsakInn = as.numeric(input$aarsakInnRes),
                                                skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                erMann=as.numeric(input$erMannRes)),
@@ -125,13 +138,6 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
     AntTab
   }
 
-  # output$tabTidEnhet_DT = DT::renderDT(
-  #   DT::datatable(AntTab()$ant_skjema[-dim(AntTab()$ant_skjema)[1], ],
-  #                 container = AntTab()$sketch,
-  #                 rownames = F,
-  #                 options = list(pageLength = 40)
-  #   )
-  # )
 
   output$tabTidEnhet_plain = renderTable(
     AntTab()$ant_skjema,
