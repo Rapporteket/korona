@@ -73,6 +73,8 @@ enhetsNavn <- rhfNavn
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som flge av et annet input.
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
 #names(enhetsNivaa) <- c('RHF', 'HF')
+startDato <- min(KoroData$InnDato, na.rm = T) #paste0(as.numeric(format(idag-120, "%Y")), '-01-01') #'2019-01-01' #Sys.Date()-364
+sluttDato <- Sys.Date()
 
 aarsakInnValg <- c(
   "Ja, minst siste opphold" = 2,
@@ -245,7 +247,9 @@ ui <- tagList(
                                               selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
                                                           choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
                                               ),
-
+                                              dateRangeInput(inputId = "valgtDatoRes", label = "Tidsperiode",
+                                                             start = startDato, end = Sys.Date(),
+                                                             separator="t.o.m.", language="nb"),
                                               selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
                                                           choices = 'Alle'
                                               ),
@@ -714,6 +718,8 @@ server <- function(input, output, session) {
                      valgtVar=input$valgtVarFord,
                      valgtEnhet = input$valgtEnhetRes, #egenEnhet,  #
                      enhetsNivaa=egetEnhetsNivaa,
+                     datoFra=input$valgtDatoRes[1],
+                     datoTil=input$valgtDatoRes[2],
                      enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
                      dodSh=as.numeric(input$dodShRes),
                      aarsakInn = as.numeric(input$aarsakInnRes),
@@ -729,6 +735,8 @@ server <- function(input, output, session) {
     UtDataFord <- KoronaFigAndeler(RegData=KoroData,
                                    valgtVar=input$valgtVarFord,
                                    valgtEnhet = input$valgtEnhetRes,
+                                   datoFra=input$valgtDatoRes[1],
+                                   datoTil=input$valgtDatoRes[2],
                                    enhetsNivaa= egetEnhetsNivaa,
                                    enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
                                    dodSh=as.numeric(input$dodShRes),

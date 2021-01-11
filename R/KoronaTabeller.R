@@ -19,7 +19,7 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
   #valgtEnhet representerer eget RHF/HF
 #if (valgtVar == 'utskrevet') {}
 
-  datoFra <- if (datoFra!=0) datoFra else min(RegData$InnDato)
+  datoFra <- if (datoFra!=0) datoFra else min(RegData$InnDato, na.rm = T)
   #if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
   RegData <- KoronaUtvalg(RegData=RegData, datoFra=datoFra, datoTil=datoTil)$RegDataAlle
 

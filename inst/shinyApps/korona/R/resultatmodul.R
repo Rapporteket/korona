@@ -10,7 +10,7 @@ koronaresultater_UI <- function(id){
                         h3('Velg variabel/tema og filtreringer i data'),
 
                         selectInput(inputId = ns('valgtVar'), label='Velg variabel',
-                                    choices = c('Antall pasienter'='antreg',
+                                    choices = c('Antall innleggelser'='antreg',
                                                 'Antall døde'='antdod',
                                                 'Antall utskrivinger'= 'antut',
                                                 'Antall inneliggende'='antinn')
@@ -110,6 +110,7 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
                                                valgtEnhet= egenEnhet, #nivå avgjort av rolle
                                                tidsenhet=input$velgTidsenhet,
                                                datoFra=datoFra(),
+                                               datoTil=input$velgSluttdatoRes,
                                                aarsakInn = as.numeric(input$aarsakInnRes),
                                                skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                erMann=as.numeric(input$erMannRes)),
@@ -117,6 +118,7 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
                                                 valgtEnhet= egenEnhet, #nivå avgjort av rolle
                                                 tidsenhet=input$velgTidsenhet,
                                                 datoFra=datoFra(),
+                                                datoTil=input$velgSluttdatoRes,
                                                 aarsakInn = as.numeric(input$aarsakInnRes),
                                                 skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                 erMann=as.numeric(input$erMannRes)),
@@ -124,6 +126,7 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
                                                      valgtEnhet= egenEnhet, #nivå avgjort av rolle
                                                      tidsenhet=input$velgTidsenhet,
                                                      datoFra=datoFra(),
+                                                     datoTil=input$velgSluttdatoRes,
                                                      aarsakInn = as.numeric(input$aarsakInnRes),
                                                      skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                      erMann=as.numeric(input$erMannRes))

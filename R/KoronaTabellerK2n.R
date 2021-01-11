@@ -1,7 +1,7 @@
 # Fil med samling av funksjoner som lager tabeller for Rapporteket-Pandemi
 
 #' Antall avdøde per tidsenhet (basert på avdøddato) og enhetsnivå. Filtreringer kan også gjøres.
-#' Detaljerinsnivå er styrt av tilgangsnivå
+#' Detaljerinsnivå er styrt av tilgangsnivå. Datointervaller baseres følgelig på "ut-dato"
 #'
 #' @param RegData dataramme med preprossesserte data
 #' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
@@ -12,7 +12,8 @@
 #'
 #' @return
 #' @export
-antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
+antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
+                            datoFra=0, datoTil=Sys.Date(),
                             skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
@@ -24,24 +25,27 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                                 LC = RegData$HFut,
                                 LU = RegData$ShNavnUt)
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+  UtData <- KoronaUtvalg(RegData=RegData, erMann=erMann, #datoFra=0, datoTil=0, minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
                          dodSh=2)
 
-
+  datoFra <- if (datoFra!=0) datoFra else min(RegData$UtDato, na.rm = T)
   RegDataAlle <- UtData$RegData
   RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)]
-  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
+
+
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på fradato
+  if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%b'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                              levels = format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 day'))), '%d.%b')),
                                  uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
-                                              levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra,
                                                                                      by=paste0('-1 week'))), '%V'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                 levels = format(rev(seq(datoTil, datoFra,
                                                                          by=paste0('-1 month'))), '%b.%Y')))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
@@ -93,9 +97,9 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 #' @return
 #' @export
 antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
-                               skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
+                               datoTil=Sys.Date(), skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
-
+  datoFra <- if (datoFra!=0) datoFra else min(RegData$UtDato, na.rm = T)
   RegData$ShNavnUt[is.na(RegData$ShNavnUt)] <- RegData$ShNavn[is.na(RegData$ShNavnUt)] # der ShNavnUt mangler, benytt ShNavn
 
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
@@ -105,23 +109,24 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                                 #LC = RegData$HFkort2,
                                 LU = RegData$ShNavnUt)
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+  UtData <- KoronaUtvalg(RegData=RegData, erMann=erMann, #datoFra=0, datoTil=0, minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
 
 
   RegDataAlle <- UtData$RegData
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$UtDato), ]
-  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på fradato
+  if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%b'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                              levels = format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 day'))), '%d.%b')),
                                  uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
-                                              levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra ,
                                                                                      by=paste0('-1 week'))), '%V'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                 levels = format(rev(seq(datoTil, datoFra ,
                                                                          by=paste0('-1 month'))), '%b.%Y')))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
@@ -195,7 +200,8 @@ tr_summarize_output <- function(x, grvarnavn=''){
 #'
 #' @return
 #' @export
-antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
+antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
+                                  datoFra=0, datoTil=Sys.Date(),
                                   skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
@@ -205,15 +211,19 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
                                 LC = RegData$HFnavn,
                                 LU = RegData$ShNavn)
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+  UtData <- KoronaUtvalg(RegData=RegData, erMann=erMann, #datoFra=0, datoTil=0, minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
 
 
   RegDataAlle <- UtData$RegData
   RegDataAlle <- RegDataAlle[!(is.na(RegDataAlle$EnhNivaaVis)), ]
-  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)], tz= 'UTC', format="%Y-%m-%d")
-  if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$UtDato >= datoFra | is.na(RegDataAlle$UtDato), ]} # filtrerer på dato
-  datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), today(), by="day")
+  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)],
+                                                           tz= 'UTC', format="%Y-%m-%d")
+  # filtrerer på dato -  UtDato >= datoFra, dvs. tar med de som er utskrervet senere enn datoFra
+  #dato til? InnDato <= datoTil, dvs. tar med de som er innlagt før datoTil
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$UtDato >= datoFra | is.na(RegDataAlle$UtDato), ]}
+  if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
+  datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), datoTil, by="day") #today()
 
   if (tidsenhet=='dag') {
     names(datoer) <- format(datoer, '%d.%b')
