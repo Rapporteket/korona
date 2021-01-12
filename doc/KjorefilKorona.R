@@ -312,7 +312,11 @@ RegData <- KoronaUtvalg(RegData=RegData, aarsakInn = 1)$RegData
 table(RegData$Reinn,is.na(RegData$FormDateUt))
 table(is.na(RegData$FormDateUt))
 
-Utdata <- KoronaFigAndeler(valgtVar='aarsakInn5kat', RegData=RegData)
+RegDataRaa <- KoronaDataSQL()
+RegData <- KoronaPreprosesser(RegData = RegDataRaa, aggPers = 0)
+RegData <- KoronaPreprosesser(RegData = RegDataRaa)
+
+Utdata <- KoronaFigAndeler(valgtVar='regForsinkelseInn', RegData=RegData, datoFra = '2020-04-01')
 # ,minald=minald, maxald=maxald, aarsakInn=aarsakInn,
 #                  erMann=erMann, dodSh=dodSh,
 #                  skjemastatusInn=skjemastatusInn, skjemastatusUt=skjemastatusUt,

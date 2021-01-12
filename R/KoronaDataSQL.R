@@ -185,7 +185,8 @@ varPandemiUt <- c('SkjemaGUID
 
 alle <- '*'
 
-varUtKoblet <- c('UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
+varUtKoblet <- c(
+'UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.Antifungalbehandling
   ,Ut.AntiviralBehandling
   ,Ut.CreationDate AS CreationDateUt
@@ -204,7 +205,7 @@ if (koble==0){
         query <- paste0('SELECT ',
                        ifelse(skjema==1, varPandemiInn, varPandemiUt),
                         ' FROM ',
-                        ifelse(skjema==1, 'InklusjonSkjemaDataContract Inn', 'UtskrivningSkjemaDataContract') #)
+                        c('InklusjonSkjemaDataContract Inn', 'UtskrivningSkjemaDataContract')[skjema] #)
                       ,' WHERE cast(FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
         RegData <- rapbase::loadRegData(registryName="korona", query=query, dbType="mysql")
 }

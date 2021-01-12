@@ -91,6 +91,36 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
             xAkseTxt <- 'Liggetid (døgn)'
       }
 
+      if (valgtVar %in% c('regForsinkelseInn', 'regForsinkelseUt')) {  #Andeler, GjsnGrVar
+        #Bare ferdigstilte?
+        #Endrede skjema:
+        indEndret <- c(which(as.Date(RegData$CreationDate) == '2020-10-22' & RegData$ReshId ==4211748) #Hammerfest
+                       ,which(as.Date(RegData$CreationDate) == '2020-06-10' & RegData$ReshId == 101971) #Finnmark
+                       ,which(as.Date(RegData$CreationDate) == '2020-10-26' & RegData$ReshId == 4209222) #Kalnes
+                        ,which(as.Date(RegData$CreationDate) == '2020-06-30' & RegData$ReshId == 4209222) #Kalnes
+                        ,which(as.Date(RegData$CreationDate) == '2020-07-09' & RegData$ReshId == 100092) #Østfold?
+                       ,which(as.Date(RegData$CreationDate) == '2020-10-23' & RegData$ReshId == 109870) #Ullevål
+                        ,which(as.Date(RegData$CreationDate) == '2020-10-28' & RegData$ReshId == 114282) #Stavanger
+        )
+        RegData <- RegData[-indEndret,]
+
+          RegData$RegForsink <- switch(valgtVar,
+                                       regForsinkelseInn = as.numeric(difftime(RegData$CreationDate,
+                                                   RegData$InnTidspunkt, units = 'days')),
+                                       regForsinkelseUt = as.numeric(difftime(RegData$FirstTimeClosedUt,
+                                                     RegData$UtTidspunkt, units = 'days'))
+          )
+        RegData <- RegData[which(!is.na(RegData$RegForsink)), ]
+        tittel <- switch(valgtVar,
+                         regForsinkelseInn='Tid fra innleggelse til opprettet inn-skjema',
+                         regForsinkelseUt = 'Tid fra utskriving til ferdigstilt ut-skjema')
+        subtxt <- 'døgn'
+        gr <- c(0,1:7,30,5000) #gr <- c(seq(0, 90, 10), 1000)
+        RegData$VariabelGr <- cut(RegData$RegForsink, breaks = gr, include.lowest = TRUE, right = TRUE)
+        grtxt <- c(levels(RegData$VariabelGr)[1:(length(gr)-2)], '30+') #c('1', '(1-7]', '(7-14]', #
+        cexgr <- 0.9
+        xAkseTxt <- 'dager'
+      }
 
       #---------------KATEGORISKE
 

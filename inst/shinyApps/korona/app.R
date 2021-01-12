@@ -57,6 +57,7 @@ if (paaServer) {
 
 
 KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
+KoroDataUAgg <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
 BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
 #Kobler pandemi og beredskap:
 KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
@@ -227,6 +228,7 @@ ui <- tagList(
                                               h3('Velg variabel/tema og filtreringer i data'),
                                               #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
                                               selectInput(inputId = 'valgtVarFord', label='Velg variabel',
+                                                          selected = 'regForsinkelseInn',
                                                           choices = c("Alder"='alder',
                                                                       'Covid-19 hovedårsak til innleggelse?' = 'aarsakInn4kat',
                                                                       'Demografi' = 'demografi',
@@ -234,6 +236,8 @@ ui <- tagList(
                                                                       'Risikofaktorer, innleggelse'='risikoInn',
                                                                       'Antibiotika, innleggelse'='antibiotikaInn',
                                                                       'Antibiotika, utskriving'='antibiotikaUt',
+                                                                      'Registreringsforsinkelse, inn' = 'regForsinkelseInn',
+                                                                      'Registreringsforsinkelse, ut' = 'regForsinkelseUt',
                                                                       'Respirasjonssvikt, innleggelse' = 'respSviktInn',
                                                                       'Respirasjonssvikt på sykehus' = 'respSviktUt',
                                                                       'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',

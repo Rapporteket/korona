@@ -113,6 +113,8 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    RegData$UtDato <- RegData$FormDateUt
    RegData$UtDato[intersect(indKladdUt, indSmDag)] <- NA
 
+   RegData$Liggetid = difftime(RegData$Utskrivningsdato, RegData$FormDate, units = "days") #Bare for utskrevne pasienter
+
 
    #------SLÅ SAMMEN TIL PER PASIENT
 if (aggPers == 1) {
@@ -166,7 +168,9 @@ if (aggPers == 1) {
                Astma = sum(Astma)>0,
                 #Bilirubin,
                 BMI = sort(BMI, decreasing = T)[1],
-                CurrentMunicipalNumber = first(CurrentMunicipalNumber, order_by = FormDate),
+               CreationDate =  first(CreationDate, order_by = FormDate),
+               CreationDateUt =  last(CreationDateUt, order_by = FormDateUt),
+               CurrentMunicipalNumber = first(CurrentMunicipalNumber, order_by = FormDate),
                 #Ddimer,
                 Diabetes = sum(Diabetes)>0,
                 #DiastoliskBlodtrykk,
@@ -174,6 +178,8 @@ if (aggPers == 1) {
                 EndretBevissthet = JaNeiUkjVar(EndretBevissthet), #1-ja, 2-nei, 3-ukjent
                 ErAnsattMikrobiologisk = JaNeiUkjVar(ErAnsattMikrobiologisk), #1-ja, 2-nei, 3-ukjent
                 ErHelsepersonell = JaNeiUkjVar(ErHelsepersonell), #1-ja, 2-nei, 3-ukjent
+               FirstTimeClosed = first(FirstTimeClosed, order_by = FormDate),
+               FirstTimeClosedUt = last(FirstTimeClosedUt, order_by = FormDateUt),
                 FormStatus = sort(FormStatus)[1], #1-kladd, 2-ferdigstilt
                 Gravid = sum(Gravid)>0,
                 HFut = last(HF, order_by = FormDate),
@@ -275,6 +281,7 @@ if (aggPers == 1) {
                LiggetidGml = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
                                  difftime(FormDateUt, FormDate, units = "days"),
                                  difftime(FormDateUt, FormDate, units = "days") - ReinnTidDum/24),
+               LiggetidNy = sum(Liggetid), #, na.rm=T Vil ikke ha liggetid hvis forløp inneholder NA
                 Liggetid = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
                                   difftime(FormDateUt, FormDate, units = "days"),
                                   difftime(FormDateUt, FormDate, units = "days") - ReinnTid/24) #Får for lang tid hvis har flere enn 1 reinnleggelse
@@ -294,12 +301,18 @@ if (aggPers == 1) {
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive
       RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
                                                   format="%Y-%m-%d %H:%M:%S" ) #DateAdmittedIntensive
+      RegData$CreationDate <- as.POSIXct(RegData$CreationDate, tz= 'UTC',
+                                         format="%Y-%m-%d %H:%M:%S" )
 
+      RegData$CreationDateUt <- as.POSIXct(RegData$CreationDateUt, tz= 'UTC',
+                                         format="%Y-%m-%d %H:%M:%S" )
       RegData$UtTidspunkt <- as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC',
                                         format="%Y-%m-%d %H:%M:%S" )
       RegData$FormDateUt <- as.Date(RegData$FormDateUt, tz= 'UTC', format="%Y-%m-%d")
       #RegData$UtDato <- as.Date(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d") #Endret fra FormDateUt siden noen oppretter ut-skjema før utskriving
       RegData$UtDato <- as.Date(RegData$UtDato, tz= 'UTC', format="%Y-%m-%d")
+      RegData$FirstTimeClosedUt <- as.POSIXct(RegData$FirstTimeClosedUt, tz= 'UTC',
+                                              format="%Y-%m-%d %H:%M:%S" )
 
       #Beregnede variabler
       #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
