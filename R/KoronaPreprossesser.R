@@ -106,12 +106,15 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
      apply(RegData[, intersect(names(RegData), LogVar)], 2, as.logical)
 
 
-   #Justere inneliggene (UtDato) for ut-skjema som opprettes samme dag som innleggelse
-   indKladdUt <- which(RegData$FormStatusUt == 1 & is.na(RegData$Utskrivningsdato)) #I kladd og mangler utskr.dato
-   indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$FormDate,
+
+   RegData$UtDato <- RegData$FormDateUt #Alle som har utskrivingsskjema
+   #Regner de som har ut- og innskjema opprettet samtidig og mangler utskrivingsdato, som ikke utskrevet
+   indIkkeUtDato <- which(is.na(RegData$Utskrivningsdato)) #Mangler utskr.dato.
+   indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$CreationDate,
                                          units = 'hours')) < 1)
-   RegData$UtDato <- RegData$FormDateUt
-   RegData$UtDato[intersect(indKladdUt, indSmDag)] <- NA
+   RegData$UtDato[intersect(indIkkeUtDato, indSmDag)] <- NA
+   #inneliggereInd <- is.na(RegData$UtDato)
+   #Inneliggende <- length(unique(RegData$PatientInRegistryGuid[inneliggereInd]))
 
    RegData$Liggetid = difftime(RegData$Utskrivningsdato, RegData$FormDate, units = "days") #Bare for utskrevne pasienter
 

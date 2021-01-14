@@ -28,6 +28,10 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+
+#Liggetider
+
+
 velgTidsenhet <- 'dag'
 datoTil <- as.Date("2020-11-01")
 datoFra <- switch (velgTidsenhet,
@@ -68,6 +72,46 @@ testBer <- intensivberedskap::abonnementBeredsk(rnwFil='BeredskapCorona.Rnw', br
 
 head(format(seq(Sys.Date(), min(Pandemi$InnDag), by=paste0('-1 day')), '%d.%b'))
 class(seq(Sys.Date(), min(Pandemi$InnDag), by=paste0('-1 day')))
+
+#INNELIGGENDE...#
+library(korona)
+RegData <- KoronaDataSQL(datoFra = '2020-03-01')
+RegData <- KoronaPreprosesser(RegData = RegData)
+RegData <- RegData[-which(RegData$SkjemaGUID %in% toupper(SkjemaGUIDInn)), ]
+
+indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$CreationDate,
+                                      units = 'hours')) < 1)
+indFerdig <- which(RegData$FormStatus==2 & RegData$FormStatusUt==2)
+
+RegData <- RegData[intersect(indSmDag, indFerdig), ]
+#Opprettet samtidig. Skjer det ved inn-eller utskriving?
+#time 1 - time 2
+InnDiff <- median(as.numeric(difftime(RegData$CreationDate, RegData$FormDate,
+                    units = 'days'))) #Fra sept: Median reg. 1.7 dager etter
+UtDiff <- median(as.numeric(difftime(RegData$CreationDateUt, RegData$FormDateUt,
+                                   units = 'days'))) #Fra sept. Median 1,8timer før utskrivning.
+DiffInnlOpprUtskr <- median(as.numeric(difftime(RegData$CreationDate, RegData$FormDateUt,
+                                               units = 'days')))
+Liggetid <- median(as.numeric(difftime(RegData$FormDate, RegData$FormDateUt,
+                                       units = 'days')))
+# For 421 av 1330 opphold legges begge skjema inn samtidig. (Ferdigstilte registreringer f.o.m. 1.sept)
+# For opphold hvor begge skjema legges inn samtidig, er median tid mellom innleggelse og registrering 1.7 dager,
+# mens tid mellom utskriving og registrering er 0,07 dager (1,8t). Samtidig registrering av hele oppholdet
+# tenderer derfor til å skje ved utskriving.
+#
+# Hvor mange legges inn samtidig med innleggelse?
+
+#Justere inneliggene (UtDato) for ut-skjema som opprettes samme dag som innleggelse
+indIkkeUtDato <- which(is.na(RegData$Utskrivningsdato)) #Mangler utskr.dato.
+indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$CreationDate,
+                                      units = 'hours')) < 1)
+
+test <- intersect(indIkkeUtDato, indSmDag)
+RegData$UtDato <- RegData$Utskrivningsdato #FormDateUt # #Alle som har utskrivingsskjema
+#Tar bort de som har skjema opprettet samme dag som inn-skjema og mangler utskrivingsdato
+RegData$UtDato[intersect(indIkkeUtDato, indSmDag)] <- NA
+inneliggereInd <- is.na(RegData$UtDato)
+Inneliggende <- length(unique(RegData$PatientInRegistryGuid[inneliggereInd]))
 
 #Se nærmere på inneliggende basert på manglende utskrivingsdato.
 #Ca. 290 pasienter som har en dato for utskrivingsskjema før dato for utskrivning,
@@ -841,8 +885,41 @@ TabTidRHF <-
 Samlet <- bind_cols(TabTidHF, TabTidRHF[,-1])
 reshID_rhf <- RegData[match(reshID, RegData$HFresh), "RHFresh"]
 
+#FLYTTEDE REGISTRERINGER:
 
+  SkjemaGUIDInn <- c(
+'150e9c2f-77b3-44f0-916d-77605d36fece','a7d7d201-8da8-44ae-96ce-b6d0540a0a60',
+'3561a23e-566a-4bab-a632-364eed12cbdd','4e6c27bc-6063-4835-a457-f18a3f9c938e',
+'0334823d-5bb7-4dcf-91a6-1fe610d56b33','6110fae8-fe06-4038-aea2-6bea9dfc7c12',
+'52411918-ebaf-444b-bbb1-077dab6d7552','c39bf236-8c56-4581-813a-9f83b217c468',
+'4a9559e6-deab-4143-a21c-8b7eab07b526','be852097-0c51-451b-951d-ced0decbaca4',
+'e5752e24-daff-455a-9c10-8c6648afa685','49bc1fda-871d-4d61-b07d-478efc835b18',
+'390d5325-63ae-4c98-9675-bd83e726708c','3aafd47a-98f1-4121-9b72-cedd26539357',
+'44ad0657-1039-4f69-a491-21d47d2b603e','89d68e91-e19d-487b-b65f-29576bd30d7d',
+'bd58f45d-2bdc-40b8-9cdf-ae4e50af119e','54a7cf9b-d4f0-43dc-be4a-15b5c2e99173',
+'df2d4d27-96e9-4461-9ef9-f902d01e9ea2','6ccd3de7-7af6-41e6-aff0-8d4fedcb8047',
+'e9bde1b0-692e-468d-ba0d-0e7eda32b2da','bc3dfd58-0db9-4376-a011-49e293d97a1a',
+'8ecc2b2f-d2eb-46b5-81d3-6636195f4c3f','c3049634-05e7-453b-bd22-74ff364feb00',
+'091def5c-0b3f-4a39-9d84-16c80563689b','510d11df-a3fe-4a3f-855c-1acb3fc0d99e',
+'9cf2a0be-2541-45b1-8a83-4c50185aebab','99e1774a-6e91-440d-a56f-27904a4cb1c8',
+'5ded1bb3-188d-48f0-8a57-07d8265f6b00','35c6b20e-db86-4140-992f-336b93d6e612',
+'f8875228-2055-4f46-a0b6-1c14c30cc4c7','78093e0c-06c1-4692-90a0-1ecbe73045c2',
+'2a0b0ad1-a5c3-4f2b-ad57-708d555dfd55','14ce5c38-829d-4549-85d6-a88615348130',
+'1c337b67-42ac-4677-8a2b-861d09117cd1')
 
-
-
-
+SkjemaGUIDUt <- c(
+  '6cb85138-ba28-4618-9183-0bd706b7e5c0',  'f8012564-1b18-4ade-97b1-313389a0ed0a',
+  '8f406c23-6fca-431e-9017-4ac0ad67dc5d',  '0d31c410-ca03-4cfe-b9a5-ce5bfb3d9e20',
+  'ad96b388-dc88-476d-b3b0-628a3269e9f5',  '23ed777d-d9f5-44a2-932b-a80754476df6',
+  'dac534ce-25d7-4bae-abbd-6f9b57980971',  'a2b67b9b-7bd0-4e3b-bfec-a9b5f386380c',
+  'c8b46001-045d-4057-8b35-50cab9618e77',  '4b91acd8-474d-44a7-8737-124ef97c14c5',
+  'cdf0335c-e2f6-47af-bc61-a03e488ef811',  'ad75bea7-7230-463a-8c18-fe5752b5256e',
+  '085ffdf5-96d6-4652-a4d3-b4d66db03d42',  '7b569753-a287-4236-ab2f-d9269775fc3e',
+  '1284ccce-06e0-4b2a-900b-284a6f31b6c5',  '6a7b0bf0-4d1f-4a96-9194-cf10d5a304f4',
+  'd2dc5df1-d714-4356-b941-96208f7790ef',  '0bb683ca-c975-45ae-905c-b34f5f89307f',
+  '14396ac9-4711-407d-90be-a9a30d44dec2',  '86ef80af-d029-40db-8ac6-526a6ac9ca23',
+  '1168b0a9-4bf4-40e7-a780-3da602adee8c',  '193702b0-52a7-43b2-8544-5554f4babe4e',
+  '759bd541-4da4-4bda-a543-abca9fbb6195',  '0a661671-276e-4291-9877-903a5a2bfca7',
+  'b900cde7-c8fa-4005-a4cb-167cb37c1639',  'f0765a25-b09a-420b-afc1-e3161e234831',
+  'bc8c5e82-76ed-40a0-ba3c-32028673afcf',  'd868857f-0350-4202-89cc-f7924deba976'
+)
