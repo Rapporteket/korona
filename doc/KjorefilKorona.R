@@ -29,8 +29,9 @@ PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
 
-#Liggetider
 
+colMeans(RegData[,c("ReinnTid", "ReinnTidDum")], na.rm = T)
+#RegData$Reinn==1
 
 velgTidsenhet <- 'dag'
 datoTil <- as.Date("2020-11-01")
