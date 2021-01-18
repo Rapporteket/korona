@@ -28,6 +28,51 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+#INNELIGGENDE, tabell
+datoFra <- '2020-09-01'
+datoTil <- '2020-11-01'
+RegDataAlle <- PandemiData
+
+if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$UtDato >= datoFra | is.na(RegDataAlle$UtDato), ]}
+if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
+datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), datoTil, by="day") #today()
+
+
+#' Funksjon som avgjør om en pasient er inneliggende på aktuell dato
+#' Returnerer TRUE for datoer pasienten er inneliggende
+#' @param datoer datoer som inneligging skal avgjøres for
+#' @param regdata Dataramme som inneholder InnDato og Utdato per pasient
+erInneliggende <- function(datoer, regdata){
+  # regnes som inneliggende på aktuell dato hvis den faller mellom inn- og utdato eller
+  # er etter inndato og det ikke finnes utddato. Flere betingelser kan legges til.
+
+  auxfunc <- function(x) {(x >  regdata$InnDato & (x <= regdata$UtDato) | is.na( regdata$UtDato))}
+  map_df(datoer, auxfunc)
+}
+
+
+
+if (tidsenhet=='dag') {
+  names(datoer) <- format(datoer, '%d.%b')
+  aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
+  RegDataAlle <- bind_cols(RegDataAlle, aux)
+} else {
+  names(datoer) <- datoer
+  aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
+  aux <- bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
+  aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi)
+  aux$Tid <- as.Date(aux$Tid)
+  aux$Tid <- switch (tidsenhet,
+                     'uke' = paste0('Uke ', format(aux$Tid, "%V")),
+                     'maaned' = format(aux$Tid, "%b.%Y")
+  )
+  aux <- aux %>% group_by(PasientID, Tid) %>%
+    summarise(er_inne = max(verdi))
+  aux <- aux %>% spread(key=Tid, value = er_inne)
+  RegDataAlle <- merge(RegDataAlle, aux, by = 'PasientID')
+}
+
+
 
 
 colMeans(RegData[,c("ReinnTid", "ReinnTidDum")], na.rm = T)
@@ -68,6 +113,7 @@ Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
 test <- korona::abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='lenaro', reshID=700720,
                              valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SC')
 file.copy(from=test, to='~/korona/test.pdf')
+
 testBer <- intensivberedskap::abonnementBeredsk(rnwFil='BeredskapCorona.Rnw', brukernavn='beredskap', reshID=0,
                                 valgtRHF = 'Alle', Rpakke='intensivberedskap')
 
