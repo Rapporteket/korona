@@ -426,7 +426,6 @@ antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNi
 
 
 
-library(knitr)
 library(korona)
 
 valgtEnhet='Sør-Øst' #'Alle'
@@ -440,7 +439,7 @@ tools::texi2pdf(file='KoronaRapport.tex')
 knitr::knit2pdf('KoronaRapport.Rnw') #, encoding = 'UTF-8')
 
 korona::abonnementKorona(rnwFil=rnwFil, brukernavn='lluring', reshID=0,
-                 Rpakke='korona', valgtEnhet = 'Alle',
+                 valgtEnhet = 'Alle',  #Rpakke='korona',
                  enhetsNivaa = 'RHF', rolle = 'SC')
 
 unique(PandemiInn[,c('RHFresh','RHF')])

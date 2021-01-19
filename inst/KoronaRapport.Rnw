@@ -17,7 +17,7 @@
 
 
 <<'initOpts',include=FALSE>>=
-knitr::opts_chunk$set(warnings=FALSE,echo=FALSE)
+knitr::opts_chunk$set(warnings=FALSE,echo=FALSE, message=FALSE)
 options(warn = -1)
 knitr::opts_knit$set(root.dir = './')
 options(knitr.table.format = "latex")
@@ -64,9 +64,9 @@ PandemiOpph$EnhNivaaVis <- switch(rolle,
                                 'SC' = PandemiOpph$RHF,
                                 'LC' = PandemiOpph$HF,
                                 'LU' = PandemiOpph$ShNavn)
-andemiOpphAlleInnlEgen <-  KoronaUtvalg(RegData=PandemiOpph,
+PandemiOpphAlleInnlEgen <-  KoronaUtvalg(RegData=PandemiOpph,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
-PandemiOpph <-  KoronaUtvalg(RegData=PandemiAlleInnlEgen, aarsakInn = 2)$RegData
+PandemiOpph <-  PandemiOpphAlleInnlEgen[PandemiOpphAlleInnlEgen$ArsakInnleggelse==1, ]
 PandemiOpph$EnhNivaaVis <- as.factor(PandemiOpph$EnhNivaaVis)
 
 #Innparametre:  enhetsNivaa, valgtEnhet, rolle?
@@ -106,8 +106,8 @@ Hvis ikke annet er angitt, er \textit{\textbf{kun pasienter hvor Covid-19 er hov
 Det er \Sexpr{antIkkeFerdig} av de \Sexpr{Ntot} pasientene som har uferdige inklusjonsskjema.
 \item For å luke bort feilregistreringer, er registrering av innleggelse før 8.mars
 og etter dagens dato, filtrert bort.
-\item Resultatene er basert på antall pasienter, dvs. at skjema for overflyttede pasienter
-er aggregert til ett forløp per pasient. NB: Det er foreløpig heller ikke tatt høyde for reinnleggelser.
+\item I resultatene som er basert på antall pasienter, er skjema for overflyttede pasienter
+aggregert til ett forløp per pasient, uavhengig av om pasienten har reinnleggelser.
 \item Gjennomsnittsalderen på innlagte pasienter er \Sexpr{AlderGjsn} år.
 \item Andelen menn er \Sexpr{andelMenn}.
 \item Det er registrert \Sexpr{antDod} døde.
@@ -138,7 +138,7 @@ FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 
 \begin{frame}[fragile] {Registreringsforsinkelse/datakvalitet}
 <<'RegForsinkelse', results='asis'>>=
-dum <- KoronaFigAndeler(RegData = Pandemi, valgtVar = 'regForsinkelseInn', aarsakInn = 2,
+dum <- KoronaFigAndeler(RegData = PandemiLandet, valgtVar = 'regForsinkelseInn', aarsakInn = 2,
                         enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet, enhetsUtvalg = 1,
                         datoFra = Sys.Date()-60, datoTil = Sys.Date()-30,
                         outfile='RegForsink.pdf')
@@ -164,16 +164,24 @@ InneliggHF <- if (rolle == 'LU') {
   } else {Pandemi[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
 InneliggPas <- rbind(as.matrix(InneliggHF),
       c('','Totalt', AntPaaSh))
-
-print(xtable::xtable(InneliggPas, digits=0,
+print(xtable::xtable(InneliggPas, digits=0, align=c('l','l','l','r'),
                caption='Antall inneliggende pasienter på hver enhet,
-               samt totalt. Covid-19 som hovedårsak til siste opphold.'), include.rownames=FALSE)
+               samt totalt antall innlagte pasienter for hele pandemien. Covid-19 er hovedårsak til siste opphold.'),
+      include.rownames=FALSE)
+# InneliggHF <- if (rolle == 'LU') {
+#   table(Pandemi[indNaa, 'ShNavn'])} else {table(Pandemi[indNaa, 'HF'])}
+# InneliggPas <- as.table(c(InneliggHF, 'Totalt' = AntPaaSh))
+#
+# print(xtable::xtable(InneliggPas, digits=0,
+#                caption='Antall inneliggende pasienter på hver enhet,
+#                samt totalt. Covid-19 som hovedårsak til siste opphold.')) #, include.rownames=FALSE)
+
 @
 \end{frame}
 
 
 \begin{frame}[fragile] {Covid-19-smitte hos andre pasienter}
-<<'ShusNaaAndre', results='asis'>>=
+<<'ShusNaaAndre', results='asis', message=FALSE>>=
 # Antall som ligger på sykehus nå
 PandemiAndre <- KoronaUtvalg(RegData = PandemiAlleInnlEgen, aarsakInn = 4)$RegData
 AntAndre <- dim(PandemiAndre)[1]
@@ -196,10 +204,11 @@ Hos disse er gjennomsnittsalderen \Sexpr{AlderGjsnAndre} år og \Sexpr{andelMenn
 Det er \Sexpr{antDodAndre}
 av de \Sexpr{AntAndre} som er døde.
 
-<<'ShusNaaAndreTab', results='asis'>>=
-xtable::xtable(InneliggPasAndre, digits=0,
-                              caption='Antall inneliggende pasienter med Covid-19 som
-               er innlagt av andre årsaker enn Covid-19. (Alle opphold skyldes andre årsaker enn Covid-19)')
+<<'ShusNaaAndreTab', results='asis', message=FALSE>>=
+print(xtable::xtable(InneliggPasAndre, digits=0, align=c('l','l','l','r'),
+                              caption='Antall inneliggende pasienter med Covid-19 hvor alle
+               opphold skyldes andre årsaker enn Covid-19)'),
+               include.rownames=FALSE)
 @
 \end{frame}
 
@@ -238,12 +247,12 @@ xtable::xtable(BeleggTab[fra:AntRader, ], digits=1, #-which(names(AntRader)=='He
 \end{frame}
 
 
-\begin{frame}[fragile] {Antall registrerte opphold}
+\begin{frame}[fragile] {Antall registrerte opphold per dag}
 
 I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 <<'RegRHF', results='asis'>>=
-# AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
-#                               valgtEnhet= valgtEnhet, HF = 1)$Tab_tidy
+AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
+                              valgtEnhet= valgtEnhet, HF = 1)$Tab_tidy
 
 #\resizebox function or
 #\adjustbox.
@@ -265,7 +274,7 @@ print(
                method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                caption='Antall registrerte opphold med korona som hovedårsak for innleggelse siste 20 dager,
                samt totalt antall for hele pandemiperioden.')
-      #include.rownames = FALSE,
+      ,include.rownames = FALSE
       ,scalebox = skalering)
 @
 \end{frame}
@@ -334,7 +343,7 @@ xtable::xtable(AldersTab) #, #digits=0, #method='compact', #align=c('l', rep('r'
 @
 \end{frame}
 
-\begin{frame}[fragile] {Risikofaktorer (ferdigstilte skjema)}
+\begin{frame}[fragile] {Risikofaktorer (ferdigstilte oppold)}
 <<'Risikofaktorer', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 RisikoTab <- RisikoInnTab(RegData=Pandemi, skjemastatusInn = 2)$Tab

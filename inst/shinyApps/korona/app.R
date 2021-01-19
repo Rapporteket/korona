@@ -251,12 +251,12 @@ ui <- tagList(
                                               selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
                                                           choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
                                               ),
-                                              dateRangeInput(inputId = "valgtDatoRes", label = "Tidsperiode",
-                                                             start = startDato, end = Sys.Date(),
-                                                             separator="t.o.m.", language="nb"),
                                               selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
                                                           choices = 'Alle'
                                               ),
+                                              dateRangeInput(inputId = "valgtDatoRes", label = "Tidsperiode",
+                                                             start = startDato, end = Sys.Date(),
+                                                             separator="t.o.m.", language="nb"),
                                               selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
                                                           choices = aarsakInnValg
                                               ),

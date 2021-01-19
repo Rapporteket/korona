@@ -112,7 +112,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
           )
         RegData <- RegData[which(!is.na(RegData$RegForsink)), ]
         tittel <- switch(valgtVar,
-                         regForsinkelseInn='Tid fra innleggelse til opprettet inn-skjema',
+                         regForsinkelseInn='Tid fra første innleggelse til opprettet inn-skjema',
                          regForsinkelseUt = 'Tid fra utskriving til ferdigstilt ut-skjema')
         subtxt <- 'døgn'
         gr <- c(0,1:7,30,5000) #gr <- c(seq(0, 90, 10), 1000)
