@@ -99,7 +99,9 @@ antIkkeFerdig <- sum(Pandemi$FormStatus==1, na.rm = T)
 \begin{frame}[fragile] {Hva er dette?}
 Dette er en automatisk generert rapport fra pandemiregisteret for registerering av Covid-19 pasienter.
 Dokumentet inneholder oppsummering av disse registreringene for \textbf{\Sexpr{forHvem}}.
-Hvis ikke annet er angitt, er \textit{\textbf{kun pasienter hvor Covid-19 er hovedårsak til  siste innleggelsen i forløpet}}, tatt med. Hvis pasienten er overført, skal minimum siste opphold ha Covid-19 som hovedårsak til innleggelsen.
+I registeret registreres alle pasienter med Covid uavhengig av om Covid er årsak til innleggelsen.
+I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er Covid-19.
+For resultater basert personaggregerte data, vises pasienter hvor Covid-19 er hovedårsak til siste innleggelse i forløpet.
 
 \begin{itemize}
 \item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke, med mindre dette er angitt
@@ -121,7 +123,7 @@ aggregert til ett forløp per pasient, uavhengig av om pasienten har reinnleggel
 <<'Oppsum', results='asis'>>=
 StatusNaa <- statusNaaTab(RegData=Pandemi)$Tab
 xtable::xtable(StatusNaa, align=c('l','r','r'),
-                              caption='Status nå')
+                              caption='Status nå, pasienter som ligger inne p.g.a. Covid-19.')
 
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
@@ -130,7 +132,7 @@ FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
   xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
                #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Oppsummering, utskrevne pasienter hvor både
-               inklusjons- og utskrivingsskjema er ferdigstilt.')
+               inklusjons- og utskrivingsskjema er ferdigstilt. Covid-19 hovedårsak til siste opphold.')
       #, include.rownames = FALSE)
 @
 \end{frame}
@@ -220,7 +222,7 @@ RegHF <- if (rolle == 'LU') {PandemiOpph %>% dplyr::group_by(HF, ShNavn) %>% dpl
   } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
 #sort(table(Pandemi$HF), decreasing = T)
 print(xtable::xtable(RegHF, row.names=FALSE, digits=0,
-                     caption='Totalt antall registrerte opphold i hver enhet.'),
+                     caption='Totalt antall registrerte opphold som skyldes Covid-19, i hver enhet.'),
       include.rownames = FALSE)
 @
 \end{frame}
@@ -242,7 +244,7 @@ fra <- max(1, (AntRader-20))
 #rownames(BeleggTab[AntRader,]) <- 'Ant. somatiske senger'
 xtable::xtable(BeleggTab[fra:AntRader, ], digits=1, #-which(names(AntRader)=='Hele landet')
                               caption='Andel av totalt antall senger som opptas av pasienter
-               innlagt p.g.a. Covid-19')
+               hvor Covid-19 er hovedårsak til siste opphold.')
 @
 \end{frame}
 
@@ -272,7 +274,7 @@ skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
 print(
   xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
                method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-               caption='Antall registrerte opphold med korona som hovedårsak for innleggelse siste 20 dager,
+               caption='Antall registrerte opphold med korona som hovedårsak siste 20 dager,
                samt totalt antall for hele pandemiperioden.')
       ,include.rownames = FALSE
       ,scalebox = skalering)
@@ -292,7 +294,7 @@ AntUt <- table(PandemiOpph$UtDato, PandemiOpph$EnhNivaaVis)
 AntUt <- addmargins(AntUt)
 fra <- max(1, (nrow(AntUt)-20))
 print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall avsluttede opphold per dag siste 20 dager, samt totalt.'),
+                              caption='Antall avsluttede opphold som skyldes Covid-19, per dag siste 20 dager, samt totalt.'),
 scalebox = skalering)
 
 #xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
@@ -310,7 +312,7 @@ AntDodeTab <- addmargins(AntDodeTab, FUN=list('Totalt:'=sum, 'Hele landet'=sum),
 fra <- max(1, (nrow(AntDodeTab)-20))
 xtable::xtable(AntDodeTab[fra:nrow(AntDodeTab),], digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                               caption='Antall døde per dag, siste 20 dager,
-               samt totalt for hele pandemiperioden.') %>%
+               samt totalt for hele pandemiperioden. Siste innleggelse hadde Covid-19 som hovedårsak.') %>%
  print(scalebox = skalering)
   #xtable2kable() %>%   kableExtra::kable_styling(latex_options="scale_down")
 
@@ -349,7 +351,7 @@ xtable::xtable(AldersTab) #, #digits=0, #method='compact', #align=c('l', rep('r'
 RisikoTab <- RisikoInnTab(RegData=Pandemi, skjemastatusInn = 2)$Tab
 
 xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Pasientenes risikofaktorer ved innleggelse')
+                              caption='Pasientenes risikofaktorer ved innleggelse, filtrert på pasienter med Covid-19 som hovedårsak til siste innleggelse.')
 @
 \end{frame}
 
