@@ -138,14 +138,6 @@ FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 \end{frame}
 
 
-\begin{frame}[fragile] {Registreringsforsinkelse/datakvalitet}
-<<'RegForsinkelse', results='asis'>>=
-dum <- KoronaFigAndeler(RegData = PandemiLandet, valgtVar = 'regForsinkelseInn', aarsakInn = 2,
-                        enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet, enhetsUtvalg = 1,
-                        datoFra = Sys.Date()-60, datoTil = Sys.Date()-30,
-                        outfile='RegForsink.pdf')
-@
-
 \begin{figure}[ht]
 \centering
 \includegraphics[scale=0.35]{RegForsink.pdf}
@@ -345,6 +337,7 @@ xtable::xtable(AldersTab) #, #digits=0, #method='compact', #align=c('l', rep('r'
 @
 \end{frame}
 
+
 \begin{frame}[fragile] {Risikofaktorer (ferdigstilte oppold)}
 <<'Risikofaktorer', results='asis'>>=
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
@@ -354,6 +347,14 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', n
                               caption='Pasientenes risikofaktorer ved innleggelse, filtrert på pasienter med Covid-19 som hovedårsak til siste innleggelse.')
 @
 \end{frame}
+
+\begin{frame}[fragile] {Registreringsforsinkelse/datakvalitet}
+<<'RegForsinkelse', results='asis'>>=
+dum <- KoronaFigAndeler(RegData = PandemiLandet, valgtVar = 'regForsinkelseInn', aarsakInn = 2,
+                        enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet, enhetsUtvalg = 1,
+                        datoFra = Sys.Date()-60, datoTil = Sys.Date()-30,
+                        outfile='RegForsink.pdf')
+@
 
 
 \end{tiny}

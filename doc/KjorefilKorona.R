@@ -26,7 +26,15 @@ library(korona)
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
-RegData <- PandemiData
+RegData <- PandemiDataRaa
+
+unique(PandemiDataRaa[order(PandemiDataRaa$UnitId),c("UnitId", "HelseenhetKortNavn", 'HF')])
+unique(PandemiData[order(PandemiData$ShNavnUt),c("ReshId", "ShNavnUt", 'HF', 'RHF')])
+unique(RegData[order(RegData$ReshId),c("ReshId", "ShNavn", 'HFresh', 'RHF')])
+#Resh: 102919 HF: Bergen
+
+table(PandemiDataRaa$UnitId)
+
 
 #INNELIGGENDE, tabell
 datoFra <- '2020-09-01'
