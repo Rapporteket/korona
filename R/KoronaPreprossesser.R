@@ -33,6 +33,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
    RegData$HFresh[RegData$ReshId==108595] <- 100091  #Innlandet, psyk.
    RegData$HFresh[RegData$ReshId == 700138] <- 100100 #Stavern, rehab
+   RegData$HFresh[RegData$ReshId == 1085970] <- 100089 #Kongsvinger
    #RegData$HF[RegData$ReshId==108595] <- 'Sykehuset Innlandet HF'
    #RegData$HF[RegData$ReshId==705757] <- 'Oslo universitetssykehus HF'
    #FEIL! Skal være: 4001031 RegData$HFresh[RegData$ReshId %in% c(111487, 705757)] <- 110628   #Aker, Radiumhospitalet

@@ -207,6 +207,7 @@ if (koble==0){
                         ' FROM ',
                         c('InklusjonSkjemaDataContract Inn', 'UtskrivningSkjemaDataContract')[skjema] #)
                       ,' WHERE cast(FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
+        #query <- 'SELECT * FROM InklusjonSkjemaDataContract'
         RegData <- rapbase::loadRegData(registryName="korona", query=query, dbType="mysql")
 }
 
