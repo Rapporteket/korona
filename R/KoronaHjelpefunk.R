@@ -54,6 +54,14 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle)
   )
 
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg = paste0('2.1)klasse:', 'reshID: ', class(reshID), ',
+                                 valgtEnhet: ', class(valgtEnhet),
+                                 ', enhetsNivaa: ', class(enhetsNivaa), ',
+                                                          rolle: ', class(rolle))
+  )
+
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
   src <- normalizePath(system.file(rnwFil, package='korona'))
