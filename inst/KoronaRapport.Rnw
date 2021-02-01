@@ -60,6 +60,7 @@ paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
 #Data per opphold
 PandemiOpph <- KoronaPreprosesser(RegData = Pandemi, aggPers = 0)
+#stopifnot(rolle %in% c('SC', 'LC', 'LU'), print(paste0('rolle:', rolle)))
 PandemiOpph$EnhNivaaVis <- switch(rolle,
                                 'SC' = PandemiOpph$RHF,
                                 'LC' = PandemiOpph$HF,
@@ -116,6 +117,10 @@ aggregert til ett forløp per pasient, uavhengig av om pasienten har reinnleggel
 \item Rapporten er basert på alle registreringer gjort inntil 4 timer før rapporten ble lastet ned.
 \end{itemize}
 
+Rapporten er kjørt for: rolle: \Sexpr{rolle},
+enhetsnivå: \Sexpr{enhetsNivaa},
+Enhet: \Sexpr{valgtEnhet}
+
 \end{frame}
 
 \begin{frame}[fragile] {Status og oppsummering}
@@ -138,13 +143,6 @@ FerdigeReg <- FerdigeRegTab(Pandemi)$Tab
 \end{frame}
 
 
-\begin{figure}[ht]
-\centering
-\includegraphics[scale=0.35]{RegForsink.pdf}
-\caption{Registreringsforsinkelse, forrige måneds registreringer. \Sexpr{dum$utvalgTxt[1]}}
-\end{figure}
-
-\end{frame}
 
 \begin{frame}[fragile] {Antall som ligger på sykehus nå}
 <<'ShusNaa', results='asis'>>=
@@ -356,6 +354,13 @@ dum <- KoronaFigAndeler(RegData = PandemiLandet, valgtVar = 'regForsinkelseInn',
                         outfile='RegForsink.pdf')
 @
 
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.35]{RegForsink.pdf}
+\caption{Registreringsforsinkelse, forrige måneds registreringer. \Sexpr{dum$utvalgTxt[1]}}
+\end{figure}
+
+\end{frame}
 
 \end{tiny}
 \end{document}

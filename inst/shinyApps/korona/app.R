@@ -913,6 +913,10 @@ server <- function(input, output, session) {
     fun <- "abonnementKorona"
     paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
     paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
+    # print(paste0('reshID:', reshID))
+    # print(paste0('valgtEnh:', egenEnhet))
+    # print(paste0('enhetsNivaa:', egetEnhetsNivaa))
+    # print(paste0('rolle:', rolle))
     # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
     #                        reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
     # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',

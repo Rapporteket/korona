@@ -118,8 +118,10 @@ Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
 705757
 
 #Samlerapport, sjekk
+
+#function(rnwFil, brukernavn='lluring', reshID=0, valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SC')
 test <- korona::abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='lenaro', reshID=700720,
-                             valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SC')
+                             valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SP')
 file.copy(from=test, to='~/korona/test.pdf')
 
 testBer <- intensivberedskap::abonnementBeredsk(rnwFil='BeredskapCorona.Rnw', brukernavn='beredskap', reshID=0,
