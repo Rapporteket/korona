@@ -43,6 +43,12 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
 abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                                valgtEnhet = 'Alle',
                              enhetsNivaa = 'RHF', rolle = 'SC'){
+
+  valgtEnhet <- valgtEnhet[[1]]
+  enhetsNivaa <- enhetsNivaa[[1]]
+  rolle <- rolle[[1]]
+
+
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = "1)starter abonnementkjøring: Pandemi-rapport")
