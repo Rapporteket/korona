@@ -3,7 +3,7 @@
 \name{antallTidAvdode}
 \alias{antallTidAvdode}
 \title{Antall avdøde per tidsenhet (basert på avdøddato) og enhetsnivå. Filtreringer kan også gjøres.
-Detaljerinsnivå er styrt av tilgangsnivå}
+Detaljerinsnivå er styrt av tilgangsnivå. Datointervaller baseres følgelig på "ut-dato"}
 \usage{
 antallTidAvdode(
   RegData,
@@ -11,6 +11,7 @@ antallTidAvdode(
   erMann = 9,
   tilgangsNivaa = "SC",
   datoFra = 0,
+  datoTil = Sys.Date(),
   skjemastatusInn = 9,
   aarsakInn = 9,
   valgtEnhet = "Alle"
@@ -28,6 +29,8 @@ antallTidAvdode(
 
 \item{datoFra}{startdato 'yyyy-mm-dd'}
 
+\item{datoTil}{sluttdato 'yyyy-mm-dd'}
+
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
@@ -40,5 +43,5 @@ antallTidAvdode(
 }
 \description{
 Antall avdøde per tidsenhet (basert på avdøddato) og enhetsnivå. Filtreringer kan også gjøres.
-Detaljerinsnivå er styrt av tilgangsnivå
+Detaljerinsnivå er styrt av tilgangsnivå. Datointervaller baseres følgelig på "ut-dato"
 }

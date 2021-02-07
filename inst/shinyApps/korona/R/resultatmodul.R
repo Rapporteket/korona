@@ -59,7 +59,7 @@ koronaresultater_UI <- function(id){
 }
 
 
-koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg, egetEnhetsNivaa, egenEnhet, hvdsession){
+koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rolle, enhetsvalg, egetEnhetsNivaa, egenEnhet, hvdsession){
 
   observeEvent(input$tilbakestillValgRes, {
     shinyjs::reset("brukervalgRes")
@@ -122,17 +122,19 @@ koronaresultater <- function(input, output, session, KoroData, rolle, enhetsvalg
                                                 aarsakInn = as.numeric(input$aarsakInnRes),
                                                 skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                 erMann=as.numeric(input$erMannRes)),
-                     'antinn'= antallTidInneliggende(RegData=KoroData, tilgangsNivaa=rolle,
-                                                     valgtEnhet= egenEnhet, #nivå avgjort av rolle
-                                                     tidsenhet=input$velgTidsenhet,
-                                                     datoFra=datoFra(),
-                                                     datoTil=input$velgSluttdatoRes,
-                                                     aarsakInn = as.numeric(input$aarsakInnRes),
-                                                     skjemastatusInn=as.numeric(input$skjemastatusInnRes),
-                                                     erMann=as.numeric(input$erMannRes))
+                     'antinn'= antallTidInneliggende(RegData=KoroDataOpph, tilgangsNivaa=rolle,
+                                                      valgtEnhet= egenEnhet, #nivå avgjort av rolle
+                                                      tidsenhet=input$velgTidsenhet,
+                                                      datoFra=datoFra(),
+                                                      datoTil=input$velgSluttdatoRes,
+                                                       #aarsakInn = as.numeric(input$aarsakInnRes),
+                                                       skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                                                      erMann=as.numeric(input$erMannRes))
     )
-    ant_skjema <- AntTab$Tab_tidy
-    ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
+#AntTab <- antallTidInneliggende(RegData=KoroDataOpph)
+ant_skjema <- AntTab$Tab_tidy
+ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
+    print(dim(ant_skjema))
     sketch <- htmltools::withTags(table(
       DT::tableHeader(ant_skjema[-dim(ant_skjema)[1], ]),
       DT::tableFooter(c('Sum' , as.numeric(ant_skjema[dim(ant_skjema)[1], 2:dim(ant_skjema)[2]])))))

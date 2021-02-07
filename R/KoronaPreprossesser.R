@@ -71,6 +71,11 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
                                       labels = c('Vest','Nord','Midt', 'Sør-Øst')))
 
 
+   #Kjønn
+   RegData$erMann <- NA #1=Mann, 2=Kvinne, 0=Ukjent
+   RegData$erMann[RegData$PatientGender == 1] <- 1
+   RegData$erMann[RegData$PatientGender == 2] <- 0
+   RegData$Kjonn <- factor(RegData$erMann, levels=0:1, labels=c('kvinner','menn'))
 
    RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                          RegData$Vekt/(RegData$Hoyde/100)^2,
@@ -300,11 +305,6 @@ if (aggPers == 1) {
    RegData$InnTidspunktSiste <- as.POSIXct(RegData$FormDateSiste, tz= 'UTC',
                                            format="%Y-%m-%d %H:%M:%S" )
 }
-      #Kjønn
-      RegData$erMann <- NA #1=Mann, 2=Kvinne, 0=Ukjent
-      RegData$erMann[RegData$PatientGender == 1] <- 1
-      RegData$erMann[RegData$PatientGender == 2] <- 0
-      RegData$Kjonn <- factor(RegData$erMann, levels=0:1, labels=c('kvinner','menn'))
 
       #Riktig format på datovariable:
       RegData$InnDato <- as.Date(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d") #DateAdmittedIntensive

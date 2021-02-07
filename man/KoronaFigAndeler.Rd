@@ -7,6 +7,8 @@
 KoronaFigAndeler(
   RegData,
   valgtVar = "alder",
+  datoFra = 0,
+  datoTil = 0,
   erMann = 9,
   minald = 0,
   maxald = 110,
@@ -30,6 +32,10 @@ KoronaFigAndeler(
 \item{valgtVar}{Hvilken variabel som skal visualiseres. Se \strong{Details} for oversikt.
 ' @param outfile Navn på fil figuren skrives til. Standard: '' (Figur skrives
    til systemets standard utdataenhet (som regel skjerm))}
+
+\item{datoFra}{startdato 'yyyy-mm-dd'}
+
+\item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 

@@ -57,7 +57,7 @@ if (paaServer) {
 
 
 KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
-KoroDataUAgg <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
 BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
 #Kobler pandemi og beredskap:
 KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
@@ -705,7 +705,7 @@ server <- function(input, output, session) {
     }
   )
 
-  callModule(koronaresultater, "resultater_id", KoroData = KoroData, rolle=rolle, enhetsvalg=enhetsvalg,
+  callModule(koronaresultater, "resultater_id", KoroData = KoroData, KoroDataOpph=KoroDataOpph, rolle=rolle, enhetsvalg=enhetsvalg,
              egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
 
   callModule(koronabelegg, "koronabelegg_id", KoroData = KoroData, rolle=rolle, reshID=reshID,

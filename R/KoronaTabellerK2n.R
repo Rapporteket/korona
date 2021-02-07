@@ -225,30 +225,33 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
   datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), datoTil, by="day") #today()
 
-  if (tidsenhet=='dag') {
-    names(datoer) <- format(datoer, '%d.%b')
-    aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-    RegDataAlle <- bind_cols(RegDataAlle, aux)
-  } else {
+  # if (tidsenhet=='dag') {
+  #   names(datoer) <- format(datoer, '%d.%b%y')
+  #   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
+  #   RegDataAlle <- bind_cols(RegDataAlle, aux)
+  # } else {
     names(datoer) <- datoer
     aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-    aux <- bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
-    aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi)
+    aux <- bind_cols(as_tibble(RegDataAlle)[, c('PasientID',"EnhNivaaVis")], aux) #"PasientID"
+    aux <- aux %>% gather(names(aux)[-(1:2)], key=Tid, value = verdi)
     aux$Tid <- as.Date(aux$Tid)
     aux$Tid <- switch (tidsenhet,
-                        'uke' = paste0('Uke ', format(aux$Tid, "%V")),
+                       'dag' = format(aux$Tid, '%d.%b%y'),
+                        'uke' = paste0('Uke ', format(aux$Tid, "%V.%Y")),
                         'maaned' = format(aux$Tid, "%b.%Y")
     )
     aux <- aux %>% group_by(PasientID, Tid) %>%
-      summarise(er_inne = max(verdi))
+      summarise(er_inne = max(verdi), #TRUE/FALSE
+                EnhNivaaVis = EnhNivaaVis[1])
     aux <- aux %>% spread(key=Tid, value = er_inne)
-    RegDataAlle <- merge(RegDataAlle, aux, by = 'PasientID')
-  }
+    RegDataAlle <- aux #merge(RegDataAlle, aux, by = 'PasientID')
+  #}
 
-    switch (tidsenhet,
-                    uke = datoer <- unique(paste0('Uke ', format(datoer, '%V'))),
+  switch(tidsenhet,
+          dag = datoer <- unique(format(datoer, '%d.%b%y')),
+                    uke = datoer <- unique(paste0('Uke ', format(datoer, '%V.%Y'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
-  if (tidsenhet %in% c("uke", "maaned")) {
+  if (tidsenhet %in% c("dag", "uke", "maaned")) {
     names(datoer) <- datoer
   }
 

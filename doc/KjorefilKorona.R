@@ -24,7 +24,7 @@ valgtVar <- 'demografi'
 
 library(korona)
 PandemiDataRaa <- korona::KoronaDataSQL()
-PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
+PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa, aggPers = 0)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiDataRaa
 
