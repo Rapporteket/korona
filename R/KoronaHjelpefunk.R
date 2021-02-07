@@ -213,6 +213,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 erInneliggende <- function(datoer, regdata){
   # regnes som inneliggende på aktuell dato hvis den faller mellom inn- og utdato eller
   # er etter inndato og det ikke finnes utddato. Flere betingelser kan legges til.
+  #NY: For hver dato - tell antall PID
 
   auxfunc <- function(x) {(x >  regdata$InnDato & x <= regdata$UtDato) | (x >  regdata$InnDato & is.na( regdata$UtDato))}
   map_df(datoer, auxfunc)

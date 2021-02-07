@@ -114,6 +114,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
 
    RegData$UtDato <- RegData$FormDateUt #Alle som har utskrivingsskjema
    #Regner de som har ut- og innskjema opprettet samtidig og mangler utskrivingsdato, som ikke utskrevet
+   #Inneliggende: Alle uten utsskrvinvingsdato + de med utskrivingsskjema som ikke opprettet samtidig med inn-skjema.
    indIkkeUtDato <- which(is.na(RegData$Utskrivningsdato)) #Mangler utskr.dato.
    indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$CreationDate,
                                          units = 'hours')) < 1)

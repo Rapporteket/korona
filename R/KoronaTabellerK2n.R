@@ -217,8 +217,8 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
   RegDataAlle <- UtData$RegData
   RegDataAlle <- RegDataAlle[!(is.na(RegDataAlle$EnhNivaaVis)), ]
-  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)],
-                                                           tz= 'UTC', format="%Y-%m-%d")
+  #Hvis skal regne alle med utskjema som utskrevne: Alle meRegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)],
+  #                                                         tz= 'UTC', format="%Y-%m-%d")
   # filtrerer på dato -  UtDato >= datoFra, dvs. tar med de som er utskrervet senere enn datoFra
   #dato til? InnDato <= datoTil, dvs. tar med de som er innlagt før datoTil
   if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$UtDato >= datoFra | is.na(RegDataAlle$UtDato), ]}
