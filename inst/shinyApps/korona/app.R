@@ -557,13 +557,6 @@ server <- function(input, output, session) {
                            skjemastatusInn=as.numeric(input$skjemastatusInn),
                            erMann=as.numeric(input$erMann)
     )
-    # print(egetEnhetsNivaa)
-    # print(egenEnhet)
-    # print(as.numeric(input$aarsakInn))
-    # print(as.numeric(input$skjemastatusInn))
-    # print(as.numeric(input$erMann))
-    # print(sum(UtData$RegData$StatusVedUtskriving==2, na.rm=T))
-    # print(dim(UtData$RegData)[1])
 
     txt <- if(dim(UtData$RegData)[1]>2) {
       paste0('For hele tidsperioden er gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
@@ -707,6 +700,7 @@ server <- function(input, output, session) {
 
   callModule(koronaresultater, "resultater_id", KoroData = KoroData, KoroDataOpph=KoroDataOpph, rolle=rolle, enhetsvalg=enhetsvalg,
              egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
+
 
   callModule(koronabelegg, "koronabelegg_id", KoroData = KoroData, rolle=rolle, reshID=reshID,
              egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
@@ -913,10 +907,6 @@ server <- function(input, output, session) {
     fun <- "abonnementKorona"
     paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
     paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
-    # print(paste0('reshID:', reshID))
-    # print(paste0('valgtEnh:', egenEnhet))
-    # print(paste0('enhetsNivaa:', egetEnhetsNivaa))
-    # print(paste0('rolle:', rolle))
     # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
     #                        reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
     # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
@@ -980,8 +970,6 @@ server <- function(input, output, session) {
       runDayOfYear <- rapbase::makeRunDayOfYearSequence(interval = interval)
       paramNames = c('zipFilNavn', 'brukernavn')
       paramValues = c(input$hvilkeFilerTilFHI, brukernavn)
-      #print(input$hvilkeFilerTilFHI)
-      #print(brukernavn)
       rapbase::createAutoReport(synopsis = paste0('Sendt til FHI: ',input$hvilkeFilerTilFHI),
                                 package = 'korona',
                                 fun = "sendDataFilerFHI",

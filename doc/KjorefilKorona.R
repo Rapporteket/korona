@@ -35,6 +35,29 @@ unique(RegData[order(RegData$ReshId),c("ReshId", "ShNavn", 'HFresh', 'RHF')])
 
 table(PandemiDataRaa$UnitId)
 
+#Sjekk av antall døde
+BergenHF: 100082
+
+PandemiDataRaa <- korona::KoronaDataSQL()
+PandemiDataOpph <- KoronaPreprosesser(RegData = PandemiDataRaa, aggPers = 0)
+PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa)
+
+#Før aggregering:
+table(PandemiDataOpph$ShNavn[which(PandemiDataOpph$StatusVedUtskriving==2 & PandemiDataOpph$HFresh==100082)])
+sum(PandemiDataOpph$StatusVedUtskriving==2, na.rm = T)
+
+persDod <- PandemiDataOpph$PersonId[which(PandemiDataOpph$StatusVedUtskriving == 2 & PandemiDataOpph$RHFresh == 100021)]
+PandemiDataOpph[PandemiDataOpph$PersonId %in% persDod, c("ShNavn", "ShNavnUt")]
+write.table()
+#Etter aggregering:
+table(PandemiData$ShNavnUt[which(PandemiData$StatusVedUtskriving==2& PandemiData$HFresh==100082)])
+sum(PandemiData$StatusVedUtskriving==2, na.rm = T)
+
+PandemiData[PandemiData$PersonId %in% persDod, c("ShNavn", "ShNavnUt")]
+
+unique(PandemiDataOpph[PandemiDataOpph$StatusVedUtskriving==2 ,c('ReshId', "ShNavn")])
+test <- PandemiDataOpph[which(PandemiDataOpph$StatusVedUtskriving==2), ]
+testRaa <- PandemiDataRaa[PandemiDataRaa$StatusVedUtskriving==2, ]
 
 #INNELIGGENDE, tabell
 datoFra <- '2020-09-01'

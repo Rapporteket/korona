@@ -42,9 +42,9 @@ koronaresultater_UI <- function(id){
     mainPanel(
       h2('Tellinger:'),
       h4('Merk at i figur/tabell over antall døde så benyttes skjemadato på utskrivingsskjema i de tilfeller det ikke
-         finnes utskrivingsdato. Dette kan skje når man inkluderer registreringer i kladd. Tallet over
-         antall inneliggende pasienter på dagens dato skiller seg fra antallet "På sykehus nå" på forsiden ved at førstnevnte
-         tall inkluderer også de som er utskrevet i dag.'),
+         finnes utskrivingsdato. Dette kan skje når man inkluderer registreringer i kladd.
+         Antall inneliggende pasienter på dagens dato skiller seg fra antallet "På sykehus nå" på forsiden ved at førstnevnte
+         også inkluderer de som er utskrevet i dag.'),
       # h3('NB:Siden er under utvikling!', style = "color:red"),
       br(),
       plotOutput(ns("FigurTidEnhet"), height="auto"),
@@ -78,6 +78,17 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
                                          choices = c(2, 4, 8, 12, 20), selected = 4)
     )
   )
+  observe({
+    updateSelectInput(session, "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
+                      choices = if (input$valgtVar == 'antinn') {c("Ja"=1, "Alle reg."=9, "Nei"=2)
+                        } else {c("Ja, minst siste opphold" = 2,
+                                  "Ja, alle opphold"=1,
+                                  "Ja, minst ett opph" = 3,
+                                  "Alle registrerte"=0,
+                                  "Nei, ingen opphold" = 4)}
+)
+
+  })
 
   datoFra <- reactive(
     datoFra <- switch (input$velgTidsenhet,
@@ -92,7 +103,8 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
     #                                       unit = 'week', week_start = 1),
     #                    "maaned" = floor_date(Sys.Date() - months(as.numeric(input$velgAntVisning)-1),
     #                                          unit = 'month')
-   )
+   ),
+
   )
 
   AntTab <- function() {
@@ -127,14 +139,15 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
                                                       tidsenhet=input$velgTidsenhet,
                                                       datoFra=datoFra(),
                                                       datoTil=input$velgSluttdatoRes,
-                                                       #aarsakInn = as.numeric(input$aarsakInnRes),
+                                                       aarsakInn = as.numeric(input$aarsakInnRes),
                                                        skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                       erMann=as.numeric(input$erMannRes))
     )
+    #print(names(table(KoroDataOpph))[1])
 #AntTab <- antallTidInneliggende(RegData=KoroDataOpph)
 ant_skjema <- AntTab$Tab_tidy
 ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
-    print(dim(ant_skjema))
+    #print(dim(ant_skjema))
     sketch <- htmltools::withTags(table(
       DT::tableHeader(ant_skjema[-dim(ant_skjema)[1], ]),
       DT::tableFooter(c('Sum' , as.numeric(ant_skjema[dim(ant_skjema)[1], 2:dim(ant_skjema)[2]])))))
