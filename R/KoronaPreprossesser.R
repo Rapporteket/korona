@@ -221,7 +221,7 @@ if (aggPers == 1) {
                 Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)),
                 # OverfortAnnetSykehusInnleggelse,  #1-ja, 2-nei, 3-ukjent
                 # OverfortAnnetSykehusUtskrivning,  #1-ja, 2-nei, 3-ukjent
-                PatientGender = PatientGender[1],
+               erMann = erMann[1], #PatientGender = PatientGender[1],
                 Penicillin = sum(Penicillin)>0,
                 PenicillinEnzymhemmer = sum(PenicillinEnzymhemmer)>0,
                 ReiseUtenfor = JaNeiUkjVar(ReiseUtenfor), #1-ja, 2-nei, 3-ukjent

@@ -24,9 +24,17 @@ valgtVar <- 'demografi'
 
 library(korona)
 PandemiDataRaa <- korona::KoronaDataSQL()
-PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa, aggPers = 0)
+PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa) #, aggPers = 0)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiDataRaa
+
+test <- KoronaUtvalg(RegData <- PandemiData, erMann=0)
+
+test <- lagDatafilerTilFHI()
+
+paste0('Uke ', format(aux$Tid, "%V.%y"))
+RegData$Uke <- format(RegData$InnDag, "%V.%y")
+table(RegData$Uke)
 
 unique(RegData[order(RegData$UnitId),c("UnitId", "HelseenhetKortNavn", 'HF')])
 unique(PandemiData[order(PandemiData$ShNavnUt),c("ReshId", "ShNavnUt", 'HF', 'RHF')])
