@@ -28,8 +28,6 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa) #, aggPers = 0)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiDataRaa
 
-test <- KoronaUtvalg(RegData <- PandemiData, erMann=0)
-
 test <- lagDatafilerTilFHI()
 
 paste0('Uke ', format(aux$Tid, "%V.%y"))
