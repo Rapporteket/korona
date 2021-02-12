@@ -8,7 +8,7 @@
 #'
 KoronaDataSQL <- function(datoFra = '2020-03-01', datoTil = Sys.Date(), skjema=1, koble=1) { #
 
-varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
+varPandemiInn <- c('Inn.SkjemaGUID
   ,Inn.AceHemmerInnkomst
   -- AS AceHemmerInnkomst2
   -- ,Inn.AddressQuality
@@ -128,7 +128,7 @@ varPandemiInn <- c('UPPER(Inn.SkjemaGUID) AS SkjemaGUID
   ,Inn.VektUkjent
   ')
 
-varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
+varPandemiUt <- c('SkjemaGUID
   -- ,AddressQuality
   ,AkuttNyresvikt
   ,AkuttRespirasjonsvikt
@@ -152,7 +152,7 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
   ,HelseenhetKortNavn
   ,HF
   -- ,Hospital
-  ,HovedskjemaGUID
+  ,UPPER(HovedskjemaGUID) AS HovedskjemaGUID
   -- ,IkkeFerdigstillt30Dager
   ,Karbapenem
   ,Kinolon
@@ -185,7 +185,8 @@ varPandemiUt <- c('UPPER(SkjemaGUID) AS SkjemaGUID
 
 alle <- '*'
 
-varUtKoblet <- c('UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
+varUtKoblet <- c(
+'UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.Antifungalbehandling
   ,Ut.AntiviralBehandling
   ,Ut.CreationDate AS CreationDateUt
@@ -204,25 +205,42 @@ if (koble==0){
         query <- paste0('SELECT ',
                        ifelse(skjema==1, varPandemiInn, varPandemiUt),
                         ' FROM ',
-                        ifelse(skjema==1, 'InklusjonSkjemaDataContract Inn', 'UtskrivningSkjemaDataContract') #)
+                        c('InklusjonSkjemaDataContract Inn', 'UtskrivningSkjemaDataContract')[skjema] #)
                       ,' WHERE cast(FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
+        #query <- 'SELECT * FROM InklusjonSkjemaDataContract'
+        RegData <- rapbase::loadRegData(registryName="korona", query=query, dbType="mysql")
 }
+
 if (koble==1){
-        query <- paste0('SELECT ',
-                        varPandemiInn,
-                        ',',
-                        varUtKoblet,
-                        ' FROM InklusjonSkjemaDataContract Inn
-                        LEFT JOIN UtskrivningSkjemaDataContract Ut
-                        ON UPPER(Inn.SkjemaGUID) = UPPER(Ut.HovedskjemaGUID)' #)
-                        ,' WHERE cast(Inn.FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
+        # query <- paste0('SELECT ',
+        #                 varPandemiInn,
+        #                 ',',
+        #                 varUtKoblet,
+        #                 ' FROM InklusjonSkjemaDataContract Inn
+        #                 LEFT JOIN UtskrivningSkjemaDataContract Ut
+        #                 ON Inn.SkjemaGUID = Ut.HovedskjemaGUID' #)
+        #                 ,' WHERE cast(Inn.FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
+
+  queryInn <- paste0('SELECT ',
+                     varPandemiInn,
+                    ' FROM InklusjonSkjemaDataContract Inn
+                     WHERE cast(FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
+  KoroDataInn <- rapbase::loadRegData(registryName="korona", query=queryInn, dbType="mysql")
+
+  queryUt <- paste0('SELECT ',
+                    varUtKoblet,
+                     ' FROM UtskrivningSkjemaDataContract Ut
+                     WHERE cast(FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
+  KoroDataUt <- rapbase::loadRegData(registryName="korona", query=queryUt, dbType="mysql")
+
+  RegData <- merge(KoroDataInn, KoroDataUt, #suffixes = c('','Ut'),
+                   by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+
         }
-
-
 
 #query <- 'select * from UtskrivningSkjemaDataContract'
 #query <- 'select * from InklusjonSkjemaDataContract'
+#RegData <- rapbase::loadRegData(registryName="korona", query=query, dbType="mysql")
 
-      RegData <- rapbase::loadRegData(registryName="korona", query=query, dbType="mysql")
-      return(RegData)
+return(RegData)
 }

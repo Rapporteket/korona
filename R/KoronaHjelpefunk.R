@@ -43,6 +43,12 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
 abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                                valgtEnhet = 'Alle',
                              enhetsNivaa = 'RHF', rolle = 'SC'){
+
+  valgtEnhet <- valgtEnhet[[1]]
+  enhetsNivaa <- enhetsNivaa[[1]]
+  rolle <- rolle[[1]]
+
+
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = "1)starter abonnementkjøring: Pandemi-rapport")
@@ -52,6 +58,14 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                     msg = paste0('2)PARAMETRE: rnwFil: ', rnwFil, ', brukernavn: ', brukernavn,
                ', reshID: ', reshID, ', valgtEnhet: ', valgtEnhet,
   ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle)
+  )
+
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
+                    reshId = reshID[[1]],
+                    msg = paste0('2.1)klasse:', 'reshID: ', class(reshID), ',
+                                 valgtEnhet: ', class(valgtEnhet),
+                                 ', enhetsNivaa: ', class(enhetsNivaa), ',
+                                                          rolle: ', class(rolle))
   )
 
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
@@ -199,6 +213,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 erInneliggende <- function(datoer, regdata){
   # regnes som inneliggende på aktuell dato hvis den faller mellom inn- og utdato eller
   # er etter inndato og det ikke finnes utddato. Flere betingelser kan legges til.
+  #NY: For hver dato - tell antall PID
 
   auxfunc <- function(x) {(x >  regdata$InnDato & x <= regdata$UtDato) | (x >  regdata$InnDato & is.na( regdata$UtDato))}
   map_df(datoer, auxfunc)

@@ -28,7 +28,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
 
 
       #----------- Figurparametre - MÅ RYDDES !!!! ------------------------------
-      cexgr <- 1	#Kan endres for enkeltvariable
+      cexgr <- 0.9	#Kan endres for enkeltvariable
       retn <- 'V'		#Vertikal som standard. 'H' angis evt. for enkeltvariable
       flerevar <- 0
       grtxt <- ''		#Spesifiseres for hver enkelt variabel
@@ -44,13 +44,12 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       sortAvtagende <- TRUE  #Sortering av resultater
       varTxt <- 'hendelser'
 
-      aarsakInn <-9
-      skjemastatusInn <- 9
-      skjemastatusUt <- 9
-      aarsakInn<- 9
-      dodSh <- 9
-      minald <- 0
-      maxald <- 110
+      #aarsakInn <-9
+      # skjemastatusInn <- 9
+      # skjemastatusUt <- 9
+      # dodSh <- 9
+      # minald <- 0
+      # maxald <- 110
       tittel <- 'Mangler tittel'
       variable <- 'Ingen'
       RegData$Variabel <- 0
@@ -92,6 +91,36 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
             xAkseTxt <- 'Liggetid (døgn)'
       }
 
+      if (valgtVar %in% c('regForsinkelseInn', 'regForsinkelseUt')) {  #Andeler, GjsnGrVar
+        #Bare ferdigstilte?
+        #Endrede skjema:
+        indEndret <- c(which(as.Date(RegData$CreationDate) == '2020-10-22' & RegData$ReshId ==4211748) #Hammerfest
+                       ,which(as.Date(RegData$CreationDate) == '2020-06-10' & RegData$ReshId == 101971) #Finnmark
+                       ,which(as.Date(RegData$CreationDate) == '2020-10-26' & RegData$ReshId == 4209222) #Kalnes
+                        ,which(as.Date(RegData$CreationDate) == '2020-06-30' & RegData$ReshId == 4209222) #Kalnes
+                        ,which(as.Date(RegData$CreationDate) == '2020-07-09' & RegData$ReshId == 100092) #Østfold?
+                       ,which(as.Date(RegData$CreationDate) == '2020-10-23' & RegData$ReshId == 109870) #Ullevål
+                        ,which(as.Date(RegData$CreationDate) == '2020-10-28' & RegData$ReshId == 114282) #Stavanger
+        )
+        RegData <- RegData[-indEndret,]
+
+          RegData$RegForsink <- switch(valgtVar,
+                                       regForsinkelseInn = as.numeric(difftime(RegData$CreationDate,
+                                                   RegData$InnTidspunkt, units = 'days')),
+                                       regForsinkelseUt = as.numeric(difftime(RegData$FirstTimeClosedUt,
+                                                     RegData$UtTidspunkt, units = 'days'))
+          )
+        RegData <- RegData[which(!is.na(RegData$RegForsink)), ]
+        tittel <- switch(valgtVar,
+                         regForsinkelseInn='Tid fra første innleggelse til opprettet inn-skjema',
+                         regForsinkelseUt = 'Tid fra utskriving til ferdigstilt ut-skjema')
+        subtxt <- 'døgn'
+        gr <- c(0,1:7,30,5000) #gr <- c(seq(0, 90, 10), 1000)
+        RegData$VariabelGr <- cut(RegData$RegForsink, breaks = gr, include.lowest = TRUE, right = TRUE)
+        grtxt <- c(levels(RegData$VariabelGr)[1:(length(gr)-2)], '30+') #c('1', '(1-7]', '(7-14]', #
+        cexgr <- 0.9
+        xAkseTxt <- 'dager'
+      }
 
       #---------------KATEGORISKE
 
@@ -105,7 +134,6 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
             RegData$VariabelGr <- factor(RegData$AkuttSirkulasjonsvikt, levels=gr)
             grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
                        'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
-            cexgr <- 0.9
       }
       if (valgtVar == 'sirkSviktUt') { #Andeler
         gr <- c(1:5,999)
@@ -114,7 +142,6 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         RegData$VariabelGr <- factor(RegData$UtsAkuttSirkulasjonsvikt, levels=gr)
         grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
                    'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
-        cexgr <- 0.9
       }
 
       #
@@ -128,7 +155,6 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         RegData$VariabelGr <- factor(RegData$AkuttRespirasjonsvikt, levels=gr)
         grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
                    'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
-        cexgr <- 0.9
       }
       if (valgtVar == 'respSviktUt') { #Andeler
         gr <- c(1:5,999)
@@ -137,8 +163,17 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         RegData$VariabelGr <- factor(RegData$UtsAkuttRespirasjonsvikt, levels=gr)
         grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
                    'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
-        cexgr <- 0.9
       }
+      if (valgtVar == 'aarsakInn4kat') { #Andeler
+        #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 4-nei, ingen opph, 9-ukj
+        #(3kategorier: 1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj)
+        gr <- c(1:4,9)
+        retn <- 'H'
+        tittel <- 'Covid-19 hovedårsak til sykehusopphold?'
+        RegData$VariabelGr <- factor(RegData$ArsakInnNy, levels=gr)
+        grtxt <- c('Alle opph.', 'Minst siste opph.', 'Minst ett, ikke siste', 'Ingen opph.', 'Ukjent')
+      }
+
 
       #RontgenThorax
       # -1 = Velg verdi
@@ -265,7 +300,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
 
       RegData$Variabel <- as.numeric(RegData$Variabel)
 
-      UtData <- list(RegData=RegData, minald=minald, maxald=maxald,
+      UtData <- list(RegData=RegData, #minald=minald, maxald=maxald,
                      grtxt=grtxt, cexgr=cexgr, varTxt=varTxt, xAkseTxt=xAkseTxt,
                      retn=retn,tittel=tittel, flerevar=flerevar, variable=variable, sortAvtagende=sortAvtagende)
       #RegData inneholder nå variablene 'Variabel' og 'VariabelGr'

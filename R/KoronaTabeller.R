@@ -6,29 +6,32 @@
 #' @param RegData dataramme med preprossesserte data
 #' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
-#' @param HFkort benytte kortnavn for HF 0-nei, 1-ja
+#' @param HF benytte kortnavn for HF 0-nei, 1-ja
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
 #' @return
 #' @export
-antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valgtVar='innlagt',
+antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoTil=Sys.Date(), #valgtVar='innlagt',
                             tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF',
-                            HFkort=0, skjemastatusInn=9, aarsakInn=9, dodSh=9){
+                            HF=0, skjemastatusInn=9, aarsakInn=9, dodSh=9){
   #valgtEnhet representerer eget RHF/HF
 #if (valgtVar == 'utskrevet') {}
 
-  if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
+  datoFra <- if (datoFra!=0) datoFra else min(RegData$InnDato, na.rm = T)
+  #if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
+  RegData <- KoronaUtvalg(RegData=RegData, datoFra=datoFra, datoTil=datoTil)$RegDataAlle
+
   RegData$TidsVar <- switch (tidsenhet,
-                                 dag = factor(format(RegData$InnDato, '%d.%b'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
+                             dag = factor(format(RegData$InnDato, '%d.%b'),
+                                          levels = format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 day'))), '%d.%b')),
-                                 uke = factor(paste0('Uke ', format(RegData$InnDato, '%V')),
-                                              levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
+                             uke = factor(paste0('Uke ', format(RegData$InnDato, '%V')),
+                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 week'))), '%V'))),
-                                 maaned = factor(format(RegData$InnDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegData$InnDato),
+                             maaned = factor(format(RegData$InnDato, '%b.%Y'),
+                                                 levels = format(rev(seq(datoTil, datoFra,
                                                                          by=paste0('-1 month'))), '%b.%Y')))
 
   RegData <- RegData[!is.na(RegData$TidsVar), ]
@@ -42,7 +45,8 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, #valg
   enhetsNivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
 
   #Skal også ha oppsummering for hele landet
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=, datoTil=0, erMann=erMann, #minald=0, maxald=110
+  UtData <- KoronaUtvalg(RegData=RegData, #datoFra=datoFra, datoTil=0,
+                         erMann=erMann, #minald=0, maxald=110
                          enhetsNivaa = enhetsNivaa, valgtEnhet = valgtEnhet,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
                          dodSh=dodSh)
@@ -340,12 +344,10 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
 
-  #RegData <- RegDataRaa
-  ind <- which(is.na(RegData$HovedskjemaGUID))
-  variabler <- c('HFkort', 'ShNavn', 'InnDato', 'SkjemaGUID')
-  tab <- RegData[ind, variabler]
+  variabler <- c('HF', 'ShNavn', 'InnDato', 'SkjemaGUID')
+  tab <- RegData[which(is.na(RegData$SkjemaGUIDut)), variabler]
   tab$InnDato <- as.character(tab$InnDato)
-  tabUt <- tab[with(tab, order(HFkort, ShNavn, InnDato)), ] #
+  tabUt <- tab[with(tab, order(HF, ShNavn, InnDato)), ] #
 }
 
 
@@ -370,7 +372,8 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 
   PasMdbl <- DblReg$PatientInRegistryGuid[which(DblReg$LikTid == 1)]
   TabDbl <- RegData[which(RegData$PatientInRegistryGuid %in% PasMdbl),
-                           c("PatientInRegistryGuid", "FormDate", "HelseenhetKortNavn", "UnitId", 'SkjemaGUID', "FormDateUt",'SkjemaGUIDut')]
+                    c("PatientInRegistryGuid", "FormDate", "HelseenhetKortNavn", "UnitId",
+                      'SkjemaGUID', "FormDateUt",'SkjemaGUIDut')]
   TabDbl <- TabDbl[order(TabDbl$FormDate), ]
   N <- dim(TabDbl)[1]
   indSmTid <- which(difftime(TabDbl$FormDate[2:N], TabDbl$FormDate[1:(N-1)], units = 'mins') <= tidsavvik)

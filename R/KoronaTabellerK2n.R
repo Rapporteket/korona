@@ -1,7 +1,7 @@
 # Fil med samling av funksjoner som lager tabeller for Rapporteket-Pandemi
 
 #' Antall avdøde per tidsenhet (basert på avdøddato) og enhetsnivå. Filtreringer kan også gjøres.
-#' Detaljerinsnivå er styrt av tilgangsnivå
+#' Detaljerinsnivå er styrt av tilgangsnivå. Datointervaller baseres følgelig på "ut-dato"
 #'
 #' @param RegData dataramme med preprossesserte data
 #' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
@@ -12,7 +12,8 @@
 #'
 #' @return
 #' @export
-antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
+antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
+                            datoFra=0, datoTil=Sys.Date(),
                             skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
 
@@ -24,32 +25,37 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                                 LC = RegData$HFut,
                                 LU = RegData$ShNavnUt)
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+  UtData <- KoronaUtvalg(RegData=RegData, erMann=erMann, #datoFra=0, datoTil=0, minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn,
                          dodSh=2)
 
-
+  datoFra <- if (datoFra!=0) datoFra else min(RegData$UtDato, na.rm = T)
   RegDataAlle <- UtData$RegData
   RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)]
-  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
+
+
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på fradato
+  if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%b'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                              levels = format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 day'))), '%d.%b')),
                                  uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
-                                              levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra,
                                                                                      by=paste0('-1 week'))), '%V'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                 levels = format(rev(seq(datoTil, datoFra,
                                                                          by=paste0('-1 month'))), '%b.%Y')))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
+  #RegData <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
 
   #Trenger utvalg når totalen ikke er summen av det som vises.
+  #Flytte denne for å ikke få feil tilhørighet for døde...
   RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   } else {
-    enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
+    enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HFut')
     subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
   }
 
@@ -93,9 +99,9 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 #' @return
 #' @export
 antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
-                               skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
+                               datoTil=Sys.Date(), skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
   #valgtEnhet representerer eget RHF/HF
-
+  datoFra <- if (datoFra!=0) datoFra else min(RegData$UtDato, na.rm = T)
   RegData$ShNavnUt[is.na(RegData$ShNavnUt)] <- RegData$ShNavn[is.na(RegData$ShNavnUt)] # der ShNavnUt mangler, benytt ShNavn
 
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
@@ -105,23 +111,24 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                                 #LC = RegData$HFkort2,
                                 LU = RegData$ShNavnUt)
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
+  UtData <- KoronaUtvalg(RegData=RegData, erMann=erMann, #datoFra=0, datoTil=0, minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
 
 
   RegDataAlle <- UtData$RegData
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$UtDato), ]
-  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på dato
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på fradato
+  if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%b'),
-                                              levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                              levels = format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 day'))), '%d.%b')),
                                  uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
-                                              levels = paste0('Uke ', format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra ,
                                                                                      by=paste0('-1 week'))), '%V'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(Sys.Date(), if (datoFra!=0) datoFra else min(RegDataAlle$UtDato),
+                                                 levels = format(rev(seq(datoTil, datoFra ,
                                                                          by=paste0('-1 month'))), '%b.%Y')))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
@@ -186,61 +193,89 @@ tr_summarize_output <- function(x, grvarnavn=''){
 #' Antall inneliggende per tidsenhet  og enhetsnivå. Filtreringer kan også gjøres.
 #' Detaljerinsnivå er styrt av tilgangsnivå
 #'
-#' @param RegData dataramme med preprossesserte data
+#' @param RegData dataramme med preprossesserte data, NB: IKKE personaggregert
 #' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
+#' @param aarsakInn 1-ja, 2-nei, 9-alle reg
 #' @inheritParams KoronaUtvalg
 #'
 #' @return
 #' @export
-antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
+antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
+                                  datoFra=0, datoTil=Sys.Date(),
                                   skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
+
+  # tilgangsNivaa='SC'
+  # datoFra=0
+  # datoTil=Sys.Date()
+  # valgtEnhet='Alle'
+  # tidsenhet='dag'
   #valgtEnhet representerer eget RHF/HF
 
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
                                 SC = RegData$RHF,
-                                LC = RegData$HFnavn,
+                                LC = RegData$HF, #RegData$HFnavn,
                                 LU = RegData$ShNavn)
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
-                         skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
+  UtData <- KoronaUtvalg(RegData=RegData, erMann=erMann, #datoFra=0, datoTil=0, minald=0, maxald=110,
+                         skjemastatusInn=skjemastatusInn) #, aarsakInn=aarsakInn
+  RegData <- UtData$RegData
+  if (aarsakInn !=9) {
+    RegData <- subset(RegData, RegData$ArsakInn==aarsakInn)
+    UtData$utvalgTxt <- paste0('Covid-19, hovedårsak? ', c('Ja', 'Nei')[aarsakInn])
+  }
 
 
-  RegDataAlle <- UtData$RegData
-  RegDataAlle <- RegDataAlle[!(is.na(RegDataAlle$EnhNivaaVis)), ]
-  RegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)], tz= 'UTC', format="%Y-%m-%d")
-  if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$UtDato >= datoFra | is.na(RegDataAlle$UtDato), ]} # filtrerer på dato
-  datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), today(), by="day")
+  RegDataAlle <- RegData[!(is.na(RegData$EnhNivaaVis)), ]
+  #Hvis skal regne alle med utskjema som utskrevne: Alle meRegDataAlle$UtDato[is.na(RegDataAlle$UtDato)] <- as.Date(RegDataAlle$FormDateUt[is.na(RegDataAlle$UtDato)],
+  #                                                         tz= 'UTC', format="%Y-%m-%d")
+  # filtrerer på dato -  UtDato >= datoFra, dvs. tar med de som er utskrervet senere enn datoFra
+  #dato til? InnDato <= datoTil, dvs. tar med de som er innlagt før datoTil
+  if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$UtDato >= datoFra | is.na(RegDataAlle$UtDato), ]}
+  if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
+  datoer <- seq(if (datoFra!=0) datoFra else min(RegDataAlle$InnDato), datoTil, by="day") #today()
 
-  if (tidsenhet=='dag') {
-    names(datoer) <- format(datoer, '%d.%b')
+  # if (tidsenhet=='dag') {
+  #   names(datoer) <- format(datoer, '%d.%b%y')
+  #   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
+  #   RegDataAlle <- bind_cols(RegDataAlle, aux)
+  # } else {
+    #names(datoer) <- if (tidsenhet == 'dag') format(datoer, '%d.%b.%y') else datoer
+  names(datoer) <- datoer
     aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-    RegDataAlle <- bind_cols(RegDataAlle, aux)
-  } else {
-    names(datoer) <- datoer
-    aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-    aux <- bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
-    aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi)
+    aux <- bind_cols(as_tibble(RegDataAlle)[, 'PasientID'], aux) #"PasientID" #"EnhNivaaVis", 'RHF', 'HF',
+    aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi) #-(1:5)
     aux$Tid <- as.Date(aux$Tid)
     aux$Tid <- switch (tidsenhet,
+                       'dag' = format(aux$Tid, '%d.%b%y'),
                         'uke' = paste0('Uke ', format(aux$Tid, "%V")),
                         'maaned' = format(aux$Tid, "%b.%Y")
     )
     aux <- aux %>% group_by(PasientID, Tid) %>%
-      summarise(er_inne = max(verdi))
+      summarise(er_inne = max(verdi) #TRUE/FALSE
+                #,EnhNivaaVis = EnhNivaaVis[1]
+                #,RHF = last(RHF, order_by = InnDato),
+                #HF = last(HF, order_by = InnDato)
+                )
     aux <- aux %>% spread(key=Tid, value = er_inne)
-    RegDataAlle <- merge(RegDataAlle, aux, by = 'PasientID')
-  }
+    enh <- RegDataAlle %>% group_by(PasientID) %>%
+      summarise(EnhNivaaVis = last(EnhNivaaVis, order_by = InnDato),
+                RHF = last(RHF, order_by = InnDato),
+                HF = last(HF, order_by = InnDato)
+      )
+    RegDataAlle <- merge(enh, aux, by = 'PasientID') #merge(RegDataAlle, aux, by = 'PasientID')
+  #}
 
-    switch (tidsenhet,
+  switch(tidsenhet,
+          dag = datoer <- unique(format(datoer, '%d.%b%y')),
                     uke = datoer <- unique(paste0('Uke ', format(datoer, '%V'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
-  if (tidsenhet %in% c("uke", "maaned")) {
+  #if (tidsenhet %in% c("dag", "uke", "maaned")) {
     names(datoer) <- datoer
-  }
+  #}
 
   # if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$InnDato >= datoFra, ]}
   #Trenger utvalg når totalen ikke er summen av det som vises.
@@ -248,6 +283,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   } else {
     enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
     subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
+
   }
 
   Ntest <- dim(RegData)[1]
@@ -263,6 +299,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
       group_by(EnhNivaaVis) %>%
       summarise(Totalt = length(unique(PasientID))) %>%
       tr_summarize_output(grvarnavn = 'Tid')
+
     TabTidEnh <-
       RegData[,c("EnhNivaaVis", names(datoer))] %>%
       group_by(EnhNivaaVis) %>%

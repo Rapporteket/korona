@@ -57,25 +57,25 @@ if (paaServer) {
 
 
 KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
+KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
 BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
 #Kobler pandemi og beredskap:
 KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
                      by = 'PersonId')
 KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
-#table(KoroDataBered$BeredPas)
-
-#KoroData$HFkort2 <- ReshNivaa$HFnavnKort[match(KoroData$HFresh, ReshNivaa$HFresh)] #HFkort2
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
 
 #Definere utvalgsinnhold
 rhfNavn <- c('Alle', as.character(sort(unique(KoroData$RHF))))
-hfNavn <- c('Alle', sort(unique(KoroData$HF))) #, index.return=T)
+hfNavn <- c('Alle', sort(unique(KoroData$HF))) #KoroData$HF, index.return=T)
 enhetsNavn <- rhfNavn
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som flge av et annet input.
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
 #names(enhetsNivaa) <- c('RHF', 'HF')
+startDato <- min(KoroData$InnDato, na.rm = T) #paste0(as.numeric(format(idag-120, "%Y")), '-01-01') #'2019-01-01' #Sys.Date()-364
+sluttDato <- Sys.Date()
 
 aarsakInnValg <- c(
   "Ja, minst siste opphold" = 2,
@@ -228,12 +228,16 @@ ui <- tagList(
                                               h3('Velg variabel/tema og filtreringer i data'),
                                               #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
                                               selectInput(inputId = 'valgtVarFord', label='Velg variabel',
+                                                          selected = 'regForsinkelseInn',
                                                           choices = c("Alder"='alder',
+                                                                      'Covid-19 hovedårsak til innleggelse?' = 'aarsakInn4kat',
                                                                       'Demografi' = 'demografi',
                                                                       "Liggetid"='liggetid',
                                                                       'Risikofaktorer, innleggelse'='risikoInn',
                                                                       'Antibiotika, innleggelse'='antibiotikaInn',
                                                                       'Antibiotika, utskriving'='antibiotikaUt',
+                                                                      'Registreringsforsinkelse, inn' = 'regForsinkelseInn',
+                                                                      'Registreringsforsinkelse, ut' = 'regForsinkelseUt',
                                                                       'Respirasjonssvikt, innleggelse' = 'respSviktInn',
                                                                       'Respirasjonssvikt på sykehus' = 'respSviktUt',
                                                                       'Sirkulasjonssvikt, innleggelse' = 'sirkSviktInn',
@@ -247,10 +251,12 @@ ui <- tagList(
                                               selectInput(inputId = "enhetsUtvalgFord", label="Velg enhetsnivå",
                                                           choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
                                               ),
-
                                               selectInput(inputId = "valgtEnhetRes", label="Velg enhet",
                                                           choices = 'Alle'
                                               ),
+                                              dateRangeInput(inputId = "valgtDatoRes", label = "Tidsperiode",
+                                                             start = startDato, end = Sys.Date(),
+                                                             separator="t.o.m.", language="nb"),
                                               selectInput(inputId = "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
                                                           choices = aarsakInnValg
                                               ),
@@ -551,13 +557,6 @@ server <- function(input, output, session) {
                            skjemastatusInn=as.numeric(input$skjemastatusInn),
                            erMann=as.numeric(input$erMann)
     )
-    # print(egetEnhetsNivaa)
-    # print(egenEnhet)
-    # print(as.numeric(input$aarsakInn))
-    # print(as.numeric(input$skjemastatusInn))
-    # print(as.numeric(input$erMann))
-    # print(sum(UtData$RegData$StatusVedUtskriving==2, na.rm=T))
-    # print(dim(UtData$RegData)[1])
 
     txt <- if(dim(UtData$RegData)[1]>2) {
       paste0('For hele tidsperioden er gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
@@ -592,7 +591,6 @@ server <- function(input, output, session) {
     statusNaaTab <- statusNaaTab(RegData=KoroData, enhetsNivaa=egetEnhetsNivaa, #
                                  valgtEnhet=input$valgtEnhet,
                                  aarsakInn = as.numeric(input$aarsakInn))
-    #erMann=as.numeric(input$erMann))
     output$statusNaaShTab <- renderTable({statusNaaTab$Tab}, rownames = T, digits=0, spacing="xs")
     output$utvalgNaa <- renderUI({h5(HTML(paste0(statusNaaTab$utvalgTxt, '<br />'))) })
 
@@ -700,8 +698,9 @@ server <- function(input, output, session) {
     }
   )
 
-  callModule(koronaresultater, "resultater_id", KoroData = KoroData, rolle=rolle, enhetsvalg=enhetsvalg,
+  callModule(koronaresultater, "resultater_id", KoroData = KoroData, KoroDataOpph=KoroDataOpph, rolle=rolle, enhetsvalg=enhetsvalg,
              egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
+
 
   callModule(koronabelegg, "koronabelegg_id", KoroData = KoroData, rolle=rolle, reshID=reshID,
              egetEnhetsNivaa=egetEnhetsNivaa, egenEnhet=egenEnhet, hvdsession = session)
@@ -717,6 +716,8 @@ server <- function(input, output, session) {
                      valgtVar=input$valgtVarFord,
                      valgtEnhet = input$valgtEnhetRes, #egenEnhet,  #
                      enhetsNivaa=egetEnhetsNivaa,
+                     datoFra=input$valgtDatoRes[1],
+                     datoTil=input$valgtDatoRes[2],
                      enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
                      dodSh=as.numeric(input$dodShRes),
                      aarsakInn = as.numeric(input$aarsakInnRes),
@@ -732,6 +733,8 @@ server <- function(input, output, session) {
     UtDataFord <- KoronaFigAndeler(RegData=KoroData,
                                    valgtVar=input$valgtVarFord,
                                    valgtEnhet = input$valgtEnhetRes,
+                                   datoFra=input$valgtDatoRes[1],
+                                   datoTil=input$valgtDatoRes[2],
                                    enhetsNivaa= egetEnhetsNivaa,
                                    enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
                                    dodSh=as.numeric(input$dodShRes),
@@ -967,8 +970,6 @@ server <- function(input, output, session) {
       runDayOfYear <- rapbase::makeRunDayOfYearSequence(interval = interval)
       paramNames = c('zipFilNavn', 'brukernavn')
       paramValues = c(input$hvilkeFilerTilFHI, brukernavn)
-      #print(input$hvilkeFilerTilFHI)
-      #print(brukernavn)
       rapbase::createAutoReport(synopsis = paste0('Sendt til FHI: ',input$hvilkeFilerTilFHI),
                                 package = 'korona',
                                 fun = "sendDataFilerFHI",
