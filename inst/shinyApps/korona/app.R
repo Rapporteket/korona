@@ -400,7 +400,7 @@ tabPanel('Datakvalitet',
              # ), #tab abonnement
 
 #-----------Abonnement ny--------------------------------
-tabPanel(p("Abonnement, ny versjon",
+tabPanel(p("Abonnement",
            title='Bestill automatisk utsending av rapporter på e-post'),
          value = 'Abonnement',
          sidebarLayout(
@@ -427,28 +427,10 @@ tabPanel(p("Abonnement, ny versjon",
          )
 ), #tab abonnement
 
-tabPanel("Utsending",
-         h2('Flyttes til registeradm?'),
-         sidebarLayout(
-           sidebarPanel(width = 3,
-                        uiOutput("report"),
-                        uiOutput("freq"),
-                        textInput("email", "Epostmottakere:"),
-                        uiOutput("editEmail"),
-                        htmlOutput("recipients"),
-                        tags$hr(),
-                        uiOutput("makeDispatchment") #utsending
-           ),
-           mainPanel(
-             uiOutput("dispatchmentContent")
-           )
-         )
-),
-
 
 #----------Registeradministrasjon----------------------------------
 tabPanel(p("Registeradm",
-           title='Side som bare vises for Marianne S., Eirik og Reidar'),
+           title='Side som bare vises for Marianne S., Eivind, Eirik og Reidar'),
          value = 'Registeradm',
          sidebarLayout(
            sidebarPanel(width = 4,
@@ -461,22 +443,33 @@ tabPanel(p("Registeradm",
                         br(),
                         br(),
                         br(),
-                        #conditionalPanel(condition = "output$brukernavn == 'lenaro' ",
+                        h4('Data til FHI'),
                         selectInput("hvilkeFilerTilFHI", "Data:", c("Pandemi og beredskap" = "DataFHIPanBered",
                                                                     "Testfil" = "Testfil")),
                         actionButton("bestillDataTilFHI", "Bestill data til FHI"),
                         br(),
                         downloadButton(outputId = 'lastNed_filstiDataNHN',
-                                       label='Send filer til NHN og last ned filsti', class = "butt")
-                        #)
-
-
-           ),
-           mainPanel(
-             h3('Her kan vi samle opp ting og tang som bare adm. skal se')
-           )
-         )
-) #tab abonnement
+                                       label='Send filer til NHN og last ned filsti', class = "butt"),
+                        #),
+                        br(),
+                        br(),
+                        br(),
+                        h4('Lage abonnementslister for utsendinger'),
+                                   uiOutput("report"),
+                                   uiOutput("freq"),
+                        h5('E-postmottagere legges inn en og en. Trykk legg til e-postmottager for hver gang.
+                           Når du har lagt til alle, trykker du på lag utsending. '),
+                                   textInput("email", "Epostmottakere:"),
+                                   uiOutput("editEmail"),
+                                   htmlOutput("recipients"),
+                                   tags$hr(),
+                                   uiOutput("makeDispatchment") #utsending
+                      ),
+                      mainPanel(
+                        uiOutput("dispatchmentContent")
+                      )
+                    )
+         ) #tab registeradm.
 
   ) # navbarPage
 ) # tagList
@@ -517,13 +510,14 @@ server <- function(input, output, session) {
     shinyjs::hide(id = 'KoroRappInt.pdf')
     shinyjs::hide(id = 'KoroRappTxtInt')
     }
-    if (!(brukernavn %in% c('lenaro', 'aed0903unn'))){
+    if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon'))){
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
     }
 
-  if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'eabu', 'Reidar', 'MarianneSaevik'))) {
+  if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon',
+                          'eabu', 'Reidar', 'MarianneSaevik', 'eivh'))) {
     hideTab(inputId = "hovedark", target = "Registeradm")
   }
   #})
@@ -1020,7 +1014,7 @@ server <- function(input, output, session) {
       dispatchment$email[!dispatchment$email == input$email]
   })
   observeEvent (input$dispatch, {
-    package <- "rapRegTemplate"
+    package <- "korona"
     type <- "dispatchment"
     owner <- rapbase::getUserName(session)
     ownerName <- rapbase::getUserFullName(session)
@@ -1112,7 +1106,10 @@ server <- function(input, output, session) {
       p("Det finnes ingen utsendinger")
     } else {
       tagList(
-        p("Aktive utsendinger:"),
+        h4("Aktive utsendinger:"),
+        h5("NB: Når du trykker på knappen for å gjøre endringer i ei utsending,
+           slettes utsendinga fra lista og alle valg legger seg inn i skjemaet til venstre
+           slik at du f.eks. kan legge til/slette e-postmottagere og endre frekvens."),
         DT::dataTableOutput("activeDispatchments")
       )
     }
