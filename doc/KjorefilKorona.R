@@ -24,9 +24,11 @@ valgtVar <- 'demografi'
 
 library(korona)
 PandemiDataRaa <- korona::KoronaDataSQL()
-PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa) #, aggPers = 0)
+PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa, aggPers = 0)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiDataRaa
+
+sort(unique(PandemiData$HF))
 
 test <- lagDatafilerTilFHI()
 
@@ -139,10 +141,10 @@ UtData <- KoronaUtvalg(RegData=KoroData, valgtEnhet=valgtEnhet, enhetsNivaa = en
 
 #Sjekke manglende HF i Sør-Øst
 unique(KoroDataRaa[ ,c("UnitId", "HelseenhetKortNavn", 'HF', 'RHF')])
-unique(KoroData[ ,c("ReshId", "ShNavn", 'HFkort', 'RHF')])
+unique(KoroData[ ,c("ReshId", "ShNavn", 'HF', 'RHF')])
 Pandemi  <- KoronaUtvalg(RegData=KoroData, aarsakInn = 2)$RegData
-as.data.frame(Pandemi[Pandemi$HF=='',] %>% dplyr::group_by(RHF, HF, HFkort, ShNavn) %>% dplyr::summarise(Antall = n()))
-as.data.frame(Pandemi %>% dplyr::group_by(RHF, HF, HFkort, ShNavn) %>% dplyr::summarise(Antall = n()))
+as.data.frame(Pandemi[Pandemi$HF=='',] %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = n()))
+as.data.frame(Pandemi %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = n()))
 Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
 705757
 
@@ -318,7 +320,7 @@ table(PandemiDataRaa$StatusVedUtskriving, useNA = 'a')
 
 table(RegData$ShNavn, useNA = 'a')
 table(RegData$HFresh, useNA = 'a')
-table(RegData$HFkort, useNA = 'a')
+table(RegData$HF, useNA = 'a')
 table(RegData$RHFresh, useNA = 'a')
 table(RegData$RHF, useNA = 'a')
 RegData$ReshId[is.na(RegData$HFresh)]
@@ -720,7 +722,7 @@ Kapasitet <- belegg_ssb[ ,c('HF', 'HFresh', 'Dognplasser.2018')]
 
 #Henter personid fra intensiv fordi vil ha liggetider fra intensiv. Vil derfor mangle beredskapspasienter
 #som ikke er registrert i intensiv. (Skal være svært få.)
-datoTil <- '2020-09-30'
+datoTil <- '2020-12-31'
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil, koble=1)
 KoroDataPers <- KoronaPreprosesser(RegData = KoroDataRaa)
 
@@ -737,7 +739,7 @@ KoroDataPers <- KoronaPreprosesser(RegData = KoroDataRaa)
   BeredRaa <- BeredskRaa[ ,-which(names(BeredskRaa) %in% varFellesInt)]
   BeredIntRaa <- merge(BeredRaa, IntDataRaa, suffixes = c('','Int'),
                         by.x = 'HovedskjemaGUID', by.y = 'SkjemaGUID', all.x = F, all.y=F)
-IntDataPers <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredIntRaa, kobletInt = 1)
+IntDataPers <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredIntRaa, kobleInt = 1)
 IntDataPers$Int <- 1
 
 KoroIntKoblet <- merge(KoroDataPers, IntDataPers, suffixes = c('','Int'),
@@ -746,41 +748,39 @@ KoroIntKoblet <- merge(KoroDataPers, IntDataPers, suffixes = c('','Int'),
 
 #Kobler på kapasitet
 RegData <-  merge(KoroIntKoblet, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
-RegData$HFkort <- as.factor(RegData$HFkort)
+RegData$HF <- as.factor(RegData$HF)
 
 #Gjennomsnittlig liggetid på sykehus
-LiggetidKoroHFgjsn <- round(tapply(RegData$Liggetid, INDEX = RegData$HFkort,  FUN = function(x) {mean(x,na.rm=T)}),1)
+LiggetidKoroHFgjsn <- round(tapply(RegData$Liggetid, INDEX = RegData$HF,  FUN = function(x) {mean(x,na.rm=T)}),1)
 indInt <- which(RegData$Int==1)
 
 #Gjennomsnittlig liggetid på sykehus for intensivpasienter
-LiggetidIntHFgjsn <- round(tapply(RegData$LiggetidInt[indInt], INDEX = RegData$HFkort[indInt],
+LiggetidIntHFgjsn <- round(tapply(RegData$LiggetidInt[indInt], INDEX = RegData$HF[indInt],
                                   FUN = function(x) {mean(x,na.rm=T)}),1)
 #Gjennomsnittlig liggetid på intensiv
-LiggetidKoroHFgjsnIntpas <- round(tapply(RegData$Liggetid[indInt], INDEX = RegData$HFkort[indInt],
+LiggetidKoroHFgjsnIntpas <- round(tapply(RegData$Liggetid[indInt], INDEX = RegData$HF[indInt],
                                          mean, na.rm=T), 1)
-
-
 #Total liggetid
-LiggetidKoroHFtot <- round(tapply(RegData$Liggetid, INDEX = RegData$HFkort,  sum, na.rm=T),1)
-KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HFkort,  median)
+LiggetidKoroHFtot <- round(tapply(RegData$Liggetid, INDEX = RegData$HF,  sum, na.rm=T),1)
+KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HF,  median)
 antDager <- as.numeric(as.Date(datoTil) - as.Date(datoFra))+1
 BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
 
-Tab <- cbind('Antall pas.' = table(RegData$HFkort),
-      'Antall, intensiv' = table(RegData$HFkort[indInt]),
+Tab <- cbind('Antall pas.' = table(RegData$HF),
+      'Antall, intensiv' = table(RegData$HF[indInt]),
   'Liggetid, alle' = LiggetidKoroHFgjsn,
       'Liggetid, int.pas.' = LiggetidKoroHFgjsnIntpas,
-      'Liggetid på intensiv' = LiggetidIntHFgjsn,
-  'Belegg, prosent' = BeleggHF,
-  'Kapasitet/dag' = KapasitetHF
+      'Liggetid på intensiv' = LiggetidIntHFgjsn
+  # ,'Belegg, prosent' = BeleggHF,
+  # 'Kapasitet/dag' = KapasitetHF
       )
 
 write.table(Tab, file = 'CovBelastning.csv', fileEncoding = 'ASCII', sep=';')
 
 
 #----Belegg per måned
-LiggetidKoroHFmnd <- round(tapply(RegData$Liggetid, INDEX = RegData[ ,c('HFkort', 'MndNum')],  sum, na.rm=T))
-KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HFkort,  median)
+LiggetidKoroHFmnd <- round(tapply(RegData$Liggetid, INDEX = RegData[ ,c('HF', 'MndNum')],  sum, na.rm=T))
+KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HF,  median)
 antDager <- as.numeric(as.Date(datoTil) - as.Date(datoFra))+1
 BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
 
@@ -796,27 +796,6 @@ RegData$UtDato <- as.Date(RegData$FormDateUt)
 #RegData$MndAar <- format(RegData$InnDato, '%b%y')
 RegData <- RegData[,-which((names(RegData) %in% c("FormDate", 'FormDateUt')))]
 
-# Enhetsnivånavn
-RegData$HFresh <- ReshNivaa$HFresh[match(RegData$UnitId, ReshNivaa$ShResh)]
-RegData$HFresh[RegData$UnitId==108595] <- 100091
-#RegData$HF[RegData$UnitId==108595] <- 'Sykehuset Innlandet HF'
-RegData$HFresh[is.na(RegData$HFresh)] <- RegData$UnitId[is.na(RegData$HFresh)]
-HFmap <- as.data.frame(cbind(
-  HFresh = c("100065", "100082", "100083", "100084", "100085", "100089", "100091", "100092",
-             "100093", "100100", "100132", "100133", "100170", "100317", "100320", "101051",
-             "101719", "101971", "106635", "106640", "106816", "106819", "106834", "106838",
-             "106839", "107505", "110628", "700272", "4001031", "4201115", "4208278", "4216267"),
-  HFnavn = c("Helgeland", "Bergen", "Stavanger", "Fonna",  "Førde",  "AHUS", "Innlandet",
-             "Østfold",  "Sunnaas", "Vestfold", "Telemark", "Sørlandet", "Haraldspl.",
-             "N-Trøndelag", "St.Olavs", "Nordland", "UNN", "Finnmark", "Lovisenb.",
-             "MEDI 3", "Olaviken", "NKS", "Haugesund", "Solli", "Voss", "Diakonhj.",
-             "Martina H.", "V. Viken", "OUS", "Møre og Romsdal", "LHL", "Betanien")))
-RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
-RegData <-  merge(RegData, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
-RegData$HFkort <- factor(RegData$HFkort)
-#levels(RegData$HFkort)
-
-
 inneliggendeSum <- function(x) { #x-dato, summerer antall inneliggende for hver dato
   sum((x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato)))}
 
@@ -831,23 +810,12 @@ RegData$InnDato[is.na( RegData$UtDato)]
 AntInneliggendeGr <- function(dato) { #Antall inneliggende for gitt dato, gruppert på variabel "gr"
   #GrNavn <- levels(RegData[,gr])
   inne <- (dato >  RegData$InnDato & (dato <= RegData$UtDato) | is.na( RegData$UtDato))
-  data <- tapply(RegData[inne,'PersonId'], INDEX = RegData[inne, 'HFkort'], FUN= function(x){length(unique(x))})
+  data <- tapply(RegData[inne,'PersonId'], INDEX = RegData[inne, 'HF'], FUN= function(x){length(unique(x))})
   return(data)
   #data$Grupper <- GrNavn
 }
 sum(AntInneliggendeGr('2020-07-03'), na.rm = T)
 
-# RegData$HFkort <- as.factor(RegData$HFkort)
-# beregnInneliggHF <- function(datoer){
-#   #datoer <- datoerMars #as.Date('2020-04-20')
-#   #test <- AntInneliggende(dato=datoer)
-#   names(datoer) <- format(datoer, '%d.%B')
-#   data <- as.data.frame(map_df(datoer, AntInneliggendeGr))
-#   antDager <- length(datoer)
-#   belegg <- 100*rowSums(data / (antDager*RegData$Dognplasser.2018))
-#   tot <- 100*sum(colSums(data), na.rm = T) / (antDager*sum(Kapasitet$Dognplasser.2018))
-#    return(utData = list(belegg=belegg, tot=tot))
-#  }
 
 # datoer <- seq(as.Date('2020-03-01'), as.Date('2020-09-30'), by="day")
 # RegData <- KoroDataPers
@@ -898,8 +866,8 @@ names(BeleggLandet) <- mnd
 #NB: Endre til å telle unike personid'er.
 
 LiggeDogn <-
-  RegData[,c('HFkort', mnd)] %>%
-  group_by(HFkort) %>%
+  RegData[,c('HF', mnd)] %>%
+  group_by(HF) %>%
   summarise_all(sum)
 test <-
 
@@ -912,15 +880,15 @@ write.table(BeleggData, file = 'BeleggData.csv', row.names = F, fileEncoding = '
 #LiggeDogn <- data.frame(LiggeDogn, c('Landet', BeleggLandet))
 
 #LiggeDogn$Tot <- rowSums(as.data.frame(LiggeDogn[,mnd]))
-#tapply(KoroDataPers$Liggetid, KoroDataPers$HFkort, sum, na.rm=T)
+#tapply(KoroDataPers$Liggetid, KoroDataPers$HF, sum, na.rm=T)
 
 LiggeDognData <- as.data.frame(tidyr::gather(LiggeDogn, key = 'mnd', value='Belegg', mnd, factor_key=TRUE))
 
 p <- ggplot(LiggeDognData, aes(mnd, Belegg))
-p + geom_point() + facet_wrap(~ HFkort)
+p + geom_point() + facet_wrap(~ HF)
 # pdf(file = plott.pdf, width=7, height=7*height/width, family=fonttype, #family='arial',
 #     pointsize=pointsizePDF)
-#ggplot(LiggeDognData, aes(mnd, Belegg)) + geom_point() + facet_wrap(~ HFkort) +
+#ggplot(LiggeDognData, aes(mnd, Belegg)) + geom_point() + facet_wrap(~ HF) +
 
        # Use vars() to supply variables from the dataset:
        p + facet_grid(rows = vars(drv))
