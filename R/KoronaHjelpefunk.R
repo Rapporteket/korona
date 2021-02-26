@@ -44,10 +44,12 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                                valgtEnhet = 'Alle',
                              enhetsNivaa = 'RHF', rolle = 'SC'){
 
+  rnwFil <- rnwFil[[1]]
+  brukernavn <- brukernavn[[1]]
+  reshID <- reshID[[1]]
   valgtEnhet <- valgtEnhet[[1]]
   enhetsNivaa <- enhetsNivaa[[1]]
   rolle <- rolle[[1]]
-
 
   # raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
   #                   reshId = reshID[[1]],

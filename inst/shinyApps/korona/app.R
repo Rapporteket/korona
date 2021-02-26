@@ -1058,9 +1058,14 @@ server <- function(input, output, session) {
                               runDayOfYear = runDayOfYear,
                               interval = interval, intervalName = intervalName)
     dispatchment$tab <- rapbase::makeAutoReportTab(session, type = "dispatchment")
+    test <- dimnames(dispatchment$tab)
+    # print(test[[]])
+    # print(attributes(dispatchment$tab))
+    #Author DataFlair
+    data_list <- list(c("Jan","Feb","Mar"), matrix(c(1,2,3,4,-1,9), nrow = 2),list("Red",12.3))
+    names(data_list) <- c("Monat", "Matrix", "Misc")
+    attributes(data_list)
 
-    # print(class(dispatchment$tab))
-    # print(dim(dispatchment$tab))
     alleAutorapporter <- rapbase::readAutoReportData()
     egneUts <-  rapbase::filterAutoRep(
               rapbase::filterAutoRep(alleAutorapporter, by = 'package', pass = 'korona'),
@@ -1069,12 +1074,16 @@ server <- function(input, output, session) {
     #   rapbase::filterAutoRep(, by = 'type', pass = 'dispatchment')
     # names(test)
     ider <- names(egneUts)
-    test <- egneUts[[ider[1]]]
-    parametre <- test[['params']]
-    parametre[[6]]
-    TabVisUts <- dispatchment$tab
+    roller <- egneUts[[1]][['params']][[6]]$rolle
+    for (k in 2:length(ider)) {
+      roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
+    }
+    koblRoller <- cbind(ID = ider,
+                        roller = roller)
 
-    test <- egneUts$b020afd4cacc82d309a3e8e652843938$params
+        TabVisUts <- dispatchment$tab
+
+    egneUts$`604beee0bfe6075e1c31c496f3f5dafd`$params[[6]]$rolle
 
     dispatchment$email <- vector()
   })
