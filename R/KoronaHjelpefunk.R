@@ -51,18 +51,15 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = "1)starter abonnementkjøring: Pandemi-rapport")
-
-  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
-                    reshId = reshID[[1]],
-                    msg = paste0('2)PARAMETRE: rnwFil: ', rnwFil, ', brukernavn: ', brukernavn,
+                    msg = paste0('1)starter abonnementkjøring: Pandemi-rapport med PARAMETRE: rnwFil: ',
+                                 rnwFil, ', brukernavn: ', brukernavn,
                ', reshID: ', reshID, ', valgtEnhet: ', valgtEnhet,
   ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle)
   )
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = paste0('2.1)klasse:', 'reshID: ', class(reshID), ',
+                    msg = paste0('2)klasse:', 'reshID: ', class(reshID), ',
                                  valgtEnhet: ', class(valgtEnhet),
                                  ', enhetsNivaa: ', class(enhetsNivaa), ',
                                                           rolle: ', class(rolle))
@@ -83,23 +80,18 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   dir <- getwd()
   file.copy(src, tmpFile, overwrite = TRUE)
 
-  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
-                    reshId = reshID[[1]],
-                    msg = "4) setwd, dir, file.copy ok")
   knitr::knit2pdf(input=tmpFile)
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg ="5) Kjørt knit2pdf")
+                    msg ="4) Kjørt knit2pdf")
 
   #gc() #Opprydning gc-"garbage collection"
   utfil <- paste0(dir, '/', substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf')
-  #utfil <- file.copy(from = paste0(substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf'),
-  #         to = paste0(filbase, digest::digest(brukernavn),'.pdf')) #filnavn)
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
-                    msg = paste("6) Leverer abonnementsfil: ", utfil))
+                    msg = paste("5) Leverer abonnementsfil: ", utfil))
   return(utfil)
 }
 

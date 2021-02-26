@@ -71,6 +71,10 @@ KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
 rhfNavn <- c('Alle', as.character(sort(unique(KoroData$RHF))))
 hfNavn <- c('Alle', sort(unique(KoroData$HF))) #KoroData$HF, index.return=T)
 enhetsNavn <- rhfNavn
+dum <- unique(RegData[,c('HF', "HFresh")])
+HFreshValg <- dum$HFresh
+names(HFreshValg) <- dum$HF
+
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som flge av et annet input.
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
 #names(enhetsNivaa) <- c('RHF', 'HF')
@@ -455,8 +459,10 @@ tabPanel(p("Registeradm",
                         br(),
                         br(),
                         h4('Lage abonnementslister for utsendinger'),
-                                   uiOutput("report"),
-                                   uiOutput("freq"),
+                        uiOutput("reportUts"),
+                        uiOutput("freqUts"),
+                        uiOutput("HFreshUts"),
+                        uiOutput("rolleUts"),
                         h5('E-postmottagere legges inn en og en. Trykk legg til e-postmottager for hver gang.
                            Når du har lagt til alle, trykker du på lag utsending. '),
                                    textInput("email", "Epostmottakere:"),
@@ -1030,8 +1036,18 @@ server <- function(input, output, session) {
       synopsis <- "Rapporteket-Pandemi: Koronarapport"
       fun <- "abonnementKorona"
       rnwFil <- "KoronaRapport.Rnw" #Navn på fila
+
+      rolleUts <- input$dispatchmentRole
+      egetEnhetsNivaaUts <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+      reshIDuts <- input$dispatchmentResh
+      print(reshIDuts)
+      indReshUts <- match(reshIDuts, KoroData$HFresh) #Her skal benyttes HF-resh
+      egenEnhet <- switch(rolle, SC='Alle',
+                          LC=as.character(KoroData$RHF[indReshUts]),
+                          LU=as.character(KoroData$HF[indReshUts]))
       paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
-      paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
+      paramValues <- c(rnwFil, brukernavn, reshIDuts, egenEnhetUts, egetEnhetsNivaaUts, rolleUts)
+      #paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle)
     }
 
     rapbase::createAutoReport(synopsis = synopsis, package = package,
@@ -1047,14 +1063,26 @@ server <- function(input, output, session) {
   })
 
   ## ui: velg rapport
-  output$report <- renderUI({
+  output$reportUts <- renderUI({
     selectInput("dispatchmentRep", "Rapport:",
                 c("Koronarapport"),
                 selected = dispatchment$report)
   })
+  ## ui: velg rolle
+  output$rolleUts <- renderUI({
+    selectInput("dispatchmentRole", "Rolle/nivå:",
+                c("LU", "LC", "SC"),
+                selected = dispatchment$rolle)
+  })
+  ## ui: velg HF
+  output$HFreshUts <- renderUI({
+    selectInput("dispatchmentResh", "HF-tilhørighet:",
+                HFreshValg,
+                selected = dispatchment$HFresh)
+  })
 
   ## ui: velg frekvens
-  output$freq <- renderUI({
+  output$freqUts <- renderUI({
     selectInput("dispatchmentFreq", "Frekvens:",
                 list(Årlig = "Årlig-year",
                       Kvartalsvis = "Kvartalsvis-quarter",
@@ -1135,9 +1163,6 @@ server <- function(input, output, session) {
     }
   })
 
-
-
-#------------------------------
 
   ## slett eksisterende abonnement
   # observeEvent(input$del_button, {
