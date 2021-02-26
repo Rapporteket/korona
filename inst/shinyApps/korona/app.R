@@ -1030,16 +1030,16 @@ server <- function(input, output, session) {
       interval = interval)
 
     email <- dispatchment$email
-    organization <- rapbase::getUserReshId(session)
+
 
     if (input$dispatchmentRep == "Koronarapport") {
       synopsis <- "Rapporteket-Pandemi: Koronarapport"
       fun <- "abonnementKorona"
       rnwFil <- "KoronaRapport.Rnw" #Navn på fila
-
       rolleUts <- input$dispatchmentRole
       egetEnhetsNivaaUts <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
       reshIDuts <- input$dispatchmentResh
+      organization <- reshIDuts #rapbase::getUserReshId(session)
       #print(reshIDuts)
       indReshUts <- match(reshIDuts, KoroData$HFresh) #Her skal benyttes HF-resh
       egenEnhetUts <- switch(rolle, SC='Alle',
@@ -1057,10 +1057,28 @@ server <- function(input, output, session) {
                               email = email, organization = organization,
                               runDayOfYear = runDayOfYear,
                               interval = interval, intervalName = intervalName)
-    dispatchment$tab <-
-      rapbase::makeAutoReportTab(session, type = "dispatchment")
+    dispatchment$tab <- rapbase::makeAutoReportTab(session, type = "dispatchment")
+
+    # print(class(dispatchment$tab))
+    # print(dim(dispatchment$tab))
+    alleAutorapporter <- rapbase::readAutoReportData()
+    egneUts <-  rapbase::filterAutoRep(
+              rapbase::filterAutoRep(alleAutorapporter, by = 'package', pass = 'korona'),
+              by = 'type', pass = 'dispatchment')
+    # idRolle <- rapbase::readAutoReportData() %<% rapbase::filterAutoRep(, by = 'package', pass = 'korona') %<%
+    #   rapbase::filterAutoRep(, by = 'type', pass = 'dispatchment')
+    # names(test)
+    ider <- names(egneUts)
+    test <- egneUts[[ider[1]]]
+    parametre <- test[['params']]
+    parametre[[6]]
+    TabVisUts <- dispatchment$tab
+
+    test <- egneUts$b020afd4cacc82d309a3e8e652843938$params
+
     dispatchment$email <- vector()
   })
+
 
   ## ui: velg rapport
   output$reportUts <- renderUI({
@@ -1124,9 +1142,9 @@ server <- function(input, output, session) {
   ## lag tabell over gjeldende status for utsending
   output$activeDispatchments <- DT::renderDataTable(
     dispatchment$tab, server = FALSE, escape = FALSE, selection = 'none',
-    options = list(dom = 'tp', ordning = FALSE), rownames = FALSE
-  )
-
+    options = list(dom = 'tp', ordning = FALSE, columnDefs = list(list(visible = FALSE, targets = 9))),
+                   rownames = FALSE
+    )
 
   ## ui: lag side som viser status for utsending, også når det ikke finnes noen
   output$dispatchmentContent <- renderUI({
