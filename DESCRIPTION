@@ -17,7 +17,7 @@ Depends:
     rapbase (>= 1.0.0),
     tidyverse
 Remotes: 
-      Rapporteket/rapbase,
+      Rapporteket/rapbase@1.12.2,
       Rapporteket/rapFigurer,
       Rapporteket/raplog,
       Rapporteket/sship

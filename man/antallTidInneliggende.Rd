@@ -18,7 +18,7 @@ antallTidInneliggende(
 )
 }
 \arguments{
-\item{RegData}{dataramme med preprossesserte data}
+\item{RegData}{dataramme med preprossesserte data, NB: IKKE personaggregert}
 
 \item{tidsenhet}{'dag' (standard), 'uke', 'maaned'}
 
@@ -33,8 +33,7 @@ antallTidInneliggende(
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
-\item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
-3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
+\item{aarsakInn}{1-ja, 2-nei, 9-alle reg}
 
 \item{valgtEnhet}{NULL for SC-bruker, ellers eget RHF/HF}
 }
