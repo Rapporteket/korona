@@ -1040,9 +1040,9 @@ server <- function(input, output, session) {
       rolleUts <- input$dispatchmentRole
       egetEnhetsNivaaUts <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
       reshIDuts <- input$dispatchmentResh
-      print(reshIDuts)
+      #print(reshIDuts)
       indReshUts <- match(reshIDuts, KoroData$HFresh) #Her skal benyttes HF-resh
-      egenEnhet <- switch(rolle, SC='Alle',
+      egenEnhetUts <- switch(rolle, SC='Alle',
                           LC=as.character(KoroData$RHF[indReshUts]),
                           LU=as.character(KoroData$HF[indReshUts]))
       paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
