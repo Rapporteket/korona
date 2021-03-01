@@ -151,7 +151,8 @@ ui <- tagList(
                       mainPanel(width = 9,
                                 shinyalert::useShinyalert(),
                                 appNavbarUserWidget(user = uiOutput("appUserName"),
-                                                    organization = uiOutput("appOrgName")),
+                                                    organization = uiOutput("appOrgName"),
+                                                    addUserInfo = TRUE),
                                 #,addUserInfo = TRUE),
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
 
