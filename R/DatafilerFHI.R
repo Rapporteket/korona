@@ -115,14 +115,19 @@ varFHIraa <- c(
   ,'DischargedIntensiveStatus'
   ,'FormStatus'
   ,'FormDate'
- ,'AgeAdmitted')
+ ,'AgeAdmitted'
+# ,'CreationDate'
+# ,'FirstTimeClosed'
+ ) #De nye variablene må enten legges til i varBort, eller FHI må varsles om at de kommer på ny plass i den aggregerte fila
 BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 #setdiff(varFHIraa, names(RegDataRaa))
 # write.table(BeredskapDataRaaFHI, file = paste0('A:/Pandemi/BeredskapDataRaaFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
 RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa)
-varBort <- c('AgeAdmitted','PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive', 'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
+varBort <- c('AgeAdmitted','PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive',
+             # ,'CreationDate', FirstTimeClosed'
+             'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
 varNy <- c('Alder', 'erMann', 'Bekreftet', 'Liggetid', 'ReinnResp', 'RespTid') #'PersonId',
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
               'FormDateSiste', 'Reinn', 'AntRegPrPas', 'ReinnTid', 'ReinnNaar',

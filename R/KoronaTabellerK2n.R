@@ -38,12 +38,12 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
   if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
-                                 dag = factor(format(RegDataAlle$UtDato, '%d.%b'),
+                                 dag = factor(format(RegDataAlle$UtDato, '%d.%m.%y'),
                                               levels = format(rev(seq(datoTil, datoFra,
-                                                                      by=paste0('-1 day'))), '%d.%b')),
-                                 uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
-                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra,
-                                                                                     by=paste0('-1 week'))), '%V'))),
+                                                                      by=paste0('-1 day'))), '%d.%m.%y')),
+                                 uke = factor(paste0('U', format(RegDataAlle$UtDato, '%V.%Y')),
+                                              levels = paste0('U', format(rev(seq(datoTil, datoFra,
+                                                                                     by=paste0('-1 week'))), '%V.%Y'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
                                                  levels = format(rev(seq(datoTil, datoFra,
                                                                          by=paste0('-1 month'))), '%b.%Y')))
@@ -121,12 +121,12 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
   if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
-                                 dag = factor(format(RegDataAlle$UtDato, '%d.%b'),
+                                 dag = factor(format(RegDataAlle$UtDato, '%d.%m.%y'),
                                               levels = format(rev(seq(datoTil, datoFra,
-                                                                      by=paste0('-1 day'))), '%d.%b')),
-                                 uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V')),
-                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra ,
-                                                                                     by=paste0('-1 week'))), '%V'))),
+                                                                      by=paste0('-1 day'))), '%d.%m.%y')),
+                                 uke = factor(paste0('U', format(RegDataAlle$UtDato, '%V.%Y')),
+                                              levels = paste0('U', format(rev(seq(datoTil, datoFra ,
+                                                                                     by=paste0('-1 week'))), '%V.%Y'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
                                                  levels = format(rev(seq(datoTil, datoFra ,
                                                                          by=paste0('-1 month'))), '%b.%Y')))
@@ -243,15 +243,15 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   #   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
   #   RegDataAlle <- bind_cols(RegDataAlle, aux)
   # } else {
-    #names(datoer) <- if (tidsenhet == 'dag') format(datoer, '%d.%b.%y') else datoer
+    #names(datoer) <- if (tidsenhet == 'dag') format(datoer, '%d.%m.%y') else datoer
   names(datoer) <- datoer
     aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
     aux <- bind_cols(as_tibble(RegDataAlle)[, 'PasientID'], aux) #"PasientID" #"EnhNivaaVis", 'RHF', 'HF',
     aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi) #-(1:5)
     aux$Tid <- as.Date(aux$Tid)
     aux$Tid <- switch (tidsenhet,
-                       'dag' = format(aux$Tid, '%d.%b%y'),
-                        'uke' = paste0('Uke ', format(aux$Tid, "%V")),
+                       'dag' = format(aux$Tid, '%d.%m.%y'),
+                        'uke' = paste0('U', format(aux$Tid, "%V.%Y")),
                         'maaned' = format(aux$Tid, "%b.%Y")
     )
     aux <- aux %>% group_by(PasientID, Tid) %>%
@@ -270,8 +270,8 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   #}
 
   switch(tidsenhet,
-          dag = datoer <- unique(format(datoer, '%d.%b%y')),
-                    uke = datoer <- unique(paste0('Uke ', format(datoer, '%V'))),
+          dag = datoer <- unique(format(datoer, '%d.%m.%y')),
+                    uke = datoer <- unique(paste0('U', format(datoer, '%V.%Y'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
   #if (tidsenhet %in% c("dag", "uke", "maaned")) {
     names(datoer) <- datoer
@@ -343,7 +343,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   RegData <- UtData$RegData
   datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
-  names(datoer) <- format(datoer, '%d.%b')
+  names(datoer) <- format(datoer, '%d.%m.%y')
   aux <- erInneliggende(datoer = datoer, regdata = RegData) #Matrise boolske verdier hver pasient/dag om inneliggende
   RegData <- bind_cols(RegData, aux)
 
