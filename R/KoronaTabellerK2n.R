@@ -41,8 +41,8 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%m.%y'),
                                               levels = format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 day'))), '%d.%m.%y')),
-                                 uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V.%Y')),
-                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra,
+                                 uke = factor(paste0('U', format(RegDataAlle$UtDato, '%V.%Y')),
+                                              levels = paste0('U', format(rev(seq(datoTil, datoFra,
                                                                                      by=paste0('-1 week'))), '%V.%Y'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
                                                  levels = format(rev(seq(datoTil, datoFra,
@@ -124,8 +124,8 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%m.%y'),
                                               levels = format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 day'))), '%d.%m.%y')),
-                                 uke = factor(paste0('Uke ', format(RegDataAlle$UtDato, '%V.%Y')),
-                                              levels = paste0('Uke ', format(rev(seq(datoTil, datoFra ,
+                                 uke = factor(paste0('U', format(RegDataAlle$UtDato, '%V.%Y')),
+                                              levels = paste0('U', format(rev(seq(datoTil, datoFra ,
                                                                                      by=paste0('-1 week'))), '%V.%Y'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
                                                  levels = format(rev(seq(datoTil, datoFra ,
@@ -251,7 +251,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     aux$Tid <- as.Date(aux$Tid)
     aux$Tid <- switch (tidsenhet,
                        'dag' = format(aux$Tid, '%d.%m.%y'),
-                        'uke' = paste0('Uke ', format(aux$Tid, "%V.%Y")),
+                        'uke' = paste0('U', format(aux$Tid, "%V.%Y")),
                         'maaned' = format(aux$Tid, "%b.%Y")
     )
     aux <- aux %>% group_by(PasientID, Tid) %>%
@@ -271,7 +271,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
   switch(tidsenhet,
           dag = datoer <- unique(format(datoer, '%d.%m.%y')),
-                    uke = datoer <- unique(paste0('Uke ', format(datoer, '%V.%Y'))),
+                    uke = datoer <- unique(paste0('U', format(datoer, '%V.%Y'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
   #if (tidsenhet %in% c("dag", "uke", "maaned")) {
     names(datoer) <- datoer
