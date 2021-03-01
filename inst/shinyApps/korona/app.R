@@ -549,7 +549,7 @@ server <- function(input, output, session) {
   #,'<br> Org: ', egenOrg) )}
 
   # User info in widget
-  userInfo <- rapbase::howWeDealWithPersonalData(session)
+  userInfo <- rapbase::howWeDealWithPersonalData(session, callerPkg = "korona")
   observeEvent(input$userInfo, {
     shinyalert::shinyalert("Dette vet Rapporteket om deg:", userInfo,
                            type = "", imageUrl = "rap/logo.svg",
