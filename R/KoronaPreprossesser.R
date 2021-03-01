@@ -348,8 +348,8 @@ if (aggPers == 1) {
       #RegData$UkeAar <- format(RegData$InnDato, '%G.%V') #%G -The week-based year, %V - Week of the year as decimal number (01–53) as defined in ISO 8601
       #RegData$UkeAar <- as.factor(RegData$UkeAar)
       #RegData$Dag <- format(RegData$InnDato, '%d.%B')
-      RegData$Dag <- factor(format(RegData$InnDato, '%d.%B'),
-                            levels = format(seq(min(RegData$InnDato), max(RegData$InnDato), by="day"), '%d.%B'))
+      RegData$Dag <- factor(format(RegData$InnDato, '%d.%m.%y'),
+                            levels = format(seq(min(RegData$InnDato), max(RegData$InnDato), by="day"), '%d.%m.%y'))
       RegData$InnDag <- RegData$InnDato
 
       ##Kode om  pasienter som er overført til/fra egen avdeling til "ikke-overført"
