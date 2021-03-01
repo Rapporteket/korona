@@ -24,12 +24,12 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
   RegData <- KoronaUtvalg(RegData=RegData, datoFra=datoFra, datoTil=datoTil)$RegDataAlle
 
   RegData$TidsVar <- switch (tidsenhet,
-                             dag = factor(format(RegData$InnDato, '%d.%b'),
+                             dag = factor(format(RegData$InnDato, '%d.%m.%y'),
                                           levels = format(rev(seq(datoTil, datoFra,
-                                                                      by=paste0('-1 day'))), '%d.%b')),
-                             uke = factor(paste0('Uke ', format(RegData$InnDato, '%V')),
+                                                                      by=paste0('-1 day'))), '%d.%m.%y')),
+                             uke = factor(paste0('Uke ', format(RegData$InnDato, '%V.%Y')),
                                               levels = paste0('Uke ', format(rev(seq(datoTil, datoFra,
-                                                                      by=paste0('-1 week'))), '%V'))),
+                                                                      by=paste0('-1 week'))), '%V.Y'))),
                              maaned = factor(format(RegData$InnDato, '%b.%Y'),
                                                  levels = format(rev(seq(datoTil, datoFra,
                                                                          by=paste0('-1 month'))), '%b.%Y')))

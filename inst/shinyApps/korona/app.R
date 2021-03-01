@@ -71,9 +71,10 @@ KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
 rhfNavn <- c('Alle', as.character(sort(unique(KoroData$RHF))))
 hfNavn <- c('Alle', sort(unique(KoroData$HF))) #KoroData$HF, index.return=T)
 enhetsNavn <- rhfNavn
-dum <- unique(RegData[,c('HF', "HFresh")])
+dum <- unique(KoroData[,c('HF', "HFresh")])
 HFreshValg <- dum$HFresh
 names(HFreshValg) <- dum$HF
+HFreshValg <- HFreshValg[order(dum$HF)]
 
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som flge av et annet input.
 #enhetsNivaa <- c('Alle', 'RHF', 'HF')
@@ -592,6 +593,7 @@ server <- function(input, output, session) {
 
   observe({
 #Antall innleggelser
+    #AntTab <- antallTidEnhTab(RegData=KoroData)
     AntTab <- antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,
                               valgtEnhet= egenEnhet, #nivå avgjort av rolle
                               tidsenhet='dag',
@@ -1062,17 +1064,12 @@ server <- function(input, output, session) {
     # print(test[[]])
     # print(attributes(dispatchment$tab))
     #Author DataFlair
-    data_list <- list(c("Jan","Feb","Mar"), matrix(c(1,2,3,4,-1,9), nrow = 2),list("Red",12.3))
-    names(data_list) <- c("Monat", "Matrix", "Misc")
-    attributes(data_list)
 
     alleAutorapporter <- rapbase::readAutoReportData()
     egneUts <-  rapbase::filterAutoRep(
               rapbase::filterAutoRep(alleAutorapporter, by = 'package', pass = 'korona'),
               by = 'type', pass = 'dispatchment')
-    # idRolle <- rapbase::readAutoReportData() %<% rapbase::filterAutoRep(, by = 'package', pass = 'korona') %<%
-    #   rapbase::filterAutoRep(, by = 'type', pass = 'dispatchment')
-    # names(test)
+
     ider <- names(egneUts)
     roller <- egneUts[[1]][['params']][[6]]$rolle
     for (k in 2:length(ider)) {
@@ -1081,9 +1078,7 @@ server <- function(input, output, session) {
     koblRoller <- cbind(ID = ider,
                         roller = roller)
 
-        TabVisUts <- dispatchment$tab
-
-    egneUts$`604beee0bfe6075e1c31c496f3f5dafd`$params[[6]]$rolle
+    #egneUts$`604beee0bfe6075e1c31c496f3f5dafd`$params[[6]]$rolle
 
     dispatchment$email <- vector()
   })

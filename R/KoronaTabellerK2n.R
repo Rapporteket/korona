@@ -251,7 +251,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     aux$Tid <- as.Date(aux$Tid)
     aux$Tid <- switch (tidsenhet,
                        'dag' = format(aux$Tid, '%d.%b%y'),
-                        'uke' = paste0('Uke ', format(aux$Tid, "%V")),
+                        'uke' = paste0('Uke ', format(aux$Tid, "%V.%Y")),
                         'maaned' = format(aux$Tid, "%b.%Y")
     )
     aux <- aux %>% group_by(PasientID, Tid) %>%
@@ -271,7 +271,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
   switch(tidsenhet,
           dag = datoer <- unique(format(datoer, '%d.%b%y')),
-                    uke = datoer <- unique(paste0('Uke ', format(datoer, '%V'))),
+                    uke = datoer <- unique(paste0('Uke ', format(datoer, '%V.%Y'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
   #if (tidsenhet %in% c("dag", "uke", "maaned")) {
     names(datoer) <- datoer
