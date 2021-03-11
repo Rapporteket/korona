@@ -28,9 +28,9 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa, aggPers = 0)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiDataRaa
 
-sort(unique(PandemiData$HF))
+unique(RegData[ ,c('HF', 'HFresh')])
+RegData$ReshId
 
-test <- lagDatafilerTilFHI()
 
 paste0('Uke ', format(aux$Tid, "%V.%y"))
 RegData$Uke <- format(RegData$InnDag, "%V.%y")
