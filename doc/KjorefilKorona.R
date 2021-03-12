@@ -750,6 +750,8 @@ KoroIntKoblet <- merge(KoroDataPers, IntDataPers, suffixes = c('','Int'),
 RegData <-  merge(KoroIntKoblet, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
 RegData$HF <- as.factor(RegData$HF)
 
+
+
 #Gjennomsnittlig liggetid på sykehus
 LiggetidKoroHFgjsn <- round(tapply(RegData$Liggetid, INDEX = RegData$HF,  FUN = function(x) {mean(x,na.rm=T)}),1)
 indInt <- which(RegData$Int==1)
@@ -786,8 +788,13 @@ BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
 
 
 
+
+
 #--Se på antall inneliggende per dag. Benytter rådata, dvs. ikke-personaggregerte data.
 #Lag datasett som inneholder liggetid per måned per HF
+
+#Tabell, tot.liggetid på sykehus pr.mnd og HF, tilsv liggetid på intensiv
+
 
 RegData <- KoroDataRaa[ ,c("FormDate", 'FormDateUt', "UnitId", 'PersonId')]
 RegData$InnDato <- as.Date(RegData$FormDate)
@@ -910,33 +917,11 @@ p + facet_grid(rows = vars(drv))
 
 
 
-TabTidHF <-
-  RegDataAlleDatoer[1:3,c("HFresh", names(datoer))] %>%
-  group_by(HFresh) %>%
-  summarise(Mars = sum(names(datoer[4:7])))
-  #summarise_all(sum) #    #
-# %>%
-#   merge(belegg_ssb[, c("HFresh", "Dognplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
-#   mutate(HFresh = HF) %>% select(-HF) %>%
-#   # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
-#   tr_summarize_output(grvarnavn = 'Tid')
-# TabTidHF <- t(TabTidHF)
 
 belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
 belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
 belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
 
-TabTidRHF <-
-  RegData[,c("RHFresh", names(datoer))] %>%
-  group_by(RHFresh) %>%
-  summarise_all(sum) %>%
-  merge(belegg_rhf[, c("RHFresh", "Dognplasser.2018", "RHF")], by.x = "RHFresh", by.y = "RHFresh", all.x = T) %>%
-  mutate(RHFresh = RHF) %>% select(-RHF) %>%
-  bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
-  tr_summarize_output(grvarnavn = 'Tid')
-
-Samlet <- bind_cols(TabTidHF, TabTidRHF[,-1])
-reshID_rhf <- RegData[match(reshID, RegData$HFresh), "RHFresh"]
 
 #FLYTTEDE REGISTRERINGER:
 
