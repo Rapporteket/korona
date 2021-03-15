@@ -1045,7 +1045,7 @@ server <- function(input, output, session) {
       organization <- reshIDuts #rapbase::getUserReshId(session)
       #print(reshIDuts)
       indReshUts <- match(reshIDuts, KoroData$HFresh) #Her skal benyttes HF-resh
-      egenEnhetUts <- switch(rolle, SC='Alle',
+      egenEnhetUts <- switch(rolleUts, SC='Alle', #switch(rolle, SC='Alle',
                           LC=as.character(KoroData$RHF[indReshUts]),
                           LU=as.character(KoroData$HF[indReshUts]))
       paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')

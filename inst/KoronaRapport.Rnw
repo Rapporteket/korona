@@ -26,7 +26,10 @@ library(korona) #inkluderer tidyverse
 library(lubridate)
 library(xtable)
 library(kableExtra)
-forHvem <- ifelse(valgtEnhet=='Alle', 'hele landet', valgtEnhet)
+#forHvem <- ifelse(valgtEnhet=='Alle', 'hele landet', valgtEnhet)
+forHvem <- switch(rolle,
+                  SC = 'hele landet',
+                  LU = valgtEnhet)
 Tittel <- paste0('Koronainnlagte, ', forHvem)
 @
 
@@ -242,10 +245,10 @@ xtable::xtable(BeleggTab[fra:AntRader, ], digits=1, #-which(names(AntRader)=='He
 
 \begin{frame}[fragile] {Antall registrerte opphold per dag}
 
-I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+%I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 <<'RegRHF', results='asis'>>=
 AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
-                              valgtEnhet= valgtEnhet, HF = 1)$Tab_tidy
+                              valgtEnhet= valgtEnhet)$Tab_tidy #, HF = 1
 
 #\resizebox function or
 #\adjustbox.
@@ -275,7 +278,7 @@ print(
 
 
 \begin{frame}[fragile] {Antall avsluttede opphold (utskrevne)}
-I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+%I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 
 <<'Utskrevne', results='asis'>>=
   PandemiOpph$UtDato = factor(format(PandemiOpph$UtDato, '%y-%m-%d'),
@@ -294,7 +297,7 @@ scalebox = skalering)
 \end{frame}
 
 \begin{frame}[fragile] {Antall døde}
-I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+%I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 
 <<'Dode', results='asis'>>=
 indDod <- which(Pandemi$StatusVedUtskriving==2)
