@@ -142,7 +142,11 @@ ui <- tagList(
                                                step = 10
                                    ),
                                    br(),
-                                   actionButton("tilbakestillValg", label="Tilbakestill valg")
+                                   actionButton("tilbakestillValg", label="Tilbakestill valg"),
+                                   br(),
+                                   selectInput(inputId = "bildeformatAldKj",
+                                               label = "Velg format for nedlasting av figur",
+                                               choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg'))
 
                                    # dateRangeInput(inputId = 'datovalg', start = startDato, end = idag,
                                    #                label = "Tidsperiode", separator="t.o.m.", language="nb" #)
@@ -207,7 +211,7 @@ ui <- tagList(
                                   column(width=5, offset=1,
                                          h3('Aldersfordeling'),
                                          plotOutput("FigurAldersfordeling", height="auto"),
-                                         br(),
+                                         downloadButton('LastNedFigAldKj', label='Velg figurformat og last ned figur'),
                                          downloadButton("lastNedAldKj", "Last ned tabell")
                                   ))
                       ) #main
@@ -285,14 +289,6 @@ ui <- tagList(
                                               actionButton("tilbakestillValgRes", label="Tilbakestill valg")
 
                                  ),
-                                 # mainPanel(
-                                 #   h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
-                                 #   h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
-                                 #   plotOutput('fordelinger')
-                                 #   # uiOutput("tittelFord"),
-                                 #   # tableOutput('fordelingTab'),
-                                 #   # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
-                                 # )
                                  mainPanel(
                                    tabsetPanel(
                                      tabPanel(
@@ -304,7 +300,7 @@ ui <- tagList(
                                        'Tabell',
                                        uiOutput("tittelFord"),
                                        tableOutput('fordelingTab'),
-                                       downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt")
+                                       downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell')
                                      )
                                    )
                                  )
@@ -736,6 +732,22 @@ server <- function(input, output, session) {
     }, width = 500, height = 500)
   #} else {     renderText('Få registreringer (N<5)')}
 
+  output$LastNedFigAldKj <- downloadHandler(
+    filename = function(){
+      paste0('FigurAldKj_', Sys.time(), '.', input$bildeformatAldKj)
+    },
+    content = function(file){
+      korona::AlderKjFig(RegData=KoroData,
+                         valgtEnhet= input$valgtEnhet,
+                         enhetsNivaa = egetEnhetsNivaa,
+                         dodSh=as.numeric(input$dodSh),
+                         aarsakInn = as.numeric(input$aarsakInn),
+                         skjemastatusInn=as.numeric(input$skjemastatusInn),
+                         outfile = file)
+    }
+  )
+
+
   output$lastNedAldKj <- downloadHandler(
     filename = function(){
       paste0('AldKjTabell', Sys.time(), '.csv')
@@ -747,7 +759,8 @@ server <- function(input, output, session) {
                                    enhetsNivaa = egetEnhetsNivaa,
                                    dodSh=as.numeric(input$dodSh),
                                    aarsakInn = as.numeric(input$aarsakInn),
-                                   skjemastatusInn=as.numeric(input$skjemastatusInn))
+                                   skjemastatusInn=as.numeric(input$skjemastatusInn),
+                                   outfile = file)
       write.csv2(Tabell, file, row.names = F, fileEncoding = 'latin1')
     }
   )
@@ -1054,12 +1067,6 @@ server <- function(input, output, session) {
   }
   dispatchment$koblRoller <- cbind(id = ider,
                       Rolle = roller)
- # })
-  # dispatchment$tab <- as.matrix(
-  #   merge(as.data.frame(dispatchment$tab), as.data.frame(koblRoller),
-  #         by = 'id', sort=F))
-  # #print(dim(koblRoller))
-
 
   ## observér og foreta endringer mens applikasjonen kjører
   observeEvent(input$addEmail, {
@@ -1098,10 +1105,6 @@ server <- function(input, output, session) {
       paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
       paramValues <- c(rnwFil, brukernavn, reshIDuts, egenEnhetUts, egetEnhetsNivaaUts, rolleUts)
       #paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle)
-
-      #print(egenEnhetUts)
-      #print(egetEnhetsNivaaUts)
-      #print(rolleUts)
     }
 
     rapbase::createAutoReport(synopsis = synopsis, package = package,
@@ -1192,7 +1195,6 @@ server <- function(input, output, session) {
 
   ## lag tabell over gjeldende status for utsending
   output$activeDispatchments <- DT::renderDataTable(
-    #merge(as.data.frame(dispatchment$tab), as.data.frame(dispatchment$koblRoller), by = 'id', sort=F),
     merge(as.data.frame(dispatchment$tab), as.data.frame(dispatchment$koblRoller), by = 'id',
           sort=F, all.x=T, all.y=F)[ ,c("Ansvarlig", "Rapport", "Datakilde", "Rolle", "Mottaker", "Periode", "Utløp", "Neste", "Endre", "Slett")],
     server = FALSE, escape = FALSE, selection = 'none',
@@ -1235,12 +1237,6 @@ server <- function(input, output, session) {
     }
   })
 
-
-  ## slett eksisterende abonnement
-  # observeEvent(input$del_button, {
-  #   selectedRepId <- strsplit(input$del_button, "_")[[1]][2]
-  #   rapbase::deleteAutoReport(selectedRepId)
-  #   rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)})
 
   # Slett eksisterende auto rapport (alle typer)
   observeEvent(input$del_button, {
