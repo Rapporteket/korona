@@ -298,7 +298,7 @@ ui <- tagList(
                                      tabPanel(
                                        'Figur',
                                        plotOutput('fordelinger', height="auto"),
-                                       downloadButton('LastNedFigFord')
+                                       downloadButton('LastNedFigFord', label='Velg format (til venstre) og last ned figur')
                                        ),
                                      tabPanel(
                                        'Tabell',
@@ -509,7 +509,6 @@ server <- function(input, output, session) {
   egetRHF <- 'ReshUreg'
   if (finnesEgenResh) {
     indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
-    #egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
   }
@@ -1031,8 +1030,7 @@ server <- function(input, output, session) {
       rapbase::makeAutoReportTab(session, type = "subscription")
   })
 
-  #-----Nye elementer---------------------
-  #---Utsending---
+  #----- Utsending ------
   ## reaktive verdier for å holde rede på endringer som skjer mens
   ## applikasjonen kjører
   dispatchment <- reactiveValues(
@@ -1079,9 +1077,9 @@ server <- function(input, output, session) {
       paramValues <- c(rnwFil, brukernavn, reshIDuts, egenEnhetUts, egetEnhetsNivaaUts, rolleUts)
       #paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle)
 
-      print(egenEnhetUts)
-      print(egetEnhetsNivaaUts)
-      print(rolleUts)
+      #print(egenEnhetUts)
+      #print(egetEnhetsNivaaUts)
+      #print(rolleUts)
     }
 
     rapbase::createAutoReport(synopsis = synopsis, package = package,
@@ -1092,10 +1090,9 @@ server <- function(input, output, session) {
                               runDayOfYear = runDayOfYear,
                               interval = interval, intervalName = intervalName)
     dispatchment$tab <- rapbase::makeAutoReportTab(session, type = "dispatchment")
-    test <- dimnames(dispatchment$tab)
+    #test <- dimnames(dispatchment$tab)
     # print(test[[]])
-    # print(attributes(dispatchment$tab))
-    #Author DataFlair
+     #print(attributes(dispatchment$tab))
 
     alleAutorapporter <- rapbase::readAutoReportData()
     egneUts <-  rapbase::filterAutoRep(
