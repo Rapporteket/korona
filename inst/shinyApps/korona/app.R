@@ -1090,9 +1090,11 @@ server <- function(input, output, session) {
                               runDayOfYear = runDayOfYear,
                               interval = interval, intervalName = intervalName)
     dispatchment$tab <- rapbase::makeAutoReportTab(session, type = "dispatchment")
-    #test <- dimnames(dispatchment$tab)
-    # print(test[[]])
-     #print(attributes(dispatchment$tab))
+    # navn <- dimnames(dispatchment$tab)
+    # print(navn)
+    # print(dispatchment$tab)
+    # print(class(dispatchment$tab))
+    # print(attributes(dispatchment$tab))
 
     alleAutorapporter <- rapbase::readAutoReportData()
     egneUts <-  rapbase::filterAutoRep(
@@ -1104,9 +1106,16 @@ server <- function(input, output, session) {
     for (k in 2:length(ider)) {
       roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
     }
-    koblRoller <- cbind(ID = ider,
-                        roller = roller)
+    koblRoller <- cbind(id = ider,
+                        Rolle = roller)
+    dispatchment$tab <- as.matrix(
+      merge(as.data.frame(dispatchment$tab), as.data.frame(koblRoller),
+          by = 'id', sort=F))
+    print(dim(koblRoller))
 
+# dummyTab <- matrix(c('c15eff10f74e836a852d8f5f6c5f6656', '8f20f8adccb4a23203558c149b4d1d1c',
+#                      1, 5), nrow = 2, dimnames = list(NULL, c('id', 'tall')))
+# merge(dummyTab, koblRoller, by = 'id')
     #egneUts$`604beee0bfe6075e1c31c496f3f5dafd`$params[[6]]$rolle
 
     dispatchment$email <- vector()
@@ -1174,8 +1183,10 @@ server <- function(input, output, session) {
 
   ## lag tabell over gjeldende status for utsending
   output$activeDispatchments <- DT::renderDataTable(
-    dispatchment$tab, server = FALSE, escape = FALSE, selection = 'none',
-    options = list(dom = 'tp', ordning = FALSE, columnDefs = list(list(visible = FALSE, targets = 9))),
+    #merge(as.data.frame(dispatchment$tab), as.data.frame(koblRoller), by = 'id', sort=F),
+    dispatchment$tab, #[ ,c("Ansvarlig", "Rapport", "Datakilde", "Rolle", "Mottaker", "Periode", "Utløp", "Neste", "Endre", "Slett")],
+    server = FALSE, escape = FALSE, selection = 'none',
+    options = list(dom = 'tp', ordning = FALSE), #, columnDefs = list(list(visible = FALSE, targets = 9))
                    rownames = FALSE
     )
 
