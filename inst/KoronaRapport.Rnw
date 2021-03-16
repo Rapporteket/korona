@@ -120,9 +120,9 @@ aggregert til ett forløp per pasient, uavhengig av om pasienten har reinnleggel
 \item Rapporten er basert på alle registreringer gjort inntil 4 timer før rapporten ble lastet ned.
 \end{itemize}
 
-Rapporten er kjørt for: rolle: \Sexpr{rolle}, \Sexpr{class(rolle)}
-enhetsnivå: \Sexpr{enhetsNivaa}, \Sexpr{class(enhetsNivaa)}
-Enhet: \Sexpr{valgtEnhet}, \Sexpr{class(valgtEnhet)}
+Rapporten er kjørt for: rolle: \Sexpr{rolle}  %, \Sexpr{class(rolle)}
+enhetsnivå: \Sexpr{enhetsNivaa} %, \Sexpr{class(enhetsNivaa)}
+Enhet: \Sexpr{valgtEnhet} %, \Sexpr{class(valgtEnhet)}
 
 
 \end{frame}

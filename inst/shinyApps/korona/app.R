@@ -278,6 +278,9 @@ ui <- tagList(
                                               br(),selectInput(inputId = "erMannRes", label="Kjønn",
                                                           choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
                                               ),
+                                              selectInput(inputId = "bildeformatFord",
+                                                          label = "Velg format for nedlasting av figur",
+                                                          choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
                                               br(),
                                               actionButton("tilbakestillValgRes", label="Tilbakestill valg")
 
@@ -294,7 +297,9 @@ ui <- tagList(
                                    tabsetPanel(
                                      tabPanel(
                                        'Figur',
-                                       plotOutput('fordelinger')),
+                                       plotOutput('fordelinger', height="auto"),
+                                       downloadButton('LastNedFigFord')
+                                       ),
                                      tabPanel(
                                        'Tabell',
                                        uiOutput("tittelFord"),
@@ -793,7 +798,32 @@ server <- function(input, output, session) {
                                    skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                    kjemastatusUt=as.numeric(input$skjemastatusUtRes),
                                    session = session)
+
+
     tab <- lagTabavFigFord(UtDataFraFig = UtDataFord)
+
+    output$LastNedFigFord <- downloadHandler(
+      filename = function(){
+        paste0('FordelingsFigur', valgtVar=input$valgtVarFord, '_', Sys.time(), '.', input$bildeformatFord)
+      },
+
+      content = function(file){
+        KoronaFigAndeler(RegData=KoroData,
+                         valgtVar=input$valgtVarFord,
+                         valgtEnhet = input$valgtEnhetRes,
+                         datoFra=input$valgtDatoRes[1],
+                         datoTil=input$valgtDatoRes[2],
+                         enhetsNivaa= egetEnhetsNivaa,
+                         enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
+                         dodSh=as.numeric(input$dodShRes),
+                         aarsakInn = as.numeric(input$aarsakInnRes),
+                         erMann=as.numeric(input$erMannRes),
+                         skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                         kjemastatusUt=as.numeric(input$skjemastatusUtRes),
+                         session = session,
+                         outfile = file)
+      }
+    )
 
     output$tittelFord <- renderUI({
       tagList(
@@ -986,8 +1016,6 @@ server <- function(input, output, session) {
     paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
     paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
     # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
-    #                        reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
-    # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
     #                          reshID=100082) #, valgtEnhet=egenEnhet, enhetsNivaa='RHF', rolle='SC')
 
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
@@ -1005,7 +1033,6 @@ server <- function(input, output, session) {
 
   #-----Nye elementer---------------------
   #---Utsending---
-  # Utsending
   ## reaktive verdier for å holde rede på endringer som skjer mens
   ## applikasjonen kjører
   dispatchment <- reactiveValues(
@@ -1040,7 +1067,7 @@ server <- function(input, output, session) {
       fun <- "abonnementKorona"
       rnwFil <- "KoronaRapport.Rnw" #Navn på fila
       rolleUts <- input$dispatchmentRole
-      egetEnhetsNivaaUts <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+      egetEnhetsNivaaUts <- switch(rolleUts, SC = 'RHF', LC = 'RHF', LU = 'HF')
       reshIDuts <- input$dispatchmentResh
       organization <- reshIDuts #rapbase::getUserReshId(session)
       #print(reshIDuts)
@@ -1051,6 +1078,10 @@ server <- function(input, output, session) {
       paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
       paramValues <- c(rnwFil, brukernavn, reshIDuts, egenEnhetUts, egetEnhetsNivaaUts, rolleUts)
       #paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle)
+
+      print(egenEnhetUts)
+      print(egetEnhetsNivaaUts)
+      print(rolleUts)
     }
 
     rapbase::createAutoReport(synopsis = synopsis, package = package,

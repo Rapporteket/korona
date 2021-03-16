@@ -28,6 +28,15 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa, aggPers = 0)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+
+  indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
+  egetRHF <- as.character(KoroData$RHF[indReshEgen])
+  egetHF <- as.character(KoroData$HF[indReshEgen])
+
+#Filtreringsnivå for data:
+egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
+
 antallTidEnhTab(RegData, tidsenhet='dag', erMann=9, datoFra=as.Date('2021-02-01'), datoTil=as.Date('2021-02-10'),
                             tilgangsNivaa='LC', valgtEnhet='Alle')$Tab
 
