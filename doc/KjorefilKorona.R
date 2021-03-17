@@ -28,6 +28,7 @@ PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa, aggPers = 0)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
 RegData <- PandemiData
 
+data <- lagDatafilerTilFHI()
 
   indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
   egetRHF <- as.character(KoroData$RHF[indReshEgen])
