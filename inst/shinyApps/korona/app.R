@@ -1205,8 +1205,9 @@ server <- function(input, output, session) {
       tagList(
         h4("Aktive utsendinger:"),
         h5("NB: Når du trykker på knappen for å gjøre endringer i ei utsending,
-           slettes utsendinga fra lista og alle valg legger seg inn i skjemaet til venstre
-           slik at du f.eks. kan legge til/slette e-postmottagere og endre frekvens."),
+           slettes utsendinga fra lista og legger seg inn i skjemaet til venstre
+           slik at du f.eks. kan legge til/slette e-postmottagere og endre frekvens.
+           Pass på at du får riktig enhet/rolle når du oppdaterer!"),
         DT::dataTableOutput("activeDispatchments")
       )
     }

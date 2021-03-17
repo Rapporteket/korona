@@ -38,6 +38,7 @@ koronaresultater_UI <- function(id){
                         br(),
                         actionButton(inputId = ns("tilbakestillValgRes"), label="Tilbakestill valg"
                         ),
+                        br(),
                         selectInput(inputId = ns("bildeformat"),
                                     label = "Velg format for nedlasting av figur",
                                     choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
