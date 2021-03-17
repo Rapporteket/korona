@@ -113,17 +113,11 @@ ui <- tagList(
                                    br(),
                                    br(),
                                    h3('Gjør filtreringer/utvalg:'),
-                                   #br(),
 
                                    selectInput(inputId = "valgtEnhet", label="Velg enhet",
                                                choices = 'Alle'
                                    ),
-                                   #Tildeles ut fra rolle:
-                                   # selectInput(inputId = 'enhetsGruppe', label='Enhetgruppe',
-                                   #             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
-                                   # ),
-
-                                   selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
+                                    selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
                                                choices = aarsakInnValg
                                     ),
                                    selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
@@ -211,7 +205,8 @@ ui <- tagList(
                                   column(width=5, offset=1,
                                          h3('Aldersfordeling'),
                                          plotOutput("FigurAldersfordeling", height="auto"),
-                                         downloadButton('LastNedFigAldKj', label='Velg figurformat og last ned figur'),
+                                         downloadButton('LastNedFigAldKj', label='Last ned figur'),
+                                         h5('Velg figurformat i nedtrekksmeny i venstre panel'),
                                          downloadButton("lastNedAldKj", "Last ned tabell")
                                   ))
                       ) #main

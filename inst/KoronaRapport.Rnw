@@ -27,9 +27,11 @@ library(lubridate)
 library(xtable)
 library(kableExtra)
 #forHvem <- ifelse(valgtEnhet=='Alle', 'hele landet', valgtEnhet)
-forHvem <- switch(rolle,
-                  SC = 'hele landet',
-                  LU = valgtEnhet)
+forHvem <- ifelse(rolle=='SC', 'hele landet', valgtEnhet)
+# forHvem <- switch(rolle,
+#                   SC = 'hele landet',
+#                   LC = valgtEnhet,
+#                   LU = valgtEnhet)
 Tittel <- paste0('Koronainnlagte, ', forHvem)
 @
 

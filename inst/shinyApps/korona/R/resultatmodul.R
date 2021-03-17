@@ -37,7 +37,11 @@ koronaresultater_UI <- function(id){
                         ),
                         br(),
                         actionButton(inputId = ns("tilbakestillValgRes"), label="Tilbakestill valg"
-                        )
+                        ),
+                        selectInput(inputId = ns("bildeformat"),
+                                    label = "Velg format for nedlasting av figur",
+                                    choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
+
     ),
     mainPanel(
       h2('Tellinger:'),
@@ -48,7 +52,7 @@ koronaresultater_UI <- function(id){
       # h3('NB:Siden er under utvikling!', style = "color:red"),
       br(),
       plotOutput(ns("FigurTidEnhet"), height="auto"),
-      # downloadButton(ns("LastNedFig"), label = 'Last ned figur'),
+      downloadButton(ns("LastNedFigTelling"), label = 'Last ned figur'),
       br(),
       br(),
       # DT::DTOutput(ns("tabTidEnhet_DT")),
@@ -171,19 +175,19 @@ ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
   }, width = 700, height = 700)
 
 
-  # output$LastNedFig <- downloadHandler(
-  #   filename = function(){
-  #     paste0('KoronaFigur', Sys.time(), '.', input$bildeformat)
-  #   },
-  #
-  #   content = function(file){
-  #     AntTab <- AntTab()
-  #     if (rolle != 'SC') {
-  #       AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
-  #     }
-  #     korona::FigTidEnhet(AntTab, outfile = file)
-  #   }
-  # )
+  output$LastNedFigTelling <- downloadHandler(
+    filename = function(){
+      paste0('Fig_', input$valgtVar, Sys.time(), '.', input$bildeformat)
+    },
+
+    content = function(file){
+      AntTab <- AntTab()
+      if (rolle != 'SC'  & dim(AntTab$Tab_tidy)[2] > 3) {
+        AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
+      }
+      korona::FigTidEnhet(AntTab, outfile = file)
+    }
+  )
 
   output$lastNed <- downloadHandler(
     filename = function(){
