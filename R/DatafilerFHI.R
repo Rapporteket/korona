@@ -116,8 +116,8 @@ varFHIraa <- c(
   ,'FormStatus'
   ,'FormDate'
  ,'AgeAdmitted'
-# ,'CreationDate'
-# ,'FirstTimeClosed'
+ ,'CreationDate'
+ ,'FirstTimeClosed'
  ) #De nye variablene må enten legges til i varBort, eller FHI må varsles om at de kommer på ny plass i den aggregerte fila
 BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 #setdiff(varFHIraa, names(RegDataRaa))
@@ -126,8 +126,7 @@ BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 
 RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa)
 varBort <- c('AgeAdmitted','PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive',
-             # ,'CreationDate', FirstTimeClosed'
-             'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
+              'CreationDate', 'FirstTimeClosed', 'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
 varNy <- c('Alder', 'erMann', 'Bekreftet', 'Liggetid', 'ReinnResp', 'RespTid') #'PersonId',
 varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
               'FormDateSiste', 'Reinn', 'AntRegPrPas', 'ReinnTid', 'ReinnNaar',

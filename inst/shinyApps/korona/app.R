@@ -113,17 +113,11 @@ ui <- tagList(
                                    br(),
                                    br(),
                                    h3('Gjør filtreringer/utvalg:'),
-                                   #br(),
 
                                    selectInput(inputId = "valgtEnhet", label="Velg enhet",
                                                choices = 'Alle'
                                    ),
-                                   #Tildeles ut fra rolle:
-                                   # selectInput(inputId = 'enhetsGruppe', label='Enhetgruppe',
-                                   #             choices = c("RHF"=1, "HF"=2, "Sykehus"=3)
-                                   # ),
-
-                                   selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
+                                    selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
                                                choices = aarsakInnValg
                                     ),
                                    selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
@@ -142,7 +136,11 @@ ui <- tagList(
                                                step = 10
                                    ),
                                    br(),
-                                   actionButton("tilbakestillValg", label="Tilbakestill valg")
+                                   actionButton("tilbakestillValg", label="Tilbakestill valg"),
+                                   br(),
+                                   selectInput(inputId = "bildeformatAldKj",
+                                               label = "Velg format for nedlasting av figur",
+                                               choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg'))
 
                                    # dateRangeInput(inputId = 'datovalg', start = startDato, end = idag,
                                    #                label = "Tidsperiode", separator="t.o.m.", language="nb" #)
@@ -207,7 +205,8 @@ ui <- tagList(
                                   column(width=5, offset=1,
                                          h3('Aldersfordeling'),
                                          plotOutput("FigurAldersfordeling", height="auto"),
-                                         br(),
+                                         downloadButton('LastNedFigAldKj', label='Last ned figur'),
+                                         h5('Velg figurformat i nedtrekksmeny i venstre panel'),
                                          downloadButton("lastNedAldKj", "Last ned tabell")
                                   ))
                       ) #main
@@ -278,28 +277,25 @@ ui <- tagList(
                                               br(),selectInput(inputId = "erMannRes", label="Kjønn",
                                                           choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
                                               ),
+                                              selectInput(inputId = "bildeformatFord",
+                                                          label = "Velg format for nedlasting av figur",
+                                                          choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
                                               br(),
                                               actionButton("tilbakestillValgRes", label="Tilbakestill valg")
 
                                  ),
-                                 # mainPanel(
-                                 #   h2('Fordelingsfigurer, inkl. nedlastbare tabeller'),
-                                 #   h3('?Vise fordelingsfigurer bare for ferdigstilte skjema'),
-                                 #   plotOutput('fordelinger')
-                                 #   # uiOutput("tittelFord"),
-                                 #   # tableOutput('fordelingTab'),
-                                 #   # downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt"),
-                                 # )
                                  mainPanel(
                                    tabsetPanel(
                                      tabPanel(
                                        'Figur',
-                                       plotOutput('fordelinger')),
+                                       plotOutput('fordelinger', height="auto"),
+                                       downloadButton('LastNedFigFord', label='Velg format (til venstre) og last ned figur')
+                                       ),
                                      tabPanel(
                                        'Tabell',
                                        uiOutput("tittelFord"),
                                        tableOutput('fordelingTab'),
-                                       downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell') #, class = "butt")
+                                       downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell')
                                      )
                                    )
                                  )
@@ -504,7 +500,6 @@ server <- function(input, output, session) {
   egetRHF <- 'ReshUreg'
   if (finnesEgenResh) {
     indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
-    #egetShNavn <- as.character(KoroData$ShNavn[indReshEgen])
     egetRHF <- as.character(KoroData$RHF[indReshEgen])
     egetHF <- as.character(KoroData$HF[indReshEgen])
   }
@@ -732,6 +727,22 @@ server <- function(input, output, session) {
     }, width = 500, height = 500)
   #} else {     renderText('Få registreringer (N<5)')}
 
+  output$LastNedFigAldKj <- downloadHandler(
+    filename = function(){
+      paste0('FigurAldKj_', Sys.time(), '.', input$bildeformatAldKj)
+    },
+    content = function(file){
+      korona::AlderKjFig(RegData=KoroData,
+                         valgtEnhet= input$valgtEnhet,
+                         enhetsNivaa = egetEnhetsNivaa,
+                         dodSh=as.numeric(input$dodSh),
+                         aarsakInn = as.numeric(input$aarsakInn),
+                         skjemastatusInn=as.numeric(input$skjemastatusInn),
+                         outfile = file)
+    }
+  )
+
+
   output$lastNedAldKj <- downloadHandler(
     filename = function(){
       paste0('AldKjTabell', Sys.time(), '.csv')
@@ -743,7 +754,8 @@ server <- function(input, output, session) {
                                    enhetsNivaa = egetEnhetsNivaa,
                                    dodSh=as.numeric(input$dodSh),
                                    aarsakInn = as.numeric(input$aarsakInn),
-                                   skjemastatusInn=as.numeric(input$skjemastatusInn))
+                                   skjemastatusInn=as.numeric(input$skjemastatusInn),
+                                   outfile = file)
       write.csv2(Tabell, file, row.names = F, fileEncoding = 'latin1')
     }
   )
@@ -793,7 +805,32 @@ server <- function(input, output, session) {
                                    skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                    kjemastatusUt=as.numeric(input$skjemastatusUtRes),
                                    session = session)
+
+
     tab <- lagTabavFigFord(UtDataFraFig = UtDataFord)
+
+    output$LastNedFigFord <- downloadHandler(
+      filename = function(){
+        paste0('FordelingsFigur', valgtVar=input$valgtVarFord, '_', Sys.time(), '.', input$bildeformatFord)
+      },
+
+      content = function(file){
+        KoronaFigAndeler(RegData=KoroData,
+                         valgtVar=input$valgtVarFord,
+                         valgtEnhet = input$valgtEnhetRes,
+                         datoFra=input$valgtDatoRes[1],
+                         datoTil=input$valgtDatoRes[2],
+                         enhetsNivaa= egetEnhetsNivaa,
+                         enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
+                         dodSh=as.numeric(input$dodShRes),
+                         aarsakInn = as.numeric(input$aarsakInnRes),
+                         erMann=as.numeric(input$erMannRes),
+                         skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                         kjemastatusUt=as.numeric(input$skjemastatusUtRes),
+                         session = session,
+                         outfile = file)
+      }
+    )
 
     output$tittelFord <- renderUI({
       tagList(
@@ -986,8 +1023,6 @@ server <- function(input, output, session) {
     paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
     paramValues <- c(rnwFil, brukernavn, reshID, egenEnhet, egetEnhetsNivaa, rolle) #, as.character(input$valgtEnhetabb))
     # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
-    #                        reshID=reshID, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa, rolle=rolle)
-    # test <- abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='tullebukk',
     #                          reshID=100082) #, valgtEnhet=egenEnhet, enhetsNivaa='RHF', rolle='SC')
 
     rapbase::createAutoReport(synopsis = synopsis, package = 'korona',
@@ -1003,17 +1038,32 @@ server <- function(input, output, session) {
       rapbase::makeAutoReportTab(session, type = "subscription")
   })
 
-  #-----Nye elementer---------------------
-  #---Utsending---
-  # Utsending
+  #----- Utsending ------
   ## reaktive verdier for å holde rede på endringer som skjer mens
   ## applikasjonen kjører
   dispatchment <- reactiveValues(
     tab = rapbase::makeAutoReportTab(session = session, type = "dispatchment"),
+    koblRoller = matrix(NA, ncol=2, dimnames=list(NULL, c('id', 'Rolle') )),
     report = "Koronarapport",
     freq = "Månedlig-month",
     email = vector()
   )
+
+  #observe({
+  alleAutorapporter <- rapbase::readAutoReportData()
+  egneUts <-  rapbase::filterAutoRep(
+    rapbase::filterAutoRep(alleAutorapporter, by = 'package', pass = 'korona'),
+    by = 'type', pass = 'dispatchment')
+
+  if (length(names(egneUts))!=0) {
+    ider <- names(egneUts)
+    roller <- vector() #egneUts[[1]][['params']][[6]]$rolle
+    for (k in 1:length(ider)) {
+      roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
+    }
+  dispatchment$koblRoller <- cbind(id = ider,
+                      Rolle = roller)
+  }
   ## observér og foreta endringer mens applikasjonen kjører
   observeEvent(input$addEmail, {
     dispatchment$email <- c(dispatchment$email, input$email)
@@ -1040,12 +1090,12 @@ server <- function(input, output, session) {
       fun <- "abonnementKorona"
       rnwFil <- "KoronaRapport.Rnw" #Navn på fila
       rolleUts <- input$dispatchmentRole
-      egetEnhetsNivaaUts <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+      egetEnhetsNivaaUts <- switch(rolleUts, SC = 'RHF', LC = 'RHF', LU = 'HF')
       reshIDuts <- input$dispatchmentResh
       organization <- reshIDuts #rapbase::getUserReshId(session)
       #print(reshIDuts)
       indReshUts <- match(reshIDuts, KoroData$HFresh) #Her skal benyttes HF-resh
-      egenEnhetUts <- switch(rolle, SC='Alle',
+      egenEnhetUts <- switch(rolleUts, SC='Alle', #switch(rolle, SC='Alle',
                           LC=as.character(KoroData$RHF[indReshUts]),
                           LU=as.character(KoroData$HF[indReshUts]))
       paramNames <- c('rnwFil', 'brukernavn', "reshID", "valgtEnhet", "enhetsNivaa", 'rolle')
@@ -1061,25 +1111,20 @@ server <- function(input, output, session) {
                               runDayOfYear = runDayOfYear,
                               interval = interval, intervalName = intervalName)
     dispatchment$tab <- rapbase::makeAutoReportTab(session, type = "dispatchment")
-    test <- dimnames(dispatchment$tab)
-    # print(test[[]])
-    # print(attributes(dispatchment$tab))
-    #Author DataFlair
 
     alleAutorapporter <- rapbase::readAutoReportData()
     egneUts <-  rapbase::filterAutoRep(
-              rapbase::filterAutoRep(alleAutorapporter, by = 'package', pass = 'korona'),
-              by = 'type', pass = 'dispatchment')
+      rapbase::filterAutoRep(alleAutorapporter, by = 'package', pass = 'korona'),
+      by = 'type', pass = 'dispatchment')
 
     ider <- names(egneUts)
-    roller <- egneUts[[1]][['params']][[6]]$rolle
-    for (k in 2:length(ider)) {
+    roller <- vector()
+    for (k in 1:length(ider)) {
       roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
     }
-    koblRoller <- cbind(ID = ider,
-                        roller = roller)
+    dispatchment$koblRoller <- cbind(id = ider,
+                                     Rolle = roller)
 
-    #egneUts$`604beee0bfe6075e1c31c496f3f5dafd`$params[[6]]$rolle
 
     dispatchment$email <- vector()
   })
@@ -1144,12 +1189,20 @@ server <- function(input, output, session) {
     }
   })
 
-  ## lag tabell over gjeldende status for utsending
+  ## lag tabell over gjeldende status for utsending - MÅ TA HØYDE FOR AT IKKE FINNES NOEN
+
   output$activeDispatchments <- DT::renderDataTable(
-    dispatchment$tab, server = FALSE, escape = FALSE, selection = 'none',
-    options = list(dom = 'tp', ordning = FALSE, columnDefs = list(list(visible = FALSE, targets = 9))),
+    if (length(dispatchment$tab) != 0) { #(!is.na(dispatchment$koblRoller[1])) {
+    merge(as.data.frame(dispatchment$tab), as.data.frame(dispatchment$koblRoller), by = 'id',
+          sort=F, all.x=T, all.y=F)[ ,c("Ansvarlig", "Rapport", "Datakilde", "Rolle", "Mottaker",
+                                        "Periode", "Utløp", "Neste", "Endre", "Slett")]} else NULL,
+    server = FALSE, escape = FALSE, selection = 'none',
+    options = list(dom = 'tp', ordning = FALSE), #, columnDefs = list(list(visible = FALSE, targets = 9))
                    rownames = FALSE
+
     )
+
+
 
   ## ui: lag side som viser status for utsending, også når det ikke finnes noen
   output$dispatchmentContent <- renderUI({
@@ -1159,8 +1212,9 @@ server <- function(input, output, session) {
       tagList(
         h4("Aktive utsendinger:"),
         h5("NB: Når du trykker på knappen for å gjøre endringer i ei utsending,
-           slettes utsendinga fra lista og alle valg legger seg inn i skjemaet til venstre
-           slik at du f.eks. kan legge til/slette e-postmottagere og endre frekvens."),
+           slettes utsendinga fra lista og legger seg inn i skjemaet til venstre
+           slik at du f.eks. kan legge til/slette e-postmottagere og endre frekvens.
+           Pass på at du får riktig enhet/rolle når du oppdaterer!"),
         DT::dataTableOutput("activeDispatchments")
       )
     }
@@ -1186,12 +1240,6 @@ server <- function(input, output, session) {
     }
   })
 
-
-  ## slett eksisterende abonnement
-  # observeEvent(input$del_button, {
-  #   selectedRepId <- strsplit(input$del_button, "_")[[1]][2]
-  #   rapbase::deleteAutoReport(selectedRepId)
-  #   rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)})
 
   # Slett eksisterende auto rapport (alle typer)
   observeEvent(input$del_button, {

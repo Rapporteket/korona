@@ -5,6 +5,10 @@ RegDataRaa <- KoronaDataSQL(datoFra = '2020-09-01')
 RegData <- KoronaPreprosesser(RegData = RegDataRaa, aggPers = 1)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
+
+
+unique(RegData[, c('HF',"ReshId", 'ShNavn')])
+
 tidsenhet='dag'
 datoFra <- '2020-01-01'
 datoTil <- Sys.Date()
@@ -26,11 +30,20 @@ library(korona)
 PandemiDataRaa <- korona::KoronaDataSQL()
 PandemiData <- KoronaPreprosesser(RegData = PandemiDataRaa, aggPers = 0)
 PandemiUt <- KoronaDataSQL(koble = 0, skjema = 2)
-RegData <- PandemiDataRaa
+RegData <- PandemiData
 
-sort(unique(PandemiData$HF))
 
-test <- lagDatafilerTilFHI()
+  indReshEgen <- match(reshID, KoroData$HFresh) #Her skal benyttes HF-resh
+  egetRHF <- as.character(KoroData$RHF[indReshEgen])
+  egetHF <- as.character(KoroData$HF[indReshEgen])
+
+#Filtreringsnivå for data:
+egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
+egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
+
+antallTidEnhTab(RegData, tidsenhet='dag', erMann=9, datoFra=as.Date('2021-02-01'), datoTil=as.Date('2021-02-10'),
+                            tilgangsNivaa='LC', valgtEnhet='Alle')$Tab
+
 
 paste0('Uke ', format(aux$Tid, "%V.%y"))
 RegData$Uke <- format(RegData$InnDag, "%V.%y")
@@ -747,8 +760,11 @@ KoroIntKoblet <- merge(KoroDataPers, IntDataPers, suffixes = c('','Int'),
 
 
 #Kobler på kapasitet
-RegData <-  merge(KoroIntKoblet, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
+#RegData <-  merge(KoroIntKoblet, Kapasitet, by = 'HFresh', all.x = T, all.y=F)
+RegData <- KoroIntKoblet
 RegData$HF <- as.factor(RegData$HF)
+
+
 
 #Gjennomsnittlig liggetid på sykehus
 LiggetidKoroHFgjsn <- round(tapply(RegData$Liggetid, INDEX = RegData$HF,  FUN = function(x) {mean(x,na.rm=T)}),1)
@@ -762,6 +778,15 @@ LiggetidKoroHFgjsnIntpas <- round(tapply(RegData$Liggetid[indInt], INDEX = RegDa
                                          mean, na.rm=T), 1)
 #Total liggetid
 LiggetidKoroHFtot <- round(tapply(RegData$Liggetid, INDEX = RegData$HF,  sum, na.rm=T),1)
+LiggetidKoroHFmndTot <- round(tapply(RegData$Liggetid, INDEX = list(RegData$HF, RegData$MndNum),  sum, na.rm=T),1)
+write.table(LiggetidKoroHFtot, file = 'LiggetidKoroHFmndTot.csv', sep=';')
+
+LiggetidIntHFtot <- round(tapply(RegData$LiggetidInt, INDEX = RegData$HF,  sum, na.rm=T), 1)
+LiggetidIntHFmndTot <- round(tapply(RegData$LiggetidInt, INDEX = list(RegData$HF, RegData$MndNum),  sum, na.rm=T), 1)
+write.table(LiggetidIntHFtot, file = 'LiggetidIntHFmndTot.csv', sep=';')
+#Sjekk: RegData <- KoronaPreprosesser(KoronaDataSQL(datoTil = '2020-12-31'))
+
+
 KapasitetHF <- tapply(RegData$Dognplasser.2018,  INDEX = RegData$HF,  median)
 antDager <- as.numeric(as.Date(datoTil) - as.Date(datoFra))+1
 BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
@@ -775,7 +800,8 @@ Tab <- cbind('Antall pas.' = table(RegData$HF),
   # 'Kapasitet/dag' = KapasitetHF
       )
 
-write.table(Tab, file = 'CovBelastning.csv', fileEncoding = 'ASCII', sep=';')
+#write.table(Tab, file = 'CovBelastning.csv', fileEncoding = 'ASCII', sep=';')
+write.table(Tab, file = 'CovLiggetider.csv', sep=';') #fileEncoding = 'ASCII',
 
 
 #----Belegg per måned
@@ -786,8 +812,13 @@ BeleggHF <- round(100*LiggetidKoroHFtot/(KapasitetHF*antDager),1)
 
 
 
+
+
 #--Se på antall inneliggende per dag. Benytter rådata, dvs. ikke-personaggregerte data.
 #Lag datasett som inneholder liggetid per måned per HF
+
+#Tabell, tot.liggetid på sykehus pr.mnd og HF, tilsv liggetid på intensiv
+
 
 RegData <- KoroDataRaa[ ,c("FormDate", 'FormDateUt', "UnitId", 'PersonId')]
 RegData$InnDato <- as.Date(RegData$FormDate)
@@ -910,33 +941,11 @@ p + facet_grid(rows = vars(drv))
 
 
 
-TabTidHF <-
-  RegDataAlleDatoer[1:3,c("HFresh", names(datoer))] %>%
-  group_by(HFresh) %>%
-  summarise(Mars = sum(names(datoer[4:7])))
-  #summarise_all(sum) #    #
-# %>%
-#   merge(belegg_ssb[, c("HFresh", "Dognplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
-#   mutate(HFresh = HF) %>% select(-HF) %>%
-#   # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
-#   tr_summarize_output(grvarnavn = 'Tid')
-# TabTidHF <- t(TabTidHF)
 
 belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
 belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
 belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
 
-TabTidRHF <-
-  RegData[,c("RHFresh", names(datoer))] %>%
-  group_by(RHFresh) %>%
-  summarise_all(sum) %>%
-  merge(belegg_rhf[, c("RHFresh", "Dognplasser.2018", "RHF")], by.x = "RHFresh", by.y = "RHFresh", all.x = T) %>%
-  mutate(RHFresh = RHF) %>% select(-RHF) %>%
-  bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>%
-  tr_summarize_output(grvarnavn = 'Tid')
-
-Samlet <- bind_cols(TabTidHF, TabTidRHF[,-1])
-reshID_rhf <- RegData[match(reshID, RegData$HFresh), "RHFresh"]
 
 #FLYTTEDE REGISTRERINGER:
 
