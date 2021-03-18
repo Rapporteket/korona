@@ -5,6 +5,10 @@ RegDataRaa <- KoronaDataSQL(datoFra = '2020-09-01')
 RegData <- KoronaPreprosesser(RegData = RegDataRaa, aggPers = 1)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
+
+
+unique(RegData[, c('HF',"ReshId", 'ShNavn')])
+
 tidsenhet='dag'
 datoFra <- '2020-01-01'
 datoTil <- Sys.Date()

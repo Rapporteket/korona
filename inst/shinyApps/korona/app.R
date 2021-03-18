@@ -1055,14 +1055,15 @@ server <- function(input, output, session) {
     rapbase::filterAutoRep(alleAutorapporter, by = 'package', pass = 'korona'),
     by = 'type', pass = 'dispatchment')
 
-  ider <- names(egneUts)
-  roller <- egneUts[[1]][['params']][[6]]$rolle
-  for (k in 2:length(ider)) {
-    roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
-  }
+  if (length(names(egneUts))!=0) {
+    ider <- names(egneUts)
+    roller <- vector() #egneUts[[1]][['params']][[6]]$rolle
+    for (k in 1:length(ider)) {
+      roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
+    }
   dispatchment$koblRoller <- cbind(id = ider,
                       Rolle = roller)
-
+  }
   ## observér og foreta endringer mens applikasjonen kjører
   observeEvent(input$addEmail, {
     dispatchment$email <- c(dispatchment$email, input$email)
@@ -1117,8 +1118,8 @@ server <- function(input, output, session) {
       by = 'type', pass = 'dispatchment')
 
     ider <- names(egneUts)
-    roller <- egneUts[[1]][['params']][[6]]$rolle
-    for (k in 2:length(ider)) {
+    roller <- vector()
+    for (k in 1:length(ider)) {
       roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
     }
     dispatchment$koblRoller <- cbind(id = ider,
@@ -1188,14 +1189,20 @@ server <- function(input, output, session) {
     }
   })
 
-  ## lag tabell over gjeldende status for utsending
+  ## lag tabell over gjeldende status for utsending - MÅ TA HØYDE FOR AT IKKE FINNES NOEN
+
   output$activeDispatchments <- DT::renderDataTable(
+    if (length(dispatchment$tab) != 0) { #(!is.na(dispatchment$koblRoller[1])) {
     merge(as.data.frame(dispatchment$tab), as.data.frame(dispatchment$koblRoller), by = 'id',
-          sort=F, all.x=T, all.y=F)[ ,c("Ansvarlig", "Rapport", "Datakilde", "Rolle", "Mottaker", "Periode", "Utløp", "Neste", "Endre", "Slett")],
+          sort=F, all.x=T, all.y=F)[ ,c("Ansvarlig", "Rapport", "Datakilde", "Rolle", "Mottaker",
+                                        "Periode", "Utløp", "Neste", "Endre", "Slett")]} else NULL,
     server = FALSE, escape = FALSE, selection = 'none',
     options = list(dom = 'tp', ordning = FALSE), #, columnDefs = list(list(visible = FALSE, targets = 9))
                    rownames = FALSE
+
     )
+
+
 
   ## ui: lag side som viser status for utsending, også når det ikke finnes noen
   output$dispatchmentContent <- renderUI({
