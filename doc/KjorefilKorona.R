@@ -725,7 +725,7 @@ Sjekk[order(Sjekk$PersonId, Sjekk$FormDate) ,c("PersonId", "FormDate", "FormDate
 
 
 
-#----------------- COVID, belastning på sykehus-------------------------------
+#----------------- COVID, belastning på sykehus SKDE-------------------------------
 library(korona)
 
 #data("belegg_ssb")
@@ -907,6 +907,7 @@ BeleggData <- rbind(as.matrix(LiggeDogn),
 
 write.table(BeleggData, file = 'BeleggData.csv', row.names = F, fileEncoding = 'UTF-8', sep = ';')
 
+#-------------Figur
 #dplyr::add_row(LiggeDogn, c('Landet', BeleggLandet))
 #LiggeDogn <- data.frame(LiggeDogn, c('Landet', BeleggLandet))
 
@@ -937,14 +938,34 @@ p <-
 # Use vars() to supply variables from the dataset:
 p + facet_grid(rows = vars(drv))
 
-
-
-
-
-
 belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
 belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
 belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
+
+
+
+#---NY RUNDE
+#Tabell, tot.liggetid pr.mnd og HF, tilsv liggetid på intensiv.
+
+datoTil <- '2020-12-31'
+KoroDataRaa <- KoronaDataSQL(datoTil = datoTil, koble=1)
+BeredskRaa <- intensivberedskap::NIRberedskDataSQL()
+datoFra <- min(as.Date(BeredskRaa$FormDate))
+IntDataRaa <- intensiv::NIRRegDataSQL(datoFra = datoFra, datoTil = datoTil) #Kun ferdigstilte intensivdata på Rapporteket
+#Felles variabler som skal hentes fra intensiv (= fjernes fra beredskap)
+varFellesInt <- c('DateAdmittedIntensive', 'DateDischargedIntensive',	'DaysAdmittedIntensiv',
+                  'DeadPatientDuring24Hours',	'MechanicalRespirator',	'RHF', 'TransferredStatus',
+                  'VasoactiveInfusion',	'MoreThan24Hours',	'Morsdato',
+                  'MovedPatientToAnotherIntensivDuring24Hours',	'PatientAge',	'PatientGender',
+                  'UnitId') # PatientInRegistryGuid', 'FormStatus', 'ShNavn',
+BeredRaa <- BeredskRaa[ ,-which(names(BeredskRaa) %in% varFellesInt)]
+BeredIntRaa <- merge(BeredRaa, IntDataRaa, suffixes = c('','Int'),
+                     by.x = 'HovedskjemaGUID', by.y = 'SkjemaGUID', all.x = F, all.y=F)
+IntDataPers <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredIntRaa, kobleInt = 1)
+IntDataPers$Int <- 1
+
+KoroIntKoblet <- merge(KoroDataPers, IntDataPers, suffixes = c('','Int'),
+                       by = 'PersonId', all.x = T, all.y=F)
 
 
 #FLYTTEDE REGISTRERINGER:
