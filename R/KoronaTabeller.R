@@ -80,8 +80,6 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
 }
 
 
-
-
 #' Status nå
 #' @param RegData pandemiskjema
 #' @return
