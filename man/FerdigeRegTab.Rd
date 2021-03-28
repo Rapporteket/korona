@@ -14,7 +14,7 @@ FerdigeRegTab(
 )
 }
 \arguments{
-\item{RegData}{beredskapsskjema}
+\item{RegData}{korona-registreringer}
 
 \item{valgtEnhet}{- gis ut fra resh}
 

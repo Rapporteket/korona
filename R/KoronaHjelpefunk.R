@@ -1,3 +1,44 @@
+#' Beregner og legger til variabel for reinnleggelse, ny innleggelse og overføring
+#' NB: Basert på opphold, ikke aggregerte tall!
+#'
+#' Reinn: ny innleggelse, def. >= 24t, uansett enhet
+#' Overf: overført, def. < 24t ikke samme enhet
+#'
+#' @param RegData Dataramme. RegData må inneholde Inntidspunkt, Uttidspunkt og PasientID
+#' @param PasientID variabelnavn for pasient-id
+#'
+#' @return Dataramme som inneholder de beregnede variablene
+#' @export
+#'
+LeggTilNyInnOverf <- function(RegData, PasientID='PasientID'){
+  N <- dim(RegData)[1]
+  RegData$PasientID <- RegData[ ,PasientID]
+  RegDataSort <- RegData[order(RegData$PasientID, RegData$InnTidspunkt,     #Denne tar mest tid
+                               RegData$UtTidspunkt), ]
+  RegDataSort$OpphNr <- as.numeric(ave(RegDataSort$PasientID, RegDataSort$PasientID, FUN=seq_along))
+  indPasFlereOpph <- which(RegDataSort$OpphNr>1) #intersect(which(RegDataSort$AntOpph>1), which(RegDataSort$OpphNr>1))
+  RegDataSort$TidUtInn <- NA
+  RegDataSort$TidUtInn[indPasFlereOpph] <-
+    difftime(as.POSIXlt(RegDataSort$InnTidspunkt[indPasFlereOpph], tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
+             as.POSIXlt(RegDataSort$UtTidspunkt[indPasFlereOpph-1], tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
+             units = 'hour')
+  RegDataSort$SmResh <- c(FALSE, RegDataSort$ReshId[2:N] == RegDataSort$ReshId[1:N-1])
+  # RegDataSort$Reinn <- 0 #Ikke reinnleggelse
+  # RegDataSort$Reinn[RegDataSort$TidUtInn<12 & RegDataSort$TidUtInn >= 0] <- 1 #Reinnleggelse
+  # RegDataSort$Reinn[!(RegDataSort$SmResh)] <- 0 #Bare reinnleggelse hvis samme resh
+
+  RegDataSort$Reinn <- 0 #Ikke ny innleggelse
+  RegDataSort$Reinn[RegDataSort$TidUtInn > 24 ] <- 1 #Ny innleggelse
+
+  RegDataSort$Overf <- 0 #Ikke overføring
+  RegDataSort$Overf[RegDataSort$TidUtInn >= 0 & RegDataSort$TidUtInn < 24 ] <- 1 #Overført
+  RegDataSort$Overf[(RegDataSort$SmResh)] <- 0 #Ikke overført hvis sm. resh
+return(RegDataSort)
+}
+
+
+
+
 #' Funksjon som produserer rapporten som skal sendes til mottager.
 #'
 #' @param rnwFil Navn på fila som skal kjøres. Angis uten ending (\emph{dvs uten  ".Rnw"})

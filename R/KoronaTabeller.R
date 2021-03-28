@@ -125,7 +125,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
 
 #' Ferdigstilte registreringer, utskrevne pasienter
-#' @param RegData beredskapsskjema
+#' @param RegData korona-registreringer
 #' @inheritParams KoronaUtvalg
 #' @return
 #' @export
@@ -139,9 +139,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   RegData <- Utvalg$RegData
 
   N <- dim(RegData)[1]
-indUreinn <- which(RegData$Reinn==0)
-  #LiggetidTot <- summary(RegData$LiggetidTot[indUreinn], na.rm = T)
-  Liggetid <- summary(RegData$Liggetid, na.rm = T)
+  Liggetid <- summary(as.numeric(RegData$Liggetid), na.rm = T)
   Alder <- summary(RegData$Alder, na.rm = T)
   BMI <- summary(RegData$BMI[RegData$BMI<60]) #Filtrerer bort de med BMI over 60
   AntReinn <- sum(RegData$Reinn, na.rm = T)
@@ -156,10 +154,8 @@ indUreinn <- which(RegData$Reinn==0)
     c(sprintf('%.1f',x[4]), sprintf('%.1f',x[3]), paste(sprintf('%.1f',x[2]), sprintf('%.1f',x[5]), sep=' - '))
   }
   formatPst <- function(x, antDes){paste0(sprintf(paste0('%.', antDes,'f'),x),'%')}
-  #formatPst(2.343, 1)
 
   TabFerdigeReg <- rbind(
-    #  'Liggetid u/reinn (døgn)' = c(med_IQR(LiggetidTot), length(indUreinn), ''),
     'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'BMI' = c(med_IQR(BMI), N, ''),
@@ -168,7 +164,7 @@ indUreinn <- which(RegData$Reinn==0)
     'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
   TabFerdigeReg[4:6,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:6,5])),' %')
-  colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall pasienter', 'Andel pasienter')
+  colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall opphold', 'Andel pasienter')
 
   xtable::xtable(TabFerdigeReg,
                  digits=0,

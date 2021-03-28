@@ -21,15 +21,21 @@ IntData <- NIRRegDataSQL(datoFra=datoFra, datoTil=datoTil)
 table(KoroData$OverfortAnnetSykehusInnleggelse)
 table(KoroData$OverfortAnnetSykehusUtskrivning)
 
+#Legger til reinnleggelser osv
+KoroData <- LeggTilNyInnOverf(RegData=KoroData, PasientID='PasientID')
+table(KoroData$Overf)
+# test <- RegDataSort[sort(unique(c(indPasFlereOpph, indPasFlereOpph-1))),
+#                     c("PasientID", "OpphNr","Reinn","NyInn", "TidUtInn","InnTidspunkt", "UtTidspunkt", "ReshId")]
+
 #Alle koronapasienter pr HF :
 #FerdigeRegTab pas -> opph.
 #Inneholder: liggetid, alder, BMI, om pasienten har risikofaktorer, andel reinnleggelse (>24t),
 #andel døde + andel isolert ved innleggelse (kval.ind), antall pasienter
+RegData <- KoroData
 
-TabFerdig <- FerdigeRegTab(RegData=KoroData)
+TabFerdig <- FerdigeRegTab(RegData=KoroData)$Tab
                            # valgtEnhet=enh,
                            # enhetsNivaa = 'HF')
-
 
 
 
