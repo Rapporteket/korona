@@ -148,6 +148,8 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   NrisikoKjent <- sum(RegData$KjentRisikofaktor %in% 1:2, na.rm=T)
   Nrisiko <- sum(RegData$KjentRisikofaktor==1, na.rm=T)
   pstRisiko <- 100*Nrisiko/NrisikoKjent
+  AntBered <- sum(RegData$BeredPas)
+  PstBered <- 100*AntBered/N
 
   med_IQR <- function(x){
     #x[is.na(x)]<-0
@@ -161,9 +163,10 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
     'BMI' = c(med_IQR(BMI), N, ''),
     'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
     'Ny innleggelse (>24t)' = c('','','', AntReinn, PstReinn),
+    'Intensivbehandlet' = c('','','', AntBered, PstBered),
     'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
-  TabFerdigeReg[4:6,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:6,5])),' %')
+  TabFerdigeReg[4:7,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:7,5])),' %')
   colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall pasienter', 'Andel pasienter')
 
   xtable::xtable(TabFerdigeReg,
