@@ -164,13 +164,13 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
     'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
   TabFerdigeReg[4:6,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:6,5])),' %')
-  colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall opphold', 'Andel pasienter')
+  colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall pasienter', 'Andel pasienter')
 
   xtable::xtable(TabFerdigeReg,
                  digits=0,
                  align = c('l','r','r','c', 'r','r'),
                  caption='Ferdigstilte opphold.
-                 IQR (Inter quartile range) - 50% av oppholdene er i dette intervallet.')
+                 IQR (Inter quartile range) - 50% av registreringene er i dette intervallet.')
   return(invisible(UtData <- list(Tab=TabFerdigeReg,
                                   utvalgTxt = Utvalg$utvalgTxt,
                                   Ntest=N)))

@@ -15,17 +15,19 @@ KoroData <- KoronaDataSQL(datoTil = datoTil)
 KoroData <- KoronaPreprosesser(RegData = KoroData[KoroData$ArsakInnleggelse==1, ], aggPers = 0)
 IntData <- NIRRegDataSQL(datoFra=datoFra, datoTil=datoTil)
 
-#OverfortAnnetSykehusInnleggelse:
-#Ble pasienten overført fra et annet sykehus til dette sykehuset ved innleggelse?
-#1,2,3: Ja, Nei, Ukjent
-table(KoroData$OverfortAnnetSykehusInnleggelse)
-table(KoroData$OverfortAnnetSykehusUtskrivning)
 
 #Legger til reinnleggelser osv
 KoroData <- LeggTilNyInnOverf(RegData=KoroData, PasientID='PasientID')
 table(KoroData$Overf)
 # test <- RegDataSort[sort(unique(c(indPasFlereOpph, indPasFlereOpph-1))),
 #                     c("PasientID", "OpphNr","Reinn","NyInn", "TidUtInn","InnTidspunkt", "UtTidspunkt", "ReshId")]
+#OverfortAnnetSykehusInnleggelse:
+#Ble pasienten overført fra et annet sykehus til dette sykehuset ved innleggelse?
+#1,2,3: Ja, Nei, Ukjent
+table(KoroData$OverfortAnnetSykehusInnleggelse)
+table(KoroData$OverfortAnnetSykehusUtskrivning)
+ test <- KoroData[KoroData$OpphNr>1,
+                  c("PasientID", "OpphNr","Reinn","Overf", 'OverfortAnnetSykehusInnleggelse', "TidUtInn","InnTidspunkt", "UtTidspunkt", "ReshId")]
 
 #Alle koronapasienter pr HF :
 #FerdigeRegTab pas -> opph.
@@ -33,9 +35,15 @@ table(KoroData$Overf)
 #andel døde + andel isolert ved innleggelse (kval.ind), antall pasienter
 RegData <- KoroData
 
-TabFerdig <- FerdigeRegTab(RegData=KoroData)$Tab
-                           # valgtEnhet=enh,
-                           # enhetsNivaa = 'HF')
+HFer <- unique(KoroData$HF)
+for (enh in HFer) {
+Nokkeltall <- FerdigeRegTab(RegData=KoroData,
+                            valgtEnhet=enh,
+                            enhetsNivaa = 'HF')$Tab
+print(xtable::xtable(Nokkeltall, align=c('l','r','r','c','r','r'),
+               #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+               caption=paste0('Nøkkeltall for ', enh)))
+}
 
 
 

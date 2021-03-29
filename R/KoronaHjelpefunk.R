@@ -31,7 +31,7 @@ LeggTilNyInnOverf <- function(RegData, PasientID='PasientID'){
   RegDataSort$Reinn[RegDataSort$TidUtInn > 24 ] <- 1 #Ny innleggelse
 
   RegDataSort$Overf <- 0 #Ikke overføring
-  RegDataSort$Overf[RegDataSort$TidUtInn >= 0 & RegDataSort$TidUtInn < 24 ] <- 1 #Overført
+  RegDataSort$Overf[RegDataSort$TidUtInn > -2 & RegDataSort$TidUtInn < 24 ] <- 1 #Overført
   RegDataSort$Overf[(RegDataSort$SmResh)] <- 0 #Ikke overført hvis sm. resh
 return(RegDataSort)
 }
