@@ -7,9 +7,9 @@ Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
 
 #Påkoblet beredskap
-RegData <- KoroData
-RegData <- KoronaUtvalg(RegData=RegData, aarsakInn = 1)$RegData #alle opphold pga korona
-prop.table(table(RegData$BeredPas, RegData$Aar), margin = 2)
+KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleBered = 1)
+KoronaFigAndelTid(RegData=KoroIntData)
+
 
 unique(RegData[, c('HF',"ReshId", 'ShNavn')])
 

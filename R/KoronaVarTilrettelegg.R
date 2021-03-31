@@ -20,9 +20,7 @@
 
 KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype='andeler'){
       #, datoFra='2011-01-01', datoTil='3000-12-31',
-      #		minald=0, maxald=110, erMann='',InnMaate='', dodInt='',outfile='',
-      #		preprosess=1, hentData=0, reshID, enhetsUtvalg=1)
-
+      #		minald=0, maxald=110, erMann='',InnMaate='',
 
       "%i%" <- intersect
 
@@ -76,7 +74,44 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
               xAkseTxt <- 'Aldersgrupper (år)'}
             sortAvtagende <- FALSE
       }
+      if (valgtVar=='alder_u18') {	#AndelGrVar/Tid
+        RegData <- RegData[which(RegData$Alder>=0), ]    #Tar bort alder<0
+        RegData$Variabel[RegData$Alder < 18] <- 1
+        tittel <- 'Innlagte under 18 år'
+        varTxt <- 'barn'
+      }
 
+      if (valgtVar=='alder_u40') {	#AndelGrVar/Tid
+        RegData <- RegData[which(RegData$Alder>=0), ]    #Tar bort alder<0
+        RegData$Variabel[RegData$Alder < 40] <- 1
+        tittel <- 'Innlagte under 40 år'
+        varTxt <- 'under 40 år'
+      }
+      if (valgtVar=='alder_o60') {	#AndelGrVar/Tid
+        RegData <- RegData[which(RegData$Alder>=0), ]    #Tar bort alder<0
+        RegData$Variabel[RegData$Alder >= 60] <- 1
+        tittel <- 'Innlagte over 60 år'
+        varTxt <- 'over 60 år'
+      }
+
+      if (valgtVar=='isolertInn') {	#AndelGrVar/Tid
+        RegData <- RegData[which(RegData$Isolert %in% 1:2), ]    #Tar bort ukjente
+        RegData$Variabel[RegData$Isolert == 1] <- 1
+        tittel <- 'Isolert ved innleggelse'
+        varTxt <- 'isolerte'
+      }
+      if (valgtVar=='beredPas') {	#AndelGrVar/Tid
+        RegData <- RegData[which(RegData$BeredPas %in% 0:1), ]    #Tar bort ukjente
+        RegData$Variabel <- RegData$BeredPas
+        tittel <- 'Intensivpasienter'
+        varTxt <- 'intensivinnlagte'
+      }
+      if (valgtVar=='dodSh') {	#AndelGrVar/Tid
+        RegData <- RegData[which(RegData$StatusVedUtskriving %in% 1:2), ]    #Tar bort ukjente
+        RegData$Variabel[RegData$StatusVedUtskriving == 2] <- 1
+        tittel <- 'Død på sykehus'
+        varTxt <- 'døde'
+      }
 
       if (valgtVar == 'liggetid') { #Andeler #GjsnGrVar
             #Liggetid bare >0
