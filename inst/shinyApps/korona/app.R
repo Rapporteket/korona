@@ -349,7 +349,7 @@ ui <- tagList(
                                       choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
                           selectInput(inputId = "tidsenhetAndel", label="Velg tidsenhet",
                                       choices = rev(c('År'= 'Aar', 'Halvår' = 'Halvaar',
-                                                      'Kvartal'='Kvartal', 'Måned'='Mnd')))
+                                                      'Kvartal'='Kvartal', 'Måned'='Mnd'))),
                           br(),
                           actionButton("tilbakestillValgAndel", label="Tilbakestill valg"),
                           br()
