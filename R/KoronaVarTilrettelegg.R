@@ -116,7 +116,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       if (valgtVar == 'liggetid') { #Andeler #GjsnGrVar
             #Liggetid bare >0
         #indUreinn <- which(RegData$Reinn==0)
-            RegData$Variabel  <- as.numeric(RegData$Liggetid)
+            #RegData$Liggetid  <- as.numeric(RegData$Liggetid)
             RegData <- RegData[which(RegData$Liggetid>0 & RegData$Reinn==0 & RegData$FormStatusUt==2), ]
             tittel <- 'Liggetid, utskrevne uten reinnlagte'
             #if (figurtype %in% c('gjsnGrVar', 'gjsnTid')) {tittel <- 'liggetid'}

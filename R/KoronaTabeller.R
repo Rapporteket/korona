@@ -148,6 +148,9 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   NrisikoKjent <- sum(RegData$KjentRisikofaktor %in% 1:2, na.rm=T)
   Nrisiko <- sum(RegData$KjentRisikofaktor==1, na.rm=T)
   pstRisiko <- 100*Nrisiko/NrisikoKjent
+  NisolertKjent <- sum(RegData$Isolert %in% 1:2, na.rm=T)    #Tar bort ukjente
+  Nisolert <- sum(RegData$Isolert == 1, na.rm=T)
+  pstIsolert <- 100*Nisolert/NisolertKjent
   AntBered <- sum(RegData$BeredPas)
   PstBered <- 100*AntBered/N
 
@@ -162,12 +165,15 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'BMI' = c(med_IQR(BMI), N, ''),
     'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
+    'Isolert ved innleggelse' = c('','','', Nisolert, pstIsolert),
     'Ny innleggelse (>24t)' = c('','','', AntReinn, PstReinn),
     'Intensivbehandlet' = c('','','', AntBered, PstBered),
     'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
-  TabFerdigeReg[4:7,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:7,5])),' %')
+  TabFerdigeReg[4:8,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:8,5])),' %')
   colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall pasienter', 'Andel pasienter')
+
+  AntPas <- length(unique(RegData$PersonId))
 
   xtable::xtable(TabFerdigeReg,
                  digits=0,
@@ -176,7 +182,8 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                  IQR (Inter quartile range) - 50% av registreringene er i dette intervallet.')
   return(invisible(UtData <- list(Tab=TabFerdigeReg,
                                   utvalgTxt = Utvalg$utvalgTxt,
-                                  Ntest=N)))
+                                  Ntest=N,
+                                  AntPas=AntPas)))
 }
 
 

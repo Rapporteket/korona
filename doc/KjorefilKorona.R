@@ -5,6 +5,11 @@ RegDataRaa <- KoronaDataSQL(datoFra = '2020-09-01')
 RegData <- KoronaPreprosesser(RegData = RegDataRaa, aggPers = 1)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
+DataBeredRaa <- NIRberedskDataSQL()
+DataBered <- NIRPreprosessBeredsk(DataBeredRaa)
+
+PasientID == "4442C54B-848C-EB11-A970-00155D0B4E21"
+RegData[RegData$PatientInRegistryGuid == "4442C54B-848C-EB11-A970-00155D0B4E21",]
 
 #Påkoblet beredskap
 KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleBered = 1)

@@ -128,7 +128,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0)	#, resh
    #inneliggereInd <- is.na(RegData$UtDato)
    #Inneliggende <- length(unique(RegData$PatientInRegistryGuid[inneliggereInd]))
 
-   RegData$Liggetid = difftime(RegData$Utskrivningsdato, RegData$FormDate, units = "days") #Bare for utskrevne pasienter
+   RegData$Liggetid = as.numeric(difftime(RegData$Utskrivningsdato, RegData$FormDate, units = "days")) #Bare for utskrevne pasienter
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
