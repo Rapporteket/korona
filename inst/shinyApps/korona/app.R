@@ -836,6 +836,28 @@ server <- function(input, output, session) {
                      session = session)
   }, height=700, width=700 #height = function() {session$clientData$output_fordelinger_width}
   )
+  output$LastNedFigFord <- downloadHandler(
+    filename = function(){
+      paste0('FordelingsFigur', valgtVar=input$valgtVarFord, '_', Sys.time(), '.', input$bildeformatFord)
+    },
+
+    content = function(file){
+      KoronaFigAndeler(RegData=KoroData,
+                       valgtVar=input$valgtVarFord,
+                       valgtEnhet = input$valgtEnhetRes,
+                       datoFra=input$valgtDatoRes[1],
+                       datoTil=input$valgtDatoRes[2],
+                       enhetsNivaa= egetEnhetsNivaa,
+                       enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
+                       dodSh=as.numeric(input$dodShRes),
+                       aarsakInn = as.numeric(input$aarsakInnRes),
+                       erMann=as.numeric(input$erMannRes),
+                       skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                       kjemastatusUt=as.numeric(input$skjemastatusUtRes),
+                       session = session,
+                       outfile = file)
+    }
+  )
 
   observe({
     UtDataFord <- KoronaFigAndeler(RegData=KoroData,
@@ -855,28 +877,6 @@ server <- function(input, output, session) {
 
     tab <- lagTabavFigFord(UtDataFraFig = UtDataFord)
 
-    output$LastNedFigFord <- downloadHandler(
-      filename = function(){
-        paste0('FordelingsFigur', valgtVar=input$valgtVarFord, '_', Sys.time(), '.', input$bildeformatFord)
-      },
-
-      content = function(file){
-        KoronaFigAndeler(RegData=KoroData,
-                         valgtVar=input$valgtVarFord,
-                         valgtEnhet = input$valgtEnhetRes,
-                         datoFra=input$valgtDatoRes[1],
-                         datoTil=input$valgtDatoRes[2],
-                         enhetsNivaa= egetEnhetsNivaa,
-                         enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
-                         dodSh=as.numeric(input$dodShRes),
-                         aarsakInn = as.numeric(input$aarsakInnRes),
-                         erMann=as.numeric(input$erMannRes),
-                         skjemastatusInn=as.numeric(input$skjemastatusInnRes),
-                         kjemastatusUt=as.numeric(input$skjemastatusUtRes),
-                         session = session,
-                         outfile = file)
-      }
-    )
 
     output$tittelFord <- renderUI({
       tagList(
