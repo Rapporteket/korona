@@ -13,6 +13,23 @@ datoFra1aar <- '2020-01-01'
 #Analyser baseres på opphold. Kun de med Covid som hovedårsak til innleggelse.
 #Alle pandemidata for 2020 er nå ferdigstilte
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
+Inklusjon <- read.table('A:/Pandemi/InklusjonSkjemaDataContract2021-04-05', sep=';',
+                                    stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+# KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-06-11 09-29-30.txt', sep=';',
+#                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+# KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
+# KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-06-11 09-29-30.txt', sep=';',
+#                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+# names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
+# BeredData <-  read.table('I:/nir/ReadinessFormDataContract2020-06-11 09-31-13.txt', sep=';',
+#                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+# BeredData$EcmoEnd[BeredData$EcmoEnd == ""] <- NA
+# BeredData$EcmoStart[BeredData$EcmoStart == ""] <- NA
+# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
+#            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
+# KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+#                      by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+
 KoroData <- KoronaPreprosesser(RegData = KoroDataRaa[KoroDataRaa$ArsakInnleggelse==1, ], aggPers = 0)
 BeredDataRaa <- NIRberedskDataSQL()
 BeredData <- NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 0)
