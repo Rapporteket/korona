@@ -120,6 +120,10 @@ ui <- tagList(
                                     selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
                                                choices = aarsakInnValg
                                     ),
+                                   dateRangeInput(inputId = "valgtDato", label = "Tidsperiode",
+                                                  start = startDato, end = Sys.Date(),
+                                                  separator="t.o.m.", language="nb"),
+
                                    selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
                                                choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                    ),
@@ -142,9 +146,6 @@ ui <- tagList(
                                                label = "Velg format for nedlasting av figur",
                                                choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg'))
 
-                                   # dateRangeInput(inputId = 'datovalg', start = startDato, end = idag,
-                                   #                label = "Tidsperiode", separator="t.o.m.", language="nb" #)
-                                   # ),
                       ),
                       mainPanel(width = 9,
                                 shinyalert::useShinyalert(),
@@ -314,7 +315,7 @@ ui <- tagList(
                                       choices = c("Alder under 18 år"='alder_u18',
                                                   "Alder under 40 år"='alder_u40',
                                                   "Alder over 60 år"='alder_o60',
-                                                  # 'Covid-19 hovedårsak til innleggelse?' = 'aarsakInn4kat',
+                                                  "Alder over 80 år"='alder_o80',
                                                   "Isolert ved ankomst" = 'isolertInn',
                                                   'Intensivpasient' = 'beredPas',
                                                   'Døde' = 'dodSh'
@@ -718,6 +719,8 @@ server <- function(input, output, session) {
     TabFerdig <- FerdigeRegTab(RegData=KoroData,
                                aarsakInn = as.numeric(input$aarsakInn),
                                valgtEnhet=input$valgtEnhet,
+                               datoFra=input$valgtDato[1],
+                               datoTil=input$valgtDato[2],
                                enhetsNivaa = egetEnhetsNivaa,
                                dodSh=as.numeric(input$dodSh),
                                erMann=as.numeric(input$erMann))
@@ -734,6 +737,8 @@ server <- function(input, output, session) {
     RisikoTab <- RisikoInnTab(RegData=KoroData,
                               valgtEnhet= input$valgtEnhet,
                               enhetsNivaa = egetEnhetsNivaa,
+                              datoFra=input$valgtDato[1],
+                              datoTil=input$valgtDato[2],
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               dodSh=as.numeric(input$dodSh),
                               aarsakInn = as.numeric(input$aarsakInn),
@@ -767,9 +772,12 @@ server <- function(input, output, session) {
     renderPlot({korona::AlderKjFig(RegData=KoroData,
                                    valgtEnhet= input$valgtEnhet,
                                    enhetsNivaa = egetEnhetsNivaa,
+                                   datoFra=input$valgtDato[1],
+                                   datoTil=input$valgtDato[2],
                                    dodSh=as.numeric(input$dodSh),
                                    aarsakInn = as.numeric(input$aarsakInn),
-                                   skjemastatusInn=as.numeric(input$skjemastatusInn))
+                                   skjemastatusInn=as.numeric(input$skjemastatusInn)
+                                   )
     }, width = 500, height = 500)
   #} else {     renderText('Få registreringer (N<5)')}
 
@@ -781,6 +789,8 @@ server <- function(input, output, session) {
       korona::AlderKjFig(RegData=KoroData,
                          valgtEnhet= input$valgtEnhet,
                          enhetsNivaa = egetEnhetsNivaa,
+                         datoFra=input$valgtDato[1],
+                         datoTil=input$valgtDato[2],
                          dodSh=as.numeric(input$dodSh),
                          aarsakInn = as.numeric(input$aarsakInn),
                          skjemastatusInn=as.numeric(input$skjemastatusInn),
@@ -798,6 +808,8 @@ server <- function(input, output, session) {
       Tabell <- korona::AlderKjFig(RegData=KoroData,
                                    valgtEnhet= input$valgtEnhet,
                                    enhetsNivaa = egetEnhetsNivaa,
+                                   datoFra=input$valgtDato[1],
+                                   datoTil=input$valgtDato[2],
                                    dodSh=as.numeric(input$dodSh),
                                    aarsakInn = as.numeric(input$aarsakInn),
                                    skjemastatusInn=as.numeric(input$skjemastatusInn),

@@ -93,6 +93,12 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         tittel <- 'Innlagte over 60 år'
         varTxt <- 'over 60 år'
       }
+      if (valgtVar=='alder_o80') {	#AndelGrVar/Tid
+        RegData <- RegData[which(RegData$Alder>=0), ]    #Tar bort alder<0
+        RegData$Variabel[RegData$Alder >= 80] <- 1
+        tittel <- 'Innlagte over 80 år'
+        varTxt <- 'over 80 år'
+      }
 
       if (valgtVar=='isolertInn') {	#AndelGrVar/Tid
         RegData <- RegData[which(RegData$Isolert %in% 1:2), ]    #Tar bort ukjente

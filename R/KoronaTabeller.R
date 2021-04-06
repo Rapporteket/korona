@@ -130,10 +130,11 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' @return
 #' @export
 FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
-                          aarsakInn=9, erMann=9, dodSh=9){
+                          datoFra='2020-03-01', datoTil=Sys.Date(), aarsakInn=9, erMann=9, dodSh=9){
 
   Utvalg <- KoronaUtvalg(RegData=RegData,
                          valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa,
+                         datoFra = datoFra, datoTil = datoTil,
                          aarsakInn=aarsakInn, erMann = erMann, dodSh = dodSh,
                          skjemastatusInn=2, skjemastatusUt = 2)
   RegData <- Utvalg$RegData
@@ -193,12 +194,12 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' @inheritParams KoronaUtvalg
 #' @export
 #' @return
-RisikoInnTab <- function(RegData, datoTil=Sys.Date(),
+RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
                          erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
                          valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
-  UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann,
-                         skjemastatusInn=skjemastatusInn, dodSh=dodSh,
+  UtData <- KoronaUtvalg(RegData=RegData, datoFra=datoFra, datoTil=datoTil,
+                         erMann=erMann, skjemastatusInn=skjemastatusInn, dodSh=dodSh,
                          minald=minald, maxald=maxald, aarsakInn=aarsakInn,
                          valgtEnhet=valgtEnhet, enhetsNivaa = enhetsNivaa)
 
