@@ -33,6 +33,7 @@ KoroData <- KoronaPreprosesser(RegData = KoroDataRaa[KoroDataRaa$ArsakInnleggels
 BeredDataRaa <- NIRberedskDataSQL()
 BeredData <- NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 0)
 #Kobler pandemi og beredskap:
+#FEIL!!! Kan bare brukes for personaggregerte data. Må også ta hensyn til innleggelsestidspunkt.
 KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F,
                   suffixes = c("", "Bered"), by = 'PersonId')
 KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
@@ -99,7 +100,9 @@ test <- KoroData[,c('OverfortAnnetSykehusInnleggelse', 'OverfortAnnetSykehusUtsk
 #                     c("PasientID", "OpphNr","Reinn","NyInn", "TidUtInn","InnTidspunkt", "UtTidspunkt", "ReshId")]
 #OverfortAnnetSykehusInnleggelse:
 #Ble pasienten overført fra et annet sykehus til dette sykehuset ved innleggelse?#1,2,3: Ja, Nei, Ukjent
-# table(KoroData$OverfortAnnetSykehusInnleggelse)
-# table(KoroData$OverfortAnnetSykehusUtskrivning)
-#  test <- KoroData[KoroData$OpphNr>1,
-#                   c("PasientID", "OpphNr","Reinn","Overf", 'OverfortAnnetSykehusInnleggelse', "TidUtInn","InnTidspunkt", "UtTidspunkt", "ReshId")]
+table(KoroData$OverfortAnnetSykehusInnleggelse)
+table(KoroData$OverfortAnnetSykehusUtskrivning)
+table(KoroData$Overf)
+
+ test <- KoroData[KoroData$OpphNr>1,
+                  c("PasientID", "OpphNr","Reinn","Overf", 'OverfortAnnetSykehusInnleggelse', "TidUtInn","InnTidspunkt", "UtTidspunkt", "ReshId")]
