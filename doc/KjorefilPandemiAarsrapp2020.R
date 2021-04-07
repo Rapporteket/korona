@@ -1,12 +1,6 @@
 #  FIGURER OG TABELLER TIL ÅRSRAPPORT, NiPar, Pandemi-data
 
 setwd('/home/rstudio/korona/Aarsrapport')
-library(intensiv)
-library(intensivberedskap)
-library(korona)
-datoFra <- '2020-01-01' #Vi har pandemi fra 1.mars..
-datoTil <- '2020-12-31'	#
-datoFra1aar <- '2020-01-01'
 
 #--------Klargjøre data-----------
 #Analyser baseres på opphold. Kun de med Covid som hovedårsak til innleggelse.
@@ -28,20 +22,44 @@ datoFra1aar <- '2020-01-01'
 #            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
 # KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
 #                      by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+library(intensiv)
+library(intensivberedskap)
+library(korona)
+datoFra <- '2020-01-01' #Vi har pandemi fra 1.mars..
+datoTil <- '2020-12-31'	#
+datoFra1aar <- '2020-01-01'
+
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
-KoroData <- KoronaPreprosesser(RegData = KoroDataRaa[KoroDataRaa$ArsakInnleggelse==1, ], aggPers = 0)
+KoroDataPre <- KoronaPreprosesser(RegData = KoroDataRaa[KoroDataRaa$ArsakInnleggelse==1, ], aggPers = 0)
 BeredDataRaa <- NIRberedskDataSQL()
 BeredData <- NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 0)
 #Kobler pandemi og beredskap:
 #FEIL!!! Kan bare brukes for personaggregerte data. Må også ta hensyn til innleggelsestidspunkt.
-KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F,
-                  suffixes = c("", "Bered"), by = 'PersonId')
-KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+# KoroData <- merge(KoroDataPre, BeredData, all.x = T, all.y = F,
+#                   suffixes = c("", "Bered"), by = 'PersonId')
+
+#Hvilke pandemiskjema har beredskapsskjema?
+Kobl <- merge(KoroDataPre[,c("PersonId","SkjemaGUID")], #, "InnTidspunkt", "UtTidspunkt" )],
+              BeredData[,c("PersonId", "SkjemaGUID")], #"Innleggelsestidspunkt", "DateDischargedIntensive")],
+              all.x = T, all.y = F,
+              suffixes = c("", "Bered"), by = 'PersonId')
+KoblRed <- Kobl %>% group_by(SkjemaGUID) %>%
+  summarise(SkjemaGUID = SkjemaGUID[1],
+    BeredPas = ifelse(sum(!is.na(SkjemaGUIDBered))>0 ,1 ,0)
+    )
+
+#KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+KoroData <- merge(KoroDataPre, KoblRed, by = 'SkjemaGUID')
+
+
 
 #Legger til reinnleggelser osv
 KoroData <- LeggTilNyInnOverf(RegData=KoroData, PasientID='PasientID')
 
-
+table(KoroData$Overf)
+table(KoroData$OverfortAnnetSykehusInnleggelse)
+table(KoroData$OverfortAnnetSykehusUtskrivning)
+KoroData[KoroData$Overf==1,c('Overf', 'OverfortAnnetSykehusInnleggelse', 'OverfortAnnetSykehusUtskrivning')]
 
 #------------Alle koronapasienter pr HF---------
 #FerdigeRegTab pas -> opph.

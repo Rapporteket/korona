@@ -74,6 +74,7 @@ varPandemiInn <- c('Inn.SkjemaGUID
   ,Inn.MunicipalNumber
   ,Inn.NedsattimmunHIV
   ,Inn.NerkontaktCovid
+  ,Inn.Nir_beredskapsskjema_CoV2
   ,Inn.Nyresykdom
   ,Inn.Oksygenmetning
   ,Inn.OkysgenmetningUkjent
