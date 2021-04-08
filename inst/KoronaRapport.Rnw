@@ -26,12 +26,8 @@ library(korona) #inkluderer tidyverse
 library(lubridate)
 library(xtable)
 library(kableExtra)
-#forHvem <- ifelse(valgtEnhet=='Alle', 'hele landet', valgtEnhet)
+
 forHvem <- ifelse(rolle=='SC', 'hele landet', valgtEnhet)
-# forHvem <- switch(rolle,
-#                   SC = 'hele landet',
-#                   LC = valgtEnhet,
-#                   LU = valgtEnhet)
 Tittel <- paste0('Koronainnlagte, ', forHvem)
 @
 
@@ -75,18 +71,19 @@ PandemiOpphAlleInnlEgen <-  KoronaUtvalg(RegData=PandemiOpph,
 PandemiOpph <-  PandemiOpphAlleInnlEgen[PandemiOpphAlleInnlEgen$ArsakInnleggelse==1, ]
 PandemiOpph$EnhNivaaVis <- as.factor(PandemiOpph$EnhNivaaVis)
 
-#Innparametre:  enhetsNivaa, valgtEnhet, rolle?
-  #Filtreringsnivå for data:
-  #enhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
-  #valgtEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
-
-#Dobbeltprogrammering - forenkle?
+#Innparametre:  enhetsNivaa, valgtEnhet, rolle
 #Personaggregerte data
 Pandemi <- KoronaPreprosesser(Pandemi)
 Pandemi$EnhNivaaVis <- switch(as.character(rolle),
                                 'SC' = Pandemi$RHF,
                                 'LC' = Pandemi$HF,
                                 'LU' = Pandemi$ShNavn)
+BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
+#Kobler pandemi og beredskap:
+Pandemi <- merge(Pandemi, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
+                     by = 'PersonId')
+Pandemi  <- Pandemi %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
 
 PandemiLandet <- KoronaUtvalg(RegData=Pandemi, aarsakInn = 2)$RegData
 PandemiAlleInnlEgen <-  KoronaUtvalg(RegData=Pandemi,
@@ -249,7 +246,7 @@ xtable::xtable(BeleggTab[fra:AntRader, ], digits=1, #-which(names(AntRader)=='He
 
 %I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 <<'RegRHF', results='asis'>>=
-AntTab <- antallTidEnhTab(RegData=PandemiLandet, tilgangsNivaa=rolle, #nivå avgjort av rolle
+AntTab <- antallTidEnhTab(RegData=PandemiOpph , tilgangsNivaa=rolle, #nivå avgjort av rolle #PandemiLandet
                               valgtEnhet= valgtEnhet)$Tab_tidy #, HF = 1
 
 #\resizebox function or

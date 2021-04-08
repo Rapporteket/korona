@@ -9,7 +9,7 @@
 #'
 #' @export
 #'
-KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
+KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0)	#, reshID=reshID)
 {
    # Endre variabelnavn:
    names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
@@ -128,7 +128,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1)	#, reshID=reshID)
    #inneliggereInd <- is.na(RegData$UtDato)
    #Inneliggende <- length(unique(RegData$PatientInRegistryGuid[inneliggereInd]))
 
-   RegData$Liggetid = difftime(RegData$Utskrivningsdato, RegData$FormDate, units = "days") #Bare for utskrevne pasienter
+   RegData$Liggetid = as.numeric(difftime(RegData$Utskrivningsdato, RegData$FormDate, units = "days")) #Bare for utskrevne pasienter
 
 
    #------SLÅ SAMMEN TIL PER PASIENT
@@ -344,7 +344,7 @@ if (aggPers == 1) {
       RegData$MndAar <- format(RegData$InnTidspunkt, '%b%y')
       RegData$Kvartal <- ceiling(RegData$MndNum/3)
       RegData$Halvaar <- ceiling(RegData$MndNum/6)
-      RegData$Aar <- format(RegData$InnDato, '%Y')
+      RegData$Aar <- as.numeric(format(RegData$InnDato, '%Y'))
       RegData$UkeNr <- format(RegData$InnDato, '%V')
       #RegData$UkeAar <- format(RegData$InnDato, '%G.%V') #%G -The week-based year, %V - Week of the year as decimal number (01–53) as defined in ISO 8601
       #RegData$UkeAar <- as.factor(RegData$UkeAar)
@@ -352,6 +352,18 @@ if (aggPers == 1) {
       RegData$Dag <- factor(format(RegData$InnDato, '%d.%m.%y'),
                             levels = format(seq(min(RegData$InnDato), max(RegData$InnDato), by="day"), '%d.%m.%y'))
       RegData$InnDag <- RegData$InnDato
+
+      if (kobleBered==1){
+         if (aggPers==0) {stop('Kan bare koble til beredskapsskjema for aggregerte data')}
+         BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+         BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
+         RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
+                           by = 'PersonId')
+         RegData  <- RegData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+
+      }
+
+
 
       ##Kode om  pasienter som er overført til/fra egen avdeling til "ikke-overført"
       #1= ikke overført, 2= overført
