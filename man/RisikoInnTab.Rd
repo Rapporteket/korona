@@ -6,6 +6,7 @@
 \usage{
 RisikoInnTab(
   RegData,
+  datoFra = "2020-03-01",
   datoTil = Sys.Date(),
   erMann = "",
   skjemastatusInn = 9,
@@ -19,6 +20,8 @@ RisikoInnTab(
 }
 \arguments{
 \item{RegData}{data}
+
+\item{datoFra}{startdato 'yyyy-mm-dd'}
 
 \item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
