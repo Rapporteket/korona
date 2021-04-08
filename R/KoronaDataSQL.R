@@ -108,23 +108,23 @@ varPandemiInn <- c('Inn.SkjemaGUID
   ,Inn.Trombocytter
   ,Inn.TrombocytterUkjent
   ,Inn.UnitId
-  ,Inn.UtsAkuttNyresvikt
-  ,Inn.UtsAkuttRespirasjonsvikt
-  ,Inn.UtsAkuttSirkulasjonsvikt
-  ,Inn.UtsAminoglykosid
-  ,Inn.UtsAndreGencefalosporin
-  ,Inn.UtsAntibiotika
-  ,Inn.UtsAntibiotikaAnnet
-  ,Inn.UtsAntibiotikaUkjent
-  ,Inn.UtsAntifungalbehandling
-  ,Inn.UtsAntiviralBehandling
-  ,Inn.UtsKarbapenem
-  ,Inn.UtsKinolon
+--  ,Inn.UtsAkuttNyresvikt
+--    ,Inn.UtsAkuttRespirasjonsvikt
+--    ,Inn.UtsAkuttSirkulasjonsvikt
+--    ,Inn.UtsAminoglykosid
+--    ,Inn.UtsAndreGencefalosporin
+--    ,Inn.UtsAntibiotika
+--    ,Inn.UtsAntibiotikaAnnet
+--    ,Inn.UtsAntibiotikaUkjent
+--    ,Inn.UtsAntifungalbehandling
+--    ,Inn.UtsAntiviralBehandling
+--    ,Inn.UtsKarbapenem
+--    ,Inn.UtsKinolon
   -- ,Inn.Utskrivningsdato AS UtskrivningsdatoInnSkjema
-  ,Inn.UtsMakrolid
-  ,Inn.UtsPenicillin
-  ,Inn.UtsPenicillinEnzymhemmer
-  ,Inn.UtsTredjeGencefalosporin
+--    ,Inn.UtsMakrolid
+--    ,Inn.UtsPenicillin
+--    ,Inn.UtsPenicillinEnzymhemmer
+--    ,Inn.UtsTredjeGencefalosporin
   ,Inn.Vekt
   ,Inn.VektUkjent
   ')
@@ -190,17 +190,35 @@ varUtKoblet <- c(
 'UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.Antifungalbehandling
   ,Ut.AntiviralBehandling
+    ,Ut.AkuttNyresvikt AS UtsAkuttNyresvikt
+  ,Ut.AkuttRespirasjonsvikt AS UtsAkuttRespirasjonsvikt
+  ,Ut.AkuttSirkulasjonsvikt AS UtsAkuttSirkulasjonsvikt
+  ,Ut.Aminoglykosid AS UtsAminoglykosid
+  ,Ut.AndreGencefalosporin AS UtsAndreGencefalosporin
+  ,Ut.Antibiotika AS UtsAntibiotika
+  ,Ut.AntibiotikaAnnet AS UtsAntibiotikaAnnet
+  ,Ut.AntibiotikaUkjent AS UtsAntibiotikaUkjent
+  ,Ut.Antifungalbehandling AS UtsAntifungalbehandling
+  ,Ut.AntiviralBehandling AS UtsAntiviralBehandling
   ,Ut.CreationDate AS CreationDateUt
   ,Ut.FirstTimeClosed AS FirstTimeClosedUt
-  ,Ut.HelseenhetKortNavn AS ShNavnUt
   ,Ut.FormStatus AS FormStatusUt
   ,Ut.FormDate AS FormDateUt
+  ,Ut.HelseenhetKortNavn AS ShNavnUt
   ,Ut.Importert AS ImportertUt
+  ,Ut.Karbapenem AS UtsKarbapenem
+  ,Ut.Kinolon AS UtsKinolon
+  -- ,Ut.Utskrivningsdato AS UtskrivningsdatoInnSkjema
+  ,Ut.Makrolid AS UtsMakrolid
+  ,Ut.Penicillin AS UtsPenicillin
+  ,Ut.PenicillinEnzymhemmer AS UtsPenicillinEnzymhemmer
   ,Ut.OverfortAnnetSykehusUtskrivning
   ,Ut.StatusVedUtskriving
+  ,Ut.TredjeGencefalosporin AS UtsTredjeGencefalosporin
   ,Ut.Utskrivningsdato
   ,Ut.SkjemaGUID AS SkjemaGUIDut
   ')
+
 
 if (koble==0){
         query <- paste0('SELECT ',

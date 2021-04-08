@@ -1,6 +1,5 @@
 #  FIGURER OG TABELLER TIL ÅRSRAPPORT, NiPar, Pandemi-data
 
-setwd('/home/rstudio/korona/Aarsrapport')
 
 #--------Klargjøre data-----------
 #Analyser baseres på opphold. Kun de med Covid som hovedårsak til innleggelse.
@@ -22,6 +21,9 @@ setwd('/home/rstudio/korona/Aarsrapport')
 #            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
 # KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
 #                      by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+
+setwd('/home/rstudio/korona/Aarsrapport')
+
 library(intensiv)
 library(intensivberedskap)
 library(korona)
@@ -47,8 +49,8 @@ KoblRed <- Kobl %>% group_by(SkjemaGUID) %>%
   summarise(SkjemaGUID = SkjemaGUID[1],
     BeredPas = ifelse(sum(!is.na(SkjemaGUIDBered))>0 ,1 ,0)
     )
-
 #KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+
 KoroData <- merge(KoroDataPre, KoblRed, by = 'SkjemaGUID')
 
 
@@ -59,7 +61,10 @@ KoroData <- LeggTilNyInnOverf(RegData=KoroData, PasientID='PasientID')
 table(KoroData$Overf)
 table(KoroData$OverfortAnnetSykehusInnleggelse)
 table(KoroData$OverfortAnnetSykehusUtskrivning)
-KoroData[KoroData$Overf==1,c('Overf', 'OverfortAnnetSykehusInnleggelse', 'OverfortAnnetSykehusUtskrivning')]
+test <- KoroData[KoroData$Overf==1 | KoroData$OverfortAnnetSykehusInnleggelse==1 | KoroData$OverfortAnnetSykehusUtskrivning==1,
+         c('Overf', 'OverfortAnnetSykehusInnleggelse', 'OverfortAnnetSykehusUtskrivning',
+         'PersonId', "InnTidspunkt", "UtTidspunkt")]
+write.table(test)
 
 #------------Alle koronapasienter pr HF---------
 #FerdigeRegTab pas -> opph.

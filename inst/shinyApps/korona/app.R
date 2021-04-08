@@ -302,7 +302,7 @@ ui <- tagList(
                                  ) #mainPanel
                         ), #Fordelinger
     #------------------Andeler-----------------
-    tabPanel(p('Andeler',
+    tabPanel(p('Utvikling over tid (andeler)',
                title='Resultater som kan vises som andel per tidsenhet'),
              value = 'Andeler',
              sidebarPanel(id = 'brukervalgAndel',
@@ -935,7 +935,7 @@ server <- function(input, output, session) {
                      #skjemastatusUt=as.numeric(input$skjemastatusUtAndel),
                      tidsenhet=input$tidsenhetAndel,
                      session = session)
-  }, height=700, width=700 #height = function() {session$clientData$output_fordelinger_width}
+  }, height = 300, width = 1000 #height = function() {session$clientData$output_fordelinger_width}
   )
 
   # observe({
