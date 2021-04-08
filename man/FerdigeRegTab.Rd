@@ -8,6 +8,8 @@ FerdigeRegTab(
   RegData,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
+  datoFra = "2020-03-01",
+  datoTil = Sys.Date(),
   aarsakInn = 9,
   erMann = 9,
   dodSh = 9
@@ -20,6 +22,10 @@ FerdigeRegTab(
 
 \item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
 RHF (SC og LC-brukere), HF (LU-brukere)}
+
+\item{datoFra}{startdato 'yyyy-mm-dd'}
+
+\item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
 3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}

@@ -9,11 +9,13 @@ AlderKjFig(
   valgtVar = "Alder",
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
+  datoFra = "2020-03-01",
+  datoTil = Sys.Date(),
   skjemastatusInn = 9,
   aarsakInn = 9,
   dodSh = 9,
   erMann = 9,
-  grvar = "PatientGender",
+  grvar = "erMann",
   outfile = ""
 )
 }
@@ -24,6 +26,10 @@ AlderKjFig(
 
 \item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
 RHF (SC og LC-brukere), HF (LU-brukere)}
+
+\item{datoFra}{startdato 'yyyy-mm-dd'}
+
+\item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
