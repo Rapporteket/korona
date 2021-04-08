@@ -53,7 +53,14 @@ KoblRed <- Kobl %>% group_by(SkjemaGUID) %>%
 
 KoroData <- merge(KoroDataPre, KoblRed, by = 'SkjemaGUID')
 
-
+#Får vi nå et intensivopphold for alle skjema som tilhører en pasient som har hatt intensivopphold?
+pers <- unique(KoroData$PersonId[which(KoroData$BeredPas==1)])
+length(pers)
+test <- KoroData[which(KoroData$PersonId %in% pers), c("PersonId", "SkjemaGUID", "BeredPas")] #Har alle disse beredskapsopphold på hvert skjema
+table(test$BeredPas)
+table(table(KoroDataPre$))
+table(KoroData$BeredPas)
+Skjekk ved å sjekke antall beredskapsskjema som er knyttet opp. TEll også hvor mange beredskapsskjema hver pasient har og om
 
 #Legger til reinnleggelser osv
 KoroData <- LeggTilNyInnOverf(RegData=KoroData, PasientID='PasientID')
@@ -106,8 +113,8 @@ for (valgtVar in variabler) {
   KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
 }
 
-valgtVar <- 'liggetid'
-RegData <- KoroData
+# valgtVar <- 'liggetid'
+# RegData <- KoroData
 
 #----------------Alle figurer, tidsuvikling, basert på opphold-----------------
 variabler <- c('alder_u18', 'alder_u40', 'alder_o60', 'alder_o80', 'isolertInn', 'beredPas', 'dodSh')
