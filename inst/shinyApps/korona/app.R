@@ -133,6 +133,10 @@ ui <- tagList(
                                     selectInput(inputId = "aarsakInn", label="Covid-19 hovedårsak til innleggelse?",
                                                choices = aarsakInnValg
                                     ),
+                                   dateRangeInput(inputId = "valgtDato", label = "Tidsperiode",
+                                                  start = startDato, end = Sys.Date(),
+                                                  separator="t.o.m.", language="nb"),
+
                                    selectInput(inputId = "skjemastatusInn", label="Skjemastatus, inklusjon",
                                                choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
                                    ),
@@ -155,9 +159,6 @@ ui <- tagList(
                                                label = "Velg format for nedlasting av figur",
                                                choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg'))
 
-                                   # dateRangeInput(inputId = 'datovalg', start = startDato, end = idag,
-                                   #                label = "Tidsperiode", separator="t.o.m.", language="nb" #)
-                                   # ),
                       ),
                       mainPanel(width = 9,
                                 shinyalert::useShinyalert(),
@@ -200,7 +201,7 @@ ui <- tagList(
                                 h3('Antall ny-innlagte siste 10 dager'),
                                 h5('Overføringer telles ikke med'),
                                 uiOutput('utvalgAntOpph'),
-                                tableOutput('tabAntOpph'),
+                                tableOutput('tabAntOpph')
                                   ),
                                 fluidRow(#column(width=5, offset = 3,
                                        br(),
@@ -235,7 +236,7 @@ ui <- tagList(
                         tabPanel("Belegg",
                                  koronabelegg_UI("koronabelegg_id")
                         ),
-
+    #---------Fordelinger-------------
                         tabPanel(p('Fordelinger',
                                    title='Figurer/tabeller for de fleste opplysninger registrert i
                   inlusjons- eller utskrivingsskjema'),
@@ -311,9 +312,82 @@ ui <- tagList(
                                        downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell')
                                      )
                                    )
-                                 )
-                        )) #tabset og tab
-             ), #Resultater
+                                 ) #mainPanel
+                        ), #Fordelinger
+    #------------------Andeler-----------------
+    tabPanel(p('Utvikling over tid (andeler)',
+               title='Resultater som kan vises som andel per tidsenhet'),
+             value = 'Andeler',
+             sidebarPanel(id = 'brukervalgAndel',
+                          width = 3,
+                          br(),
+                          h3('Velg variabel/tema og filtreringer i data'),
+                          #conditionalPanel(condition = "input.ark == 'Fordelinger' ",
+                          selectInput(inputId = 'valgtVarAndel', label='Velg variabel',
+                                      selected = 'regForsinkelseInn',
+                                      choices = c("Alder under 18 år"='alder_u18',
+                                                  "Alder under 40 år"='alder_u40',
+                                                  "Alder over 60 år"='alder_o60',
+                                                  "Alder over 80 år"='alder_o80',
+                                                  "Isolert ved ankomst" = 'isolertInn',
+                                                  'Intensivpasient' = 'beredPas',
+                                                  'Døde' = 'dodSh'
+                                      )
+                          ),
+                          # selectInput(inputId = "enhetsUtvalgAndel", label="Velg enhetsnivå",
+                          #             choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
+                          # ),
+                          # selectInput(inputId = "valgtEnhetAndel", label="Velg enhet",
+                          #             choices = 'Alle'
+                          # ),
+                          dateRangeInput(inputId = "valgtDatoAndel", label = "Tidsperiode",
+                                         start = startDato, end = Sys.Date(),
+                                         separator="t.o.m.", language="nb"),
+                          selectInput(inputId = "aarsakInnAndel", label="Covid-19 hovedårsak til innleggelse?",
+                                      choices = aarsakInnValg
+                          ),
+                          # selectInput(inputId = "skjemastatusInnAndel", label="Skjemastatus, inklusjon",
+                          #             choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
+                          # ),
+                          selectInput(inputId = "dodShAndel", label="Utskrevne, tilstand",
+                                      choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
+                          ),
+                          selectInput(inputId = "beredPasAndel", label="Intensivpasient?",
+                                      choices = c("Alle pasienter"=9, "Ja"=1, "Nei"=0)
+                          ),
+                          selectInput(inputId = "erMannAndel", label="Kjønn",
+                                           choices = c("Begge"=9, "Menn"=1, "Kvinner"=0)
+                          ),
+                          selectInput(inputId = "bildeformatAndel",
+                                      label = "Velg format for nedlasting av figur",
+                                      choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
+                          selectInput(inputId = "tidsenhetAndel", label="Velg tidsenhet",
+                                      choices = rev(c('År'= 'Aar', 'Halvår' = 'Halvaar',
+                                                      'Kvartal'='Kvartal', 'Måned'='Mnd'))),
+                          br(),
+                          actionButton("tilbakestillValgAndel", label="Tilbakestill valg"),
+                          br()
+                          #p(em('Følgende utvalg gjelder bare figuren som viser utvikling over tid')),
+                          #selectInput(inputId = 'enhetsUtvalgAndel', label='Egen enhet og/eller landet',
+                          #            choices = c("Egen mot resten av landet"=1, "Hele landet"=0, "Egen enhet"=2)),
+             ),
+             mainPanel(
+               #tabsetPanel(
+                 #tabPanel(
+                   'Figur',
+                   plotOutput('andelTid', height="auto"),
+                   downloadButton('LastNedFigAndelTid', label='Velg format (til venstre) og last ned figur')
+                 #)
+                 # tabPanel(
+                 #   'Tabell',
+                 #   uiOutput("tittelFord"),
+                 #   tableOutput('fordelingTab'),
+                 #   downloadButton(outputId = 'lastNed_tabFord', label='Last ned tabell')
+                 # )
+               #)
+             ) #main
+    ) #tabset & Andeler
+)), #tabset og Resultater
 
 
 #----------Datakvalitet-------------------------
@@ -344,7 +418,7 @@ tabPanel('Datakvalitet',
 
                                    selectInput(inputId = "bekrInt", label="Bekreftet/Mistenkt",
                                                choices = c("Alle"=9, "Bekreftet"=1, "Mistenkt"=0)
-                                   ),
+                                   )
                       ),
                       mainPanel(width = 9,
                                 h3('Resultater fra koronaregistrering på INTENSIVavdelinger.'),
@@ -357,7 +431,7 @@ tabPanel('Datakvalitet',
                                   column(width = 4,
                                          h4('Opphold uten registrert ut-tid fra intensiv'), #, align='center'),
                                          uiOutput('utvalgIntensivNaa'),
-                                         tableOutput('tabIntensivNaa'),
+                                         tableOutput('tabIntensivNaa')
                                          # br(),
                                          # h4('Opphold registrert som utskrevet, uten ferdigstilt skjema:'),
                                          # uiOutput('RegIlimbo')
@@ -385,34 +459,6 @@ tabPanel('Datakvalitet',
                                   ))
                       )
              ), #Intensiv-side
-
-#-----------Abonnement gml--------------------------------
-             # tabPanel(p("Abonnement, gammel versjon",
-             #            title='Bestill automatisk utsending av rapporter på e-post'),
-             #          value = 'Abonnement, gml versjon',
-             #          sidebarLayout(
-             #            sidebarPanel(width = 3,
-             #                         selectInput("subscriptionRep", "Dokument:", c("Koronarapport")), #Evt legg til influensarapport
-             #                         selectInput("subscriptionFreq", "Frekvens:",
-             #                                     list(Månedlig="Månedlig-month",
-             #                                          Ukentlig="Ukentlig-week",
-             #                                          Daglig="Daglig-DSTday"),
-             #                                     selected = "Ukentlig-week"),
-             #                         # selectInput(inputId = "valgtEnhetabb", label="Velg enhet",
-             #                         #             choices = 'Alle'
-             #                         # ),
-             #                         #selectInput("abbonnerDataTilFHI", "Abbonner på:","Datafiler til FHI"),
-             #                         actionButton("subscribe", "Bestill!"),
-             #                         br(),
-             #                         br(),
-             #                         br()
-             #            ),
-             #            mainPanel(
-             #              h4('NB: Abonnementet løper til det sies opp. '),
-             #              uiOutput("subscriptionContent")
-             #            )
-             #          )
-             # ), #tab abonnement
 
 #-----------Abonnement ny--------------------------------
 tabPanel(p("Abonnement",
@@ -595,6 +641,7 @@ server <- function(input, output, session) {
 
   observeEvent(input$tilbakestillValg, shinyjs::reset("brukervalgStartside"))
   observeEvent(input$tilbakestillValgRes, shinyjs::reset("brukervalgRes"))
+  observeEvent(input$tilbakestillValgAndel, shinyjs::reset("brukervalgAndel"))
 
   output$manglerRegResh <- renderUI(tagList(
     if (finnesEgenResh | rolle=='SC') {''} else {
@@ -685,6 +732,8 @@ server <- function(input, output, session) {
     TabFerdig <- FerdigeRegTab(RegData=KoroData,
                                aarsakInn = as.numeric(input$aarsakInn),
                                valgtEnhet=input$valgtEnhet,
+                               datoFra=input$valgtDato[1],
+                               datoTil=input$valgtDato[2],
                                enhetsNivaa = egetEnhetsNivaa,
                                dodSh=as.numeric(input$dodSh),
                                erMann=as.numeric(input$erMann))
@@ -701,6 +750,8 @@ server <- function(input, output, session) {
     RisikoTab <- RisikoInnTab(RegData=KoroData,
                               valgtEnhet= input$valgtEnhet,
                               enhetsNivaa = egetEnhetsNivaa,
+                              datoFra=input$valgtDato[1],
+                              datoTil=input$valgtDato[2],
                               skjemastatusInn=as.numeric(input$skjemastatusInn),
                               dodSh=as.numeric(input$dodSh),
                               aarsakInn = as.numeric(input$aarsakInn),
@@ -734,9 +785,12 @@ server <- function(input, output, session) {
     renderPlot({korona::AlderKjFig(RegData=KoroData,
                                    valgtEnhet= input$valgtEnhet,
                                    enhetsNivaa = egetEnhetsNivaa,
+                                   datoFra=input$valgtDato[1],
+                                   datoTil=input$valgtDato[2],
                                    dodSh=as.numeric(input$dodSh),
                                    aarsakInn = as.numeric(input$aarsakInn),
-                                   skjemastatusInn=as.numeric(input$skjemastatusInn))
+                                   skjemastatusInn=as.numeric(input$skjemastatusInn)
+                                   )
     }, width = 500, height = 500)
   #} else {     renderText('Få registreringer (N<5)')}
 
@@ -748,6 +802,8 @@ server <- function(input, output, session) {
       korona::AlderKjFig(RegData=KoroData,
                          valgtEnhet= input$valgtEnhet,
                          enhetsNivaa = egetEnhetsNivaa,
+                         datoFra=input$valgtDato[1],
+                         datoTil=input$valgtDato[2],
                          dodSh=as.numeric(input$dodSh),
                          aarsakInn = as.numeric(input$aarsakInn),
                          skjemastatusInn=as.numeric(input$skjemastatusInn),
@@ -765,6 +821,8 @@ server <- function(input, output, session) {
       Tabell <- korona::AlderKjFig(RegData=KoroData,
                                    valgtEnhet= input$valgtEnhet,
                                    enhetsNivaa = egetEnhetsNivaa,
+                                   datoFra=input$valgtDato[1],
+                                   datoTil=input$valgtDato[2],
                                    dodSh=as.numeric(input$dodSh),
                                    aarsakInn = as.numeric(input$aarsakInn),
                                    skjemastatusInn=as.numeric(input$skjemastatusInn),
@@ -803,6 +861,28 @@ server <- function(input, output, session) {
                      session = session)
   }, height=700, width=700 #height = function() {session$clientData$output_fordelinger_width}
   )
+  output$LastNedFigFord <- downloadHandler(
+    filename = function(){
+      paste0('FordelingsFigur', valgtVar=input$valgtVarFord, '_', Sys.time(), '.', input$bildeformatFord)
+    },
+
+    content = function(file){
+      KoronaFigAndeler(RegData=KoroData,
+                       valgtVar=input$valgtVarFord,
+                       valgtEnhet = input$valgtEnhetRes,
+                       datoFra=input$valgtDatoRes[1],
+                       datoTil=input$valgtDatoRes[2],
+                       enhetsNivaa= egetEnhetsNivaa,
+                       enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
+                       dodSh=as.numeric(input$dodShRes),
+                       aarsakInn = as.numeric(input$aarsakInnRes),
+                       erMann=as.numeric(input$erMannRes),
+                       skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                       kjemastatusUt=as.numeric(input$skjemastatusUtRes),
+                       session = session,
+                       outfile = file)
+    }
+  )
 
   observe({
     UtDataFord <- KoronaFigAndeler(RegData=KoroData,
@@ -822,28 +902,6 @@ server <- function(input, output, session) {
 
     tab <- lagTabavFigFord(UtDataFraFig = UtDataFord)
 
-    output$LastNedFigFord <- downloadHandler(
-      filename = function(){
-        paste0('FordelingsFigur', valgtVar=input$valgtVarFord, '_', Sys.time(), '.', input$bildeformatFord)
-      },
-
-      content = function(file){
-        KoronaFigAndeler(RegData=KoroData,
-                         valgtVar=input$valgtVarFord,
-                         valgtEnhet = input$valgtEnhetRes,
-                         datoFra=input$valgtDatoRes[1],
-                         datoTil=input$valgtDatoRes[2],
-                         enhetsNivaa= egetEnhetsNivaa,
-                         enhetsUtvalg = as.numeric(input$enhetsUtvalgFord),
-                         dodSh=as.numeric(input$dodShRes),
-                         aarsakInn = as.numeric(input$aarsakInnRes),
-                         erMann=as.numeric(input$erMannRes),
-                         skjemastatusInn=as.numeric(input$skjemastatusInnRes),
-                         kjemastatusUt=as.numeric(input$skjemastatusUtRes),
-                         session = session,
-                         outfile = file)
-      }
-    )
 
     output$tittelFord <- renderUI({
       tagList(
@@ -872,6 +930,63 @@ server <- function(input, output, session) {
       })
   }) #observe
 
+  #------------Andeler---------------------
+  #----------AndelTid------------
+  output$andelTid <- renderPlot({
+    KoronaFigAndelTid(RegData=KoroData,
+                     valgtVar=input$valgtVarAndel,
+                     valgtEnhet = input$valgtEnhetAndel, #egenEnhet,  #
+                     enhetsNivaa=egetEnhetsNivaa,
+                     datoFra=input$valgtDatoAndel[1],
+                     datoTil=input$valgtDatoAndel[2],
+                     enhetsUtvalg = as.numeric(input$enhetsUtvalgAndel),
+                     dodSh=as.numeric(input$dodShAndel),
+                     aarsakInn = as.numeric(input$aarsakInnAndel),
+                     erMann=as.numeric(input$erMannAndel),
+                     beredPas = as.numeric(input$beredPasAndel),
+                     #skjemastatusInn=as.numeric(input$skjemastatusInnAndel),
+                     #skjemastatusUt=as.numeric(input$skjemastatusUtAndel),
+                     tidsenhet=input$tidsenhetAndel,
+                     session = session)
+  }, height = 300, width = 1000 #height = function() {session$clientData$output_fordelinger_width}
+  )
+
+  # observe({
+  #   UtDataAndel <- KoronaFigAndeler(RegData=KoroData,
+  #                                  valgtVar=input$valgtVarAndel,
+  #                                  valgtEnhet = input$valgtEnhetAndel,
+  #                                  datoFra=input$valgtDatoAndel[1],
+  #                                  datoTil=input$valgtDatoAndel[2],
+  #                                  enhetsNivaa= egetEnhetsNivaa,
+  #                                  enhetsUtvalg = as.numeric(input$enhetsUtvalgAndel),
+  #                                  dodSh=as.numeric(input$dodShAndel),
+  #                                  aarsakInn = as.numeric(input$aarsakInnAndel),
+  #                                  erMann=as.numeric(input$erMannAndel),
+  #                                  skjemastatusInn=as.numeric(input$skjemastatusInnAndel),
+  #                                  skjemastatusUt=as.numeric(input$skjemastatusUtAndel),
+  #                                  session = session)
+  #
+  #
+  #   #tab <- lagTabavFigAndel(UtDataFraFig = UtDataAndel)
+  #
+  #   # output$LastNedFigAndelTid <- downloadHandler(
+  #   #   filename = function(){
+  #   #     paste0('FigurAndelTid', valgtVar=input$valgtVarAndelTid, '_', Sys.time(), '.', input$bildeformatAndel)
+  #   #   },
+  #   #
+  #   #   content = function(file){
+  #   #     KoronaFigAndelTid(...,
+  #   #                      outfile = file)
+  #   #   }
+  #   # )
+  #
+  #   # output$tittelAndel <- renderUI({
+  #   #   tagList(
+  #   #     h3(HTML(paste(UtDataAndel$tittel, sep='<br />'))),
+  #   #     h5(HTML(paste0(UtDataAndel$utvalgTxt, '<br />')))
+  #   #   )}) #, align='center'
+  #
+  # }) #observe
   #----------Datakvalitet-------------------------
   innManglerUtTab <- innManglerUt(RegData=KoroDataRaa, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa)
   output$innManglerUtTab <- renderTable(innManglerUtTab)
@@ -968,15 +1083,6 @@ server <- function(input, output, session) {
   #------------------ Abonnement ----------------------------------------------
   ## reaktive verdier for å holde rede på endringer som skjer mens
   ## applikasjonen kjører
-  # rv <- reactiveValues(
-  #   subscriptionTab = rapbase::makeUserSubscriptionTab(session))
-  # ## lag tabell over gjeldende status for abonnement
-  # output$activeSubscriptions <- DT::renderDataTable(
-  #   rv$subscriptionTab, server = FALSE, escape = FALSE, selection = 'none',
-  #   rownames = FALSE, options = list(dom = 't')
-  # )
-  ## reaktive verdier for å holde rede på endringer som skjer mens
-  ## applikasjonen kjører
   subscription <- reactiveValues(
     tab = rapbase::makeAutoReportTab(session, type = "subscription"))
 
@@ -987,20 +1093,6 @@ server <- function(input, output, session) {
                    columnDefs = list(list(visible = FALSE, targets = 6))),
     rownames = FALSE
   )
-
-  ## lag side som viser status for abonnement, også når det ikke finnes noen
-  # output$subscriptionContent <- renderUI({
-  #   fullName <- rapbase::getUserFullName(session)
-  #   if (length(rv$subscriptionTab) == 0) {
-  #     p(paste("Ingen aktive abonnement for", fullName))
-  #   } else {
-  #     tagList(
-  #       p(paste("Aktive abonnement for", fullName, "som sendes per epost til ",
-  #               rapbase::getUserEmail(session), ":")),
-  #       DT::dataTableOutput("activeSubscriptions")
-  #     )
-  #   }
-  # })
 
   ## lag side som viser status for abonnement, også når det ikke finnes noen
   output$subscriptionContent <- renderUI({
@@ -1016,7 +1108,6 @@ server <- function(input, output, session) {
       )
     }
   })
-
 
 
   ## nye abonnement

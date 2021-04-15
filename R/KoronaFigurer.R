@@ -6,13 +6,15 @@
 #' @return
 #' @export
 AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa='RHF',
-                     skjemastatusInn=9,  aarsakInn=9, dodSh=9, erMann=9, grvar = 'PatientGender', outfile=''){
+                       datoFra='2020-03-01', datoTil=Sys.Date(), skjemastatusInn=9,
+                       aarsakInn=9, dodSh=9, erMann=9, grvar = 'erMann', outfile=''){
 
-   if (grvar=='PatientGender') {RegData$PatientGender <- factor(RegData$PatientGender, levels = 1:2, labels = c("Menn", "Kvinner"))}
+   if (grvar=='erMann') {RegData$erMann <- factor(RegData$erMann, levels = 0:1, labels = c("Kvinner", "Menn"))}
 
   UtData <- KoronaUtvalg(RegData=RegData,
                          valgtEnhet=valgtEnhet,
                          enhetsNivaa = enhetsNivaa,
+                         datoFra = datoFra, datoTil = datoTil,
                          dodSh = dodSh,
                          aarsakInn=aarsakInn,
                          erMann = erMann,

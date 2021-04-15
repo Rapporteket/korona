@@ -4,7 +4,7 @@
 \alias{KoronaPreprosesser}
 \title{Preprosesser data fra Koronaregisteret}
 \usage{
-KoronaPreprosesser(RegData = RegData, aggPers = 1)
+KoronaPreprosesser(RegData = RegData, aggPers = 1, kobleBered = 0)
 }
 \arguments{
 \item{RegData}{Koronaskjema}
