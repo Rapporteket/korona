@@ -1,7 +1,7 @@
 #Kjørefil for Rapporteket-Pandemi
 rm(list=(ls()))
 library(korona)
-RegDataRaa <- KoronaDataSQL(datoFra = '2020-09-01')
+RegDataRaa <- KoronaDataSQL(datoFra = '2020-01-01')
 RegData <- KoronaPreprosesser(RegData = RegDataRaa, aggPers = 1)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
@@ -16,24 +16,18 @@ KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleB
 KoronaFigAndelTid(RegData=KoroIntData)
 
 
-unique(RegData[, c('HF',"ReshId", 'ShNavn')])
 
-tidsenhet='dag'
-datoFra <- '2020-01-01'
-datoTil <- Sys.Date()
-erMann=9
-aarsakInn=1  #covid-19 som hovedårsak til innleggelse 1-ja, 2-nei
-skjemastatusInn=9
-skjemastatusUt <- 9
-aarsakInn<- 1  #covid-19 som hovedårsak til innleggelse 1-ja, 2-nei
-dodSh=9
-minald <- 0
-maxald <- 110
-#reshID: 101719 (UNN HF), '100100' (Vestfold)
-valgtEnhet='Alle' #'Sykehuset i Vestfold HF' #
-enhetsNivaa <- 'RHF'
-enhetsUtvalg <- 0
-valgtVar <- 'demografi'
+#Antall innlagte på Gjøvik
+705476
+HFresh <- 100091
+test <- RegDataRaa[RegDataRaa$UnitId == 705476, c("Innleggelse", "Utskrivningsdato", "FormStatus", "PatientInRegistryGuid")]
+RegDataRaa[RegDataRaa$UnitId == 705476 & is.na(RegDataRaa$Utskrivningsdato), ]
+
+table(RegData$ShNavnUt9
+
+
+unique(RegData[, c('HF',"HFresh", "ReshId", 'ShNavn')])
+
 
 library(korona)
 PandemiDataRaa <- korona::KoronaDataSQL()
