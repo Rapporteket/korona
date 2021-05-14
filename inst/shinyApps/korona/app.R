@@ -1051,7 +1051,7 @@ server <- function(input, output, session) {
 
 
     #Tab risiko
-    RisikoTab <- intensivberedskap::RisikofaktorerTab(RegData=BeredData, tidsenhet='Totalt',
+    RisikoTab <- intensivberedskap::RisikofaktorerTab(RegData=BeredData, #tidsenhet='Totalt',
                                                       bekr=as.numeric(input$bekrInt))
 
     output$tabRisikofaktorerInt <- if (RisikoTab$Ntest>2){
