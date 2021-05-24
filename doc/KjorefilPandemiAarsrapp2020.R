@@ -33,6 +33,10 @@ datoFra1aar <- '2020-01-01'
 
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
 KoroDataPre <- KoronaPreprosesser(RegData = KoroDataRaa[KoroDataRaa$ArsakInnleggelse==1, ], aggPers = 0)
+KoroDataAllePers <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1)
+length(unique(KoroDataRaa$PersonId))
+length(unique(KoroDataPre$PersonId))
+
 BeredDataRaa <- NIRberedskDataSQL()
 BeredData <- NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 0)
 
