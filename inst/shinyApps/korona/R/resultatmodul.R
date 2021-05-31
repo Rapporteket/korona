@@ -86,12 +86,12 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
   observe({
     updateSelectInput(session, "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
                       choices = if (input$valgtVar == 'antinn') {c("Ja"=1, "Alle reg."=9, "Nei"=2)
-                        } else {c("Ja, minst siste opphold" = 2,
-                                  "Ja, alle opphold"=1,
-                                  "Ja, minst ett opph" = 3,
-                                  "Alle registrerte"=0,
-                                  "Nei, ingen opphold" = 4)}
-)
+                      } else {c("Ja, minst siste opphold" = 2,
+                                "Ja, alle opphold"=1,
+                                "Ja, minst ett opph" = 3,
+                                "Alle registrerte"=0,
+                                "Nei, ingen opphold" = 4)}
+    )
 
   })
 
@@ -102,13 +102,13 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
                                           unit = 'week', week_start = 1),
                        "maaned" = floor_date(input$velgSluttdatoRes - months(as.numeric(input$velgAntVisning)-1),
                                              unit = 'month')
-    # datoFra <- switch (input$velgTidsenhet,
-    #                    "dag" = Sys.Date() - days(as.numeric(input$velgAntVisning)-1),
-    #                    "uke" = floor_date(Sys.Date() - weeks(as.numeric(input$velgAntVisning)-1),
-    #                                       unit = 'week', week_start = 1),
-    #                    "maaned" = floor_date(Sys.Date() - months(as.numeric(input$velgAntVisning)-1),
-    #                                          unit = 'month')
-   ),
+                       # datoFra <- switch (input$velgTidsenhet,
+                       #                    "dag" = Sys.Date() - days(as.numeric(input$velgAntVisning)-1),
+                       #                    "uke" = floor_date(Sys.Date() - weeks(as.numeric(input$velgAntVisning)-1),
+                       #                                       unit = 'week', week_start = 1),
+                       #                    "maaned" = floor_date(Sys.Date() - months(as.numeric(input$velgAntVisning)-1),
+                       #                                          unit = 'month')
+    ),
 
   )
 
@@ -140,18 +140,18 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
                                                 skjemastatusInn=as.numeric(input$skjemastatusInnRes),
                                                 erMann=as.numeric(input$erMannRes)),
                      'antinn'= antallTidInneliggende(RegData=KoroDataOpph, tilgangsNivaa=rolle,
-                                                      valgtEnhet= egenEnhet, #nivå avgjort av rolle
-                                                      tidsenhet=input$velgTidsenhet,
-                                                      datoFra=datoFra(),
-                                                      datoTil=input$velgSluttdatoRes,
-                                                       aarsakInn = as.numeric(input$aarsakInnRes),
-                                                       skjemastatusInn=as.numeric(input$skjemastatusInnRes),
-                                                      erMann=as.numeric(input$erMannRes))
+                                                     valgtEnhet= egenEnhet, #nivå avgjort av rolle
+                                                     tidsenhet=input$velgTidsenhet,
+                                                     datoFra=datoFra(),
+                                                     datoTil=input$velgSluttdatoRes,
+                                                     aarsakInn = as.numeric(input$aarsakInnRes),
+                                                     skjemastatusInn=as.numeric(input$skjemastatusInnRes),
+                                                     erMann=as.numeric(input$erMannRes))
     )
     #print(names(table(KoroDataOpph))[1])
-#AntTab <- antallTidInneliggende(RegData=KoroDataOpph)
-ant_skjema <- AntTab$Tab_tidy
-ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
+    #AntTab <- antallTidInneliggende(RegData=KoroDataOpph)
+    ant_skjema <- AntTab$Tab_tidy
+    ant_skjema[-dim(ant_skjema)[1], ] <- ant_skjema[rev(1:(dim(ant_skjema)[1]-1)), ]
     #print(dim(ant_skjema))
     sketch <- htmltools::withTags(table(
       DT::tableHeader(ant_skjema[-dim(ant_skjema)[1], ]),
@@ -291,6 +291,14 @@ koronabelegg <- function(input, output, session, KoroData, rolle, reshID, egetEn
       write.csv2(Tabell1, file, row.names = F, fileEncoding = 'latin1')
     }
   )
+
+  output$FigurTidBelegg <- renderPlot({
+    AntTab <- AntTab()
+    if (rolle != 'SC'  & dim(AntTab$Tab_tidy)[2] > 3) {
+      AntTab$Tab_tidy <- AntTab$Tab_tidy[, -(dim(AntTab$Tab_tidy)[2]-1)]
+    }
+    korona::FigTidEnhet(AntTab)
+  }, width = 700, height = 700)
 
 }
 

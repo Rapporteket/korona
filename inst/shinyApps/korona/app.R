@@ -39,10 +39,10 @@ if (paaServer) {
   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
-  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2021-03-25 09-14-53.txt', sep=';',
+  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
-  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2021-03-25 09-14-53.txt', sep=';',
+  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   map_ut_navn <- data.frame(gml=c("CreationDate", "FirstTimeClosed", "HelseenhetKortNavn", "FormStatus", "FormDate", "Importert", "SkjemaGUID"),
                             ny=c("CreationDateUt", "FirstTimeClosedUt", "ShNavnUt", "FormStatusUt", "FormDateUt", "ImportertUt", "SkjemaGUIDut"))
@@ -52,13 +52,8 @@ if (paaServer) {
                                "FirstTimeClosedUt", "ShNavnUt", "FormStatusUt", "FormDateUt", "ImportertUt",
                                "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", "Utskrivningsdato", "SkjemaGUIDut")]
 
-  BeredData <-  read.table('I:/nir/ReadinessFormDataContract2021-03-25 09-40-16.txt', sep=';',
+  BeredData <-  read.table('I:/nir/ReadinessFormDataContract2021-05-31 11-28-03.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  # BeredData$EcmoEnd[BeredData$EcmoEnd == ""] <- NA
-  # BeredData$EcmoStart[BeredData$EcmoStart == ""] <- NA
-  # BeredData$MechanicalRespiratorStart[BeredData$MechanicalRespiratorStart == ""] <- NA
-  # BeredData$MechanicalRespiratorEnd[BeredData$MechanicalRespiratorEnd == ""] <- NA
-  # BeredData$DateDischargedIntensive[BeredData$DateDischargedIntensive == ""] <- NA
   BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart",
                          "MechanicalRespiratorEnd", "DateDischargedIntensive")][BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart",
                           "MechanicalRespiratorEnd", "DateDischargedIntensive")]==""] <- NA
@@ -550,7 +545,7 @@ server <- function(input, output, session) {
 
   reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100082) # 100089
 
-  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'LU')
+  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'SC')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
   output$brukernavn <- renderText(brukernavn)
 
