@@ -33,8 +33,13 @@ datoFra1aar <- '2020-01-01'
 
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
 KoroDataPre <- KoronaPreprosesser(RegData = KoroDataRaa[KoroDataRaa$ArsakInnleggelse==1, ], aggPers = 0)
+KoroDataAllePers <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1)
+length(unique(KoroDataRaa$PersonId))
+length(unique(KoroDataPre$PersonId))
+
 BeredDataRaa <- NIRberedskDataSQL()
 BeredData <- NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 0)
+
 #Kobler pandemi og beredskap:
 #FEIL!!! Kan bare brukes for personaggregerte data. Må også ta hensyn til innleggelsestidspunkt.
 # KoroData <- merge(KoroDataPre, BeredData, all.x = T, all.y = F,
@@ -60,7 +65,7 @@ test <- KoroData[which(KoroData$PersonId %in% pers), c("PersonId", "SkjemaGUID",
 table(test$BeredPas)
 table(table(KoroDataPre$))
 table(KoroData$BeredPas)
-Skjekk ved å sjekke antall beredskapsskjema som er knyttet opp. TEll også hvor mange beredskapsskjema hver pasient har og om
+#Skjekk ved å sjekke antall beredskapsskjema som er knyttet opp. TEll også hvor mange beredskapsskjema hver pasient har og om
 
 #Legger til reinnleggelser osv
 KoroData <- LeggTilNyInnOverf(RegData=KoroData, PasientID='PasientID')
@@ -78,7 +83,7 @@ write.table(test)
 #Inneholder: liggetid, alder, BMI, om pasienten har risikofaktorer, andel reinnleggelse (>24t),
 #andel døde + andel isolert ved innleggelse (kval.ind), antall pasienter
 
-RegData <- KoroData
+#RegData <- KoroData
 Nokkeltall <- FerdigeRegTab(RegData=KoroData)
 colnames(Nokkeltall$Tab) <- c('Gj.sn', 'Median', 'IQR', 'Antall opph.', 'Andel opph.')
 enh <- 'Alle'

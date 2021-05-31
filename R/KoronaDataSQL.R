@@ -248,8 +248,8 @@ if (koble==1){
 
   queryUt <- paste0('SELECT ',
                     varUtKoblet,
-                     ' FROM UtskrivningSkjemaDataContract Ut
-                     WHERE cast(FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
+                     ' FROM UtskrivningSkjemaDataContract Ut')
+                     #WHERE cast(FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
   KoroDataUt <- rapbase::loadRegData(registryName="korona", query=queryUt, dbType="mysql")
 
   RegData <- merge(KoroDataInn, KoroDataUt, #suffixes = c('','Ut'),
