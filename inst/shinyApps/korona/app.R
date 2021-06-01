@@ -54,8 +54,9 @@ if (paaServer) {
 
   BeredData <-  read.table('I:/nir/ReadinessFormDataContract2021-05-31 11-28-03.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart",
+  BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart", "DateAdmittedIntensive",
                          "MechanicalRespiratorEnd", "DateDischargedIntensive")][BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart",
+                                                                                              "DateAdmittedIntensive",
                           "MechanicalRespiratorEnd", "DateDischargedIntensive")]==""] <- NA
   BeredDataRaa <- BeredData[as.Date(BeredData$FormDate) >= '2020-03-01' & as.Date(BeredData$FormDate) <= Sys.Date(), ]
   KoroDataRaa <- merge(KoroDataInn, KoroDataUt,
