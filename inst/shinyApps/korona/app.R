@@ -39,20 +39,29 @@ if (paaServer) {
   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
-  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2020-06-11 09-29-30.txt', sep=';',
+  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
   KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
-  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2020-06-11 09-29-30.txt', sep=';',
+  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  names(KoroDataUt)[names(KoroDataUt) == "HelseenhetKortNavn"] <- "ShNavnUt"
-  BeredData <-  read.table('I:/nir/ReadinessFormDataContract2020-06-11 09-31-13.txt', sep=';',
+  map_ut_navn <- data.frame(gml=c("CreationDate", "FirstTimeClosed", "HelseenhetKortNavn", "FormStatus", "FormDate", "Importert", "SkjemaGUID"),
+                            ny=c("CreationDateUt", "FirstTimeClosedUt", "ShNavnUt", "FormStatusUt", "FormDateUt", "ImportertUt", "SkjemaGUIDut"))
+  names(KoroDataUt)[names(KoroDataUt) %in% map_ut_navn$gml] <-
+    map_ut_navn$ny[match(names(KoroDataUt)[names(KoroDataUt) %in% map_ut_navn$gml], map_ut_navn$gml)]
+  KoroDataUt <- KoroDataUt[, c("HovedskjemaGUID", "Antifungalbehandling", "AntiviralBehandling", "CreationDateUt",
+                               "FirstTimeClosedUt", "ShNavnUt", "FormStatusUt", "FormDateUt", "ImportertUt",
+                               "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", "Utskrivningsdato", "SkjemaGUIDut")]
+
+  BeredData <-  read.table('I:/nir/ReadinessFormDataContract2021-05-31 11-28-03.txt', sep=';',
                              stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  BeredData$EcmoEnd[BeredData$EcmoEnd == ""] <- NA
-  BeredData$EcmoStart[BeredData$EcmoStart == ""] <- NA
-  varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID", 'ShNavnUt',
-             'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", 'Utskrivningsdato')
-  KoroDataRaa <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
+  BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart", "DateAdmittedIntensive",
+                         "MechanicalRespiratorEnd", "DateDischargedIntensive")][BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart",
+                                                                                              "DateAdmittedIntensive",
+                          "MechanicalRespiratorEnd", "DateDischargedIntensive")]==""] <- NA
+  BeredDataRaa <- BeredData[as.Date(BeredData$FormDate) >= '2020-03-01' & as.Date(BeredData$FormDate) <= Sys.Date(), ]
+  KoroDataRaa <- merge(KoroDataInn, KoroDataUt,
                     by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+  KoroDataRaa$Utskrivningsdato[which(KoroDataRaa$Utskrivningsdato=="")] <- NA
 } #hente data
 
 
@@ -537,7 +546,7 @@ server <- function(input, output, session) {
 
   reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100082) # 100089
 
-  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'LU')
+  rolle <- ifelse(paaServer, rapbase::getUserRole(shinySession=session), 'SC')
   brukernavn <- ifelse(paaServer, rapbase::getUserName(shinySession=session), 'brukernavnDummy')
   output$brukernavn <- renderText(brukernavn)
 

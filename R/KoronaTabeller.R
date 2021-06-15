@@ -383,8 +383,8 @@ PasMdblReg <- function(RegData, tidsavvik=0){
   N <- dim(TabDbl)[1]
   indSmTid <- which(difftime(TabDbl$FormDate[2:N], TabDbl$FormDate[1:(N-1)], units = 'mins') <= tidsavvik)
   TabDbl <- TabDbl[unique(sort(c(indSmTid, (indSmTid+1)))), ]
-  TabDbl$FormDate <- format(TabDbl$FormDate, "%Y-%m-%d %H:%M:%S")
-  TabDbl$FormDateUt <- format(TabDbl$FormDateUt, "%Y-%m-%d %H:%M:%S")
+  TabDbl$FormDate <- format(TabDbl$FormDate, format="%Y-%m-%d %H:%M:%S")
+  TabDbl$FormDateUt <- format(TabDbl$FormDateUt, format="%Y-%m-%d %H:%M:%S")
 
   tabUt <- TabDbl[order(TabDbl$PatientInRegistryGuid, TabDbl$FormDate), ]
 }

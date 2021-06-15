@@ -340,6 +340,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
+  # RegData <- RegData[!(RegData$HFresh %in% c(107505, 106635, 100170)), ] #### TEST, skal fjernes!!!!!!!!!!!!
 
   RegData <- UtData$RegData
   datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
