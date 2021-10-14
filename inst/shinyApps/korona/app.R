@@ -1414,7 +1414,9 @@ server <- function(input, output, session) {
                                 interval = interval,
                                 intervalName = intervalName)
 
-      rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
+      #rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
+      subscription$tab <-
+        rapbase::makeAutoReportTab(session, type = "subscription")
 
     })
 
