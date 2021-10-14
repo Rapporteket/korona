@@ -528,7 +528,18 @@ tabPanel(p("Registeradm",
                         uiOutput("dispatchmentContent")
                       )
                     )
-         ) #tab registeradm.
+         ), #tab registeradm.
+    shiny::tabPanel(
+      "Eksport",
+      shiny::sidebarLayout(
+        shiny::sidebarPanel(
+          rapbase::exportUCInput("koronaExport")
+        ),
+        shiny::mainPanel(
+          rapbase::exportGuideUI("koronaExportGuide")
+        )
+      )
+    )
 
   ) # navbarPage
 ) # tagList
@@ -1406,6 +1417,13 @@ server <- function(input, output, session) {
       rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
 
     })
+
+    # Eksport
+    registryName <- "korona"
+    ## brukerkontroller
+    rapbase::exportUCServer("koronaExport", registryName)
+    ## veileding
+    rapbase::exportGuideServer("koronaExportGuide", registryName)
 
 
 

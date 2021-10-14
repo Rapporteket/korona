@@ -30,9 +30,8 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
                              uke = factor(paste0('U', format(RegData$InnDato, '%V.%Y')),
                                               levels = paste0('U', format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 week'))), '%V.%Y'))),
-                             maaned = factor(format(RegData$InnDato, '%b.%Y'),
-                                                 levels = format(rev(seq(datoTil, datoFra,
-                                                                         by=paste0('-1 month'))), '%b.%Y')))
+                             maaned = factor(format(RegData$InnDato, '%b %y'),
+                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")))
 
   RegData <- RegData[!is.na(RegData$TidsVar), ]
 
