@@ -395,7 +395,7 @@ tabPanel('Datakvalitet',
          tableOutput('innManglerUtTab')
          ),
     tabPanel('Dobbeltregistrering av inn-skjema',
-             h3('Pasienter som har to innleggelsesskjema med (tilnærmet) like innleggelsestidspunkt'),
+             h3('Pasienter som har to innleggelsesskjema med like innleggelsestidspunkt (<30 min.) '),
              downloadButton(outputId = 'lastNed_dblInn', label='Last ned tabell'),
              tableOutput('dblInn')
              )
@@ -1006,7 +1006,7 @@ server <- function(input, output, session) {
       write.csv2(innManglerUtTab, file, row.names = F, na = '')
     })
 
-  TabDblInn <- PasMdblReg(RegData=KoroDataRaa, tidsavvik = 60)
+  TabDblInn <- PasMdblReg(RegData=KoroDataRaa, tidsavvik = 30)
   output$dblInn <- renderTable(TabDblInn)
 
   output$lastNed_dblInn <- downloadHandler(
@@ -1153,7 +1153,7 @@ server <- function(input, output, session) {
   ## reaktive verdier for å holde rede på endringer som skjer mens
   ## applikasjonen kjører
   dispatchment <- reactiveValues(
-    tab = rapbase::makeAutoReportTab(session = session, type = "dispatchment"),
+    tab = rapbase::makeAutoReportTab(session = session, type = "dispatchment", includeReportId = TRUE),
     koblRoller = matrix(NA, ncol=2, dimnames=list(NULL, c('id', 'Rolle') )),
     report = "Koronarapport",
     freq = "Månedlig-month",
@@ -1221,7 +1221,7 @@ server <- function(input, output, session) {
                               email = email, organization = organization,
                               runDayOfYear = runDayOfYear,
                               interval = interval, intervalName = intervalName)
-    dispatchment$tab <- rapbase::makeAutoReportTab(session, type = "dispatchment")
+    dispatchment$tab <- rapbase::makeAutoReportTab(session, type = "dispatchment", includeReportId = TRUE)
 
     alleAutorapporter <- rapbase::readAutoReportData()
     egneUts <-  rapbase::filterAutoRep(
@@ -1343,7 +1343,7 @@ server <- function(input, output, session) {
       dispatchment$email <- rep$email
       rapbase::deleteAutoReport(repId)
       dispatchment$tab <-
-        rapbase::makeAutoReportTab(session, type = "dispatchment")
+        rapbase::makeAutoReportTab(session, type = "dispatchment", includeReportId = TRUE)
       dispatchment$report <- rep$synopsis
     }
     if (rep$type == "bulletin") {
@@ -1359,7 +1359,7 @@ server <- function(input, output, session) {
     subscription$tab <-
       rapbase::makeAutoReportTab(session, type = "subscription")
     dispatchment$tab <-
-      rapbase::makeAutoReportTab(session, type = "dispatchment")
+      rapbase::makeAutoReportTab(session, type = "dispatchment", includeReportId = TRUE)
   })
 
 
