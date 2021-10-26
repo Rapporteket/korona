@@ -1093,7 +1093,10 @@ server <- function(input, output, session) {
   subscription <- reactiveValues(
     tab = rapbase::makeAutoReportTab(session, type = "subscription"))
 
-  ## lag tabell over gjeldende status for abonnement
+  #observe(print(subscription$tab))
+  #print(rapbase::makeAutoReportTab(session, type = "subscription"))
+
+           ## lag tabell over gjeldende status for abonnement
   output$activeSubscriptions <- DT::renderDataTable(
     subscription$tab, server = FALSE, escape = FALSE, selection = 'none',
     options = list(dom = 'tp', ordning = FALSE,
