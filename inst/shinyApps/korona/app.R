@@ -1093,7 +1093,10 @@ server <- function(input, output, session) {
   subscription <- reactiveValues(
     tab = rapbase::makeAutoReportTab(session, type = "subscription"))
 
-  ## lag tabell over gjeldende status for abonnement
+  #observe(print(subscription$tab))
+  #print(rapbase::makeAutoReportTab(session, type = "subscription"))
+
+           ## lag tabell over gjeldende status for abonnement
   output$activeSubscriptions <- DT::renderDataTable(
     subscription$tab, server = FALSE, escape = FALSE, selection = 'none',
     options = list(dom = 'tp', ordning = FALSE,
@@ -1171,7 +1174,8 @@ server <- function(input, output, session) {
     roller <- vector()
     for (k in 1:length(ider)) {
       #roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
-      roller <- c(roller, egneUts[[1]][['params']]$rolle)
+      #roller <- c(roller, egneUts[[k]][['params']]$rolle)
+      roller <- c(roller, egneUts[[k]]$params$rolle)
     }
   dispatchment$koblRoller <- cbind(id = ider,
                       Rolle = roller)
@@ -1233,7 +1237,8 @@ server <- function(input, output, session) {
     roller <- vector()
     for (k in 1:length(ider)) {
       #roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
-      roller <- c(roller, egneUts[[k]][['params']]$rolle)
+      #roller <- c(roller, egneUts[[k]][['params']]$rolle)
+      roller <- c(roller, egneUts[[k]]$params$rolle)
     }
     dispatchment$koblRoller <- cbind(id = ider,
                                      Rolle = roller)
