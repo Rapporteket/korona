@@ -1168,9 +1168,10 @@ server <- function(input, output, session) {
 
   if (length(names(egneUts))!=0) {
     ider <- names(egneUts)
-    roller <- vector() #egneUts[[1]][['params']][[6]]$rolle
+    roller <- vector()
     for (k in 1:length(ider)) {
-      roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
+      #roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
+      roller <- c(roller, egneUts[[1]][['params']]$rolle)
     }
   dispatchment$koblRoller <- cbind(id = ider,
                       Rolle = roller)
@@ -1231,7 +1232,8 @@ server <- function(input, output, session) {
     ider <- names(egneUts)
     roller <- vector()
     for (k in 1:length(ider)) {
-      roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
+      #roller <- c(roller, egneUts[[k]][['params']][[6]]$rolle)
+      roller <- c(roller, egneUts[[k]][['params']]$rolle)
     }
     dispatchment$koblRoller <- cbind(id = ider,
                                      Rolle = roller)
