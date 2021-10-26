@@ -217,6 +217,7 @@ if (aggPers == 1) {
                 MunicipalNumber = first(MunicipalNumber, order_by = FormDate),
                 NedsattimmunHIV = sum(NedsattimmunHIV)>0,
                 NerkontaktCovid = JaNeiUkjVar(NerkontaktCovid), #1-ja, 2-nei, 3-ukjent
+               Nir_beredskapsskjema_CoV2 = JaNeiUkjVar(Nir_beredskapsskjema_CoV2),
                 Nyresykdom = sum(Nyresykdom)>0,
                 #Oksygenmetning
                 Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)),

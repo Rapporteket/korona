@@ -44,9 +44,8 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                                  uke = factor(paste0('U', format(RegDataAlle$UtDato, '%V.%Y')),
                                               levels = paste0('U', format(rev(seq(datoTil, datoFra,
                                                                                      by=paste0('-1 week'))), '%V.%Y'))),
-                                 maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(datoTil, datoFra,
-                                                                         by=paste0('-1 month'))), '%b.%Y')))
+                                 maaned = factor(format(RegDataAlle$UtDato, '%b %y'),
+                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
   #RegData <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
@@ -127,9 +126,8 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                                  uke = factor(paste0('U', format(RegDataAlle$UtDato, '%V.%Y')),
                                               levels = paste0('U', format(rev(seq(datoTil, datoFra ,
                                                                                      by=paste0('-1 week'))), '%V.%Y'))),
-                                 maaned = factor(format(RegDataAlle$UtDato, '%b.%Y'),
-                                                 levels = format(rev(seq(datoTil, datoFra ,
-                                                                         by=paste0('-1 month'))), '%b.%Y')))
+                                 maaned = factor(format(RegDataAlle$UtDato, '%b %y'),
+                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
 
@@ -340,6 +338,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=0, datoTil=0, erMann=erMann, #minald=0, maxald=110,
                          skjemastatusInn=skjemastatusInn, aarsakInn=aarsakInn)
+  # RegData <- RegData[!(RegData$HFresh %in% c(107505, 106635, 100170)), ] #### TEST, skal fjernes!!!!!!!!!!!!
 
   RegData <- UtData$RegData
   datoer <- seq(min(RegData$InnDato), lubridate::today(), by="day")
