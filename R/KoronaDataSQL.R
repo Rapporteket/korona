@@ -66,10 +66,10 @@ varPandemiInn <- c('Inn.SkjemaGUID
   ,Inn.Leukocytter
   ,Inn.LeukocytterUkjent
   ,Inn.Leversykdom
-  ,Inn.MajorVersion
+  -- ,Inn.MajorVersion
   ,Inn.Makrolid
   -- ,Inn.MigrationInformation
-  ,Inn.MinorVersion
+  -- ,Inn.MinorVersion
   ,Inn.Municipal
   ,Inn.MunicipalNumber
   ,Inn.NedsattimmunHIV
@@ -161,7 +161,7 @@ varPandemiUt <- c('SkjemaGUID
   -- ,MajorVersion
   ,Makrolid
   -- ,MigrationInformation
-  ,MinorVersion
+  -- ,MinorVersion
   ,Municipal
   ,MunicipalNumber
   ,OverfortAnnetSykehusUtskrivning
