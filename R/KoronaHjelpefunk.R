@@ -145,7 +145,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 #' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
 #' person, for hvert register
 #'
-#' @param zipFilNavn Navn på fila som skal kjøres. DataFHIPanBered, Testfil
+#' @param zipFilNavn Navn på fila som skal kjøres. DataFHIPanBeredInflu, Testfil
 #' @param brukernavn Innlogget brukernavn
 #' @return Filsti til fil med filsti til zip...
 #' @export
@@ -163,13 +163,13 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   kat <- getwd()
 
   #zipFilNavn <- paste0(zipFilNavn, Sys.Date())
-  if (zipFilNavn == 'DataFHIPanBered') {
+  if (zipFilNavn == 'DataFHIPanBeredInflu') {
     Filer <- korona::lagDatafilerTilFHI()
 
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har hentet ekte filer for sending til FHI"))
 
-    datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
+    datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI', 'InfluensaDataRaaFHI')
     for (fil in datasett){
       Fil <- Filer[[fil]]
       write.table(Fil, file = paste0(fil, '.csv'),
@@ -229,7 +229,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   #Fjern filer.. unntatt filstifila
   if (zipFilNavn == 'Testfil') {
     dum <- file.remove(c('Testfil1.csv', 'Testfil2.csv', 'Testfil.zip')) }
-  if (zipFilNavn == 'DataFHIPanBered') {
+  if (zipFilNavn == 'DataFHIPanBeredInflu') {
     dum <- file.remove(paste0(zipFilNavn, '.zip'), paste0(datasett, '.csv'))
     }
 
