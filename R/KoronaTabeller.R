@@ -79,6 +79,77 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
 }
 
 
+
+
+
+
+
+#' tabAntOpphShMnd antall opphold siste X (antMnd) mnd
+#'
+#' @param RegData
+#' @inheritParams NIRUtvalgEnh
+#' @param antMnd antall måneder som skal vises
+#'
+#' @export
+tabAntOpphShMnd <- function(RegData, datoTil=Sys.Date(), datoFra='Ikke angitt', antMnd=6){
+KoroDataRaa <-  KoronaDataSQL(koble=1)
+KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+RegData <- KoroDataOpph
+
+  #RegData må inneholde ikke-aggregerte data, dvs. data på oppholdsnivå
+  if (datoFra == 'Ikke angitt') {
+    datoFra <-  lubridate::floor_date(as.Date(datoTil) - months(6, abbreviate = T), 'month')
+      #lubridate::floor_date(as.Date(datoTil) %m-% months(antMnd, abbreviate = T), 'month')
+    } #as.Date(paste0(as.numeric(substr(datoTil,1,4))-1, substr(datoTil,5,8), '01'), tz='UTC')
+  aggVar <-  c('RHF','HFkort','ShNavn', 'InnDato')
+  RegDataDum <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
+                        & RegData$InnDato > as.Date(datoFra, tz='UTC'), aggVar]
+  RegDataDum$Maaned1 <- floor_date(RegDataDum$InnDato, 'month') #For å holde rekkefølgen
+  #RegDataDum$Maaned2 <- format(ymd(RegDataDum$InnDato), '%b %y')
+
+
+#     DT <- data.table::data.table(RegDataDum[ , c('HFkort','ShNavn', 'Maaned1')])
+#    Tab <- DT[,SUM:=sum(Maaned1), by = list('HFkort','ShNavn')]
+# DF <- data.frame(X=1:20, Y=sample(c(0,1), 20, TRUE), Z=sample(0:5, 20, TRUE))
+# DT <- data.table(DF)
+# test <- DT[, Mean:=mean(X), by=list(Y, Z)]
+
+  tabAvdMnd1 <- table(RegDataDum[ , c('ShNavn', 'Maaned1')]) #RegDataDum[ , c('RHF', 'HFkort','ShNavn', 'Maaned1')], deparse.level = 1)
+  #tabAvdMnd1 <- table(RegDataDum[ , c('ShNavn', 'Maaned1')])
+  colnames(tabAvdMnd1) <- format(ymd(colnames(tabAvdMnd1)), '%b %y')
+  tabAvdMnd1 <- addmargins((tabAvdMnd1))
+  #tabAvdMnd1 <- RegDataDum %>% group_by(Maaned=floor_date(InnDato, "month"), ShNavn) %>%
+  #      summarize(Antall=length(ShNavn))
+  tabAvdMnd1 <- xtable::xtable(tabAvdMnd1)
+  return(tabAvdMnd1)
+}
+
+#' Antall opphold siste 5 år
+#'
+#' @param RegData data
+#' @param datoTil sluttdato
+#' @export
+tabAntOpphSh5Aar <- function(RegData, datoTil){
+  AarNaa <- as.numeric(format.Date(datoTil, "%Y"))
+
+  tabAvdAarN <- addmargins(table(RegData[which(RegData$Aar %in% (AarNaa-4):AarNaa), c('ShNavn','Aar')]))
+  rownames(tabAvdAarN)[dim(tabAvdAarN)[1] ]<- 'TOTALT, alle enheter:'
+  colnames(tabAvdAarN)[dim(tabAvdAarN)[2] ]<- 'Siste 5 år'
+  tabAvdAarN <- xtable::xtable(tabAvdAarN)
+  return(tabAvdAarN)
+}
+
+
+
+
+
+
+
+
+
+
+
+
 #' Status nå
 #' @param RegData pandemiskjema
 #' @return
@@ -390,5 +461,6 @@ PasMdblReg <- function(RegData, tidsavvik=0){
   tabUt <- TabDbl[order(TabDbl$PatientInRegistryGuid, TabDbl$FormDate), ]
   } else {tabUt <- paste0('Ingen registreringer med mindre enn ', tidsavvik, 'minutter mellom registreringene for samme pasient.')}
 }
+
 
 
