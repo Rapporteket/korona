@@ -256,3 +256,40 @@ erInneliggende <- function(datoer, regdata){
   map_df(datoer, auxfunc)
 }
 
+
+
+#' Tilrettelegge tidsenhetvariabel:
+#' @param RegData dataramme
+#' @param tidsenhet tidsenhet: 'Mnd' (standard), 'Kvartal', 'Halvaar', 'Aar',
+#'
+#' @export
+SorterOgNavngiTidsEnhet <- function(RegData, tidsenhet='Mnd') {
+  #Lager sorteringsvariabel for tidsenhet:
+  RegData$TidsEnhetSort <- switch(tidsenhet,
+                                  Aar = RegData$Aar-min(RegData$Aar)+1,
+                                  Mnd = RegData$MndNum-min(RegData$MndNum[RegData$Aar==min(RegData$Aar)])+1
+                                  +(RegData$Aar-min(RegData$Aar))*12, #format(RegData$InnDato, '%b%y'), #
+                                  Kvartal = RegData$Kvartal-min(RegData$Kvartal[RegData$Aar==min(RegData$Aar)])+1+
+                                    (RegData$Aar-min(RegData$Aar))*4,
+                                  Halvaar = RegData$Halvaar-min(RegData$Halvaar[RegData$Aar==min(RegData$Aar)])+1+
+                                    (RegData$Aar-min(RegData$Aar))*2
+  )
+
+  tidtxt <- switch(tidsenhet,
+                   #Henter fullt månedsnavn og forkorter etterpå.
+                   Mnd = format.Date(seq(from=lubridate::floor_date(as.Date(min(as.Date(RegData$InnDato), na.rm = T)), 'month'),
+                                         to=max(as.Date(RegData$InnDato), na.rm = T), by='month'), format = '%B%y'), #Hele måneden
+                   Kvartal = paste(substr(RegData$Aar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)], 3,4),
+                                   sprintf('%01.0f', RegData$Kvartal[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)]), sep='-'),
+                   Halvaar = paste(substr(RegData$Aar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)], 3,4),
+                                   sprintf('%01.0f', RegData$Halvaar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)]), sep='-'),
+                   Aar = as.character(RegData$Aar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)]))
+
+  substrRight <- function(x, n){substr(x, nchar(x)-n+1, nchar(x))}
+  if (tidsenhet=='Mnd') {tidtxt <- paste0(substr(tidtxt, 1,3), ' '[tab], substrRight(tidtxt, 2))}
+  RegData$TidsEnhet <- factor(RegData$TidsEnhetSort, levels=1:max(RegData$TidsEnhetSort), labels=tidtxt)
+
+    UtData <- list('RegData'=RegData, 'tidtxt'=tidtxt)
+  return(UtData)
+}
+
