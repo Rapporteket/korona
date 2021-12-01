@@ -267,8 +267,8 @@ SorterOgNavngiTidsEnhet <- function(RegData, tidsenhet='Mnd') {
   #Lager sorteringsvariabel for tidsenhet:
   RegData$TidsEnhetSort <- switch(tidsenhet,
                                   Aar = RegData$Aar-min(RegData$Aar)+1,
-                                  Mnd = RegData$MndNum-min(RegData$MndNum[RegData$Aar==min(RegData$Aar)])+1
-                                  +(RegData$Aar-min(RegData$Aar))*12, #format(RegData$InnDato, '%b%y'), #
+                                  Mnd = RegData$MndNum - min(RegData$MndNum[RegData$Aar==min(RegData$Aar)])+1
+                                  + (RegData$Aar - min(RegData$Aar))*12, #format(RegData$InnDato, '%b%y'), #
                                   Kvartal = RegData$Kvartal-min(RegData$Kvartal[RegData$Aar==min(RegData$Aar)])+1+
                                     (RegData$Aar-min(RegData$Aar))*4,
                                   Halvaar = RegData$Halvaar-min(RegData$Halvaar[RegData$Aar==min(RegData$Aar)])+1+
@@ -286,7 +286,7 @@ SorterOgNavngiTidsEnhet <- function(RegData, tidsenhet='Mnd') {
                    Aar = as.character(RegData$Aar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)]))
 
   substrRight <- function(x, n){substr(x, nchar(x)-n+1, nchar(x))}
-  if (tidsenhet=='Mnd') {tidtxt <- paste0(substr(tidtxt, 1,3), ' '[tab], substrRight(tidtxt, 2))}
+  if (tidsenhet=='Mnd') {tidtxt <- paste0(substr(tidtxt, 1,3), ' '[0], substrRight(tidtxt, 2))}
   RegData$TidsEnhet <- factor(RegData$TidsEnhetSort, levels=1:max(RegData$TidsEnhetSort), labels=tidtxt)
 
     UtData <- list('RegData'=RegData, 'tidtxt'=tidtxt)

@@ -226,8 +226,27 @@ ui <- tagList(
              tabPanel("Resultater",
                       #tags$style(HTML(".tabbable > .nav > li > a {background-color: #DBDBDB;  color:black; width: 300PX;}")),
                       tabsetPanel(
-                        tabPanel("Tellinger",
+
+                        tabPanel("Ant. pasienter",
                                  koronaresultater_UI("resultater_id")
+                        ),
+                        tabPanel("Ant. opphold",
+                                 sidebarPanel(
+                                   selectInput(inputId = 'enhetsNivaaOpph', label='Velg enhetsnivå',
+                                               choices = c("Sykehus"='ShNavn',
+                                                           'HF' = 'HF',
+                                                           'RHF' = 'RHF')
+                                   ),
+                                   selectInput(inputId = 'tidsenhetOpph', label='Velg tidsenhet',
+                                               selected = 'Mnd',
+                                               choices = c("Måned"='Mnd',
+                                                           'Kvartal' = 'Kvartal',
+                                                           'År' = 'Aar')
+                                 )),
+                                 mainPanel(
+                                   h2('Antall opphold i valgt tidsperiode'),
+                                   tableOutput('tabAntOpphEnhTid')
+                                 )
                         ),
                         tabPanel("Belegg",
                                  koronabelegg_UI("koronabelegg_id")
@@ -852,6 +871,15 @@ server <- function(input, output, session) {
   ########## Kevin slutt ##################
 
   #-----------------------------Resultater---------------------------------
+
+
+  output$tabAntOpphEnhTid <- renderTable(
+    tabAntOpphEnhTid(RegData=KoroDataOpph,
+                     #datoTil=Sys.Date(),
+                     enhetsNivaa = input$enhetsNivaaOpph,
+                     tidsEnhet = input$tidsenhetOpph,
+                     antTidsenh=6)
+  )
 
   #------------Fordelinger---------------------
 

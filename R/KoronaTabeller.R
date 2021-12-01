@@ -83,70 +83,46 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
 
 
 
-KoroDataRaa <-  KoronaDataSQL(koble=1)
-KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-RegData <- KoroDataOpph
-
+# KoroDataRaa <-  KoronaDataSQL(koble=1)
+# KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+# RegData <- KoroDataOpph
+#tabAntOpphEnhTid(RegData, enhetsNivaa = 'HF', tidsEnhet = 'Aar', antTidsenh=6)
 
 #' tabAntOpphEnhTid antall opphold siste X (antMnd) mnd
 #' RegData må inneholde ikke-aggregerte data, dvs. data på oppholdsnivå
 #' Summerer antall opphold for hele tidsperioder
-#' @param RegData
+#' @param RegData dataramme
 #' @param enhetsNivaa Aggregeringsnivå RHF, HF, ShNavn (sykehus, standard)
-#' @inheritParams NIRUtvalgEnh
-#' @param tidsEnhet - mnd, kvartal, aar
+#' @param tidsEnhet - Mnd, Kvartal, Aar
 #' @param antTidsenh antall måneder som skal vises
+#' @param datoTil siste registrering som vises
 #'
 #' @export
-tabAntOpphShMnd <- function(RegData, datoTil=Sys.Date(),  #datoFra='2020-03-01',
-                            enhetsnivaa = 'ShNavn', antTidsenh=6){
+tabAntOpphEnhTid <- function(RegData, datoTil=Sys.Date(),
+                            enhetsNivaa = 'ShNavn', tidsEnhet = 'Mnd', antTidsenh=6){
 
-    datoFra <-  lubridate::floor_date(as.Date(datoTil) -
-                                        switch(months(6, abbreviate = T), 'month')
-    )
-    RegDataNy <- SorterOgNavngiTidsEnhet(RegData, tidsenhet='Mnd')
-    UtData <- list('RegData'=RegData, 'tidtxt'=tidtxt)
-  aggVar <-  c(enhetsnivaa, 'InnDato')
-  RegDataDum <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
-                        & RegData$InnDato > as.Date(datoFra, tz='UTC'), aggVar]
-  RegDataDum$Maaned1 <- floor_date(RegDataDum$InnDato, 'month') #For å holde rekkefølgen
-  #RegDataDum$Maaned2 <- format(ymd(RegDataDum$InnDato), '%b %y')
+datoDum <-   switch(tidsEnhet,
+                      Mnd = lubridate::floor_date(as.Date(datoTil) - months(antTidsenh, abbreviate = T), 'month'),
+                      Kvartal = lubridate::floor_date(as.Date(datoTil) -months(antTidsenh*3, abbreviate = T), 'month'),
+                      Aar = lubridate::floor_date(as.Date(datoTil) - 365*antTidsenh)
+                      )
+datoFra <- max('2020-03-01', datoDum) # max(as.Date('2020-03-01'), as.Date(datoDum))
 
+    aggVar <- c(enhetsNivaa, 'InnDato', 'Aar', 'MndNum', 'Kvartal', 'Halvaar')
+    RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
+                          & RegData$InnDato > as.Date(datoFra, tz='UTC'), aggVar]
 
-  tabAvdMnd1 <- table(RegDataDum[ , c('ShNavn', 'Maaned1')]) #RegDataDum[ , c('RHF', 'HFkort','ShNavn', 'Maaned1')], deparse.level = 1)
-  #tabAvdMnd1 <- table(RegDataDum[ , c('ShNavn', 'Maaned1')])
-  colnames(tabAvdMnd1) <- format(ymd(colnames(tabAvdMnd1)), '%b %y')
-  tabAvdMnd1 <- addmargins((tabAvdMnd1))
-  #tabAvdMnd1 <- RegDataDum %>% group_by(Maaned=floor_date(InnDato, "month"), ShNavn) %>%
-  #      summarize(Antall=length(ShNavn))
-  tabAvdMnd1 <- xtable::xtable(tabAvdMnd1)
-  return(tabAvdMnd1)
+    RegDataNy <- SorterOgNavngiTidsEnhet(RegData, tidsenhet= tidsEnhet)
+    RegData <- RegDataNy$RegData
+    tidsenheter <- RegDataNy$tidtxt
+
+  tabEnhTid <- table(RegData[ , c(enhetsNivaa, 'TidsEnhet')])
+  #colnames(tabEnhTid) <- tidsenheter #format(ymd(colnames(tabAvdMnd1)), '%b %y')
+  tabEnhTid <- addmargins((tabEnhTid))
+
+  tabEnhTid <- xtable::xtable(tabEnhTid, digits = 0)
+  return(tabEnhTid)
 }
-
-
-#' Antall opphold siste 5 år
-#'
-#' @param RegData data
-#' @param datoTil sluttdato
-#' @export
-tabAntOpphSh5Aar <- function(RegData, datoTil){
-  AarNaa <- as.numeric(format.Date(datoTil, "%Y"))
-
-  tabAvdAarN <- addmargins(table(RegData[which(RegData$Aar %in% (AarNaa-4):AarNaa), c('ShNavn','Aar')]))
-  rownames(tabAvdAarN)[dim(tabAvdAarN)[1] ]<- 'TOTALT, alle enheter:'
-  colnames(tabAvdAarN)[dim(tabAvdAarN)[2] ]<- 'Siste 5 år'
-  tabAvdAarN <- xtable::xtable(tabAvdAarN)
-  return(tabAvdAarN)
-}
-
-
-
-
-
-
-
-
-
 
 
 
