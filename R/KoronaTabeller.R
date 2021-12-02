@@ -81,12 +81,12 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
 
 
 
-
-
+# antallTidEnhTab (RegData)
+#
 # KoroDataRaa <-  KoronaDataSQL(koble=1)
 # KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
 # RegData <- KoroDataOpph
-#tabAntOpphEnhTid(RegData, enhetsNivaa = 'HF', tidsEnhet = 'Aar', antTidsenh=6)
+# tabAntOpphEnhTid(RegData, enhetsNivaa = 'HF', tidsEnhet = 'Mnd', antTidsenh=6)
 
 #' tabAntOpphEnhTid antall opphold siste X (antMnd) mnd
 #' RegData må inneholde ikke-aggregerte data, dvs. data på oppholdsnivå
@@ -102,11 +102,11 @@ tabAntOpphEnhTid <- function(RegData, datoTil=Sys.Date(),
                             enhetsNivaa = 'ShNavn', tidsEnhet = 'Mnd', antTidsenh=6){
 
 datoDum <-   switch(tidsEnhet,
-                      Mnd = lubridate::floor_date(as.Date(datoTil) - months(antTidsenh, abbreviate = T), 'month'),
-                      Kvartal = lubridate::floor_date(as.Date(datoTil) -months(antTidsenh*3, abbreviate = T), 'month'),
-                      Aar = lubridate::floor_date(as.Date(datoTil) - 365*antTidsenh)
+                      Mnd = lubridate::floor_date(as.Date(datoTil) - months(antTidsenh-1, abbreviate = T), 'month'),
+                      Kvartal = lubridate::floor_date(as.Date(datoTil) -months(antTidsenh*3-1, abbreviate = T), 'month'),
+                      Aar = lubridate::floor_date(as.Date(datoTil) - 365*antTidsenh-1)
                       )
-datoFra <- max('2020-03-01', datoDum) # max(as.Date('2020-03-01'), as.Date(datoDum))
+datoFra <- max(as.Date('2020-03-01'), as.Date(datoDum)) # max(as.Date('2020-03-01'), as.Date(datoDum))
 
     aggVar <- c(enhetsNivaa, 'InnDato', 'Aar', 'MndNum', 'Kvartal', 'Halvaar')
     RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')

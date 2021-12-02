@@ -242,7 +242,13 @@ ui <- tagList(
                                                choices = c("Måned"='Mnd',
                                                            'Kvartal' = 'Kvartal',
                                                            'År' = 'Aar')
-                                 )),
+                                 ),
+                                 dateInput(inputId = 'tilDatoOpph', label = 'Velg sluttdato',
+                                           min = '2020-03-01', max = Sys.Date()),
+                                 sliderInput(inputId = 'antTidsenhOpph', label = 'Velg antall måneder/kvartal/år',
+                                             value = 6, step = 1,
+                                             min = 1, max = 13)
+                                 ),
                                  mainPanel(
                                    h2('Antall opphold i valgt tidsperiode'),
                                    tableOutput('tabAntOpphEnhTid')
@@ -873,12 +879,12 @@ server <- function(input, output, session) {
   #-----------------------------Resultater---------------------------------
 
 
-  output$tabAntOpphEnhTid <- renderTable(
+  output$tabAntOpphEnhTid <- renderTable( #xtable::xtable(
     tabAntOpphEnhTid(RegData=KoroDataOpph,
-                     #datoTil=Sys.Date(),
+                     datoTil=input$tilDatoOpph,
                      enhetsNivaa = input$enhetsNivaaOpph,
                      tidsEnhet = input$tidsenhetOpph,
-                     antTidsenh=6)
+                     antTidsenh=input$antTidsenhOpph), rownames = T, digits = 0
   )
 
   #------------Fordelinger---------------------
