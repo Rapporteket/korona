@@ -11,7 +11,7 @@ library(intensivberedskap) #  library(tidyverse) #
 
   queryInflu <- 'SELECT
               PersonIdBC19Hash
-                ,PatientInRegistryGuid
+                # ,PatientInRegistryGuid
                 ,PatientAge
                 ,PatientGender
                 ,HF
