@@ -245,7 +245,7 @@ ui <- tagList(
                                  ),
                                  dateInput(inputId = 'tilDatoOpph', label = 'Velg sluttdato',
                                            min = '2020-03-01', max = Sys.Date()),
-                                 sliderInput(inputId = 'antTidsenhOpph', label = 'Velg antall hele måneder/kvartal/år (forut for perioden valgt dato inngår i)',
+                                 sliderInput(inputId = 'antTidsenhOpph', label = 'Velg antall hele måneder/kvartal/år forut for "sluttdato"',
                                              value = 6, step = 1,
                                              min = 1, max = 13)
                                  ),
