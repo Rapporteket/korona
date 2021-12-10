@@ -17,6 +17,8 @@ tabAntOpphEnhTid(
 \arguments{
 \item{RegData}{dataramme}
 
+\item{datoTil}{siste registrering som vises}
+
 \item{enhetsNivaa}{Aggregeringsnivå RHF, HF, ShNavn (sykehus, standard)}
 
 \item{tidsEnhet}{- Mnd, Kvartal, Aar}

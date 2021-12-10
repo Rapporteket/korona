@@ -102,8 +102,10 @@ tabAntOpphEnhTid <- function(RegData, datoTil=Sys.Date(),
                             enhetsNivaa = 'ShNavn', tidsEnhet = 'Mnd', antTidsenh=6){
 
 datoDum <-   switch(tidsEnhet,
-                      Mnd = lubridate::floor_date(as.Date(datoTil) - months(antTidsenh-1, abbreviate = T), 'month'),
-                      Kvartal = lubridate::floor_date(as.Date(datoTil) -months(antTidsenh*3-1, abbreviate = T), 'month'),
+                    Mnd = lubridate::floor_date(as.Date(datoTil), 'month') - months(antTidsenh-1, abbreviate = T),
+                    Kvartal = lubridate::floor_date(as.Date(datoTil), 'month') - months(antTidsenh*3-1, abbreviate = T),
+                    #Mnd = lubridate::floor_date(as.Date(datoTil) - months(antTidsenh-1, abbreviate = T), 'month'),
+                     # Kvartal = lubridate::floor_date(as.Date(datoTil) -months(antTidsenh*3-1, abbreviate = T), 'month'),
                       Aar = lubridate::floor_date(as.Date(datoTil) - 365*antTidsenh-1)
                       )
 datoFra <- max(as.Date('2020-03-01'), as.Date(datoDum)) # max(as.Date('2020-03-01'), as.Date(datoDum))
