@@ -122,7 +122,7 @@ datoTil <- max(as.Date(datoTil), as.Date(datoFra))
     RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
                           & RegData$InnDato > as.Date(datoFra, tz='UTC'), aggVar]
 if (dim(RegData)[1]>0){
-    RegDataNy <- SorterOgNavngiTidsEnhet(RegData, tidsenhet= )
+    RegDataNy <- SorterOgNavngiTidsEnhet(RegData, tidsenhet = tidsenhet)
     RegData <- RegDataNy$RegData
     tidsenheter <- RegDataNy$tidtxt
 
