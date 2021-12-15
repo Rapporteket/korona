@@ -263,7 +263,10 @@ erInneliggende <- function(datoer, regdata){
 #' @param tidsenhet tidsenhet: 'Mnd' (standard), 'Kvartal', 'Halvaar', 'Aar',
 #'
 #' @export
-SorterOgNavngiTidsEnhet <- function(RegData, tidsenhet='Mnd') {
+SorterOgNavngiTidsEnhet <- function(RegData, tidsenhet='Mnd', sluttDato='ikkeAngitt') {
+
+
+
   #Lager sorteringsvariabel for tidsenhet:
   RegData$TidsEnhetSort <- switch(tidsenhet,
                                   Aar = RegData$Aar-min(RegData$Aar)+1,
@@ -287,6 +290,7 @@ SorterOgNavngiTidsEnhet <- function(RegData, tidsenhet='Mnd') {
 
   substrRight <- function(x, n){substr(x, nchar(x)-n+1, nchar(x))}
   if (tidsenhet=='Mnd') {tidtxt <- paste0(substr(tidtxt, 1,3), ' '[0], substrRight(tidtxt, 2))}
+
   RegData$TidsEnhet <- factor(RegData$TidsEnhetSort, levels=1:max(RegData$TidsEnhetSort), labels=tidtxt)
 
     UtData <- list('RegData'=RegData, 'tidtxt'=tidtxt)

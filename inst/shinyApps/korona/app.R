@@ -244,7 +244,7 @@ ui <- tagList(
                                                            'År' = 'Aar')
                                  ),
                                  dateInput(inputId = 'tilDatoOpph', label = 'Velg sluttdato',
-                                           min = '2020-03-01', max = Sys.Date()),
+                                           min = '2020-03-15', max = Sys.Date()),
                                  sliderInput(inputId = 'antTidsenhOpph', label = 'Velg antall hele måneder/kvartal/år forut for "sluttdato"',
                                              value = 6, step = 1,
                                              min = 1, max = 13)
@@ -883,7 +883,7 @@ server <- function(input, output, session) {
     tabAntOpphEnhTid(RegData=KoroDataOpph,
                      datoTil=input$tilDatoOpph,
                      enhetsNivaa = input$enhetsNivaaOpph,
-                     tidsEnhet = input$tidsenhetOpph,
+                     tidsenhet = input$tidsenhetOpph,
                      antTidsenh=input$antTidsenhOpph), rownames = T, digits = 0
   )
 

@@ -4,7 +4,7 @@
 \alias{SorterOgNavngiTidsEnhet}
 \title{Tilrettelegge tidsenhetvariabel:}
 \usage{
-SorterOgNavngiTidsEnhet(RegData, tidsenhet = "Mnd")
+SorterOgNavngiTidsEnhet(RegData, tidsenhet = "Mnd", sluttDato = "ikkeAngitt")
 }
 \arguments{
 \item{RegData}{dataramme}
