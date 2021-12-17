@@ -226,8 +226,33 @@ ui <- tagList(
              tabPanel("Resultater",
                       #tags$style(HTML(".tabbable > .nav > li > a {background-color: #DBDBDB;  color:black; width: 300PX;}")),
                       tabsetPanel(
-                        tabPanel("Tellinger",
+
+                        tabPanel("Ant. pasienter",
                                  koronaresultater_UI("resultater_id")
+                        ),
+                        tabPanel("Ant. opphold",
+                                 sidebarPanel(
+                                   selectInput(inputId = 'enhetsNivaaOpph', label='Velg enhetsnivå',
+                                               choices = c("Sykehus"='ShNavn',
+                                                           'HF' = 'HF',
+                                                           'RHF' = 'RHF')
+                                   ),
+                                   selectInput(inputId = 'tidsenhetOpph', label='Velg tidsenhet',
+                                               selected = 'Mnd',
+                                               choices = c("Måned"='Mnd',
+                                                           'Kvartal' = 'Kvartal',
+                                                           'År' = 'Aar')
+                                 ),
+                                 dateInput(inputId = 'tilDatoOpph', label = 'Velg sluttdato',
+                                           min = '2020-03-15', max = Sys.Date()),
+                                 sliderInput(inputId = 'antTidsenhOpph', label = 'Velg antall hele måneder/kvartal/år forut for "sluttdato"',
+                                             value = 6, step = 1,
+                                             min = 1, max = 13)
+                                 ),
+                                 mainPanel(
+                                   h2('Antall opphold i valgt tidsperiode'),
+                                   tableOutput('tabAntOpphEnhTid')
+                                 )
                         ),
                         tabPanel("Belegg",
                                  koronabelegg_UI("koronabelegg_id")
@@ -357,6 +382,10 @@ ui <- tagList(
                           selectInput(inputId = "bildeformatAndel",
                                       label = "Velg format for nedlasting av figur",
                                       choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
+                          # selectInput(inputId = "bildeformatFord",
+                          #             label = "Velg format for nedlasting av figur",
+                          #             choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
+
                           selectInput(inputId = "tidsenhetAndel", label="Velg tidsenhet",
                                       choices = rev(c('År'= 'Aar', 'Halvår' = 'Halvaar',
                                                       'Kvartal'='Kvartal', 'Måned'='Mnd'))),
@@ -501,7 +530,7 @@ tabPanel(p("Registeradm",
                         br(),
                         br(),
                         h4('Data til FHI'),
-                        selectInput("hvilkeFilerTilFHI", "Data:", c("Pandemi og beredskap" = "DataFHIPanBered",
+                        selectInput("hvilkeFilerTilFHI", "Data:", c("Pandemi, beredskap og influensa" = "DataFHIPanBeredInflu", #c("Pandemi og beredskap" = "DataFHIPanBered",
                                                                     "Testfil" = "Testfil")),
                         actionButton("bestillDataTilFHI", "Bestill data til FHI"),
                         br(),
@@ -849,6 +878,15 @@ server <- function(input, output, session) {
 
   #-----------------------------Resultater---------------------------------
 
+
+  output$tabAntOpphEnhTid <- renderTable( #xtable::xtable(
+    tabAntOpphEnhTid(RegData=KoroDataOpph,
+                     datoTil=input$tilDatoOpph,
+                     enhetsNivaa = input$enhetsNivaaOpph,
+                     tidsenhet = input$tidsenhetOpph,
+                     antTidsenh=input$antTidsenhOpph), rownames = T, digits = 0
+  )
+
   #------------Fordelinger---------------------
 
   output$fordelinger <- renderPlot({
@@ -892,6 +930,7 @@ server <- function(input, output, session) {
   )
 
   observe({
+    #print(paste0('FigurAndelTid', valgtVar=input$valgtVarAndel, '_', Sys.Date(), '.', input$bildeformatAndel))
     UtDataFord <- KoronaFigAndeler(RegData=KoroData,
                                    valgtVar=input$valgtVarFord,
                                    valgtEnhet = input$valgtEnhetRes,
@@ -958,42 +997,59 @@ server <- function(input, output, session) {
   }, height = 300, width = 1000 #height = function() {session$clientData$output_fordelinger_width}
   )
 
-  # observe({
-  #   UtDataAndel <- KoronaFigAndeler(RegData=KoroData,
-  #                                  valgtVar=input$valgtVarAndel,
-  #                                  valgtEnhet = input$valgtEnhetAndel,
-  #                                  datoFra=input$valgtDatoAndel[1],
-  #                                  datoTil=input$valgtDatoAndel[2],
-  #                                  enhetsNivaa= egetEnhetsNivaa,
-  #                                  enhetsUtvalg = as.numeric(input$enhetsUtvalgAndel),
-  #                                  dodSh=as.numeric(input$dodShAndel),
-  #                                  aarsakInn = as.numeric(input$aarsakInnAndel),
-  #                                  erMann=as.numeric(input$erMannAndel),
-  #                                  skjemastatusInn=as.numeric(input$skjemastatusInnAndel),
-  #                                  skjemastatusUt=as.numeric(input$skjemastatusUtAndel),
-  #                                  session = session)
-  #
-  #
-  #   #tab <- lagTabavFigAndel(UtDataFraFig = UtDataAndel)
-  #
-  #   # output$LastNedFigAndelTid <- downloadHandler(
-  #   #   filename = function(){
-  #   #     paste0('FigurAndelTid', valgtVar=input$valgtVarAndelTid, '_', Sys.time(), '.', input$bildeformatAndel)
-  #   #   },
-  #   #
-  #   #   content = function(file){
-  #   #     KoronaFigAndelTid(...,
-  #   #                      outfile = file)
-  #   #   }
-  #   # )
-  #
-  #   # output$tittelAndel <- renderUI({
-  #   #   tagList(
-  #   #     h3(HTML(paste(UtDataAndel$tittel, sep='<br />'))),
-  #   #     h5(HTML(paste0(UtDataAndel$utvalgTxt, '<br />')))
-  #   #   )}) #, align='center'
-  #
-  # }) #observe
+
+
+    output$LastNedFigAndelTid <- downloadHandler(
+      filename = function(){
+        paste0('FigurAndelTid', valgtVar=input$valgtVarAndel, '_', Sys.time(), '.', input$bildeformatAndel)
+        #paste0('FordelingsFigur', valgtVar=input$valgtVarFord, '_', Sys.time(), '.', input$bildeformatFord)
+      },
+
+      content = function(file){
+        KoronaFigAndelTid(RegData=KoroData,
+                          valgtVar=input$valgtVarAndel,
+                          valgtEnhet = input$valgtEnhetAndel, #egenEnhet,  #
+                          enhetsNivaa=egetEnhetsNivaa,
+                          datoFra=input$valgtDatoAndel[1],
+                          datoTil=input$valgtDatoAndel[2],
+                          enhetsUtvalg = as.numeric(input$enhetsUtvalgAndel),
+                          dodSh=as.numeric(input$dodShAndel),
+                          aarsakInn = as.numeric(input$aarsakInnAndel),
+                          erMann=as.numeric(input$erMannAndel),
+                          beredPas = as.numeric(input$beredPasAndel),
+                          #skjemastatusInn=as.numeric(input$skjemastatusInnAndel),
+                          #skjemastatusUt=as.numeric(input$skjemastatusUtAndel),
+                          tidsenhet=input$tidsenhetAndel,
+                          session = session,
+                          outfile = file)
+      }
+    )
+
+    # observe({
+    #   UtDataAndel <- KoronaFigAndeler(RegData=KoroData,
+    #                                   valgtVar=input$valgtVarAndel,
+    #                                   valgtEnhet = input$valgtEnhetAndel,
+    #                                   datoFra=input$valgtDatoAndel[1],
+    #                                   datoTil=input$valgtDatoAndel[2],
+    #                                   enhetsNivaa= egetEnhetsNivaa,
+    #                                   enhetsUtvalg = as.numeric(input$enhetsUtvalgAndel),
+    #                                   dodSh=as.numeric(input$dodShAndel),
+    #                                   aarsakInn = as.numeric(input$aarsakInnAndel),
+    #                                   erMann=as.numeric(input$erMannAndel),
+    #                                   skjemastatusInn=as.numeric(input$skjemastatusInnAndel),
+    #                                   skjemastatusUt=as.numeric(input$skjemastatusUtAndel),
+    #                                   session = session)
+
+
+      #tab <- lagTabavFigAndel(UtDataFraFig = UtDataAndel)
+
+    # output$tittelAndel <- renderUI({
+    #   tagList(
+    #     h3(HTML(paste(UtDataAndel$tittel, sep='<br />'))),
+    #     h5(HTML(paste0(UtDataAndel$utvalgTxt, '<br />')))
+    #   )}) #, align='center'
+
+#  }) #observe
   #----------Datakvalitet-------------------------
   innManglerUtTab <- innManglerUt(RegData=KoroDataRaa, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa)
   output$innManglerUtTab <- renderTable(innManglerUtTab)
@@ -1016,6 +1072,20 @@ server <- function(input, output, session) {
     content = function(file, filename){
       write.csv2(TabDblInn, file, row.names = F, na = '')
     })
+
+
+
+
+
+  #Antall opphold
+  output$tabOpphHF <- renderTable({
+      if (rolle == 'LU') {KoroDataOpph <- KoroDataOpph[which(KoroDataOpph$RHF == egetRHF), ]}
+      OpphHF <- KoroDataOpph %>% dplyr::group_by(RHF, HFkort) %>% dplyr::summarise(Antall = n(), .groups = 'keep')
+      colnames(OpphHF) <- c('RHF', 'HF', 'Antall')
+      OpphHF
+    }, rownames = F, digits = 0)
+
+
 
   #-------------Intensivregistreringer------------------------
 

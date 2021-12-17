@@ -137,9 +137,11 @@ BeredskapDataPpFHI <- RegData[ ,varFHIpp]
 # write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
+InfluensaDataRaaFHI <- korona::lagInfluDataFHI()
 
 UtData <- list(PandemiDataRaaFHI = PandemiDataRaaFHI, PandemiDataPpFHI = PandemiDataPpFHI,
-               BeredskapDataRaaFHI = BeredskapDataRaaFHI, BeredskapDataPpFHI = BeredskapDataPpFHI)
+               BeredskapDataRaaFHI = BeredskapDataRaaFHI, BeredskapDataPpFHI = BeredskapDataPpFHI,
+               InfluensaDataRaaFHI = InfluensaDataRaaFHI)
 return(UtData)
 
 }

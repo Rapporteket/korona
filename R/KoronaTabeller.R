@@ -13,9 +13,10 @@
 #'
 #' @return
 #' @export
+#'
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoTil=Sys.Date(), #valgtVar='innlagt',
-                            tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF',
-                            HF=0, skjemastatusInn=9, aarsakInn=9, dodSh=9){
+                            tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF', HF=0,
+                            skjemastatusInn=9, aarsakInn=9, dodSh=9){
   #valgtEnhet representerer eget RHF/HF
 #if (valgtVar == 'utskrevet') {}
 
@@ -77,6 +78,65 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
   return(UtData <- list(Tab=TabTidEnh, utvalgTxt=c(valgtEnhet, UtData$utvalgTxt), Ntest=dim(RegData)[1], Tab_tidy=Tab_tidy))
 }
+
+
+
+# antallTidEnhTab (RegData)
+#
+# library(korona)
+# KoroDataRaa <-  KoronaDataSQL(koble=1)
+# KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+# RegData <- KoroDataOpph
+# enhetsNivaa <- 'HF'
+# tidsenhet = 'Aar'
+# datoTil = '2020-03-01'
+# antTidsenh=1
+# tabAntOpphEnhTid(RegData=RegData, enhetsNivaa = 'HF', tidsenhet = 'Aar', datoTil = '2020-03-01', antTidsenh=1)
+
+#' tabAntOpphEnhTid antall opphold siste X (antMnd) mnd
+#' RegData må inneholde ikke-aggregerte data, dvs. data på oppholdsnivå
+#' Summerer antall opphold for hele tidsperioder
+#' @param RegData dataramme
+#' @param enhetsNivaa Aggregeringsnivå RHF, HF, ShNavn (sykehus, standard)
+#' @param tidsEnhet - Mnd, Kvartal, Aar
+#' @param antTidsenh antall måneder som skal vises
+#' @param datoTil siste registrering som vises
+#'
+#' @export
+tabAntOpphEnhTid <- function(RegData, datoTil=Sys.Date(),
+                            enhetsNivaa = 'ShNavn', tidsenhet = 'Mnd', antTidsenh=6){
+
+  #Må legge på "levels" for å unngå at f.eks. siste måned ikke har registreringer
+
+datoDum <-   switch(tidsenhet,
+                    Mnd = lubridate::floor_date(as.Date(datoTil), 'month') - months(antTidsenh, abbreviate = T), #antTidsenh-1
+                    Kvartal = lubridate::floor_date(as.Date(datoTil), 'month') - months(antTidsenh*3, abbreviate = T), #antTidsenh*3-1
+                    #Mnd = lubridate::floor_date(as.Date(datoTil) - months(antTidsenh-1, abbreviate = T), 'month'),
+                     # Kvartal = lubridate::floor_date(as.Date(datoTil) -months(antTidsenh*3-1, abbreviate = T), 'month'),
+                      Aar = lubridate::floor_date(as.Date(datoTil) - 365*antTidsenh-1)
+                      )
+datoFra <- max(as.Date('2020-03-10'), as.Date(datoDum)) # max(as.Date('2020-03-01'), as.Date(datoDum))
+datoTil <- max(as.Date(datoTil), as.Date(datoFra))
+
+    aggVar <- c(enhetsNivaa, 'InnDato', 'Aar', 'MndNum', 'Kvartal', 'Halvaar')
+    RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
+                          & RegData$InnDato > as.Date(datoFra, tz='UTC'), aggVar]
+if (dim(RegData)[1]>0){
+    RegDataNy <- SorterOgNavngiTidsEnhet(RegData, tidsenhet = tidsenhet)
+    RegData <- RegDataNy$RegData
+    tidsenheter <- RegDataNy$tidtxt
+
+  tabEnhTid <- table(RegData[ , c(enhetsNivaa, 'TidsEnhet')])
+  #colnames(tabEnhTid) <- tidsenheter #format(ymd(colnames(tabAvdMnd1)), '%b %y')
+  tabEnhTid <- addmargins((tabEnhTid))
+
+  tabEnhTid <- xtable::xtable(tabEnhTid, digits = 0)
+} else {
+  tabEnhTid <- 'Ingen registreringer'
+}
+  return(tabEnhTid)
+}
+
 
 
 #' Status nå
@@ -390,5 +450,6 @@ PasMdblReg <- function(RegData, tidsavvik=0){
   tabUt <- TabDbl[order(TabDbl$PatientInRegistryGuid, TabDbl$FormDate), ]
   } else {tabUt <- paste0('Ingen registreringer med mindre enn ', tidsavvik, 'minutter mellom registreringene for samme pasient.')}
 }
+
 
 

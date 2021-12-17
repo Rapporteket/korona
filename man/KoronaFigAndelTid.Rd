@@ -26,7 +26,6 @@ KoronaFigAndelTid(
   beredPas = 9,
   outfile = "",
   lagFig = 1,
-  offData = 0,
   ...
 )
 }

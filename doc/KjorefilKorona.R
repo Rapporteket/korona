@@ -16,6 +16,45 @@ KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleB
 KoronaFigAndelTid(RegData=KoroIntData)
 
 
+#Tidsenheter og oppholdstabell
+KoroDataRaa <- KoronaDataSQL(datoFra = '2020-01-01')
+KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+
+tabAntOpphEnhTid(RegData=KoroDataOpph, datoTil='2021-08-31',
+                             enhetsNivaa = 'ShNavn', tidsEnhet = 'Kvartal', antTidsenh=4)
+
+tidsEnhet = 'Aar'
+antTidsenh=4
+datoTil='2021-08-31'
+(datoDum <-   switch(tidsEnhet,
+                    Mnd = lubridate::floor_date(as.Date(datoTil), 'month') - months(antTidsenh-1, abbreviate = T),
+                    Kvartal = lubridate::floor_date(as.Date(datoTil), 'month') - months(antTidsenh*3-1, abbreviate = T),
+                    Aar = lubridate::floor_date(as.Date(datoTil) - 365*antTidsenh-1)
+))
+library(lubridate)
+datoFra <- max(as.Date('2020-03-01'), as.Date(datoDum)) # max(as.Date('2020-03-01'), as.Date(datoDum))
+
+aggVar <- c(enhetsNivaa, 'InnDato', 'Aar', 'MndNum', 'Kvartal', 'Halvaar')
+RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
+                   & RegData$InnDato > as.Date(datoFra, tz='UTC'), aggVar]
+
+RegDataNy <- SorterOgNavngiTidsEnhet(RegData, tidsenhet= tidsEnhet)
+RegData <- RegDataNy$RegData
+tidsenheter <- RegDataNy$tidtxt
+
+
+# AndelTid
+NutvTxt <- 4
+c(5-0.75*(0:(NutvTxt-1)))
+KoronaFigAndelTid(RegData=RegData, hentData=0, valgtVar='alder_u18',
+                              datoFra='2019-12-15', datoTil=Sys.Date(), tidsenhet='Kvartal',
+                              dod=1, reshID=0, erMann=1, minald=10, maxald=110, #
+                              skjemastatusInn=9, skjemastatusUt=2, dodSh=0, aarsakInn=9,
+                              #enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=0,
+                              beredPas=9)
+
+
+
 
 #Antall innlagte på Gjøvik
 705476
@@ -23,7 +62,7 @@ HFresh <- 100091
 test <- RegDataRaa[RegDataRaa$UnitId == 705476, c("Innleggelse", "Utskrivningsdato", "FormStatus", "PatientInRegistryGuid")]
 RegDataRaa[RegDataRaa$UnitId == 705476 & is.na(RegDataRaa$Utskrivningsdato), ]
 
-table(RegData$ShNavnUt9
+table(RegData$ShNavnUt)
 
 
 unique(RegData[, c('HF',"HFresh", "ReshId", 'ShNavn')])

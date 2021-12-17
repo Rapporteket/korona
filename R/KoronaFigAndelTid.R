@@ -22,7 +22,7 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
                               dod='', reshID=0, erMann=9, minald=0, maxald=110, #
                               skjemastatusInn=9, skjemastatusUt=9, dodSh=9, aarsakInn=9,
                               enhetsNivaa='RHF', valgtEnhet='Alle', enhetsUtvalg=0,
-                              beredPas=9, outfile='', lagFig=1, offData=0,...) {
+                              beredPas=9, outfile='', lagFig=1, ...) {
 
 
    if ("session" %in% names(list(...))) {
@@ -31,17 +31,9 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
    if (hentData == 1) {
          RegData <- KoronaPreprosesser(KoronaDataSQL(koble=1), aggPers = 1 )
    }
-      # if (offData == 1) {
-      #       utvalgsInfo <- RegData$utvalgsInfo
-      #       KImaal <- RegData$KImaal
-      #       sortAvtagende <- RegData$sortAvtagende
-      #       tittel <- RegData$tittel
-      #       RegData <- RegData$KoronaRegData01Off
-      # }
 
       #------- Tilrettelegge variable
       varTxt <- ''
-      if (offData == 0) {
             KoronaVarSpes <- KoronaVarTilrettelegg(RegData=RegData, valgtVar=valgtVar, figurtype = 'andelGrVar')
             RegData <- KoronaVarSpes$RegData
             sortAvtagende <- KoronaVarSpes$sortAvtagende
@@ -49,14 +41,12 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
             KImaal <- KoronaVarSpes$KImaal
             KImaaltxt <- ifelse(KoronaVarSpes$KImaaltxt=='', '', paste0('Mål: ',KoronaVarSpes$KImaaltxt))
             tittel <- KoronaVarSpes$tittel
-      }
 
 
       #------- Gjøre utvalg
       smltxt <- ''
       medSml <- 0
 
-      if (offData == 0) {
             if (reshID==0) {enhetsUtvalg <- 0}
             KoronaUtvalg <- KoronaUtvalg(RegData=RegData, datoFra=datoFra, datoTil=datoTil,
                                       minald=minald, maxald=maxald, erMann=erMann,
@@ -69,26 +59,26 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
             medSml <- KoronaUtvalg$medSml
             utvalgTxt <- KoronaUtvalg$utvalgTxt
             ind <- KoronaUtvalg$ind
-      }
-      # if (offData == 1) {KoronaUtvalg <- KoronaUtvalgOff(RegData=RegData, aldGr=aldGr, aar=aar, erMann=erMann,
-      #                                              InnMaate=InnMaate, grType=grType)
-      #       utvalgTxt <- c(KoronaUtvalg$utvalgsTxt, utvalgsInfo)
-      #       ind <- list(Hoved = 1:dim(RegData)[1], Rest = NULL)}
+
       RegData <- KoronaUtvalg$RegData
-      Ngrense <-ifelse(valgtVar %in% c('OrganDonationCompletedStatus', 'OrganDonationCompletedCirc'),
-                       0,10)
-      #------------------------Klargjøre tidsenhet--------------
+      Ngrense <- 10
       N <- list(Hoved = dim(RegData)[1], Rest=0)
+
+      #--------------- Gjøre beregninger ------------------------------
+      AggVerdier <- list(Hoved = 0, Rest =0)
+      Ngr <- list(Hoved = 0, Rest =0)
+      N <- list(Hoved = length(ind$Hoved), Rest =length(ind$Rest))
+      grtxt2 <- ''
+      vektor <- c('Aar','Halvaar','Kvartal','Mnd')
+      xAkseTxt <- paste0(c('Innleggelsesår', 'Innleggelsesår', 'Innleggelseskvartal', 'Innleggelsesmåned')
+                         [which(tidsenhet==vektor)])
+      yAkseTxt <- 'Andel (%)'
+      hovedgrTxt <- ''
+
       if (N$Hoved>Ngrense) {
-            RegDataFunk <- intensiv::SorterOgNavngiTidsEnhet(RegData=RegData, tidsenhet = tidsenhet)
+        #Klargjøre tidsenhet
+        RegDataFunk <- intensiv::SorterOgNavngiTidsEnhet(RegData=RegData, tidsenhet = tidsenhet)
             RegData <- RegDataFunk$RegData
-
-            #--------------- Gjøre beregninger ------------------------------
-
-            AggVerdier <- list(Hoved = 0, Rest =0)
-            Ngr <- list(Hoved = 0, Rest =0)
-			N <- list(Hoved = length(ind$Hoved), Rest =length(ind$Rest))
-
 
             NAarHoved <- tapply(RegData[ind$Hoved, 'Variabel'], RegData[ind$Hoved ,'TidsEnhet'], length) #Tot. ant. per tidsenhet
             Ngr$Hoved <- tapply(RegData[ind$Hoved, 'Variabel'], RegData[ind$Hoved ,'TidsEnhet'],sum, na.rm=T) #Ant. hendelser per tidsenhet
@@ -98,33 +88,23 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
             AggVerdier$Rest <- Ngr$Rest/NAarRest*100
 
             grtxt2 <- paste0('(', sprintf('%.1f',AggVerdier$Hoved), '%)')
-            yAkseTxt <- 'Andel (%)'
-            vektor <- c('Aar','Halvaar','Kvartal','Mnd')
-            xAkseTxt <- paste0(c('Innleggelsesår', 'Innleggelsesår', 'Innleggelseskvartal', 'Innleggelsesmåned')
-                               [which(tidsenhet==vektor)])
             hovedgrTxt=KoronaUtvalg$hovedgrTxt
-
-            FigDataParam <- list(AggVerdier=AggVerdier, N=N,
-                                 Ngr=Ngr,
-                                 KImaal <- KImaal,
-                                 KImaaltxt <- KImaaltxt,
-                                 grtxt=levels(RegData$TidsEnhet),
-                                 grtxt2=grtxt2,
-                                 varTxt=varTxt,
-                                 tittel=tittel,
-                                 retn='V',
-                                 xAkseTxt=xAkseTxt,
-                                 yAkseTxt=yAkseTxt,
-                                 utvalgTxt=KoronaUtvalg$utvalgTxt,
-                                 medSml=medSml,
-                                 hovedgrTxt=hovedgrTxt,
-                                 smltxt=KoronaUtvalg$smltxt)
-
       }
-      # FigAndelTid <- function(RegData, AggVerdier, AggTot=0, Ngr, tittel='mangler tittel', smltxt='', N, retn='H',
-      #                         yAkseTxt='', utvalgTxt='', grTypeTxt='', varTxt='', grtxt2='', hovedgrTxt='', #tidtxt,
-      #                         valgtMaal='Andel', cexgr=1, medSml=0, fargepalett='BlaaOff', xAkseTxt='',
-      #                         medKI=0, KImaal = NA, KImaaltxt = '', outfile='') { #Ngr=list(Hoved=0), grVar='',
+      FigDataParam <- list(AggVerdier=AggVerdier, N=N,
+                           Ngr=Ngr,
+                           KImaal <- KImaal,
+                           KImaaltxt <- KImaaltxt,
+                           grtxt=levels(RegData$TidsEnhet),
+                           grtxt2=grtxt2,
+                           varTxt=varTxt,
+                           tittel=tittel,
+                           retn='V',
+                           xAkseTxt=xAkseTxt,
+                           yAkseTxt=yAkseTxt,
+                           utvalgTxt=KoronaUtvalg$utvalgTxt,
+                           medSml=medSml,
+                           hovedgrTxt=hovedgrTxt,
+                           smltxt=KoronaUtvalg$smltxt)
 
       if (lagFig == 1) {
                   #-----------Figur---------------------------------------
@@ -135,8 +115,8 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
                   plot.new()
                   title(main=paste0('variabel: ', valgtVar))	#, line=-6)
                   legend('topleft',utvalgTxt, bty='n', cex=0.9, text.col=farger[1])
-                  text(0.5, 0.65, 'Færre enn 10 registreringer i hoved-', cex=1.2)
-                  text(0.55, 0.6, 'eller sammenlikningsgruppe', cex=1.2)
+                  text(0.5, 0.65, 'For få registreringer', cex=1.2)
+                  #text(0.55, 0.55, 'eller sammenlikningsgruppe', cex=1.2)
                   if ( outfile != '') {dev.off()}
 
             } else {
@@ -191,7 +171,10 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
                   }
 
                   #Tekst som angir hvilket utvalg som er gjort
-                  mtext(utvalgTxt, side=3, las=1, cex=0.9, adj=0, col=fargeRest, line=c(3+0.8*((NutvTxt-1):0)))
+                  mtext(utvalgTxt, side=3, las=1, cex=0.9, adj=0, col=fargeRest,
+                        #line=c(3+0.8*((NutvTxt-1):0))
+                        line=c(4.5-0.75*(0:(NutvTxt-1)))
+                  )
 
                   par('fig'=c(0, 1, 0, 1))
                   if ( outfile != '') {dev.off()}

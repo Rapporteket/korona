@@ -9,7 +9,7 @@ person, for hvert register}
 sendDataFilerFHI(zipFilNavn = "Testfil", brukernavn = "testperson")
 }
 \arguments{
-\item{zipFilNavn}{Navn på fila som skal kjøres. DataFHIPanBered, Testfil}
+\item{zipFilNavn}{Navn på fila som skal kjøres. DataFHIPanBeredInflu, Testfil}
 
 \item{brukernavn}{Innlogget brukernavn}
 }

@@ -145,7 +145,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 #' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
 #' person, for hvert register
 #'
-#' @param zipFilNavn Navn på fila som skal kjøres. DataFHIPanBered, Testfil
+#' @param zipFilNavn Navn på fila som skal kjøres. DataFHIPanBeredInflu, Testfil
 #' @param brukernavn Innlogget brukernavn
 #' @return Filsti til fil med filsti til zip...
 #' @export
@@ -163,13 +163,13 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   kat <- getwd()
 
   #zipFilNavn <- paste0(zipFilNavn, Sys.Date())
-  if (zipFilNavn == 'DataFHIPanBered') {
+  if (zipFilNavn == 'DataFHIPanBeredInflu') {
     Filer <- korona::lagDatafilerTilFHI()
 
     raplog::subLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
                       msg = paste0("Har hentet ekte filer for sending til FHI"))
 
-    datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI')
+    datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI', 'InfluensaDataRaaFHI')
     for (fil in datasett){
       Fil <- Filer[[fil]]
       write.table(Fil, file = paste0(fil, '.csv'),
@@ -229,7 +229,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   #Fjern filer.. unntatt filstifila
   if (zipFilNavn == 'Testfil') {
     dum <- file.remove(c('Testfil1.csv', 'Testfil2.csv', 'Testfil.zip')) }
-  if (zipFilNavn == 'DataFHIPanBered') {
+  if (zipFilNavn == 'DataFHIPanBeredInflu') {
     dum <- file.remove(paste0(zipFilNavn, '.zip'), paste0(datasett, '.csv'))
     }
 
@@ -254,5 +254,46 @@ erInneliggende <- function(datoer, regdata){
 
   auxfunc <- function(x) {(x >  regdata$InnDato & x <= regdata$UtDato) | (x >  regdata$InnDato & is.na( regdata$UtDato))}
   map_df(datoer, auxfunc)
+}
+
+
+
+#' Tilrettelegge tidsenhetvariabel:
+#' @param RegData dataramme
+#' @param tidsenhet tidsenhet: 'Mnd' (standard), 'Kvartal', 'Halvaar', 'Aar',
+#'
+#' @export
+SorterOgNavngiTidsEnhet <- function(RegData, tidsenhet='Mnd', sluttDato='ikkeAngitt') {
+
+
+
+  #Lager sorteringsvariabel for tidsenhet:
+  RegData$TidsEnhetSort <- switch(tidsenhet,
+                                  Aar = RegData$Aar-min(RegData$Aar)+1,
+                                  Mnd = RegData$MndNum - min(RegData$MndNum[RegData$Aar==min(RegData$Aar)])+1
+                                  + (RegData$Aar - min(RegData$Aar))*12, #format(RegData$InnDato, '%b%y'), #
+                                  Kvartal = RegData$Kvartal-min(RegData$Kvartal[RegData$Aar==min(RegData$Aar)])+1+
+                                    (RegData$Aar-min(RegData$Aar))*4,
+                                  Halvaar = RegData$Halvaar-min(RegData$Halvaar[RegData$Aar==min(RegData$Aar)])+1+
+                                    (RegData$Aar-min(RegData$Aar))*2
+  )
+
+  tidtxt <- switch(tidsenhet,
+                   #Henter fullt månedsnavn og forkorter etterpå.
+                   Mnd = format.Date(seq(from=lubridate::floor_date(as.Date(min(as.Date(RegData$InnDato), na.rm = T)), 'month'),
+                                         to=max(as.Date(RegData$InnDato), na.rm = T), by='month'), format = '%B%y'), #Hele måneden
+                   Kvartal = paste(substr(RegData$Aar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)], 3,4),
+                                   sprintf('%01.0f', RegData$Kvartal[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)]), sep='-'),
+                   Halvaar = paste(substr(RegData$Aar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)], 3,4),
+                                   sprintf('%01.0f', RegData$Halvaar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)]), sep='-'),
+                   Aar = as.character(RegData$Aar[match(1:max(RegData$TidsEnhetSort), RegData$TidsEnhetSort)]))
+
+  substrRight <- function(x, n){substr(x, nchar(x)-n+1, nchar(x))}
+  if (tidsenhet=='Mnd') {tidtxt <- paste0(substr(tidtxt, 1,3), ' '[0], substrRight(tidtxt, 2))}
+
+  RegData$TidsEnhet <- factor(RegData$TidsEnhetSort, levels=1:max(RegData$TidsEnhetSort), labels=tidtxt)
+
+    UtData <- list('RegData'=RegData, 'tidtxt'=tidtxt)
+  return(UtData)
 }
 

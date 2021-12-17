@@ -11,6 +11,7 @@
 #'
 KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0)	#, reshID=reshID)
 {
+  data(ReshNivaa)
    # Endre variabelnavn:
    names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
    names(RegData)[which(names(RegData) == 'UnitId')] <- 'ReshId'
@@ -30,6 +31,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0)	#, resh
 
    # Enhetsnivå-mapping
    #Legger på HFresh
+  # data("ReshNivaa")
    RegData$HFresh <- ReshNivaa$HFresh[match(RegData$ReshId, ReshNivaa$ShResh)]
    RegData$HFresh[RegData$ReshId==108595] <- 100091  #Innlandet, psyk.
    RegData$HFresh[RegData$ReshId == 700138] <- 100100 #Stavern, rehab
