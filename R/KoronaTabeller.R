@@ -221,8 +221,8 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   formatPst <- function(x, antDes){paste0(sprintf(paste0('%.', antDes,'f'),x),'%')}
 
   TabFerdigeReg <- rbind(
-    'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'Alder (år)' = c(med_IQR(Alder), N, ''),
+    'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
     'BMI' = c(med_IQR(BMI), N, ''),
     'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
     'Isolert ved innleggelse' = c('','','', Nisolert, pstIsolert),
@@ -239,7 +239,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                  digits=0,
                  align = c('l','r','r','c', 'r','r'),
                  caption='Ferdigstilte opphold.
-                 IQR (Inter quartile range) - 50% av registreringene er i dette intervallet.')
+                 IQR (Inter quartile range) - 50 \\% av registreringene er i dette intervallet.')
   return(invisible(UtData <- list(Tab=TabFerdigeReg,
                                   utvalgTxt = Utvalg$utvalgTxt,
                                   Ntest=N,
@@ -267,7 +267,6 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
 
   N <- dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
 
-  #AntAndel <- function(Var, Nevner){c(sum(Var), sum(Var)/Nevner)}
   AntAndel <- function(Var, Nevner){
     Ant <- sum(Var, na.rm=T)
     c(Ant, paste0(sprintf('%.0f', 100*(Ant/Nevner)),' %'))}
@@ -289,7 +288,7 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
     'Fedme (BMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
-    'Antall pasienter (i tabellen)' = c(N, '')
+    'Totalt antall (N)' = c(N, '')
     #   'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
   )
 
@@ -297,7 +296,7 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
 
   #if (Ntest>3){
 
-  colnames(TabRisiko) <- c('Antall', 'Andel')
+  colnames(TabRisiko) <- c('Antall pasienter', 'Andel pasienter')
 
   xtable::xtable(TabRisiko,
                  digits=0,
