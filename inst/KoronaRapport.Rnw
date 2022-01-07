@@ -121,10 +121,10 @@ For resultater basert på personaggregerte data, er skjema aggregert til ett for
 uavhengig av om pasienten har reinnleggelser. For personaggregerte resultater vises pasienter
 hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
 ferdigstilt eller ikke, dersom ikke annet er oppgitt. \\
-\\
+%\vspace{0.5 cm}
 \bf{Rapporten gir en oversikt over:}
 %\setlist[itemize]{noitemsep}
-\begin{itemize}{noitemsep}
+\begin{itemize} %{noitemsep}
 \item Antall pasienter inneliggende på sykehus på rapporteringstidspunktet, samt antall innlagt, utskrevet og død dagen før.
 \item Antall pasienter inneliggende på sykehus med hovedårsak covid-19, per helseforetak.
 \item Antall pasienter inneliggende på sykehus der hovedårsak IKKE er covid-19, per helseforetak.
@@ -138,8 +138,8 @@ ferdigstilt eller ikke, dersom ikke annet er oppgitt. \\
 At et opphold er ferdigstilt vil si at opplysningene er kontrollert og ferdig registrert.
 \end{itemize}
 
-Rapporten er kjørt for: rolle: \Sexpr{rolle}  %, \Sexpr{class(rolle)}
-enhetsnivå: \Sexpr{enhetsNivaa} %, \Sexpr{class(enhetsNivaa)}
+Rapporten er kjørt for: rolle: \Sexpr{rolle},  %, \Sexpr{class(rolle)}
+enhetsnivå: \Sexpr{enhetsNivaa}, %, \Sexpr{class(enhetsNivaa)}
 Enhet: \Sexpr{valgtEnhet} %, \Sexpr{class(valgtEnhet)}
 
 
