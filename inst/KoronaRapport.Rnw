@@ -16,6 +16,7 @@
 \newcolumntype{L}{>{\centering\arraybackslash}m{3cm}}
 
 
+
 <<'initOpts',include=FALSE>>=
 knitr::opts_chunk$set(warnings=FALSE,echo=FALSE, message=FALSE)
 options(warn = -1)
@@ -28,7 +29,7 @@ library(xtable)
 library(kableExtra)
 
 forHvem <- ifelse(rolle=='SC', 'hele landet', valgtEnhet)
-Tittel <- paste0('\bf{Norsk intensiv- og pandemiregister (NIPaR)} \\
+Tittel <- paste0('Norsk intensiv- og pandemiregister (NIPaR) \\
 Automatisk generert rapport - sykehusbehandlede pasienter med covid-19, \\ ', forHvem)
 @
 
@@ -107,10 +108,10 @@ NinneliggPgaCov <- sum(is.na(Pandemi$UtDato))
 @
 
 
-\begin{frame}[fragile] {Hva er dette?}
+\begin{frame}[fragile] {Om dokumentet}
 
 Dette er en automatisk generert rapport fra Norsk intensiv- og pandemiregister (NIPaR).
-Dokumentet inneholder oversikt over sykehusbehandlede pasienter med covid-19 for \textbf{\Sexpr{forHvem}}.
+Dokumentet inneholder oversikt over \bf{sykehusbehandlede pasienter med covid-19} for \textbf{\Sexpr{forHvem}}.
 I denne sammenhengen betyr det at pasienten er innlagt på sykehus og har en positiv prøve for SARS-CoV-2
 i løpet av de siste 3 månedene før innleggelse.
 Datagrunnlaget er oppdatert med alle registreringer gjort inntil 4 timer før rapporten ble lastet ned.
@@ -120,9 +121,10 @@ For resultater basert på personaggregerte data, er skjema aggregert til ett for
 uavhengig av om pasienten har reinnleggelser. For personaggregerte resultater vises pasienter
 hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
 ferdigstilt eller ikke, dersom ikke annet er oppgitt. \\
-
+\\
 \bf{Rapporten gir en oversikt over:}
-\begin{itemize}
+%\setlist[itemize]{noitemsep}
+\begin{itemize}{noitemsep}
 \item Antall pasienter inneliggende på sykehus på rapporteringstidspunktet, samt antall innlagt, utskrevet og død dagen før.
 \item Antall pasienter inneliggende på sykehus med hovedårsak covid-19, per helseforetak.
 \item Antall pasienter inneliggende på sykehus der hovedårsak IKKE er covid-19, per helseforetak.
@@ -161,7 +163,7 @@ Tabellen viser liggetid og endringer siste døgn for inneliggende pasienter med 
 StatusNaa <- statusNaaTab(RegData=Pandemi)$Tab
 xtable::xtable(StatusNaa, align=c('l','r','r'),
                caption='Antall inneliggende pasienter med hovedårsak covid-19 på rapporteringstidspunktet og
-               liggetid på sykehus for disse. Antall innlagt, utskrevet og død dagen før rapporteringsdato..')
+               liggetid på sykehus for disse. Antall innlagt, utskrevet og død dagen før rapporteringsdato.')
 @
 \end{frame}
 
@@ -170,7 +172,7 @@ xtable::xtable(StatusNaa, align=c('l','r','r'),
 
 \begin{frame}[fragile] {Antall inneliggende med hovedårsak covid-19}
 
-Antall inneliggende pasienter per helseforetak på rapporteringstidspunktet samt totalt
+Antall inneliggende pasienter per helseforetak på rapporteringstidspunktet samt totalt.
 
 <<'ShusNaa', results='asis'>>=
 # Antall som ligger på sykehus nå
@@ -248,9 +250,10 @@ BeleggTab <- as.data.frame(
 AntRader <- nrow(BeleggTab)
 fra <- max(1, (AntRader-20))
 #rownames(BeleggTab[AntRader,]) <- 'Ant. somatiske senger'
-xtable::xtable(BeleggTab[fra:AntRader, ],
+print(xtable::xtable(BeleggTab[fra:AntRader, ],
                digits=1, #-which(names(AntRader)=='Hele landet')
-               caption='Andel av totalt antall senger som opptas av pasienter hvor covid-19 er hovedårsak til siste opphold.')
+               caption='Andel av totalt antall senger som opptas av pasienter hvor covid-19 er hovedårsak til siste opphold.'),
+               include.rownames=FALSE)
 @
 \end{frame}
 
@@ -265,11 +268,10 @@ xtable::xtable(BeleggTab[fra:AntRader, ],
                           levels = format(seq(min(PandemiOpph$UtDato, na.rm = T), Sys.Date(), by=paste0('1 day')), '%y-%m-%d'))
 
 AntUt <- table(PandemiOpph$UtDato, PandemiOpph$EnhNivaaVis)
-AntUt <- addmargins(AntUt)
+AntUt <- addmargins(AntUt, FUN=list('Totalt:'=sum, 'Hele landet'=sum), quiet=TRUE)
 fra <- max(1, (nrow(AntUt)-20))
 print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                              caption='Antall avsluttede opphold (utskrevne) med covid-19 som hovedårsak siste 20 dager, s
-                     amt totalt antall fra 8. mars 2020 til rapporteringstidspuktet.'),
+                     caption='Antall avsluttede opphold (utskrevne) med covid-19 som hovedårsak siste 20 dager, samt totalt antall fra 8. mars 2020 til rapporteringstidspuktet.'),
 scalebox = skalering)
 #xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
 
@@ -309,6 +311,7 @@ txtAlder <- if (dim(Pandemi)[1]>2){paste0('Alderen er mellom ',
 <<'Alder', results='asis'>>=
 AldersTab <- AlderTab(RegData=Pandemi)$Tab
 AldersTab[ ,'Antall'][as.numeric(AldersTab[ ,'Antall'])<3] <- '<3'
+colnames(AldersTab) <- paste0(colnames(AldersTab), ' pasienter')
 xtable::xtable(AldersTab, caption='Fordeling i aldersgrupper på rapporteringstidspunktet')
 #, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))), #)
 @
@@ -349,16 +352,6 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', n
 @
 \end{frame}
 
-\begin{frame}[fragile] {Registreringsforsinkelse/datakvalitet}
-<<'RegForsinkelse', results='asis'>>=
-dum <- KoronaFigAndeler(RegData = PandemiLandet, valgtVar = 'regForsinkelseInn', aarsakInn = 2,
-                        enhetsNivaa=enhetsNivaa, valgtEnhet=valgtEnhet, enhetsUtvalg = 1,
-                        datoFra = Sys.Date()-60, datoTil = Sys.Date()-30,
-                        outfile='RegForsink.pdf')
-@
-
-
-
 
 
 \begin{frame}[fragile] {Antall registrerte opphold per dag}
@@ -390,13 +383,13 @@ print(
 
 
 
-\begin{figure}[ht]
-\centering
-\includegraphics[scale=0.35]{RegForsink.pdf}
-\caption{Registreringsforsinkelse, forrige måneds registreringer. \Sexpr{dum$utvalgTxt[1]}}
-\end{figure}
-
-\end{frame}
+% \begin{figure}[ht]
+% \centering
+% \includegraphics[scale=0.35]{RegForsink.pdf}
+% \caption{Registreringsforsinkelse, forrige måneds registreringer. \Sexpr{dum$utvalgTxt[1]}}
+% \end{figure}
+%
+% \end{frame}
 
 
 \begin{frame}[fragile] {Resultater for ferdigstilte opphold}
