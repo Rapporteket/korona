@@ -269,10 +269,15 @@ print(xtable::xtable(BeleggTab[fra:AntRader, ],
 
 AntUt <- table(PandemiOpph$UtDato, PandemiOpph$EnhNivaaVis)
 AntUt <- addmargins(AntUt, FUN=list('Totalt:'=sum, 'Hele landet'=sum), quiet=TRUE)
+
+antEnh <- dim(AntUt)[2]
+skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
+
 fra <- max(1, (nrow(AntUt)-20))
 print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                     caption='Antall avsluttede opphold (utskrevne) med covid-19 som hovedårsak siste 20 dager, samt totalt antall fra 8. mars 2020 til rapporteringstidspuktet.'),
-scalebox = skalering)
+                     caption='Antall avsluttede opphold (utskrevne) med covid-19 som hovedårsak siste 20 dager,
+                     samt totalt antall fra 8. mars 2020 til rapporteringstidspuktet.'),
+      scalebox = skalering)
 #xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
 
 @
