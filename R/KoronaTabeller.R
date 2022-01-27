@@ -289,15 +289,16 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
     'Fedme (BMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
-    'Antall pasienter (i tabellen)' = c(N, '')
-    #   'Risikofaktorer (av alle)' = AntAndel(RegData$KjentRisikofaktor==1, dim(RegData)[1])
+    'Antall pasienter (i tabellen)' = c(N, ''),
+    '  * Antall besvart BMI:' = c(sum(!is.na(RegData$BMI)),'')
   )
 
-  #TabRisiko[,2] <- paste0(sprintf('%.0f', 100*(TabRisiko[ ,2])),'%')
-
   #if (Ntest>3){
+  TabRisiko['Fedme (BMI>30)',2] <- paste0(TabRisiko['Fedme (BMI>30)',2], '*')
+
 
   colnames(TabRisiko) <- c('Antall', 'Andel')
+  #TabRisiko["Fedme (BMI>30)", "Andel"] <- paste0(TabRisiko["Fedme (BMI>30)", "Andel"], '*')
 
   xtable::xtable(TabRisiko,
                  digits=0,
