@@ -4,12 +4,22 @@
 \alias{KoronaPreprosesser}
 \title{Preprosesser data fra Koronaregisteret}
 \usage{
-KoronaPreprosesser(RegData = RegData, aggPers = 1, kobleBered = 0)
+KoronaPreprosesser(
+  RegData = RegData,
+  aggPers = 1,
+  kobleBered = 0,
+  tellFlereForlop = 0
+)
 }
 \arguments{
 \item{RegData}{Koronaskjema}
 
-\item{skjema}{1: innleggelse, 2: utskriving,}
+\item{aggPers}{1: aggregere til personnivå (standard), 0: ikke aggregere}
+
+\item{kobleBered}{Koble data med beredskapsdata? 0: nei(standard), 1:ja}
+
+\item{tellFlereForlop}{0: aggregerer til personnivå
+1: Identifiserer inntil 3 forløp per person}
 }
 \value{
 Preprosesserte data

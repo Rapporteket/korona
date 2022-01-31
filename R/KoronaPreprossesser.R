@@ -3,13 +3,16 @@
 #' Denne funksjonen navner om variabler og beregner evt. nye.
 #'
 #' @param RegData Koronaskjema
-#' @param skjema 1: innleggelse, 2: utskriving,
+#' @param kobleBered Koble data med beredskapsdata? 0: nei(standard), 1:ja
+#' @param aggPers 1: aggregere til personnivå (standard), 0: ikke aggregere
+#' @param tellFlereForlop 0: aggregerer til personnivå
+#'             1: Identifiserer inntil 3 forløp per person
 #'
 #' @return Preprosesserte data
 #'
 #' @export
 #'
-KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0)	#, reshID=reshID)
+KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFlereForlop=0)	#, reshID=reshID)
 {
   data(ReshNivaa)
    # Endre variabelnavn:
@@ -122,7 +125,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0)	#, resh
 
    RegData$UtDato <- RegData$FormDateUt #Alle som har utskrivingsskjema
    #Regner de som har ut- og innskjema opprettet samtidig og mangler utskrivingsdato, som ikke utskrevet
-   #Inneliggende: Alle uten utsskrvinvingsdato + de med utskrivingsskjema som ikke opprettet samtidig med inn-skjema.
+   #Inneliggende: Alle uten utsskrivingsdato + de med utskrivingsskjema som ikke opprettet samtidig med inn-skjema.
    indIkkeUtDato <- which(is.na(RegData$Utskrivningsdato)) #Mangler utskr.dato.
    indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$CreationDate,
                                          units = 'hours')) < 1)
@@ -142,11 +145,6 @@ if (aggPers == 1) {
       test <- x %in% 1:5
       ifelse(sum(test)>0, max(x[test]), 999)} #1-nei, 2:5 ja, 999 ukjent.
 
-   # Aarsak <- function(x, N, FormDate) {
-   #    ifelse(sum(x == 1) == N, 1,
-   #           ifelse(last(x, order_by = FormDate) == 1, 2,
-   #                  ifelse(1 %in% x, 3,
-   #                         ifelse(sum(x == 2) == N, 5, 9) )))} #sum (x == 3) == N
 
    Aarsak <- function(x, N, FormDate) {
       case_when(
@@ -158,6 +156,38 @@ if (aggPers == 1) {
          (sum (x == 3) == N) | (sum(x == -1))  ~ 9
          )}
 
+   #Identifisere pasienter med flere innleggelser
+if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
+  # library(korona)
+  # RegData <- KoronaDataSQL()
+  # names(RegData)[
+  #   names(RegData) %in% c('PatientInRegistryGuid', 'PasientGUID')] <- 'PasientID'
+
+  RegData$Dato <- as.Date(RegData$FormDate)
+   # PasFlere <- RegData %>% group_by(PasientID) %>%
+   #    summarise(FlereTilf = 1+sum(as.numeric(Dato-min(Dato))>90))
+   # pasFlere <- PasFlere$PasientID[PasFlere$FlereTilf>1]
+   # Dum <- RegData[RegData$PasientID %in% pasFlere, c("PasientID", "Dato",'SkjemaGUID')]
+
+    #Identifiserer inntil 3 forløp
+    PasFlere <- RegData %>% group_by(PasientID) %>%
+      summarise(.groups = 'drop',
+                SkjemaGUID = SkjemaGUID,
+        InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
+        InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
+        PasientID = paste0(PasientID, '_', InnNr)
+        #Tid = as.numeric(Dato-min(Dato))
+      )
+    #Dato <- as.Date(c('2020-01-31', '2021-03-01', '2020-02-03', '2023-01-01'))
+    #InnNr0 <- c(1,2,1,2)
+    #length(unique(RegData$PasientID))
+    #length(unique(PasFlere$PasientIDny))
+
+    RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")], PasFlere, by='SkjemaGUID')
+    # which(RegDataNy$InnNr==2)
+    # Test <- RegDataNy[c(1:10, which(RegDataNy$InnNr==2)),c("PasientID", "PasientIDny")]
+    #For testing: RegData$Dato[RegData$PasientID=='EAC1F8C2-B10F-EC11-A974-00155D0B4D1A'][3:4] <- as.Date(c('2023-01-02', '2024-01-03'))
+}
 
    RegDataRed <- RegData %>% group_by(PasientID) %>%
       summarise(PersonId = PersonId[1],

@@ -16,6 +16,12 @@ KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleB
 KoronaFigAndelTid(RegData=KoroIntData)
 
 
+RegData <- KoronaDataSQL()
+DataOpph <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 0, tellFlereForlop = 0)
+DataPers <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 0)
+DataForlop <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 1)
+
+
 #Tidsenheter og oppholdstabell
 KoroDataRaa <- KoronaDataSQL(datoFra = '2020-01-01')
 KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)

@@ -10,7 +10,7 @@ tabAntOpphEnhTid(
   RegData,
   datoTil = Sys.Date(),
   enhetsNivaa = "ShNavn",
-  tidsEnhet = "Mnd",
+  tidsenhet = "Mnd",
   antTidsenh = 6
 )
 }
@@ -21,9 +21,9 @@ tabAntOpphEnhTid(
 
 \item{enhetsNivaa}{Aggregeringsnivå RHF, HF, ShNavn (sykehus, standard)}
 
-\item{tidsEnhet}{- Mnd, Kvartal, Aar}
-
 \item{antTidsenh}{antall måneder som skal vises}
+
+\item{tidsEnhet}{- Mnd, Kvartal, Aar}
 }
 \description{
 tabAntOpphEnhTid antall opphold siste X (antMnd) mnd
