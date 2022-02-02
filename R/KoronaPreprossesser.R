@@ -230,8 +230,7 @@ if (aggPers == 1) {
                 ErHelsepersonell = JaNeiUkjVar(ErHelsepersonell), #1-ja, 2-nei, 3-ukjent
                FirstTimeClosed = first(FirstTimeClosed, order_by = FormDate),
                FirstTimeClosedUt = last(FirstTimeClosedUt, order_by = FormDateUt),
-               # FoerstePositivProeve = min(FoerstePositivProeve, na.rm = T),
-               # FoerstePositivProeve = first(FoerstePositivProeve, order_by = FoerstePositivProeve),
+               FoerstePositivProeve = first(as.Date(FoerstePositivProeve), order_by = as.Date(FoerstePositivProeve)),
                FormStatus = sort(FormStatus)[1], #1-kladd, 2-ferdigstilt
                 Gravid = sum(Gravid)>0,
                 HFut = last(HF, order_by = FormDate),
