@@ -157,8 +157,8 @@ if (aggPers == 1) {
          )}
 
    #Identifisere pasienter med flere innleggelser
-if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
-  # library(korona)
+   if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
+     # library(korona)
   # RegData <- KoronaDataSQL()
   # names(RegData)[
   #   names(RegData) %in% c('PatientInRegistryGuid', 'PasientGUID')] <- 'PasientID'
@@ -178,12 +178,15 @@ if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
         PasientID = paste0(PasientID, '_', InnNr)
         #Tid = as.numeric(Dato-min(Dato))
       )
+
+
+
     #Dato <- as.Date(c('2020-01-31', '2021-03-01', '2020-02-03', '2023-01-01'))
     #InnNr0 <- c(1,2,1,2)
     #length(unique(RegData$PasientID))
     #length(unique(PasFlere$PasientIDny))
 
-    RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")], PasFlere, by='SkjemaGUID')
+      RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")], PasFlere, by='SkjemaGUID')
     # which(RegDataNy$InnNr==2)
     # Test <- RegDataNy[c(1:10, which(RegDataNy$InnNr==2)),c("PasientID", "PasientIDny")]
     #For testing: RegData$Dato[RegData$PasientID=='EAC1F8C2-B10F-EC11-A974-00155D0B4D1A'][3:4] <- as.Date(c('2023-01-02', '2024-01-03'))
@@ -227,7 +230,9 @@ if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
                 ErHelsepersonell = JaNeiUkjVar(ErHelsepersonell), #1-ja, 2-nei, 3-ukjent
                FirstTimeClosed = first(FirstTimeClosed, order_by = FormDate),
                FirstTimeClosedUt = last(FirstTimeClosedUt, order_by = FormDateUt),
-                FormStatus = sort(FormStatus)[1], #1-kladd, 2-ferdigstilt
+               # FoerstePositivProeve = min(FoerstePositivProeve, na.rm = T),
+               # FoerstePositivProeve = first(FoerstePositivProeve, order_by = FoerstePositivProeve),
+               FormStatus = sort(FormStatus)[1], #1-kladd, 2-ferdigstilt
                 Gravid = sum(Gravid)>0,
                 HFut = last(HF, order_by = FormDate),
                 HF = first(HF, order_by = FormDate),

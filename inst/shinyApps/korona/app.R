@@ -631,6 +631,14 @@ server <- function(input, output, session) {
   #                   choices = enhetsvalg)
   #}
 
+  #Telle pasienter med flere forløp
+  PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
+  Flere <- PandemiOpph %>% group_by(PasientID) %>%
+    summarise(.groups = 'drop',
+              InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+  antPasFlereForl <- sum(PasFlere$InnNr0>1)
+
+
 
   # widget
   if (paaServer) {
@@ -684,6 +692,7 @@ server <- function(input, output, session) {
            h2(HTML('Ingen registreringer på innlogget ReshID'), style = "color:red")}))
 
   observe({
+
 #Antall innleggelser
     #AntTab <- antallTidEnhTab(RegData=KoroData)
     AntTab <- antallTidEnhTab(RegData=KoroData, tilgangsNivaa=rolle,

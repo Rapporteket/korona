@@ -96,6 +96,13 @@ AlderGjsn <- round(mean(Pandemi$Alder, na.rm = T))
 andelMenn <- paste0(sprintf('%.0f', 100*sum(Pandemi$erMann)/Ntot), ' \\%')
 antDod <- sum(Pandemi$StatusVedUtskriving==2, na.rm = T) #[indFerdigUt]
 antIkkeFerdig <- sum(Pandemi$FormStatus==1, na.rm = T)
+
+#Telle pasienter med flere forløp
+PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
+    Flere <- PandemiOpph %>% group_by(PasientID) %>%
+      summarise(.groups = 'drop',
+                InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+    antPasFlereForl <- sum(PasFlere$InnNr0>1)
 @
 
 
@@ -112,7 +119,7 @@ Det er \Sexpr{antIkkeFerdig} av de \Sexpr{Ntot} pasientene som har uferdige inkl
 \item For å luke bort feilregistreringer, er registrering av innleggelse før 8.mars
 og etter dagens dato, filtrert bort.
 \item I resultatene som er basert på antall pasienter, er skjema for overflyttede pasienter
-aggregert til ett forløp per pasient, uavhengig av om pasienten har reinnleggelser.
+aggregert til ett forløp per pasient, uavhengig av om pasienten har reinnleggelser eller flere forløp. Per i dag er det \Sexpr{antPasFlereForl} som har mer enn ett forløp med Covid-19.
 \item Gjennomsnittsalderen på innlagte pasienter er \Sexpr{AlderGjsn} år.
 \item Andelen menn er \Sexpr{andelMenn}.
 \item Det er registrert \Sexpr{antDod} døde.
