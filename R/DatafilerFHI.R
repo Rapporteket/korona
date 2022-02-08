@@ -54,7 +54,8 @@ varFHIraa <- c(
                ,'CreationDate'
                ,'CreationDateUt'
                ,'FirstTimeClosed'
-               ,'FirstTimeClosedUt')
+               ,'FirstTimeClosedUt'
+               ,'FoerstePositivProeve')
 
 
 PandemiDataRaaFHI <- RegDataRaa[,varFHIraa]

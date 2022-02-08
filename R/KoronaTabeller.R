@@ -159,7 +159,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(),
                                      RegData$InnTidspunktSiste, units='days'))[inneliggere]
-  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 120], na.rm = T), 1)
+  LiggetidNaaGjsn <- round(mean(LiggetidNaa[LiggetidNaa < 90], na.rm = T), 1) #<120
 
   igaar <- Sys.Date()-1 #  '2020-04-10' #
   innIgaar <- length(which(RegData$InnDato == as.Date(igaar)))
