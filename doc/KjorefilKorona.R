@@ -213,7 +213,7 @@ Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
 
 #function(rnwFil, brukernavn='lluring', reshID=0, valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SC')
 test <- korona::abonnementKorona(rnwFil="KoronaRapport.Rnw", brukernavn='lenaro', reshID=700720,
-                             valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SP')
+                             valgtEnhet = 'Alle', enhetsNivaa = 'RHF', rolle = 'SC')
 file.copy(from=test, to='~/korona/test.pdf')
 
 testBer <- intensivberedskap::abonnementBeredsk(rnwFil='BeredskapCorona.Rnw', brukernavn='beredskap', reshID=0,
@@ -530,7 +530,7 @@ antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNi
 
 library(korona)
 
-valgtEnhet='Sør-Øst' #'Alle'
+valgtEnhet='Innlandet' #'Alle'
 enhetsNivaa <- 'RHF'
 rolle <- 'LC'
 reshID <- 100091

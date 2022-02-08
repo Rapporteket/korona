@@ -712,7 +712,7 @@ Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.
     )
 
     txt <- if(dim(UtData$RegData)[1]>2) {
-      paste0('For hele tidsperioden er gjennomsnittsalderen er <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
+      paste0('For hele tidsperioden er gjennomsnittsalderen <b>', round(mean(UtData$RegData$Alder, na.rm = T)), '</b> år og ',
              round(100*mean(UtData$RegData$erMann, na.rm = T)), '% er menn.
               Antall døde: ', sum(UtData$RegData$StatusVedUtskriving==2, na.rm=T))
     } else {''}
