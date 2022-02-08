@@ -54,7 +54,8 @@ varFHIraa <- c(
                ,'CreationDate'
                ,'CreationDateUt'
                ,'FirstTimeClosed'
-               ,'FirstTimeClosedUt')
+               ,'FirstTimeClosedUt'
+               ,'FoerstePositivProeve')
 
 
 PandemiDataRaaFHI <- RegDataRaa[,varFHIraa]
@@ -63,7 +64,7 @@ PandemiDataRaaFHI <- RegDataRaa[,varFHIraa]
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
 #Preprossesserte data
-RegData <- KoronaPreprosesser(RegDataRaa)
+RegData <- KoronaPreprosesser(RegDataRaa, tellFlereForlop = 1)
 varBort <- c('PatientAge', 'PatientGender', #PasientIdXX
              'Vekt', 'VektUkjent', 'Hoyde', 'HoydeUkjent',
              "CreationDate", "CreationDateUt", "FirstTimeClosed", "FirstTimeClosedUt")

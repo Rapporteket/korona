@@ -54,7 +54,7 @@ KoronaFigAndeler  <- function(RegData, valgtVar='alder',
 
    if ("session" %in% names(list(...)) & rapbase::isRapContext()) {
       # Error: 'isRapContext' is not an exported object from 'namespace:rapbase'
-      raplog::repLogger(session = list(...)[["session"]], msg = paste0('Fordelingsfigur: ',valgtVar))
+      rapbase::repLogger(session = list(...)[["session"]], msg = paste0('Fordelingsfigur: ',valgtVar))
    }
     if (hentData == 1) {
             RegData <- KoronaPreprosesser(KoronaDataSQL(koble=1) )

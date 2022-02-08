@@ -38,6 +38,7 @@ varPandemiInn <- c('Inn.SkjemaGUID
   ,Inn.ErAnsattMikrobiologisk
   ,Inn.ErHelsepersonell
   ,Inn.FirstTimeClosed
+  ,Inn.FoerstePositivProeve
   ,Inn.FormDate
   ,Inn.FormStatus
   ,Inn.FormTypeId
@@ -231,14 +232,6 @@ if (koble==0){
 }
 
 if (koble==1){
-        # query <- paste0('SELECT ',
-        #                 varPandemiInn,
-        #                 ',',
-        #                 varUtKoblet,
-        #                 ' FROM InklusjonSkjemaDataContract Inn
-        #                 LEFT JOIN UtskrivningSkjemaDataContract Ut
-        #                 ON Inn.SkjemaGUID = Ut.HovedskjemaGUID' #)
-        #                 ,' WHERE cast(Inn.FormDate as date) BETWEEN \'', datoFra, '\' AND \'', datoTil, '\'')
 
   queryInn <- paste0('SELECT ',
                      varPandemiInn,

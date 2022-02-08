@@ -26,7 +26,7 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
 
 
    if ("session" %in% names(list(...))) {
-      raplog::repLogger(session = list(...)[["session"]], msg = paste0("AndelTid: ", valgtVar))
+      rapbase::repLogger(session = list(...)[["session"]], msg = paste0("AndelTid: ", valgtVar))
    }
    if (hentData == 1) {
          RegData <- KoronaPreprosesser(KoronaDataSQL(koble=1), aggPers = 1 )
