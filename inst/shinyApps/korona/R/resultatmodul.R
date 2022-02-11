@@ -215,9 +215,6 @@ koronabelegg_UI <- function(id){
                         br(),
                         h3('Velg variabel/tema og filtreringer i data'),
 
-                        # selectInput(inputId = ns("aarsakInn"), label="Covid-19 hovedårsak til innleggelse?",
-                        #             choices = c("Alle"=9, "Ja"=1, "Nei"=2)
-                        # ),
                         selectInput(inputId = ns("aarsakInnRes"), label="Covid-19 hovedårsak til innleggelse?",
                                     choices = c(
                                       "Ja, minst siste opphold" = 2,

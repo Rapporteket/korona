@@ -8,6 +8,7 @@ AlderTab(
   RegData,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
+  minN = 0,
   skjemastatusInn = 9,
   aarsakInn = 9,
   dodSh = 9,

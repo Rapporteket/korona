@@ -12,6 +12,7 @@ AlderKjFig(
   datoFra = "2020-03-01",
   datoTil = Sys.Date(),
   skjemastatusInn = 9,
+  minN = 0,
   aarsakInn = 9,
   dodSh = 9,
   erMann = 9,
@@ -32,6 +33,8 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 \item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
+
+\item{minN}{minste antall: Maskerer verdier under minN}
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
 3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
