@@ -600,6 +600,10 @@ server <- function(input, output, session) {
   #Filtreringsnivå for data:
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
+# print(reshID)
+# print(rolle)
+# print(egetEnhetsNivaa)
+# print(egenEnhet)
 
   #observe({
     if (rolle != 'SC') {
@@ -659,6 +663,10 @@ Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.
                            html = TRUE, confirmButtonText = rapbase::noOptOutOk())
   })
 
+  # print(reshID)
+  # print(rolle)
+  # print(egetEnhetsNivaa)
+  # print(egenEnhet)
 
 
   #-------- Laste ned Samlerapporter------------
@@ -671,8 +679,8 @@ Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.
         henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
                                   rolle = rolle,
                                   valgtEnhet = egenEnhet, #as.character(input$valgtEnhet),
-                                  enhetsNivaa = egetEnhetsNivaa
-                                  #reshID = reshID
+                                  enhetsNivaa = egetEnhetsNivaa,
+                                  reshID = reshID
         ) #Vurder å ta med tidsinndeling eller startdato
       }
     )

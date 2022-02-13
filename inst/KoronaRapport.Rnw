@@ -28,7 +28,10 @@ library(lubridate)
 library(xtable)
 library(kableExtra)
 
-forHvem <- ifelse(rolle=='SC', 'hele landet', valgtEnhet)
+forHvem <- switch(rolle,
+                  SC = 'hele landet',
+                  LC = paste0('Helse ', valgtEnhet, ' RHF'),
+                  LU = valgtEnhet)
 Tittel <- paste0('Norsk intensiv- og pandemiregister (NIPaR) \\
 Automatisk generert rapport - sykehusbehandlede pasienter med covid-19, \\ ', forHvem)
 @
@@ -269,13 +272,16 @@ BeleggTab <- as.data.frame(
                   , tilgangsNivaa= rolle
                   )$belegg_anslag_txt)
 
-#as.data.frame(BeleggTab)
+bredde <- 6.5/ncol(BeleggTab)
+colnames(BeleggTab) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(BeleggTab),'}')
+
 AntRader <- nrow(BeleggTab)
 fra <- max(1, (AntRader-20))
 print(xtable::xtable(BeleggTab[fra:AntRader, ],
                digits=1, #-which(names(AntRader)=='Hele landet')
                caption='Andel av totalt antall senger (2019-tall) som opptas av pasienter hvor covid-19 er hovedårsak til siste opphold.'),
-               include.rownames=FALSE)
+               include.rownames=FALSE
+      , sanitize.colnames.function = identity)
 @
 \end{frame}
 
@@ -283,59 +289,48 @@ print(xtable::xtable(BeleggTab[fra:AntRader, ],
 \begin{frame}[fragile] {Antall registrerte opphold per dag}
 
 <<'RegRHF', results='asis'>>=
-AntTab <- antallTidEnhTab(RegData=PandemiOpph , tilgangsNivaa=rolle, #nivå avgjort av rolle #PandemiLandet
+AntTab <- antallTidEnhTab(RegData=PandemiLandet , tilgangsNivaa=rolle, #nivå avgjort av rolle #
                               valgtEnhet= valgtEnhet)$Tab_tidy #, HF = 1
 
-#\resizebox function or
-#\adjustbox.
+# antEnh <- dim(AntTab)[2]
+# skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
 
-# PandemiOpph$InnDag = factor(format(PandemiOpph$InnDag, '%y-%m-%d'),
-#                           levels = format(seq(min(PandemiOpph$InnDag, na.rm = T), Sys.Date(), by=paste0('1 day')), '%y-%m-%d'))
+bredde <- 6/ncol(AntTab)
+colnames(AntTab) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(AntTab),'}')
 
-antEnh <- dim(AntTab)[2]
-skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
 print(
   xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
                method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-               caption='Antall nye opphold (innlagte) med covid-19 som hovedårsak siste 20 dager,
-               samt totalt antall fra pandemistart til rapporteringstidspuktet.')
+               caption='Antall nye innlagte med covid-19 som hovedårsak siste 20 dager,
+               samt totalt antall fra pandemistart til rapporteringstidspuktet.
+               Enhetstilhørighet er basert på første opphold i forløpet.
+               ')
       ,include.rownames = FALSE
-      ,scalebox = skalering)
+      #,scalebox = skalering
+  , sanitize.colnames.function = identity)
 @
 \end{frame}
 
 
 
-\begin{frame}[fragile] {Antall avsluttede opphold per dag}
+\begin{frame}[fragile] {Antall avsluttede forløp per dag}
 %I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
 
 <<'Utskrevne', results='asis'>>=
 
-AntUt <- antallTidUtskrevne(RegData=PandemiOpph, tilgangsNivaa=rolle, valgtEnhet= valgtEnhet)$Tab
+AntUt <- antallTidUtskrevne(RegData=PandemiLandet, tilgangsNivaa=rolle, valgtEnhet= valgtEnhet)$Tab #PandemiOpph
 antEnh <- dim(AntUt)[2]
-skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
-# print(
-#   xtable::xtable(AntUt[(nrow(AntUt)-20):nrow(AntUt), ], digits=0,
-#                method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-#                caption='Antall nye opphold (innlagte) med covid-19 som hovedårsak siste 20 dager,
-#                samt totalt antall fra pandemistart til rapporteringstidspuktet.')
-#       ,include.rownames = FALSE
-#       ,scalebox = skalering)
-
-#   PandemiOpph$UtDato = factor(format(PandemiOpph$UtDato, '%y-%m-%d'),
-#                           levels = format(seq(min(PandemiOpph$UtDato, na.rm = T), Sys.Date(), by=paste0('1 day')), '%y-%m-%d'))
-#
-# AntUt <- table(PandemiOpph$UtDato, PandemiOpph$EnhNivaaVis)
-# AntUt <- addmargins(AntUt, FUN=list('Totalt:'=sum, 'Hele landet'=sum), quiet=TRUE)
-#
-# antEnh <- dim(AntUt)[2]
-# skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
-#
+#skalering <- ifelse(antEnh < 6, 1, 6/antEnh)
+bredde <- 6/ncol(AntUt)
+colnames(AntUt) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(AntUt),'}')
 fra <- max(1, (nrow(AntUt)-20))
 print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                     caption='Antall avsluttede opphold (utskrevne) med covid-19 som hovedårsak siste 20 dager,
-                     samt totalt antall fra pandemistart til rapporteringstidspuktet.'),
-      scalebox = skalering)
+                     caption='Antall avsluttede forløp (utskrevne) med covid-19 som hovedårsak siste 20 dager,
+                     samt totalt antall fra pandemistart til rapporteringstidspuktet.
+                     Enhetstilhørighet er basert på siste opphold i forløpet.')
+      #, scalebox = skalering
+      , sanitize.colnames.function = identity
+      )
 #xTab %>% xtable2kable() %>% kableExtra::kable_styling(latex_options="scale_down")
 
 @

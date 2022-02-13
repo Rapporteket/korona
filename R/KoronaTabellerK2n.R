@@ -105,7 +105,7 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
 
   #Benytter rolle som "enhetsnivå". Bestemmer laveste visningsnivå
   RegData$EnhNivaaVis <- switch(tilgangsNivaa, #RegData[ ,enhetsNivaa]
-                                SC = RegData$RHF,
+                                SC = RegData$RHFut,
                                 LC = RegData$HFut,
                                 #LC = RegData$HFkort2,
                                 LU = RegData$ShNavnUt)
@@ -118,6 +118,10 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$UtDato), ]
   if (datoFra != 0) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato >= datoFra), ]} # filtrerer på fradato
   if (datoTil != Sys.Date()) {RegDataAlle <- RegDataAlle[which(RegDataAlle$UtDato <= datoTil), ]} # filtrerer på tildato
+
+  RegDataAlle$TidsVar <- factor(format(RegDataAlle$UtDato, '%d.%m.%y'),
+                                levels = format(seq(datoFra, datoTil,
+                                                    by='day'), '%d.%m.%y'))
 
   RegDataAlle$TidsVar <- switch (tidsenhet,
                                  dag = factor(format(RegDataAlle$UtDato, '%d.%m.%y'),
@@ -134,7 +138,7 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
   #Trenger utvalg når totalen ikke er summen av det som vises.
   RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   } else {
-    enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHF', 'LU'='HF')
+    enhetsnivaa <- switch(tilgangsNivaa,'LC'='RHFut', 'LU'='HFut')
     subset(RegDataAlle, RegDataAlle[ ,enhetsnivaa] == valgtEnhet)
   }
 

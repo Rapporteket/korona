@@ -245,6 +245,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 PenicillinEnzymhemmer = sum(PenicillinEnzymhemmer)>0,
                 ReiseUtenfor = JaNeiUkjVar(ReiseUtenfor), #1-ja, 2-nei, 3-ukjent
                 ReshId = first(ReshId, order_by = FormDate),
+                RHFut = last(RHF, order_by = FormDate),
                 RHF = first(RHF, order_by = FormDate),
                 RHFresh = first(RHFresh, order_by = FormDate),
                 RontgenThorax = RontgenThorax[1], #1-5...?
