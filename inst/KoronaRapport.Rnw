@@ -18,7 +18,7 @@
 
 
 <<'initOpts',include=FALSE>>=
-knitr::opts_chunk$set(warnings=FALSE,echo=FALSE, message=FALSE)
+knitr::opts_chunk$set(warnings=FALSE,echo=FALSE, message=FALSE, cache = FALSE)
 options(warn = -1)
 knitr::opts_knit$set(root.dir = './')
 options(knitr.table.format = "latex")
