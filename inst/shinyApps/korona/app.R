@@ -580,7 +580,7 @@ server <- function(input, output, session) {
 
   #-----------Div serveroppstart------------------
   if (context %in% c('QA', 'PRODUCTION')){
-    raplog::appLogger(session = session, msg = "Starter Pandemi-app")}
+    rapbase::appLogger(session = session, msg = "Starter Pandemi-app")}
 
   reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100082) # 100089
 
