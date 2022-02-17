@@ -377,7 +377,7 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
     TabTidLandet,
     Senger = 11399)
 
-  senger_Landet <- 11399
+  senger_Landet <- 11399 #2019-tall
 
   Samlet <- bind_cols(TabTidHF, TabTidRHF[,-1], 'Hele landet' = t(TabTidLandet))
   reshID_rhf <- RegData[match(reshID, RegData$HFresh), "RHFresh"]

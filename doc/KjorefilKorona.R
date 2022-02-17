@@ -529,10 +529,10 @@ antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNi
 
 
 library(korona)
-valgtEnhet= 'Midt' #'Innlandet' #'Vest' #'Innlandet' #'Alle'
-enhetsNivaa <- 'RHF'
-rolle <- 'LC'
-reshID <- 100317 #100091
+valgtEnhet= 'N-Trøndelag' #'Midt' #'Innlandet' #'Vest' #'Innlandet' #'Alle'
+enhetsNivaa <- 'HF'
+rolle <- 'LU'
+reshID <- 100317 #N-Trøndelag #100091
 #setwd('C:/ResultattjenesteGIT/korona/inst')
 setwd('/home/rstudio/korona/inst')
 knitr::knit('KoronaRapport.Rnw', encoding = 'UTF-8')

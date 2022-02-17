@@ -276,6 +276,7 @@ bredde <- 6.5/ncol(BeleggTab)
 colnames(BeleggTab) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(BeleggTab),'}')
 
 AntRader <- nrow(BeleggTab)
+BeleggTab[AntRader,1] <- 'Dognplasser.2019'
 fra <- max(1, (AntRader-20))
 print(xtable::xtable(BeleggTab[fra:AntRader, ],
                digits=1, #-which(names(AntRader)=='Hele landet')
@@ -295,7 +296,7 @@ AntTab <- antallTidEnhTab(RegData=PandemiLandet , tilgangsNivaa=rolle, #nivå av
 # antEnh <- dim(AntTab)[2]
 # skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
 
-bredde <- 6/ncol(AntTab)
+bredde <- 7/ncol(AntTab)
 colnames(AntTab) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(AntTab),'}')
 
 print(
