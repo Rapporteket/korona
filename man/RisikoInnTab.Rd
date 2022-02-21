@@ -12,7 +12,7 @@ RisikoInnTab(
   skjemastatusInn = 9,
   dodSh = 9,
   aarsakInn = 9,
-  sens = 1,
+  sens = 0,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
   minald = 0,
