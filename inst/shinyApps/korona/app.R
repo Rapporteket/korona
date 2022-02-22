@@ -17,6 +17,7 @@ library(sship)
 library(intensivberedskap)
 library(korona)
 
+procStart <- proc.time()
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
 # ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
@@ -35,8 +36,19 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
 if (paaServer) {
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
-  KoroDataRaa <-  KoronaDataSQL(koble=1)
-  BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+
+  ## get staging data, if present
+  KoroDataRaa <- rapbase::loadStagingData("korona", "koroDataRaa")
+  if (isFALSE(KoroDataRaa)) {
+    KoroDataRaa <-  KoronaDataSQL(koble=1)
+    rapbase::saveStagingData("korona", "koroDataRaa", KoroDataRaa)
+  }
+  BeredDataRaa <- rapbase::loadStagingData("korona", "beredDataRaa")
+  if (isFALSE(BeredDataRaa)) {
+    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+    rapbase::saveStagingData("korona", "beredDataRaa", BeredDataRaa)
+  }
+
   #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
 } else {
   KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
@@ -64,14 +76,35 @@ if (paaServer) {
   KoroDataRaa$Utskrivningsdato[which(KoroDataRaa$Utskrivningsdato=="")] <- NA
 } #hente data
 
+## get staging data, if present
+KoroDataOpph <- rapbase::loadStagingData("korona", "koroDataOpph")
+if (isFALSE(KoroDataOpph)) {
+  KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+  rapbase::saveStagingData("korona", "koroDataOpph", KoroDataOpph)
+}
 
-KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
-KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
-#Kobler pandemi og beredskap:
-KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
-                     by = 'PersonId')
-KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+BeredData <- rapbase::loadStagingData("korona", "beredData")
+if (isFALSE(BeredData)) {
+  BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
+  rapbase::saveStagingData("korona", "beredData", BeredData)
+}
+
+KoroData <- rapbase::loadStagingData("korona", "koroData")
+if (isFALSE(KoroData)) {
+  KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
+  KoroData <- merge(KoroData,
+                    BeredData,
+                    all.x = T,
+                    all.y = F,
+                    suffixes = c("", "Bered"),
+                    by = 'PersonId')
+  KoroData  <- KoroData %>%
+    dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+  rapbase::saveStagingData("korona", "koroData", KoroData)
+}
+
+
+
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
@@ -102,6 +135,9 @@ aarsakInnValg <- c(
 
 #last modul(er)
 source(system.file("shinyApps/korona/R/resultatmodul.R", package = "korona"), encoding = 'UTF-8')
+
+cat("Startup timings (s):\n")
+print(proc.time() - procStart)
 
 ui <- tagList(
   navbarPage(id='hovedark',

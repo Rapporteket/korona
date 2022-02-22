@@ -10,6 +10,8 @@ antallTidBelegg(
   tidsenhet = "dag",
   erMann = 9,
   tilgangsNivaa = "SC",
+  datoFra = 0,
+  datoTil = Sys.Date(),
   skjemastatusInn = 9,
   aarsakInn = 9,
   valgtEnhet = "Alle",
@@ -25,6 +27,10 @@ antallTidBelegg(
 
 \item{tilgangsNivaa}{SC, LC og LU bestemmer hvilket enhetsNivaa
 ('RHF', 'HF', 'ShNavn') resultatene skal vises for}
+
+\item{datoFra}{startdato 'yyyy-mm-dd'}
+
+\item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
