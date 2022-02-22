@@ -33,48 +33,17 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
                    ifelse(context=='QA', 'QA',''))
 
 #---------Hente data------------
-if (paaServer) {
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
 
   ## get staging data, if present
-  KoroDataRaa <- rapbase::loadStagingData("korona", "koroDataRaa")
+  KoroDataRaa <- rapbase::loadStagingData("korona", "koroDataRaa") #Benyttes i appen
   if (isFALSE(KoroDataRaa)) {
     KoroDataRaa <-  KoronaDataSQL(koble=1)
     rapbase::saveStagingData("korona", "koroDataRaa", KoroDataRaa)
   }
-  BeredDataRaa <- rapbase::loadStagingData("korona", "beredDataRaa")
-  if (isFALSE(BeredDataRaa)) {
-    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-    rapbase::saveStagingData("korona", "beredDataRaa", BeredDataRaa)
-  }
 
-  #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
-} else {
-  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
-                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
-  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
-                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  map_ut_navn <- data.frame(gml=c("CreationDate", "FirstTimeClosed", "HelseenhetKortNavn", "FormStatus", "FormDate", "Importert", "SkjemaGUID"),
-                            ny=c("CreationDateUt", "FirstTimeClosedUt", "ShNavnUt", "FormStatusUt", "FormDateUt", "ImportertUt", "SkjemaGUIDut"))
-  names(KoroDataUt)[names(KoroDataUt) %in% map_ut_navn$gml] <-
-    map_ut_navn$ny[match(names(KoroDataUt)[names(KoroDataUt) %in% map_ut_navn$gml], map_ut_navn$gml)]
-  KoroDataUt <- KoroDataUt[, c("HovedskjemaGUID", "Antifungalbehandling", "AntiviralBehandling", "CreationDateUt",
-                               "FirstTimeClosedUt", "ShNavnUt", "FormStatusUt", "FormDateUt", "ImportertUt",
-                               "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", "Utskrivningsdato", "SkjemaGUIDut")]
 
-  BeredData <-  read.table('I:/nir/ReadinessFormDataContract2021-05-31 11-28-03.txt', sep=';',
-                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart", "DateAdmittedIntensive",
-                         "MechanicalRespiratorEnd", "DateDischargedIntensive")][BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart",
-                                                                                              "DateAdmittedIntensive",
-                          "MechanicalRespiratorEnd", "DateDischargedIntensive")]==""] <- NA
-  BeredDataRaa <- BeredData[as.Date(BeredData$FormDate) >= '2020-03-01' & as.Date(BeredData$FormDate) <= Sys.Date(), ]
-  KoroDataRaa <- merge(KoroDataInn, KoroDataUt,
-                    by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
-  KoroDataRaa$Utskrivningsdato[which(KoroDataRaa$Utskrivningsdato=="")] <- NA
-} #hente data
 
 ## get staging data, if present
 KoroDataOpph <- rapbase::loadStagingData("korona", "koroDataOpph")
@@ -83,13 +52,15 @@ if (isFALSE(KoroDataOpph)) {
   rapbase::saveStagingData("korona", "koroDataOpph", KoroDataOpph)
 }
 
-BeredData <- rapbase::loadStagingData("korona", "beredData")
+BeredData <- rapbase::loadStagingData("korona", "BeredData")
 if (isFALSE(BeredData)) {
+  # BeredDataRaa <- rapbase::loadStagingData("korona", "BeredDataRaa") #Bare mellomregning
+  BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
-  rapbase::saveStagingData("korona", "beredData", BeredData)
+  rapbase::saveStagingData("korona", "BeredData", BeredData)
 }
 
-KoroData <- rapbase::loadStagingData("korona", "koroData")
+KoroData <- rapbase::loadStagingData("korona", "KoroData")
 if (isFALSE(KoroData)) {
   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
   KoroData <- merge(KoroData,
@@ -100,7 +71,7 @@ if (isFALSE(KoroData)) {
                     by = 'PersonId')
   KoroData  <- KoroData %>%
     dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
-  rapbase::saveStagingData("korona", "koroData", KoroData)
+  rapbase::saveStagingData("korona", "KoroData", KoroData)
 }
 
 
@@ -389,21 +360,12 @@ ui <- tagList(
                                                   'Døde' = 'dodSh'
                                       )
                           ),
-                          # selectInput(inputId = "enhetsUtvalgAndel", label="Velg enhetsnivå",
-                          #             choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
-                          # ),
-                          # selectInput(inputId = "valgtEnhetAndel", label="Velg enhet",
-                          #             choices = 'Alle'
-                          # ),
                           dateRangeInput(inputId = "valgtDatoAndel", label = "Tidsperiode",
                                          start = startDato, end = Sys.Date(),
                                          separator="t.o.m.", language="nb"),
                           selectInput(inputId = "aarsakInnAndel", label="Covid-19 hovedårsak til innleggelse?",
                                       choices = aarsakInnValg
                           ),
-                          # selectInput(inputId = "skjemastatusInnAndel", label="Skjemastatus, inklusjon",
-                          #             choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                          # ),
                           selectInput(inputId = "dodShAndel", label="Utskrevne, tilstand",
                                       choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
                           ),
@@ -415,11 +377,8 @@ ui <- tagList(
                           ),
                           selectInput(inputId = "bildeformatAndel",
                                       label = "Velg format for nedlasting av figur",
-                                      choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
-                          # selectInput(inputId = "bildeformatFord",
-                          #             label = "Velg format for nedlasting av figur",
-                          #             choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
-
+                                      choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')
+                                      ),
                           selectInput(inputId = "tidsenhetAndel", label="Velg tidsenhet",
                                       choices = rev(c('År'= 'Aar', 'Halvår' = 'Halvaar',
                                                       'Kvartal'='Kvartal', 'Måned'='Mnd'))),
