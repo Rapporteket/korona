@@ -280,7 +280,7 @@ bredde <- 6.5/ncol(BeleggTab)
 colnames(BeleggTab) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(BeleggTab),'}')
 
 AntRader <- nrow(BeleggTab)
-BeleggTab[AntRader,1] <- 'Dognplasser.2019'
+BeleggTab[AntRader,1] <- 'Senger, 2019'
 fra <- max(1, (AntRader-20))
 print(xtable::xtable(BeleggTab[fra:AntRader, ],
                digits=1, #-which(names(AntRader)=='Hele landet')
