@@ -17,7 +17,7 @@ library(sship)
 library(intensivberedskap)
 library(korona)
 
-procStart <- proc.time()
+# procStart <- proc.time()
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
 # ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
@@ -47,8 +47,8 @@ aarsakInnValg <- c(
 #last modul(er)
 source(system.file("shinyApps/korona/R/resultatmodul.R", package = "korona"), encoding = 'UTF-8')
 
-cat("Startup timings (s):\n")
-print(proc.time() - procStart)
+# cat("Startup timings (s):\n")
+# print(proc.time() - procStart)
 
 ui <- tagList(
   navbarPage(id='hovedark',
@@ -637,6 +637,7 @@ server <- function(input, output, session) {
                 InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
     antPasFlereForl <- sum(PasFlere$InnNr0>1)
   })
+
   output$antFlereForl <- renderUI(h5(HTML(paste0('Resultatene er stort sett basert på antall pasienter. Det betyr at alle opphold
   for overflyttede eller reinnlagte pasienter er aggregerte til ett forløp per pasient.
   Det er ikke tatt hensyn til at en pasient kan ha flere Covid-forløp.
@@ -1068,6 +1069,7 @@ Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.
 
   #  }) #observe
   #----------Datakvalitet-------------------------
+  observe({
   innManglerUtTab <- innManglerUt(RegData=rv$KoroDataRaa, valgtEnhet=egenEnhet, enhetsNivaa=egetEnhetsNivaa)
   output$innManglerUtTab <- renderTable(innManglerUtTab)
 
@@ -1090,7 +1092,7 @@ Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.
       write.csv2(TabDblInn, file, row.names = F, na = '')
     })
 
-
+  })
 
 
 
