@@ -67,12 +67,7 @@ paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 #Data per opphold
 PandemiOpph <- KoronaPreprosesser(RegData = Pandemi, aggPers = 0)
 #stopifnot(rolle %in% c('SC', 'LC', 'LU'), print(paste0('rolle:', rolle)))
-#Telle pasienter med flere forløp, covid hovedårsak
 PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
-    PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
-      summarise(.groups = 'drop',
-                InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
-    antPasFlereForlAlle <- sum(PasFlere$InnNr0>1)
 
 PandemiOpph$EnhNivaaVis <- switch(rolle,
                                 SC = PandemiOpph$RHF,
@@ -80,6 +75,11 @@ PandemiOpph$EnhNivaaVis <- switch(rolle,
                                 LU = PandemiOpph$ShNavn)
 PandemiOpphAlleInnlEgen <-  KoronaUtvalg(RegData=PandemiOpph,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
+#Telle pasienter med flere forløp, covid hovedårsak
+    PasFlere <- PandemiOpphAlleInnlEgen %>% group_by(PasientID) %>%
+      summarise(.groups = 'drop',
+                InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+    antPasFlereForlAlleInn <- sum(PasFlere$InnNr0>1)
 PandemiOpph <-  PandemiOpphAlleInnlEgen[PandemiOpphAlleInnlEgen$ArsakInnleggelse==1, ]
 PandemiOpph$EnhNivaaVis <- as.factor(PandemiOpph$EnhNivaaVis)
 
@@ -123,7 +123,7 @@ txtAlder <- if (dim(Pandemi)[1]>2){paste0('Alderen er mellom ',
 
 
 #Telle pasienter med flere forløp, covid hovedårsak
-PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
+#PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
     PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
       summarise(.groups = 'drop',
                 InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
@@ -142,7 +142,7 @@ Alle innlagte med covid-19 blir registrert i NIPaR, uavhengig av om covid-19 er 
 I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er Covid-19.
 
 For resultater basert på personaggregerte data, er skjema aggregert til ett forløp per pasient,
-uavhengig av om pasienten har reinnleggelser eller flere forløp. Per i dag er det \Sexpr{antPasFlereForlAlle} pasienter som har mer enn ett forløp og \Sexpr{antPasFlereForl} av disse har mer enn ett forløp med Covid-19 som hovedårsak.
+uavhengig av om pasienten har reinnleggelser eller flere forløp. Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett forløp og \Sexpr{antPasFlereForl} av disse har mer enn ett forløp med Covid-19 som hovedårsak.
 For personaggregerte resultater vises pasienter
 hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
 ferdigstilt eller ikke, dersom ikke annet er oppgitt.
@@ -370,7 +370,9 @@ print(xtable::xtable(RegHF, row.names=FALSE, digits=0,
 <<'Alder', results='asis'>>=
 AldersTab <- AlderTab(RegData=Pandemi, minN = 3)$Tab
 colnames(AldersTab) <- paste0(colnames(AldersTab), ' pasienter')
-xtable::xtable(AldersTab, caption='Fordeling i aldersgrupper på rapporteringstidspunktet')
+xtable::xtable(AldersTab,
+               align = c('l', 'r', 'r'),
+               caption='Fordeling i aldersgrupper på rapporteringstidspunktet')
 @
 
 \end{frame}
@@ -439,7 +441,7 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #
 <<'Oppsum', results='asis'>>=
 
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-FerdigeReg <- FerdigeRegTab(PandemiUsiste3mnd)$Tab
+FerdigeReg <- FerdigeRegTab(PandemiUsiste3mnd, minN = 3)$Tab
 
 Tidsrom <- paste0('(Før ', format(datoTil3mnd, format='%d.%b%y'),')')
 Kol1 <- rownames(FerdigeReg)
@@ -457,7 +459,7 @@ print(
                )
       , include.rownames = FALSE)
 
-  FerdigeReg3mnd <- FerdigeRegTab(PandemiSiste3mnd)$Tab
+  FerdigeReg3mnd <- FerdigeRegTab(PandemiSiste3mnd, minN = 3)$Tab
 
   Tidsrom <- paste0('(F.o.m. ', format(datoTil3mnd, format='%d.%b%y'),')')
 Kol1 <- rownames(FerdigeReg3mnd)

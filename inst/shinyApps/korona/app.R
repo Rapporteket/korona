@@ -655,8 +655,8 @@ server <- function(input, output, session) {
   output$antFlereForl <- renderUI(h5(HTML(paste0('Resultatene er stort sett basert på antall pasienter. Det betyr at alle opphold
   for overflyttede eller reinnlagte pasienter er aggregerte til ett forløp per pasient.
   Det er ikke tatt hensyn til at en pasient kan ha flere Covid-forløp.
-Per i dag er det ', antPasFlereForlAlle, ' som har mer enn ett forløp
-og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hovedårsak .'))))
+Per i dag er det på landsbasis', antPasFlereForlAlle, ' som har mer enn ett forløp
+og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hovedårsak.'))))
 
 
 
