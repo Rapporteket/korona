@@ -173,6 +173,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' @return
 #' @export
 FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
+                          minN=0,
                           datoFra='2020-03-01', datoTil=Sys.Date(), aarsakInn=9, erMann=9, dodSh=9){
 
   Utvalg <- KoronaUtvalg(RegData=RegData,
@@ -219,11 +220,20 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
   AntPas <- length(unique(RegData$PersonId))
 
+  if (N>3){
+    if (minN>0){
+      underMin <- which(as.numeric(TabFerdigeReg[,4]) < minN)
+      ant <- length(underMin)
+      TabFerdigeReg[underMin, ] <- c(rep('', 3*ant), rep('<3', ant), rep('', ant))
+    }
+
   xtable::xtable(TabFerdigeReg,
                  digits=0,
                  align = c('l','r','r','c', 'r','r'),
                  caption='Ferdigstilte opphold.
                  IQR (Inter quartile range) - 50 \\% av registreringene er i dette intervallet.')
+
+  } else {TabRiTabFerdigeReg <- 'Færre enn 3 observasjoner'}
   return(invisible(UtData <- list(Tab=TabFerdigeReg,
                                   utvalgTxt = Utvalg$utvalgTxt,
                                   Ntest=N,
@@ -274,29 +284,20 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
     'Fedme (BMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
-    'Totalt antall (N)' = c(N, ''),
+    'Pasienter, totalt' = c(N, ''),
     '  * Antall besvart BMI:' = c(sum(!is.na(RegData$BMI)),'')
   )
 
   TabRisiko['Fedme (BMI>30)',2] <- paste0(TabRisiko['Fedme (BMI>30)',2], '*')
-  colnames(TabRisiko) <- c('Antall pasienter', 'Andel pasienter')
+  #colnames(TabRisiko) <- c('Antall pasienter', 'Andel pasienter')
 
 
   if (N>3){
-
-    # TabRisiko <- cbind(AntRisiko,
-    #                    'Andel' = paste0(sprintf('%.0f', 100*AntRisiko/dim(RegData)[1]),'%')) #[,"Sum"]
     if (sens==1){
       under3 <- which(as.numeric(TabRisiko[,1]) < 3)
       TabRisiko[under3, ] <- c(rep('<3', length(under3)), rep('', length(under3)))
     }
-    TabRisiko <- rbind(TabRisiko,
-                       'Pasienter, totalt' = c(dim(RegData)[1], ''))
     colnames(TabRisiko) <- c('Antall', 'Andel') #c('Antall pasienter', 'Andel pasienter')
-  # xtable::xtable(TabRisiko,
-  #                digits=0,
-  #                align = c('l',rep('r',ncol(TabRisiko))),
-  #                caption='Risikofaktorer')
 } else {TabRisiko <- 'Færre enn 3 observasjoner'}
   return(UtData <- list(Tab=TabRisiko, utvalgTxt=UtData$utvalgTxt, Ntest=N))
 }

@@ -67,6 +67,13 @@ paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 #Data per opphold
 PandemiOpph <- KoronaPreprosesser(RegData = Pandemi, aggPers = 0)
 #stopifnot(rolle %in% c('SC', 'LC', 'LU'), print(paste0('rolle:', rolle)))
+#Telle pasienter med flere forløp, covid hovedårsak
+PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
+    PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
+      summarise(.groups = 'drop',
+                InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+    antPasFlereForlAlle <- sum(PasFlere$InnNr0>1)
+
 PandemiOpph$EnhNivaaVis <- switch(rolle,
                                 SC = PandemiOpph$RHF,
                                 LC = PandemiOpph$HF,
@@ -115,7 +122,7 @@ txtAlder <- if (dim(Pandemi)[1]>2){paste0('Alderen er mellom ',
                            Alder[4], ' år.')} else {''}
 
 
-#Telle pasienter med flere forløp
+#Telle pasienter med flere forløp, covid hovedårsak
 PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
     PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
       summarise(.groups = 'drop',
@@ -126,9 +133,6 @@ PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
 
 \begin{frame}[fragile] {Om dokumentet}
 
- I dokumentet skilles det ikke på om skjema er ferdigstilt eller ikke, dersom ikke annet er oppgitt.
-
-
 Dette er en automatisk generert rapport fra Norsk intensiv- og pandemiregister (NIPaR).
 Dokumentet inneholder oversikt over \bf{sykehusbehandlede pasienter med covid-19} for \textbf{\Sexpr{forHvem}}.
 I denne sammenhengen betyr det at pasienten er innlagt på sykehus og har en positiv prøve for SARS-CoV-2
@@ -138,7 +142,7 @@ Alle innlagte med covid-19 blir registrert i NIPaR, uavhengig av om covid-19 er 
 I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er Covid-19.
 
 For resultater basert på personaggregerte data, er skjema aggregert til ett forløp per pasient,
-uavhengig av om pasienten har reinnleggelser eller flere forløp. Per i dag er det \Sexpr{antPasFlereForl} som har mer enn ett forløp med Covid-19.
+uavhengig av om pasienten har reinnleggelser eller flere forløp. Per i dag er det \Sexpr{antPasFlereForlAlle} pasienter som har mer enn ett forløp og \Sexpr{antPasFlereForl} av disse har mer enn ett forløp med Covid-19 som hovedårsak.
 For personaggregerte resultater vises pasienter
 hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
 ferdigstilt eller ikke, dersom ikke annet er oppgitt.
@@ -280,7 +284,7 @@ BeleggTab[AntRader,1] <- 'Dognplasser.2019'
 fra <- max(1, (AntRader-20))
 print(xtable::xtable(BeleggTab[fra:AntRader, ],
                digits=1, #-which(names(AntRader)=='Hele landet')
-               caption='Andel av totalt antall senger (2019-tall) som opptas av pasienter hvor covid-19 er hovedårsak til siste opphold.'),
+               caption='Andel av totalt antall somatiske senger (2019-tall) som opptas av pasienter hvor covid-19 er hovedårsak til siste opphold.'),
                include.rownames=FALSE
       , sanitize.colnames.function = identity)
 @
@@ -392,7 +396,7 @@ dum <- AlderKjFig(RegData=PandemiSiste3mnd, minN = 3,
 \centering
 \includegraphics[scale=0.25]{AlderKjonnU3.pdf}
 \includegraphics[scale=0.25]{AlderKjonnSiste3.pdf}
-\caption{Fordeling av kjønn i ulike aldersgrupper for h.h.v. pandemiperioden fram til \Sexpr{datoTil3mnd} og
+\caption{Fordeling av kjønn i ulike aldersgrupper for h.h.v. pandemiperioden før \Sexpr{datoTil3mnd} og
 fra og med \Sexpr{datoTil3mnd} til rapporteringstidspunktet. Merk at figurene kan ha ulik alderskategorisering.
 Dette fordi det alltid må være minst 3 observasjoner i ei gruppe.}
 \end{figure}
@@ -405,11 +409,13 @@ Dette fordi det alltid må være minst 3 observasjoner i ei gruppe.}
 <<'Risikofaktorer', results='asis'>>=
 RisikoTab <- RisikoInnTab(RegData=PandemiUsiste3mnd, skjemastatusInn = 2, sens=1)$Tab
 
-xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-               caption=paste0('Risikofaktorer på  for
-               ferdigstilte forløp fram til ',  datoTil3mnd, ' hvor covid-19 var hovedårsak til innleggelsen.
-               Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan derfor være
-               høyere enn antallet pasienter'))
+xtable::xtable(RisikoTab, #digits=0, #method='compact', #
+               align=c('l', rep('r', ncol(RisikoTab))),
+               caption=paste0(
+                 'Risikofaktorer for ferdigstilte forløp fra pandemistart til ',
+                 datoTil3mnd, ' hvor covid-19 var hovedårsak til innleggelsen.
+                 Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan
+                 derfor være høyere enn antallet pasienter'))
 @
 \end{frame}
 
@@ -418,7 +424,8 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', n
 #RisikoTab <- RisikoInnTab(RegData=PandemiSiste3mnd[1:70,], skjemastatusInn = 2, sens=1)$Tab
 RisikoTab <- RisikoInnTab(RegData=PandemiSiste3mnd, skjemastatusInn = 2, sens=1)$Tab
 
-xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
+xtable::xtable(RisikoTab, #digits=0, #method='compact', #
+               align=c('l', rep('r', ncol(RisikoTab))),
                caption='Risikofaktorer på rapporteringstidspunktet for
                ferdigstilte forløp siste 3 måneder hvor covid-19 var hovedårsak til innleggelsen.
                Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan derfor være
@@ -428,33 +435,46 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #align=c('l', rep('r', n
 
 
 
-\begin{frame}[fragile] {Resultater for ferdigstilte opphold}
+\begin{frame}[fragile] {Resultater for ferdigstilte forløp}
 <<'Oppsum', results='asis'>>=
 
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
 FerdigeReg <- FerdigeRegTab(PandemiUsiste3mnd)$Tab
 
-#print(
-  xtable::xtable(FerdigeReg, align=c('l','r','r','c','r','r'),
+Tidsrom <- paste0('(Før ', format(datoTil3mnd, format='%d.%b%y'),')')
+Kol1 <- rownames(FerdigeReg)
+rownames(FerdigeReg) <- NULL
+FerdigeRegNy <- cbind(Kol1, FerdigeReg)
+colnames(FerdigeRegNy)[1] <- Tidsrom
+
+print(
+  xtable::xtable(FerdigeRegNy, align=c('l','l','r','r','c','r','r'),
                #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                # caption=paste('Verdier for utskrevne pasienter innlagt før ', datoTil3mnd, 'hvor både
                # inklusjons- og utskrivingsskjema er ferdigstilt.
                # IQR (inter quartile range) betyr at 25 \\% av oppholdene er under minste verdi, 50 \\% av oppholdene
                # er i intervallet, og 25 \\% av oppholdene er over høyeste verdi.')
                )
-      #, include.rownames = FALSE)
+      , include.rownames = FALSE)
 
   FerdigeReg3mnd <- FerdigeRegTab(PandemiSiste3mnd)$Tab
 
-#print(
-  xtable::xtable(FerdigeReg3mnd, align=c('l','r','r','c','r','r'),
+  Tidsrom <- paste0('(F.o.m. ', format(datoTil3mnd, format='%d.%b%y'),')')
+Kol1 <- rownames(FerdigeReg3mnd)
+rownames(FerdigeReg3mnd) <- NULL
+FerdigeReg3mndNy <- cbind(Kol1, FerdigeReg3mnd)
+colnames(FerdigeReg3mndNy)[1] <- Tidsrom
+
+print(
+  xtable::xtable(FerdigeReg3mndNy, align=c('l','l','r','r','c','r','r'),
                #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-               caption=paste0('Verdier på rapporteringstidspunktet for utskrevne pasienter innlagt henholdsvis
-               før ', datoTil3mnd, ' (øverste tabell) og siste 3 måneder (nederste tabell).
-               Både inklusjonsskjema og utskrivingsskjema er ferdigstilt for hele pasientforløpet.
+               caption=paste0('Verdier på rapporteringstidspunktet for utskrevne pasienter innlagt
+               henholdsvis før ', datoTil3mnd, ' (øverste tabell) og siste 3 måneder
+               (nederste tabell). Opphold hvor både inklusjonsskjema og utskrivingsskjema er ferdigstilt for hele pasientforløpet, er inkludert.
                IQR (inter quartile range) betyr at 25 \\% av oppholdene er under minste verdi,
                50 \\% av oppholdene er i intervallet, og 25 \\% av oppholdene er over høyeste verdi.')
   )
+   , include.rownames = FALSE)
 
 @
 \end{frame}

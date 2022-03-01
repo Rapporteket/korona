@@ -36,32 +36,11 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
 
-  ## get staging data, if present
-  KoroDataRaa <- rapbase::loadStagingData("korona", "koroDataRaa") #Benyttes i appen
-  if (isFALSE(KoroDataRaa)) {
-    KoroDataRaa <-  KoronaDataSQL(koble=1)
-    rapbase::saveStagingData("korona", "koroDataRaa", KoroDataRaa)
-  }
-
-
-
-## get staging data, if present
-KoroDataOpph <- rapbase::loadStagingData("korona", "koroDataOpph")
-if (isFALSE(KoroDataOpph)) {
+  KoroDataRaa <-  KoronaDataSQL(koble=1)
   KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-  rapbase::saveStagingData("korona", "koroDataOpph", KoroDataOpph)
-}
-
-BeredData <- rapbase::loadStagingData("korona", "BeredData")
-if (isFALSE(BeredData)) {
-  # BeredDataRaa <- rapbase::loadStagingData("korona", "BeredDataRaa") #Bare mellomregning
   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
-  rapbase::saveStagingData("korona", "BeredData", BeredData)
-}
 
-KoroData <- rapbase::loadStagingData("korona", "KoroData")
-if (isFALSE(KoroData)) {
   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
   KoroData <- merge(KoroData,
                     BeredData,
@@ -71,11 +50,43 @@ if (isFALSE(KoroData)) {
                     by = 'PersonId')
   KoroData  <- KoroData %>%
     dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
-  rapbase::saveStagingData("korona", "KoroData", KoroData)
-}
 
 
-
+#   ## get staging data, if present
+#   KoroDataRaa <- rapbase::loadStagingData("korona", "koroDataRaa") #Benyttes i appen
+#   if (isFALSE(KoroDataRaa)) {
+#     KoroDataRaa <-  KoronaDataSQL(koble=1)
+#     rapbase::saveStagingData("korona", "koroDataRaa", KoroDataRaa)
+#   }
+#
+# ## get staging data, if present
+# KoroDataOpph <- rapbase::loadStagingData("korona", "koroDataOpph")
+# if (isFALSE(KoroDataOpph)) {
+#   KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+#   rapbase::saveStagingData("korona", "koroDataOpph", KoroDataOpph)
+# }
+#
+# BeredData <- rapbase::loadStagingData("korona", "BeredData")
+# if (isFALSE(BeredData)) {
+#   # BeredDataRaa <- rapbase::loadStagingData("korona", "BeredDataRaa") #Bare mellomregning
+#   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+#   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
+#   rapbase::saveStagingData("korona", "BeredData", BeredData)
+# }
+#
+# KoroData <- rapbase::loadStagingData("korona", "KoroData")
+# if (isFALSE(KoroData)) {
+#   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
+#   KoroData <- merge(KoroData,
+#                     BeredData,
+#                     all.x = T,
+#                     all.y = F,
+#                     suffixes = c("", "Bered"),
+#                     by = 'PersonId')
+#   KoroData  <- KoroData %>%
+#     dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+#   rapbase::saveStagingData("korona", "KoroData", KoroData)
+# }
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
@@ -170,8 +181,8 @@ ui <- tagList(
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
                                 uiOutput('manglerRegResh'),
                                 h3('Resultater fra pandemiregistrering, korona.'),
-                                h4('Merk at resultatene kan inkludere ufullstendige registreringer'),
                                 uiOutput('antFlereForl'),
+                                h5('Merk at resultatene kan inkludere ufullstendige registreringer'),
                                 h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
                                    pandemiregisteret finnes under fanen "Resultater".'),
                                 #h5('Siden er under utvikling... ', style = "color:red"),
@@ -633,12 +644,19 @@ server <- function(input, output, session) {
   PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
     summarise(.groups = 'drop',
               InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+  antPasFlereForlAlle <- sum(PasFlere$InnNr0>1)
+
+  PasFlere <- KoroDataOpph %>% dplyr::filter(ArsakInnleggelse==1) %>%
+    group_by(PasientID) %>%
+    summarise(.groups = 'drop',
+              InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
   antPasFlereForl <- sum(PasFlere$InnNr0>1)
 
   output$antFlereForl <- renderUI(h5(HTML(paste0('Resultatene er stort sett basert på antall pasienter. Det betyr at alle opphold
   for overflyttede eller reinnlagte pasienter er aggregerte til ett forløp per pasient.
   Det er ikke tatt hensyn til at en pasient kan ha flere Covid-forløp.
-Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.'))))
+Per i dag er det ', antPasFlereForlAlle, ' som har mer enn ett forløp
+og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hovedårsak .'))))
 
 
 
