@@ -44,6 +44,7 @@ Automatisk generert rapport - sykehusbehandlede pasienter med covid-19, \\ ', fo
 
 
 \begin{document}
+\begin{tiny}
 
 \title[NIPaR \\ Covid-19 på sykehus \\\today]{\Sexpr{Tittel}} %\\\today}
 %\title[Norsk Intensivregister, Corona \\\today] {%\textit{Coronadata, NIR} \\}
@@ -51,7 +52,6 @@ Automatisk generert rapport - sykehusbehandlede pasienter med covid-19, \\ ', fo
 \maketitle
 
 
-\begin{tiny}
 
 
 <<'hentDataOgTilrettelegg', results='asis' >>= #include=FALSE
