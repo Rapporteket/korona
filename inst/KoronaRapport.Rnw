@@ -2,13 +2,18 @@
 \usetheme{Hannover}
 
 \usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[english, norsk]{babel}
+\usepackage[T1]{fontenc}  % Bedre støtte for bl.a. orddeling
+\usepackage[norsk]{babel}
+%\usepackage[english, norsk]{babel}
 \usepackage{xspace}
 \usepackage{booktabs}
 \usepackage{rotating}
 \usepackage{graphicx}
 %\usepackage{tabularx}
+\usepackage{caption}
+\captionsetup[figure]{font=tiny} %,labelfont=footnotesize}
+\captionsetup[table]{font=tiny} %,labelfont=small}
+
 
 % \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 % \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
@@ -250,11 +255,14 @@ Hos disse er gjennomsnittsalderen \Sexpr{AlderGjsnAndre} år og \Sexpr{andelMenn
 Det er \Sexpr{antDodAndre}
 av de \Sexpr{AntAndre} som er døde.
 
+
 <<'ShusNaaAndreTab', results='asis', message=FALSE>>=
+nedskaler <- ifelse(dim(InneliggPasAndre)[1]>22, 22/dim(InneliggPasAndre)[1], 1)
 print(xtable::xtable(InneliggPasAndre, digits=0, align=c('l','l','l','r'),
-                              caption='Antall inneliggende pasienter med covid-19 hvor innleggelsen
-                     har en annen hovedårsak enn covid-19'),
-               include.rownames=FALSE)
+                     caption='Antall inneliggende pasienter med covid-19 hvor innleggelsen
+                     har en annen hovedårsak enn covid-19.'),
+      scalebox = nedskaler,
+      include.rownames=FALSE)
 @
 \end{frame}
 
@@ -353,9 +361,13 @@ RegHF <- if (rolle == 'LU') {PandemiOpph %>% dplyr::group_by(HF, ShNavn) %>% dpl
 #sort(table(Pandemi$HF), decreasing = T)
 RegHF <- rbind(as.matrix(RegHF),
       c('','Totalt', sum(RegHF$Antall)))
+
+nedskaler <- ifelse(dim(RegHF)[1]>25, 25/dim(RegHF)[1], 1)
+
 print(xtable::xtable(RegHF, row.names=FALSE, digits=0,
                      caption='Totalt antall registrerte opphold med hovedårsak covid-19
                      fra pandemistart til rapporteringstidspunktet.'),
+      scalebox = nedskaler,
       include.rownames = FALSE)
 @
 \end{frame}
@@ -372,7 +384,7 @@ AldersTab <- AlderTab(RegData=Pandemi, minN = 3)$Tab
 colnames(AldersTab) <- paste0(colnames(AldersTab), ' pasienter')
 xtable::xtable(AldersTab,
                align = c('l', 'r', 'r'),
-               caption='Fordeling i aldersgrupper på rapporteringstidspunktet')
+               caption='Fordeling i aldersgrupper på rapporteringstidspunktet.')
 @
 
 \end{frame}
@@ -417,7 +429,7 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #
                  'Risikofaktorer for ferdigstilte forløp fra pandemistart til ',
                  datoTil3mnd, ' hvor covid-19 var hovedårsak til innleggelsen.
                  Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan
-                 derfor være høyere enn antallet pasienter'))
+                 derfor være høyere enn antallet pasienter.'))
 @
 \end{frame}
 
@@ -431,7 +443,7 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #
                caption='Risikofaktorer på rapporteringstidspunktet for
                ferdigstilte forløp siste 3 måneder hvor covid-19 var hovedårsak til innleggelsen.
                Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan derfor være
-               høyere enn antallet pasienter')
+               høyere enn antallet pasienter.')
 @
 \end{frame}
 
@@ -474,7 +486,8 @@ print(
                henholdsvis før ', datoTil3mnd, ' (øverste tabell) og siste 3 måneder
                (nederste tabell). Opphold hvor både inklusjonsskjema og utskrivingsskjema er ferdigstilt for hele pasientforløpet, er inkludert.
                IQR (inter quartile range) betyr at 25 \\% av oppholdene er under minste verdi,
-               50 \\% av oppholdene er i intervallet, og 25 \\% av oppholdene er over høyeste verdi.')
+               50 \\% av oppholdene er i intervallet,
+               og 25 \\% av oppholdene er over høyeste verdi.')
   )
    , include.rownames = FALSE)
 
