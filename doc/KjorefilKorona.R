@@ -529,9 +529,9 @@ antallTidEnhTab(RegData, tidsenhet=tidsenhet, erMann=9, tilgangsNivaa=tilgangsNi
 
 
 library(korona)
-valgtEnhet= 'N-Trøndelag' #'Midt' #'Innlandet' #'Vest' #'Innlandet' #'Alle'
-enhetsNivaa <- 'HF'
-rolle <- 'LU'
+valgtEnhet= 'Alle' #'N-Trøndelag' #'Midt' #'Innlandet' #'Vest' #'Innlandet' #'Alle'
+enhetsNivaa <- 'RHF'
+rolle <- 'SC'
 reshID <- 100317 #N-Trøndelag #100091
 #setwd('C:/ResultattjenesteGIT/korona/inst')
 setwd('/home/rstudio/korona/inst')
