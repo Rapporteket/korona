@@ -17,6 +17,7 @@ library(sship)
 library(intensivberedskap)
 library(korona)
 
+procStart <- proc.time()
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
 # ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
@@ -32,46 +33,60 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
                    ifelse(context=='QA', 'QA',''))
 
 #---------Hente data------------
-if (paaServer) {
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
+
   KoroDataRaa <-  KoronaDataSQL(koble=1)
+  KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-  #repLogger(session = session, 'Hentet alle data fra intensivregisteret')
-} else {
-  KoroDataInn <- read.table('I:/korona/InklusjonSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
-                            stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  KoroDataInn <- KoroDataInn %>% select(-Utskrivningsdato)
-  KoroDataUt <- read.table('I:/korona/UtskrivningSkjemaDataContract2021-05-31 11-23-31.txt', sep=';',
-                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  map_ut_navn <- data.frame(gml=c("CreationDate", "FirstTimeClosed", "HelseenhetKortNavn", "FormStatus", "FormDate", "Importert", "SkjemaGUID"),
-                            ny=c("CreationDateUt", "FirstTimeClosedUt", "ShNavnUt", "FormStatusUt", "FormDateUt", "ImportertUt", "SkjemaGUIDut"))
-  names(KoroDataUt)[names(KoroDataUt) %in% map_ut_navn$gml] <-
-    map_ut_navn$ny[match(names(KoroDataUt)[names(KoroDataUt) %in% map_ut_navn$gml], map_ut_navn$gml)]
-  KoroDataUt <- KoroDataUt[, c("HovedskjemaGUID", "Antifungalbehandling", "AntiviralBehandling", "CreationDateUt",
-                               "FirstTimeClosedUt", "ShNavnUt", "FormStatusUt", "FormDateUt", "ImportertUt",
-                               "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving", "Utskrivningsdato", "SkjemaGUIDut")]
+  BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
 
-  BeredData <-  read.table('I:/nir/ReadinessFormDataContract2021-05-31 11-28-03.txt', sep=';',
-                             stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart", "DateAdmittedIntensive",
-                         "MechanicalRespiratorEnd", "DateDischargedIntensive")][BeredData[, c("EcmoEnd", "EcmoStart", "MechanicalRespiratorStart",
-                                                                                              "DateAdmittedIntensive",
-                          "MechanicalRespiratorEnd", "DateDischargedIntensive")]==""] <- NA
-  BeredDataRaa <- BeredData[as.Date(BeredData$FormDate) >= '2020-03-01' & as.Date(BeredData$FormDate) <= Sys.Date(), ]
-  KoroDataRaa <- merge(KoroDataInn, KoroDataUt,
-                    by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
-  KoroDataRaa$Utskrivningsdato[which(KoroDataRaa$Utskrivningsdato=="")] <- NA
-} #hente data
+  KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
+  KoroData <- merge(KoroData,
+                    BeredData,
+                    all.x = T,
+                    all.y = F,
+                    suffixes = c("", "Bered"),
+                    by = 'PersonId')
+  KoroData  <- KoroData %>%
+    dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
 
 
-KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
-KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
-#Kobler pandemi og beredskap:
-KoroData <- merge(KoroData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
-                     by = 'PersonId')
-KoroData  <- KoroData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+#   ## get staging data, if present
+#   KoroDataRaa <- rapbase::loadStagingData("korona", "koroDataRaa") #Benyttes i appen
+#   if (isFALSE(KoroDataRaa)) {
+#     KoroDataRaa <-  KoronaDataSQL(koble=1)
+#     rapbase::saveStagingData("korona", "koroDataRaa", KoroDataRaa)
+#   }
+#
+# ## get staging data, if present
+# KoroDataOpph <- rapbase::loadStagingData("korona", "koroDataOpph")
+# if (isFALSE(KoroDataOpph)) {
+#   KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+#   rapbase::saveStagingData("korona", "koroDataOpph", KoroDataOpph)
+# }
+#
+# BeredData <- rapbase::loadStagingData("korona", "BeredData")
+# if (isFALSE(BeredData)) {
+#   # BeredDataRaa <- rapbase::loadStagingData("korona", "BeredDataRaa") #Bare mellomregning
+#   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+#   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
+#   rapbase::saveStagingData("korona", "BeredData", BeredData)
+# }
+#
+# KoroData <- rapbase::loadStagingData("korona", "KoroData")
+# if (isFALSE(KoroData)) {
+#   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
+#   KoroData <- merge(KoroData,
+#                     BeredData,
+#                     all.x = T,
+#                     all.y = F,
+#                     suffixes = c("", "Bered"),
+#                     by = 'PersonId')
+#   KoroData  <- KoroData %>%
+#     dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+#   rapbase::saveStagingData("korona", "KoroData", KoroData)
+# }
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
@@ -102,6 +117,9 @@ aarsakInnValg <- c(
 
 #last modul(er)
 source(system.file("shinyApps/korona/R/resultatmodul.R", package = "korona"), encoding = 'UTF-8')
+
+cat("Startup timings (s):\n")
+print(proc.time() - procStart)
 
 ui <- tagList(
   navbarPage(id='hovedark',
@@ -163,8 +181,8 @@ ui <- tagList(
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
                                 uiOutput('manglerRegResh'),
                                 h3('Resultater fra pandemiregistrering, korona.'),
-                                h4('Merk at resultatene kan inkludere ufullstendige registreringer'),
                                 uiOutput('antFlereForl'),
+                                h5('Merk at resultatene kan inkludere ufullstendige registreringer'),
                                 h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
                                    pandemiregisteret finnes under fanen "Resultater".'),
                                 #h5('Siden er under utvikling... ', style = "color:red"),
@@ -353,21 +371,12 @@ ui <- tagList(
                                                   'Døde' = 'dodSh'
                                       )
                           ),
-                          # selectInput(inputId = "enhetsUtvalgAndel", label="Velg enhetsnivå",
-                          #             choices = c('Valgt enhet mot resten'=1, 'Hele landet'=0, 'Valgt enhet'=2)
-                          # ),
-                          # selectInput(inputId = "valgtEnhetAndel", label="Velg enhet",
-                          #             choices = 'Alle'
-                          # ),
                           dateRangeInput(inputId = "valgtDatoAndel", label = "Tidsperiode",
                                          start = startDato, end = Sys.Date(),
                                          separator="t.o.m.", language="nb"),
                           selectInput(inputId = "aarsakInnAndel", label="Covid-19 hovedårsak til innleggelse?",
                                       choices = aarsakInnValg
                           ),
-                          # selectInput(inputId = "skjemastatusInnAndel", label="Skjemastatus, inklusjon",
-                          #             choices = c("Alle"=9, "Ferdistilt"=2, "Kladd"=1)
-                          # ),
                           selectInput(inputId = "dodShAndel", label="Utskrevne, tilstand",
                                       choices = c("Ikke valgt"=9,"Levende og døde"=3,  "Død"=2, "Levende"=1)
                           ),
@@ -379,11 +388,8 @@ ui <- tagList(
                           ),
                           selectInput(inputId = "bildeformatAndel",
                                       label = "Velg format for nedlasting av figur",
-                                      choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
-                          # selectInput(inputId = "bildeformatFord",
-                          #             label = "Velg format for nedlasting av figur",
-                          #             choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')),
-
+                                      choices = c('pdf', 'png', 'jpg', 'bmp', 'tif', 'svg')
+                                      ),
                           selectInput(inputId = "tidsenhetAndel", label="Velg tidsenhet",
                                       choices = rev(c('År'= 'Aar', 'Halvår' = 'Halvaar',
                                                       'Kvartal'='Kvartal', 'Måned'='Mnd'))),
@@ -580,7 +586,7 @@ server <- function(input, output, session) {
 
   #-----------Div serveroppstart------------------
   if (context %in% c('QA', 'PRODUCTION')){
-    raplog::appLogger(session = session, msg = "Starter Pandemi-app")}
+    rapbase::appLogger(session = session, msg = "Starter Pandemi-app")}
 
   reshID <- ifelse(paaServer, as.numeric(rapbase::getUserReshId(session)), 100082) # 100089
 
@@ -600,6 +606,10 @@ server <- function(input, output, session) {
   #Filtreringsnivå for data:
   egetEnhetsNivaa <- switch(rolle, SC = 'RHF', LC = 'RHF', LU = 'HF')
   egenEnhet <- switch(rolle, SC='Alle', LC=egetRHF, LU=egetHF) #For LU vil reshID benyttes
+# print(reshID)
+# print(rolle)
+# print(egetEnhetsNivaa)
+# print(egenEnhet)
 
   #observe({
     if (rolle != 'SC') {
@@ -634,12 +644,19 @@ server <- function(input, output, session) {
   PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
     summarise(.groups = 'drop',
               InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+  antPasFlereForlAlle <- sum(PasFlere$InnNr0>1)
+
+  PasFlere <- KoroDataOpph %>% dplyr::filter(ArsakInnleggelse==1) %>%
+    group_by(PasientID) %>%
+    summarise(.groups = 'drop',
+              InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
   antPasFlereForl <- sum(PasFlere$InnNr0>1)
 
   output$antFlereForl <- renderUI(h5(HTML(paste0('Resultatene er stort sett basert på antall pasienter. Det betyr at alle opphold
   for overflyttede eller reinnlagte pasienter er aggregerte til ett forløp per pasient.
   Det er ikke tatt hensyn til at en pasient kan ha flere Covid-forløp.
-Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.'))))
+Per i dag er det på landsbasis ', antPasFlereForlAlle, ' som har mer enn ett forløp
+og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hovedårsak.'))))
 
 
 
@@ -659,6 +676,10 @@ Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.
                            html = TRUE, confirmButtonText = rapbase::noOptOutOk())
   })
 
+  # print(reshID)
+  # print(rolle)
+  # print(egetEnhetsNivaa)
+  # print(egenEnhet)
 
 
   #-------- Laste ned Samlerapporter------------
@@ -671,8 +692,8 @@ Per i dag er det ', antPasFlereForl, ' som har mer enn ett forløp med Covid-19.
         henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
                                   rolle = rolle,
                                   valgtEnhet = egenEnhet, #as.character(input$valgtEnhet),
-                                  enhetsNivaa = egetEnhetsNivaa
-                                  #reshID = reshID
+                                  enhetsNivaa = egetEnhetsNivaa,
+                                  reshID = reshID
         ) #Vurder å ta med tidsinndeling eller startdato
       }
     )

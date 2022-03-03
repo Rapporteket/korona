@@ -12,6 +12,7 @@ RisikoInnTab(
   skjemastatusInn = 9,
   dodSh = 9,
   aarsakInn = 9,
+  sens = 0,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
   minald = 0,
@@ -33,6 +34,8 @@ RisikoInnTab(
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
 3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
+
+\item{sens}{0: standard, 1: Maskere verdier <3}
 
 \item{valgtEnhet}{- gis ut fra resh}
 

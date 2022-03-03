@@ -8,6 +8,7 @@ FerdigeRegTab(
   RegData,
   valgtEnhet = "Alle",
   enhetsNivaa = "RHF",
+  minN = 0,
   datoFra = "2020-03-01",
   datoTil = Sys.Date(),
   aarsakInn = 9,

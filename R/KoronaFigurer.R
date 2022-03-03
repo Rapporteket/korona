@@ -2,11 +2,13 @@
 
 #' Aldersfordeling, tabell
 #' @param RegData datatabell, beredskapsdata
+#' @param minN minste antall: Maskerer verdier under minN, standard: 0 (ingen maskering)
 #' @inheritParams KoronaUtvalg
 #' @return
 #' @export
 AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa='RHF',
                        datoFra='2020-03-01', datoTil=Sys.Date(), skjemastatusInn=9,
+                       minN = 0,
                        aarsakInn=9, dodSh=9, erMann=9, grvar = 'erMann', outfile=''){
 
    if (grvar=='erMann') {RegData$erMann <- factor(RegData$erMann, levels = 0:1, labels = c("Kvinner", "Menn"))}
@@ -20,23 +22,49 @@ AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa
                          erMann = erMann,
                          skjemastatusInn=skjemastatusInn
   )
-  RegData <- UtData$RegData #[UtData$ind$Hoved, ]
+  RegData <- UtData$RegData
   utvalgTxt <- UtData$utvalgTxt
 
   N <- dim(RegData)[1]
   if (valgtVar=='Alder') {
-    gr <- seq(0, 90, ifelse(N<100, 25, 10) )
-    RegData$Gr <- cut(RegData$Alder, breaks=c(gr, 110), include.lowest=TRUE, right=FALSE)
-    grtxt <- if(N<100){c('0-24', '25-49', "50-74", "75+")} else {
-      c('0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+')}
-    levels(RegData$Gr) <- grtxt #c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))
+
+    finnGrupper <- function(minN, gr, RegData){
+      RegData$Gr <- cut(RegData$Alder, breaks=c(gr, 110), include.lowest=TRUE, right=FALSE)
+      AntHoved <- table(RegData[, c('erMann', "Gr")])
+      minAnt <- min(AntHoved)
+      DataUt <- list(minAnt=minAnt, RegData=RegData)
+      return(DataUt)
+    }
+
+    gr1 <- seq(0, 90, 10)
+    gr2 <- c(0,20, seq(30, 80, 10) )
+    gr3 <- c(0,30, seq(40, 80, 10) )
+    gr4 <- c(0,40,60,80)
+    gr5 <- c(0,60)
+    grupperinger <- list(gr1, gr2, gr3, gr4, gr5)
+
+    minAnt <- -1
+    tell <- 0
+    while (minAnt < minN) {
+      tell <- tell + 1
+      gr <- grupperinger[[tell]]
+      finnGr <- finnGrupper(RegData=RegData,
+                            gr=gr,
+                            minN = minN)
+      minAnt <- finnGr$minAnt
+    }
+    RegData <- finnGr$RegData
+    #grtxt <- c(levels(RegData$Gr)[-length(gr)], paste0(gr[length(gr)],'+'))
+    antGr <- length(gr)
+    grtxt <- c(paste0(gr[1:antGr-1], '-', gr[2:antGr]-1), paste0(gr[antGr], '+'))
+    levels(RegData$Gr) <- grtxt
+    tittel <- "Aldersfordeling";
   }
 
-  AntHoved <- table(RegData[, c(grvar, "Gr")])
-  AntHovedTab <- tidyr::as_tibble(as.data.frame.matrix(addmargins(table(RegData[, c("Gr", grvar)]))), rownames=valgtVar)
+  AntHoved <- table(RegData[, c('erMann', "Gr")])
   NHoved <- rowSums(AntHoved)
+  grtxtMin <- ''
 
-  tittel <- "Aldersfordeling";
   FigTypUt <- rapFigurer::figtype(outfile=outfile, pointsizePDF=12)
   retn <- 'V'; cexgr<-1
   NutvTxt <- length(utvalgTxt)
@@ -71,6 +99,7 @@ AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa
   if ( outfile != '') {dev.off()}
   }
 
+  AntHovedTab <- tidyr::as_tibble(as.data.frame.matrix(addmargins(table(RegData[, c("Gr", grvar)]))), rownames=valgtVar)
   AntHovedTab$Andel <- paste0(round(AntHovedTab$Sum/AntHovedTab$Sum[dim(AntHovedTab)[1]]*100), ' %')
   names(AntHovedTab)[(dim(AntHovedTab)[2]-1):dim(AntHovedTab)[2]] <- c("Antall", "Andel")
 

@@ -18,7 +18,6 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
                             tilgangsNivaa='SC', valgtEnhet='Alle', #enhetsNivaa='RHF', HF=0,
                             skjemastatusInn=9, aarsakInn=9, dodSh=9){
   #valgtEnhet representerer eget RHF/HF
-#if (valgtVar == 'utskrevet') {}
 
   datoFra <- if (datoFra!=0) datoFra else min(RegData$InnDato, na.rm = T)
   #if (datoFra != 0) {RegData <- RegData[which(RegData$InnDato >= datoFra), ]}
@@ -81,18 +80,6 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
 
 
 
-# antallTidEnhTab (RegData)
-#
-# library(korona)
-# KoroDataRaa <-  KoronaDataSQL(koble=1)
-# KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-# RegData <- KoroDataOpph
-# enhetsNivaa <- 'HF'
-# tidsenhet = 'Aar'
-# datoTil = '2020-03-01'
-# antTidsenh=1
-# tabAntOpphEnhTid(RegData=RegData, enhetsNivaa = 'HF', tidsenhet = 'Aar', datoTil = '2020-03-01', antTidsenh=1)
-
 #' tabAntOpphEnhTid antall opphold siste X (antMnd) mnd
 #' RegData må inneholde ikke-aggregerte data, dvs. data på oppholdsnivå
 #' Summerer antall opphold for hele tidsperioder
@@ -153,9 +140,6 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   RegData <- UtData$RegData
   N <- dim(RegData)[1]
   inneliggere <- is.na(RegData$UtDato)
-  # indKladdUt <- which(RegData$FormStatusUt == 1)
-  # ind <- which(as.numeric(difftime(RegData$CreationDateUt[indKladdUt], RegData$CreationDate[indKladdUt],
-  #                                  units = 'days')) < 1)
   AntPaaShNaa <- sum(inneliggere) #N - sum(!(is.na(RegData$DateDischargedIntensive)))
   LiggetidNaa <- as.numeric(difftime(Sys.Date(),
                                      RegData$InnTidspunktSiste, units='days'))[inneliggere]
@@ -189,6 +173,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' @return
 #' @export
 FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
+                          minN=0,
                           datoFra='2020-03-01', datoTil=Sys.Date(), aarsakInn=9, erMann=9, dodSh=9){
 
   Utvalg <- KoronaUtvalg(RegData=RegData,
@@ -235,11 +220,20 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
   AntPas <- length(unique(RegData$PersonId))
 
+  if (N>3){
+    if (minN>0){
+      underMin <- which(as.numeric(TabFerdigeReg[,4]) < minN)
+      ant <- length(underMin)
+      TabFerdigeReg[underMin, ] <- c(rep('', 3*ant), rep('<3', ant), rep('', ant))
+    }
+
   xtable::xtable(TabFerdigeReg,
                  digits=0,
                  align = c('l','r','r','c', 'r','r'),
                  caption='Ferdigstilte opphold.
                  IQR (Inter quartile range) - 50 \\% av registreringene er i dette intervallet.')
+
+  } else {TabRiTabFerdigeReg <- 'Færre enn 3 observasjoner'}
   return(invisible(UtData <- list(Tab=TabFerdigeReg,
                                   utvalgTxt = Utvalg$utvalgTxt,
                                   Ntest=N,
@@ -250,11 +244,13 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 
 #' Tabell med oversikt over tilstander som medfører økt risiko ved Coronasmitte
 #' @param RegData data
+#' @param sens 0: standard, 1: Maskere verdier <3
 #' @inheritParams KoronaUtvalg
 #' @export
 #' @return
 RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
                          erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
+                         sens=0,
                          valgtEnhet='Alle', enhetsNivaa='RHF', minald=0, maxald=110){
 
   UtData <- KoronaUtvalg(RegData=RegData, datoFra=datoFra, datoTil=datoTil,
@@ -265,7 +261,7 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
   RegData <- UtData$RegData
   RegData <- RegData[which(RegData$KjentRisikofaktor %in% 1:2), ]
 
-  N <- dim(RegData)[1] #Sjekk hvilke som kan benytte felles N
+  N <- dim(RegData)[1]
 
   AntAndel <- function(Var, Nevner){
     Ant <- sum(Var, na.rm=T)
@@ -288,21 +284,21 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
     'Fedme (BMI>30)' =	AntAndel(RegData$BMI>30, sum(!is.na(RegData$BMI))),
     'Røyker' =	AntAndel(RegData$Royker, N),
     'Risikofaktorer (minst en)' = AntAndel(RegData$KjentRisikofaktor==1, N),
-    'Antall pasienter (i tabellen)' = c(N, ''),
+    'Pasienter, totalt' = c(N, ''),
     '  * Antall besvart BMI:' = c(sum(!is.na(RegData$BMI)),'')
   )
 
-  #if (Ntest>3){
   TabRisiko['Fedme (BMI>30)',2] <- paste0(TabRisiko['Fedme (BMI>30)',2], '*')
+  #colnames(TabRisiko) <- c('Antall pasienter', 'Andel pasienter')
 
 
-  colnames(TabRisiko) <- c('Antall pasienter', 'Andel pasienter')
-  #TabRisiko["Fedme (BMI>30)", "Andel"] <- paste0(TabRisiko["Fedme (BMI>30)", "Andel"], '*')
-
-  xtable::xtable(TabRisiko,
-                 digits=0,
-                 align = c('l',rep('r',ncol(TabRisiko))),
-                 caption='Risikofaktorer')
+  if (N>3){
+    if (sens==1){
+      under3 <- which(as.numeric(TabRisiko[,1]) < 3)
+      TabRisiko[under3, ] <- c(rep('<3', length(under3)), rep('', length(under3)))
+    }
+    colnames(TabRisiko) <- c('Antall', 'Andel') #c('Antall pasienter', 'Andel pasienter')
+} else {TabRisiko <- 'Færre enn 3 observasjoner'}
   return(UtData <- list(Tab=TabRisiko, utvalgTxt=UtData$utvalgTxt, Ntest=N))
 }
 
@@ -315,7 +311,7 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
 #' @param enhetsNivaa styres av tilgangsnivå 'Alle', 'RHF', 'HF'
 #' @return
 #' @export
-AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
+AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', minN=0,
                      skjemastatusInn=9,  aarsakInn=9, dodSh=9, erMann=9){
 
   UtData <- KoronaUtvalg(RegData=RegData,
@@ -326,36 +322,53 @@ AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          erMann = erMann,
                          skjemastatusInn=skjemastatusInn
   )
-  RegData <- UtData$RegData #[UtData$ind$Hoved, ]
+  RegData <- UtData$RegData
+
+  finnGrupper <- function(minN, gr, RegData){
+    RegData$Gr <- cut(RegData$Alder, breaks=c(gr, 110), include.lowest=TRUE, right=FALSE)
+    AntHoved <- table(RegData$Gr)
+    minAnt <- min(AntHoved)
+    DataUt <- list(minAnt=minAnt, RegData=RegData)
+    return(DataUt)
+  }
+
+  gr1 <- seq(0, 90, 10)
+  gr2 <- c(0,20, seq(30, 80, 10) )
+  gr3 <- c(0,30, seq(40, 80, 10) )
+  gr4 <- c(0,40,60,80)
+  gr5 <- c(0,60)
+  grupperinger <- list(gr1, gr2, gr3, gr4, gr5)
+
+  minAnt <- 0
+  tell <- 0
+  while (minAnt <= minN) {
+    tell <- tell + 1
+    gr <- grupperinger[[tell]]
+    finnGr <- finnGrupper(RegData=RegData,
+                          gr=gr,
+                          minN = minN)
+    minAnt <- finnGr$minAnt
+  }
+  RegData <- finnGr$RegData
+  antGr <- length(gr)
+  grtxt <- c(paste0(gr[1:antGr-1], '-', gr[2:antGr]-1), paste0(gr[antGr], '+'))
+  levels(RegData$Gr) <- grtxt
 
   N <- dim(RegData)[1]
-  gr <- seq(0, 90, ifelse(N<100, 25, 10) )
-  RegData$AldersGr <- cut(RegData$Alder, breaks=c(gr, 110), include.lowest=TRUE, right=FALSE)
-  grtxt <- if(N<100){c('0-24', '25-49', "50-74", "75+")} else {
-    c('0-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+')}
-  levels(RegData$AldersGr) <- grtxt #c(levels(RegData$AldersGr)[-length(gr)], paste0(max(gr),'+'))
 
-  TabAlder <- table(RegData$AldersGr) #, RegData$EnhetsNivaaVar)
-  #TabAlder <- addmargins(TabAlder) #switch(enhetsNivaa, RHF = 'Totalt', HF = paste0(valgtRHF, ', totalt'))
-  TabAlderPst <-TabAlder/N*100 #[-nrow(TabAlder),]
-  #paste0(sprintf('%.0f', as.numeric(TabHjelp[1:2,'Andel'])),'%')
+  TabAlder <- table(RegData$Gr)
+  TabAlderPst <-100*prop.table(TabAlder)
 
   TabAlderAlle <- cbind(
     'Antall' = c(TabAlder, N),#[,'Sum'],
-    'Andel' = paste0(sprintf('%.0f', c(TabAlderPst, 100)), ' %') #[,'Sum']
+    'Andel' = paste0(sprintf('%.0f', c(TabAlderPst, 100)), ' %')
   )
   row.names(TabAlderAlle)[nrow(TabAlderAlle)] <- 'Totalt'
   TabAlderUt <-  TabAlderAlle
-  #   if (valgtRHF %in% levels(RegData$RHF)){
-  #   TabAlderUt <- cbind(
-  #     'Antall, eget' = TabAlder[ ,valgtRHF],
-  #     'Andel, eget' = paste0(sprintf('%.0f', c(TabAlderPst[ ,valgtRHF], 100)), ' %'),
-  #     TabAlderAlle)
-  # } else {TabAlderAlle}
 
   return(invisible(UtData <-
                      list(Tab=TabAlderUt,
-                          utvalgTxt=UtData$utvalgTxt))) #c(UtData$utvalgTxt, paste0('Valgt RHF: ', valgtRHF)))))
+                          utvalgTxt=UtData$utvalgTxt)))
 
 
   # TabAlder <- table(RegData$AldersGr, RegData$EnhetsNivaaVar)
@@ -385,11 +398,6 @@ lagTabavFigFord <- function(UtDataFraFig){
   rownames(tab) <- grtxt
   kolnavn <- c('Teller', 'Nevner' , 'Andel (%)')
   colnames(tab) <- c(kolnavn, if(!is.null(UtDataFraFig$Ngr$Rest)){kolnavn})
-  # colnames(tab) <- c(paste0(UtDataFraFig$hovedgrTxt,', Antall'),
-  #                    paste0(UtDataFraFig$hovedgrTxt, ', Andel (%)'),
-  #                    if(!is.null(UtDataFraFig$Ngr$Rest)){paste0(UtDataFraFig$smltxt,', Antall')},
-  #                    if(!is.null(UtDataFraFig$Ngr$Rest)){paste0(UtDataFraFig$smltxt, ', Andel (%)')})
-
   return(tab)
 }
 
