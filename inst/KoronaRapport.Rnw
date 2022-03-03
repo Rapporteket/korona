@@ -11,8 +11,8 @@
 \usepackage{graphicx}
 %\usepackage{tabularx}
 \usepackage{caption}
-\captionsetup[figure]{font=footnotesize} %,labelfont=footnotesize}
-\captionsetup[table]{font=footnotesize} %,labelfont=tiny}
+\captionsetup[figure]{font=footnotesize}
+\captionsetup[table]{font=footnotesize}
 
 
 % \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
