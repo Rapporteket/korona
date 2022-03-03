@@ -44,15 +44,13 @@ Automatisk generert rapport - sykehusbehandlede pasienter med covid-19, \\ ', fo
 
 
 \begin{document}
-\begin{tiny}
 
 \title[NIPaR \\ Covid-19 på sykehus \\\today]{\Sexpr{Tittel}} %\\\today}
 %\title[Norsk Intensivregister, Corona \\\today] {%\textit{Coronadata, NIR} \\}
 
 \maketitle
 
-
-
+\begin{tiny}
 
 <<'hentDataOgTilrettelegg', results='asis' >>= #include=FALSE
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
