@@ -94,7 +94,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   enhetsNivaa <- enhetsNivaa[[1]]
   rolle <- rolle[[1]]
 
-  rapbase::subLogger(author = brukernavn, registryName = 'Pandemi',
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = paste0('1)starter abonnementkjøring: Pandemi-rapport med PARAMETRE: rnwFil: ',
                                  rnwFil, ', brukernavn: ', brukernavn,
@@ -102,7 +102,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle)
   )
 
-  rapbase::subLogger(author = brukernavn, registryName = 'Pandemi',
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = paste0('2)klasse:', 'reshID: ', class(reshID), ',
                                  valgtEnhet: ', class(valgtEnhet),
@@ -114,7 +114,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
   src <- normalizePath(system.file(rnwFil, package='korona'))
 
-  rapbase::subLogger(author = brukernavn, registryName = 'Pandemi',
+  raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
                     msg = "3) filbase, tmpFile, src ok")
 
