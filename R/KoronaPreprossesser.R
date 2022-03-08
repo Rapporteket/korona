@@ -14,7 +14,7 @@
 #'
 KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFlereForlop=0)	#, reshID=reshID)
 {
-  data(ReshNivaa)
+  #data(ReshNivaa)
   # Endre variabelnavn:
   names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
   names(RegData)[which(names(RegData) == 'UnitId')] <- 'ReshId'
