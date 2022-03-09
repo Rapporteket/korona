@@ -148,9 +148,9 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
 
 
     Aarsak <- function(x, N, FormDate) {
-      case_when(
+      dplyr::case_when(
         sum(x == 1) == N ~ 1,
-        last(x, order_by = FormDate) == 1  ~ 2,
+        dplyr::last(x, order_by = FormDate) == 1  ~ 2,
         1 %in% x  ~ 3,
         sum(x == 1) == N ~ 1,
         sum(x == 2) == N  ~ 4,
@@ -163,8 +163,8 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
       RegData$Dato <- as.Date(RegData$FormDate)
 
       #Identifiserer inntil 3 forløp
-      PasFlere <- RegData %>% group_by(PasientID) %>%
-        summarise(.groups = 'drop',
+      PasFlere <- RegData %>% dplyr::group_by(PasientID) %>%
+        dplyr::summarise(.groups = 'drop',
                   SkjemaGUID = SkjemaGUID,
                   InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
                   InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
@@ -178,8 +178,8 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
       #For testing: RegData$Dato[RegData$PasientID=='EAC1F8C2-B10F-EC11-A974-00155D0B4D1A'][3:4] <- as.Date(c('2023-01-02', '2024-01-03'))
     }
 
-    RegDataRed <- RegData %>% group_by(PasientID) %>%
-      summarise(PersonId = PersonId[1],
+    RegDataRed <- RegData %>% dplyr::group_by(PasientID) %>%
+      dplyr::summarise(PersonId = PersonId[1],
                 PersonIdBC19Hash = PersonIdBC19Hash[1],
                 Alder = Alder[1],
                 AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
@@ -191,9 +191,9 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 Antibiotika = Antibiotika[1], #1 ja, 2-nei 3-ukjent
                 AntibiotikaAnnet = sum(AntibiotikaAnnet)>0,
                 AntibiotikaUkjent = sum(AntibiotikaUkjent)>0,
-                AntInnSkjema = n(),
+                AntInnSkjema = dplyr::n(),
                 CovidJAalle = ifelse(sum(ArsakInnleggelse == 1) == AntInnSkjema, 1,0),
-                CovidJaSiste = ifelse(last(ArsakInnleggelse, order_by = FormDate) == 1, 2,0),
+                CovidJaSiste = ifelse(dplyr::last(ArsakInnleggelse, order_by = FormDate) == 1, 2,0),
                 CovidJaFinnes = ifelse(1 %in% ArsakInnleggelse, 3, 0),
                 CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
                 CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
@@ -203,22 +203,22 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 Astma = sum(Astma)>0,
                 #Bilirubin,
                 BMI = sort(BMI, decreasing = T)[1],
-                CreationDate =  first(CreationDate, order_by = FormDate),
-                CreationDateUt =  last(CreationDateUt, order_by = FormDateUt),
-                CurrentMunicipalNumber = first(CurrentMunicipalNumber, order_by = FormDate),
+                CreationDate =  dplyr::first(CreationDate, order_by = FormDate),
+                CreationDateUt =  dplyr::last(CreationDateUt, order_by = FormDateUt),
+                CurrentMunicipalNumber = dplyr::first(CurrentMunicipalNumber, order_by = FormDate),
                 Diabetes = sum(Diabetes)>0,
-                DistrictCode = first(DistrictCode, order_by = FormDate),
+                DistrictCode = dplyr::first(DistrictCode, order_by = FormDate),
                 EndretBevissthet = JaNeiUkjVar(EndretBevissthet), #1-ja, 2-nei, 3-ukjent
                 ErAnsattMikrobiologisk = JaNeiUkjVar(ErAnsattMikrobiologisk), #1-ja, 2-nei, 3-ukjent
                 ErHelsepersonell = JaNeiUkjVar(ErHelsepersonell), #1-ja, 2-nei, 3-ukjent
-                FirstTimeClosed = first(FirstTimeClosed, order_by = FormDate),
-                FirstTimeClosedUt = last(FirstTimeClosedUt, order_by = FormDateUt),
-                FoerstePositivProeve = first(as.Date(FoerstePositivProeve), order_by = as.Date(FoerstePositivProeve)),
+                FirstTimeClosed = dplyr::first(FirstTimeClosed, order_by = FormDate),
+                FirstTimeClosedUt = dplyr::last(FirstTimeClosedUt, order_by = FormDateUt),
+                FoerstePositivProeve = dplyr::first(as.Date(FoerstePositivProeve), order_by = as.Date(FoerstePositivProeve)),
                 FormStatus = sort(FormStatus)[1], #1-kladd, 2-ferdigstilt
                 Gravid = sum(Gravid)>0,
-                HFut = last(HF, order_by = FormDate),
-                HF = first(HF, order_by = FormDate),
-                HFresh = first(HFresh, order_by = FormDate),
+                HFut = dplyr::last(HF, order_by = FormDate),
+                HF = dplyr::first(HF, order_by = FormDate),
+                HFresh = dplyr::first(HFresh, order_by = FormDate),
                 #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
                 Isolert = JaNeiUkjVar(Isolert), #1-ja, 2-nei, 3-ukjent
@@ -232,8 +232,8 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 #Leukocytter,
                 Leversykdom = sum(Leversykdom)>0,
                 Makrolid = sum(Makrolid)>0,
-                Municipal = first(Municipal, order_by = FormDate),
-                MunicipalNumber = first(MunicipalNumber, order_by = FormDate),
+                Municipal = dplyr::first(Municipal, order_by = FormDate),
+                MunicipalNumber = dplyr::first(MunicipalNumber, order_by = FormDate),
                 NedsattimmunHIV = sum(NedsattimmunHIV)>0,
                 NerkontaktCovid = JaNeiUkjVar(NerkontaktCovid), #1-ja, 2-nei, 3-ukjent
                 Nir_beredskapsskjema_CoV2 = JaNeiUkjVar(Nir_beredskapsskjema_CoV2),
@@ -245,10 +245,10 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 Penicillin = sum(Penicillin)>0,
                 PenicillinEnzymhemmer = sum(PenicillinEnzymhemmer)>0,
                 ReiseUtenfor = JaNeiUkjVar(ReiseUtenfor), #1-ja, 2-nei, 3-ukjent
-                ReshId = first(ReshId, order_by = FormDate),
-                RHFut = last(RHF, order_by = FormDate),
-                RHF = first(RHF, order_by = FormDate),
-                RHFresh = first(RHFresh, order_by = FormDate),
+                ReshId = dplyr::first(ReshId, order_by = FormDate),
+                RHFut = dplyr::last(RHF, order_by = FormDate),
+                RHF = dplyr::first(RHF, order_by = FormDate),
+                RHFresh = dplyr::first(RHFresh, order_by = FormDate),
                 RontgenThorax = RontgenThorax[1], #1-5...?
                 Royker = sum(Royker)>0,
                 #Sykehus"
@@ -276,11 +276,11 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
                 #Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død
                 #Status90Dager= sort(Status90Dager, decreasing = T)[1], #0-levende, 1-død
-                ShNavnUt = last(ShNavn, order_by = FormDate),
-                ShNavn = first(ShNavn, order_by = FormDate),
+                ShNavnUt = dplyr::last(ShNavn, order_by = FormDate),
+                ShNavn = dplyr::first(ShNavn, order_by = FormDate),
                 FormStatusUt = ifelse(sum(is.na(FormStatusUt)) > 0, 1, #Regnes som kladd hvis utskjema ikke opprettet.
                                       as.numeric(sort(FormStatusUt)[1])), #1-kladd, 2-ferdigstilt
-                Utskrivningsdato = last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
+                Utskrivningsdato = dplyr::last(Utskrivningsdato, order_by = FormDate), #, FormDateUt
                 #FormDateUtLastForm = last(FormDateUt, order_by = FormDate),
                 # Dobbeltreg= , #Overlappende liggetid >Xt på to ulike Sh
                 # Overf = , #Beregn, ja nei
@@ -304,10 +304,10 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                                    max(which(difftime(sort(FormDate)[2:AntInnSkjema],
                                                       FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
                                                       units = "hours") > 24))),
-                UtDato =  last(UtDato, order_by = FormDate),
-                FormDateSiste = nth(FormDate, ReinnNaar+1, order_by = FormDate),
-                FormDateUt = last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
-                FormDate = first(FormDate, order_by = FormDate), #sort(FormDate)[1])
+                UtDato =  dplyr::last(UtDato, order_by = FormDate),
+                FormDateSiste = dplyr::nth(FormDate, ReinnNaar+1, order_by = FormDate),
+                FormDateUt = dplyr::last(FormDateUt, order_by = FormDate), #IKKE!!: sort(FormDateUt, decreasing = T)[1],
+                FormDate = dplyr::first(FormDate, order_by = FormDate), #sort(FormDate)[1])
                 # LiggetidGml1 = ifelse(Reinn==0, #Bare for de med utskrivingsskjema
                 #                   difftime(FormDateUt, FormDate, units = "days"),
                 #                   difftime(FormDateUt, FormDate, units = "days") - ReinnTidDum/24),
