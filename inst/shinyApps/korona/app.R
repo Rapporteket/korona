@@ -35,17 +35,17 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
 
   ## get staging data, if present
-  KoroDataRaa <- rapbase::loadStagingData("korona", "koroDataRaa") #Benyttes i appen
+  KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
   if (isFALSE(KoroDataRaa)) {
     KoroDataRaa <-  KoronaDataSQL(koble=1)
-    rapbase::saveStagingData("korona", "koroDataRaa", KoroDataRaa)
+    rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa)
   }
 
 ## get staging data, if present
-KoroDataOpph <- rapbase::loadStagingData("korona", "koroDataOpph")
+KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
 if (isFALSE(KoroDataOpph)) {
   KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-  rapbase::saveStagingData("korona", "koroDataOpph", KoroDataOpph)
+  rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph)
 }
 
 BeredData <- rapbase::loadStagingData("korona", "BeredData")
