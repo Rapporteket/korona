@@ -575,7 +575,7 @@ server <- function(input, output, session) {
     }
 
   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon',
-                          'eabu', 'Reidar', 'MarianneSaevik', 'eivh'))) {
+                          'eabu', 'MarianneSaevik', 'eivh', 'anif', 'helkri'))) {
     hideTab(inputId = "hovedark", target = "Registeradm")
   }
   #})
