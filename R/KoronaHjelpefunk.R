@@ -16,29 +16,22 @@ LeggTilNyInnOverf <- function(RegData, PasientID='PasientID'){
   RegDataSort <- RegData[order(RegData$PasientID, RegData$InnTidspunkt,     #Denne tar mest tid
                                RegData$UtTidspunkt), ]
   RegDataSort$OpphNr <- as.numeric(ave(RegDataSort$PasientID, RegDataSort$PasientID, FUN=seq_along))
-  indPasFlereOpph <- which(RegDataSort$OpphNr>1) #intersect(which(RegDataSort$AntOpph>1), which(RegDataSort$OpphNr>1))
+  indPasFlereOpph <- which(RegDataSort$OpphNr>1)
   RegDataSort$TidUtInn <- NA
   RegDataSort$TidUtInn[indPasFlereOpph] <-
     difftime(as.POSIXlt(RegDataSort$InnTidspunkt[indPasFlereOpph], tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
              as.POSIXlt(RegDataSort$UtTidspunkt[indPasFlereOpph-1], tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
              units = 'hour')
   RegDataSort$SmResh <- c(FALSE, RegDataSort$ReshId[2:N] == RegDataSort$ReshId[1:N-1]) #Har sm. resh som forrige..
-  # RegDataSort$Reinn <- 0 #Ikke reinnleggelse
-  # RegDataSort$Reinn[RegDataSort$TidUtInn<12 & RegDataSort$TidUtInn >= 0] <- 1 #Reinnleggelse
-  # RegDataSort$Reinn[!(RegDataSort$SmResh)] <- 0 #Bare reinnleggelse hvis samme resh
 
   RegDataSort$Reinn <- 0 #Ikke ny innleggelse
-  RegDataSort$Reinn[RegDataSort$TidUtInn > 24 ] <- 1 #Ny innleggelse 107
+  RegDataSort$Reinn[RegDataSort$TidUtInn > 24] <- 1 #Ny innleggelse 107
 
   RegDataSort$Overf <- 0 #Ikke overføring
   RegDataSort$Overf[RegDataSort$TidUtInn > -2 & RegDataSort$TidUtInn < 24 ] <- 1 #Overført 85
   RegDataSort$Overf[(RegDataSort$SmResh)] <- 0 #Ikke overført hvis sm. resh
 return(RegDataSort)
 }
-
-# ind <- sort(unique(c(indPasFlereOpph-1, indPasFlereOpph))) #Opphold for Pasienter med mer enn ett opp
-# test <- RegDataSort[ind, c("PasientID","Reinn", "Overf", "OverfortAnnetSykehusInnleggelse", "OverfortAnnetSykehusUtskrivning",
-#                    "TidUtInn", "InnTidspunkt", "UtTidspunkt", "ShNavn", "SkjemaGUID", "SkjemaGUIDut", "SkjemaGUIDBered")]
 
 
 #' Funksjon som produserer rapporten som skal sendes til mottager.
