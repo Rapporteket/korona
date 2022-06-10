@@ -109,7 +109,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       if (valgtVar=='beredPas') {	#AndelGrVar/Tid
         RegData <- RegData[which(RegData$BeredPas %in% 0:1), ]    #Tar bort ukjente
         RegData$Variabel <- RegData$BeredPas
-        tittel <- 'Intensivpasienter'
+        tittel <- 'Pandemipasienter med intensivopphold'
         varTxt <- 'intensivinnlagte'
       }
       if (valgtVar=='dodSh') {	#AndelGrVar/Tid
