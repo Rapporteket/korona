@@ -34,25 +34,29 @@ return(RegDataSort)
 }
 
 
-#' Funksjon som produserer rapporten som skal sendes til mottager.
+#' Funksjon som produserer rapporten som skal lastes ned av mottager.
 #'
 #' @param rnwFil Navn på fila som skal kjøres. Angis uten ending (\emph{dvs uten  ".Rnw"})
 #' @param filnavn dummy
 #' @param datoFra dato
 #' @param Rpakke hvilken R-pakke fila som lager rapporten ligger i
-#' @param parametre Liste med valgfrie parametre, avhengig av type rapport
 #'
 #' @return Full path of file produced
 #' @export
 
 henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='SC',
                                       valgtEnhet = 'Alle', enhetsNivaa = 'RHF',
-                                      reshID = 0 #datoFra=Sys.Date()-180, datoTil=Sys.Date()
+                                      reshID = 0
                                 ) {
+  #Sjekker at data er relativt oppdaterte:
+  skjemaInn <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=1, koble=0)
+  skjemaUt <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=2, koble=0)
+  minAnt <- min(dim(skjemaInn)[1], dim(skjemaUt)[1])
+  rnwFil <- ifelse(minAnt > 1, rnwFil, 'KoroFeilmld.Rnw')
+
   tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
   # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
-  #owd <-
   setwd(tempdir())
   file.copy(src, tmpFile, overwrite = TRUE)
 
@@ -80,12 +84,19 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                                valgtEnhet = 'Alle',
                              enhetsNivaa = 'RHF', rolle = 'SC'){
 
-  rnwFil <- rnwFil[[1]]
-  brukernavn <- brukernavn[[1]]
-  reshID <- reshID[[1]]
-  valgtEnhet <- valgtEnhet[[1]]
-  enhetsNivaa <- enhetsNivaa[[1]]
-  rolle <- rolle[[1]]
+
+  #Sjekker at data er relativt oppdaterte:
+  skjemaInn <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=1, koble=0)
+  skjemaUt <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=2, koble=0)
+  minAnt <- min(dim(skjemaInn)[1], dim(skjemaUt)[1])
+  rnwFil <- ifelse(minAnt > 1, rnwFil, 'KoroFeilmld.Rnw')
+
+  # rnwFil <- rnwFil[[1]]
+  # brukernavn <- brukernavn[[1]]
+  # reshID <- reshID[[1]]
+  # valgtEnhet <- valgtEnhet[[1]]
+  # enhetsNivaa <- enhetsNivaa[[1]]
+  # rolle <- rolle[[1]]
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],

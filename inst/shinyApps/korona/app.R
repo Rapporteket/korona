@@ -735,7 +735,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hoved
           renderTable({AntKladdUtShus}, rownames = T, digits=0, spacing="xs")
         } else {
           AntKladdUtShus <-  as.data.frame(AntKladdUtShus)
-        names(AntKladdUtShus) <- c('', 'Inkl.skjema i kladd')
+        names(AntKladdUtShus) <- c('', 'Ut.skjema i kladd')
         renderTable({AntKladdUtShus}, rownames = F, digits=0, spacing="xs")}
     } else {output$skjemaUtKladdTab <- renderText('Alle utskrivingsskjema ferdigstilt!')}
 

@@ -1,0 +1,42 @@
+\documentclass[handout, xcolor=pdftex,dvipsnames,table]{beamer}  %presentation,
+\usetheme{Hannover}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}  % Bedre støtte for bl.a. orddeling
+\usepackage[norsk]{babel}
+\usepackage{xspace}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{graphicx}
+\usepackage{caption}
+
+
+<<'initOpts',include=FALSE>>=
+knitr::opts_chunk$set(warnings=FALSE,echo=FALSE, message=FALSE, cache = FALSE)
+options(warn = -1)
+knitr::opts_knit$set(root.dir = './')
+library(intensivberedskap)
+library(korona) #inkluderer tidyverse
+
+Tittel <- paste0('Norsk intensiv- og pandemiregister (NIPaR) \\
+Automatisk generert rapport - sykehusbehandlede pasienter med covid-19')
+@
+
+
+
+\begin{document}
+
+\title[NIPaR \\ Covid-19 på sykehus \\\today]{\Sexpr{Tittel}} %\\\today}
+\maketitle
+
+\begin{frame}[fragile] {Feilmelding!}
+
+Rapport fra Norsk intensiv- og pandemiregister (NIPaR) med oversikt over
+sykehusbehandlede pasienter med covid-19 kan ikke genereres
+på grunn av manglende data.
+Dette skyldes sannsynligvis trøbbel med dataoverføring fra registeret.
+
+Prøv gjerne å laste ned rapporten litt senere.
+
+\end{frame}
+\end{document}
