@@ -53,19 +53,19 @@ if (isFALSE(KoroDataOpph)) {
    rapbase::saveStagingData("korona", "BeredData", BeredData)
  }
 
-# KoroData <- rapbase::loadStagingData("korona", "KoroData")
-# if (isFALSE(KoroData)) {
-   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
-  #  KoroData <- merge(KoroData,
-  #                    BeredData,
-  #                    all.x = T,
-  #                    all.y = F,
-  #                    suffixes = c("", "Bered"),
-  #                    by = 'PersonId')
-  #  KoroData  <- KoroData %>%
-  #    dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
-  # rapbase::saveStagingData("korona", "KoroData", KoroData)
-#}
+ KoroData <- rapbase::loadStagingData("korona", "KoroData")
+ if (isFALSE(KoroData)) {
+   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1)
+ KoroData <- merge(KoroData,
+                   BeredData,
+                   all.x = T,
+                   all.y = F,
+                   suffixes = c("", "Bered"),
+                   by = 'PersonId')
+ KoroData  <- KoroData %>%
+   dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+rapbase::saveStagingData("korona", "KoroData", KoroData)
+}
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
