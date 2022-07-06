@@ -34,27 +34,27 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
 
- # KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
- # if (isFALSE(KoroDataRaa)) {
+  KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
+  if (isFALSE(KoroDataRaa)) {
     KoroDataRaa <-  KoronaDataSQL(koble=1)
     rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa)
- # }
+  }
 
-#KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
-#if (isFALSE(KoroDataOpph)) {
+KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
+if (isFALSE(KoroDataOpph)) {
    KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
    rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph)
-# }
+ }
 
- BeredData <- rapbase::loadStagingData("korona", "BeredData")
- if (isFALSE(BeredData)) {
+# BeredData <- rapbase::loadStagingData("korona", "BeredData")
+# if (isFALSE(BeredData)) {
    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
    rapbase::saveStagingData("korona", "BeredData", BeredData)
- }
+# }
 
- KoroData <- rapbase::loadStagingData("korona", "KoroData")
- if (isFALSE(KoroData)) {
+# KoroData <- rapbase::loadStagingData("korona", "KoroData")
+# if (isFALSE(KoroData)) {
    KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
    KoroData <- merge(KoroData,
                      BeredData,
@@ -65,7 +65,7 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
    KoroData  <- KoroData %>%
      dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
   rapbase::saveStagingData("korona", "KoroData", KoroData)
-}
+#}
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
 
