@@ -632,7 +632,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hoved
       content = function(file){
         henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
                                   rolle = rolle,
-                                  valgtEnhet = egenEnhet, #as.character(input$valgtEnhet),
+                                  valgtEnhet = egenEnhet,
                                   enhetsNivaa = egetEnhetsNivaa,
                                   reshID = reshID
         ) #Vurder å ta med tidsinndeling eller startdato

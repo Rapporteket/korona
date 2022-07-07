@@ -429,7 +429,7 @@ Dette fordi det alltid må være minst 3 observasjoner i ei gruppe.}
 <<'Oppsum', results='asis'>>=
 
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-FerdigeReg <- FerdigeRegTab(PandemiUsiste3mnd, minN = 3)$Tab
+FerdigeReg <- FerdigeRegTab(PandemiUsiste3mnd, minN = 3)$Tab[-3, ] #Fjerner BMI 7.juli 2022
 
 Tidsrom <- paste0('(Før ', format(datoTil3mnd, format='%d.%b%y'),')')
 Kol1 <- rownames(FerdigeReg)
@@ -447,7 +447,7 @@ print(
                )
       , include.rownames = FALSE)
 
-  FerdigeReg3mnd <- FerdigeRegTab(PandemiSiste3mnd, minN = 3)$Tab
+  FerdigeReg3mnd <- FerdigeRegTab(PandemiSiste3mnd, minN = 3)$Tab[-3,] #Fjerner BMI
 
   Tidsrom <- paste0('(F.o.m. ', format(datoTil3mnd, format='%d.%b%y'),')')
 Kol1 <- rownames(FerdigeReg3mnd)

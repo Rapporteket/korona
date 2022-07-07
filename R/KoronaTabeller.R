@@ -184,8 +184,8 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   RegData <- Utvalg$RegData
 
   N <- dim(RegData)[1]
-  Liggetid <- summary(as.numeric(RegData$Liggetid), na.rm = T)
-  Alder <- summary(RegData$Alder, na.rm = T)
+  Liggetid <- summary(as.numeric(RegData$Liggetid)) #, na.rm = T)
+  Alder <- summary(RegData$Alder) #, na.rm = T)
   BMI <- summary(RegData$BMI[RegData$BMI<60]) #Filtrerer bort de med BMI over 60
   AntReinn <- sum(RegData$Reinn, na.rm = T)
   PstReinn <- 100*AntReinn/sum(RegData$Reinn %in% 0:1)
@@ -208,7 +208,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   TabFerdigeReg <- rbind(
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
-    'BMI' = c(med_IQR(BMI), N, ''),
+    'BMI' = c(med_IQR(BMI), N-BMI[7], ''),
     #'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
     'Isolert ved innleggelse' = c('','','', Nisolert, pstIsolert),
     'Ny innleggelse (>24t)' = c('','','', AntReinn, PstReinn),

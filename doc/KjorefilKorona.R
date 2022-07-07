@@ -535,8 +535,8 @@ rolle <- 'SC'
 reshID <- 100317 #N-Trøndelag #100091
 #setwd('C:/ResultattjenesteGIT/korona/inst')
 setwd('/home/rstudio/korona/inst')
-knitr::knit('KoronaRapport.Rnw', encoding = 'UTF-8')
-tools::texi2pdf(file='KoronaRapport.tex')
+#knitr::knit('KoronaRapport.Rnw', encoding = 'UTF-8')
+#tools::texi2pdf(file='KoronaRapport.tex')
 knitr::knit2pdf('KoronaRapport.Rnw') #, encoding = 'UTF-8')
 
 korona::abonnementKorona(rnwFil=rnwFil, brukernavn='lluring', reshID=0,
