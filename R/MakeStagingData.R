@@ -9,7 +9,7 @@
 
 makeStagingData <- function() {
   library(magrittr)
-  library(tidyr)
+  library(dplyr)
 
   KoroDataRaa <-  KoronaDataSQL(koble=1)
   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
