@@ -341,7 +341,7 @@ RegHF <- rbind(as.matrix(RegHF),
 nedskaler <- ifelse(dim(RegHF)[1]>25, 25/dim(RegHF)[1], 1)
 
 print(xtable::xtable(RegHF, row.names=FALSE, digits=0,
-                     align=c('l','l','r'),
+                     align=c('l','l','l','r'),
                      caption='Totalt antall registrerte opphold med hovedårsak covid-19
                      fra pandemistart til rapporteringstidspunktet.'),
       scalebox = nedskaler,
