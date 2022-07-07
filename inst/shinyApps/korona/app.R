@@ -588,13 +588,13 @@ server <- function(input, output, session) {
   #Telle pasienter med flere forløp
   KoroDataOpph$Dato <- as.Date(KoroDataOpph$FormDate)
   PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
-    summarise(.groups = 'drop',
+    dplyr::summarise(.groups = 'drop',
               InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
   antPasFlereForlAlle <- sum(PasFlere$InnNr0>1)
 
   PasFlere <- KoroDataOpph %>% dplyr::filter(ArsakInnleggelse==1) %>%
     group_by(PasientID) %>%
-    summarise(.groups = 'drop',
+    dplyr::summarise(.groups = 'drop',
               InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
   antPasFlereForl <- sum(PasFlere$InnNr0>1)
 

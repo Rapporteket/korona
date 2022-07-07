@@ -100,14 +100,14 @@ d_intensiv_samlet = d_intensivopphold %>%
 # Aggregere Pandemi og intensivdata --------------------------------------
 d_pandemi_aggregert = d_pandemi_forløp %>%
   group_by(PersonId, sykdomsforlop) %>%
-  summarise(Innleggelse = first(Innleggelse),
+  dplyr::summarise(Innleggelse = first(Innleggelse),
             Utskrivningsdato = last(Utskrivningsdato),
             .groups = "drop") %>%
   select(-sykdomsforlop)
 
 d_intensiv_aggregert = d_intensiv_samlet %>%
   group_by(PersonId, sykdomsforlop) %>%
-  summarise(#InvasivVentilation = sum(InvasivVentilation, na.rm = TRUE),
+  dplyr::summarise(#InvasivVentilation = sum(InvasivVentilation, na.rm = TRUE),
             DateAdmittedIntensive = first(DateAdmittedIntensive),
             DateDischargedIntensive = last(DateDischargedIntensive),
             #DischargedIntensiveStatus = NeiJaUkjentIntensiv(DischargedIntensiveStatus),

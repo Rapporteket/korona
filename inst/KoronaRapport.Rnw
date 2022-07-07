@@ -80,7 +80,7 @@ PandemiOpphAlleInnlEgen <-  KoronaUtvalg(RegData=PandemiOpph,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
 #Telle pasienter med flere forløp, covid hovedårsak
     PasFlere <- PandemiOpphAlleInnlEgen %>% group_by(PasientID) %>%
-      summarise(.groups = 'drop',
+      dplyr::summarise(.groups = 'drop',
                 InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
     antPasFlereForlAlleInn <- sum(PasFlere$InnNr0>1)
 PandemiOpph <-  PandemiOpphAlleInnlEgen[PandemiOpphAlleInnlEgen$ArsakInnleggelse==1, ]
@@ -128,7 +128,7 @@ txtAlder <- if (dim(Pandemi)[1]>2){paste0('Alderen er mellom ',
 #Telle pasienter med flere forløp, covid hovedårsak
 #PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
     PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
-      summarise(.groups = 'drop',
+      dplyr::summarise(.groups = 'drop',
                 InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
     antPasFlereForl <- sum(PasFlere$InnNr0>1)
 @

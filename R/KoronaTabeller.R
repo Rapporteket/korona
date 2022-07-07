@@ -432,7 +432,7 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
 #' @export
 PasMdblReg <- function(RegData, tidsavvik=0){
   DblReg <- RegData %>% group_by(PersonId) %>%
-    summarise(N = n(),
+    dplyr::summarise(N = n(),
               #MinTid = ifelse(N>1, min(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins'), na.rm = T), NA),
               LikTid = ifelse(N>1,
                               ifelse(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins') <= tidsavvik,
