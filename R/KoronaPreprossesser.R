@@ -149,12 +149,12 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
 
     Aarsak <- function(x, N, FormDate) {
       dplyr::case_when(
-        sum(x == 1) == N ~ 1,
-        dplyr::last(x, order_by = FormDate) == 1  ~ 2,
-        1 %in% x  ~ 3,
-        sum(x == 1) == N ~ 1,
-        sum(x == 2) == N  ~ 4,
-        (sum (x == 3) == N) | (sum(x == -1))  ~ 9
+        sum(x == 1) == N ~ 1, #alle
+        dplyr::last(x, order_by = FormDate) == 1  ~ 2, #siste, men ikke alle
+        1 %in% x  ~ 3,      #Minst ett, ikke siste alle
+        #sum(x == 1) == N ~ 1,
+        sum(x == 2) == N  ~ 4, #Ingen
+        (sum (x == 3) == N) | (sum(x == -1))  ~ 9 #Ukjent
       )}
 
     #Identifisere pasienter med flere innleggelser

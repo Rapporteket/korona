@@ -80,7 +80,7 @@ PandemiOpphAlleInnlEgen <-  KoronaUtvalg(RegData=PandemiOpph,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
 #Telle pasienter med flere forløp, covid hovedårsak
     PasFlere <- PandemiOpphAlleInnlEgen %>% group_by(PasientID) %>%
-      summarise(.groups = 'drop',
+      dplyr::summarise(.groups = 'drop',
                 InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
     antPasFlereForlAlleInn <- sum(PasFlere$InnNr0>1)
 PandemiOpph <-  PandemiOpphAlleInnlEgen[PandemiOpphAlleInnlEgen$ArsakInnleggelse==1, ]
@@ -128,7 +128,7 @@ txtAlder <- if (dim(Pandemi)[1]>2){paste0('Alderen er mellom ',
 #Telle pasienter med flere forløp, covid hovedårsak
 #PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
     PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
-      summarise(.groups = 'drop',
+      dplyr::summarise(.groups = 'drop',
                 InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
     antPasFlereForl <- sum(PasFlere$InnNr0>1)
 @
@@ -159,10 +159,10 @@ ferdigstilt eller ikke, dersom ikke annet er oppgitt.
 \item Antall pasienter inneliggende på sykehus der hovedårsak IKKE er covid-19, per helseforetak.
 \item Registrerte sykehusopphold samlet, per helseforetak
 \item Andel av somatiske sengeplasser som opptas av pasienter med covid-19, per regionalt helseforetak.
-\item Antall pasienter innlagt siste 20 dager og totalt hittil i pandemien i hvert regionale helseforetak.
-\item Antall pasienter utskrevet siste 20 dager og totalt hittil i pandemien i hvert regionale helseforetak.
+\item Antall pasienter innlagt siste tre måneder og totalt hittil i pandemien i hvert regionale helseforetak.
+\item Antall pasienter utskrevet siste tre måneder og totalt hittil i pandemien i hvert regionale helseforetak.
 \item Fordeling av alder og kjønn totalt på rapporteringstidspunktet.
-\item Fordeling av risikofaktorer totalt på rapporteringstidspunktet.
+% \item Fordeling av risikofaktorer totalt på rapporteringstidspunktet.
 \item Liggetid på intensiv, tid med pustehjelp, alder og dødelighet på intensiv for intensivopphold som er ferdigstilte. At et opphold er ferdigstilt vil si at opplysningene er kontrollert og ferdig registrert.
 \end{itemize}
 
@@ -170,14 +170,6 @@ Rapporten er kjørt for: rolle: \Sexpr{rolle},  %, \Sexpr{class(rolle)}
 enhetsnivå: \Sexpr{enhetsNivaa}, %, \Sexpr{class(enhetsNivaa)}
 Enhet: \Sexpr{valgtEnhet} %, \Sexpr{class(valgtEnhet)}
 
-
-% \item Tabellene skiller ikke på om et skjema er ferdigstilt eller ikke, med mindre dette er angitt
-% Det er \Sexpr{antIkkeFerdig} av de \Sexpr{Ntot} pasientene som har uferdige inklusjonsskjema.
-% \item For å luke bort feilregistreringer, er registrering av innleggelse før 8.mars
-% og etter dagens dato, filtrert bort.
-% \item Gjennomsnittsalderen på innlagte pasienter er \Sexpr{AlderGjsn} år.
-% \item Andelen menn er \Sexpr{andelMenn}.
-% \item Det er registrert \Sexpr{antDod} døde.
 
 \end{frame}
 
@@ -217,13 +209,6 @@ InneliggPas <- rbind(as.matrix(InneliggHF),
 print(xtable::xtable(InneliggPas, digits=0, align=c('l','l','l','r'),
                caption='Antall inneliggende pasienter i hvert helseforetak der covid-19 er hovedårsak til innleggelsen.'),
       include.rownames=FALSE)
-# InneliggHF <- if (rolle == 'LU') {
-#   table(Pandemi[indNaa, 'ShNavn'])} else {table(Pandemi[indNaa, 'HF'])}
-# InneliggPas <- as.table(c(InneliggHF, 'Totalt' = AntPaaSh))
-#
-# print(xtable::xtable(InneliggPas, digits=0,
-#                caption='Antall inneliggende pasienter på hver enhet,
-#                samt totalt. Covid-19 som hovedårsak til siste opphold.')) #, include.rownames=FALSE)
 
 @
 \end{frame}
@@ -271,9 +256,6 @@ Andel av somatiske sengeplasser som opptas av pasienter hvor covid-19 er hovedå
 siste 20 dager
 
 <<'Belegg', results='asis', warnings=FALSE>>=
-# Data <- antallTidBelegg(RegData=Pandemi, aarsakInn=9)
-# Data$belegg_anslag
-# Data$belegg_anslag_txt
 BeleggTab <- as.data.frame(
   antallTidBelegg(RegData=PandemiLandet
                   , reshID = reshID
@@ -297,22 +279,20 @@ print(xtable::xtable(BeleggTab[fra:AntRader, ],
 \end{frame}
 
 
-\begin{frame}[fragile] {Antall registrerte opphold per dag}
+\begin{frame}[fragile] {Antall registrerte opphold per uke}
 
 <<'RegRHF', results='asis'>>=
 AntTab <- antallTidEnhTab(RegData=PandemiLandet , tilgangsNivaa=rolle, #nivå avgjort av rolle #
+                          tidsenhet = 'uke',
                               valgtEnhet= valgtEnhet)$Tab_tidy #, HF = 1
-
-# antEnh <- dim(AntTab)[2]
-# skalering <- ifelse(antEnh < 7, 1, 7/antEnh)
 
 bredde <- 7/ncol(AntTab)
 colnames(AntTab) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(AntTab),'}')
 
 print(
-  xtable::xtable(AntTab[(nrow(AntTab)-20):nrow(AntTab), ], digits=0,
+  xtable::xtable(AntTab[(nrow(AntTab)-13):nrow(AntTab), ], digits=0,
                method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-               caption='Antall nye innlagte med covid-19 som hovedårsak siste 20 dager,
+               caption='Antall nye innlagte med covid-19 som hovedårsak siste tre måneder,
                samt totalt antall fra pandemistart til rapporteringstidspuktet.
                Enhetstilhørighet er basert på første opphold i forløpet.
                ')
@@ -324,19 +304,17 @@ print(
 
 
 
-\begin{frame}[fragile] {Antall avsluttede forløp per dag}
-%I abonnementet kan denne tabellen feile. Du kan logge inn på Rapporteket-Pandemi og laste ned rapporten. Da vil tabellen være med.
+\begin{frame}[fragile] {Antall avsluttede forløp per uke}
 
 <<'Utskrevne', results='asis'>>=
 
-AntUt <- antallTidUtskrevne(RegData=PandemiLandet, tilgangsNivaa=rolle, valgtEnhet= valgtEnhet)$Tab #PandemiOpph
+AntUt <- antallTidUtskrevne(RegData=PandemiLandet, tilgangsNivaa=rolle, tidsenhet = 'uke', valgtEnhet= valgtEnhet)$Tab #PandemiOpph
 antEnh <- dim(AntUt)[2]
-#skalering <- ifelse(antEnh < 6, 1, 6/antEnh)
 bredde <- 6/ncol(AntUt)
 colnames(AntUt) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(AntUt),'}')
-fra <- max(1, (nrow(AntUt)-20))
+fra <- max(1, (nrow(AntUt)-13))
 print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                     caption='Antall avsluttede forløp (utskrevne) med covid-19 som hovedårsak siste 20 dager,
+                     caption='Antall avsluttede forløp (utskrevne) med covid-19 som hovedårsak siste tre måneder,
                      samt totalt antall fra pandemistart til rapporteringstidspuktet.
                      Enhetstilhørighet er basert på siste opphold i forløpet.')
       #, scalebox = skalering
@@ -349,7 +327,7 @@ print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align
 
 
 
-\begin{frame}[fragile] {Registererte opphold i hver enhet}
+\begin{frame}[fragile] {Registrerte opphold i hver enhet}
 <<'RegHF', results='asis'>>=
 #nivaa1 <- enhetsNivaa
 nivaa2 <- ifelse(rolle=='LU', 'ShNavn', 'HFnavn')
@@ -363,6 +341,7 @@ RegHF <- rbind(as.matrix(RegHF),
 nedskaler <- ifelse(dim(RegHF)[1]>25, 25/dim(RegHF)[1], 1)
 
 print(xtable::xtable(RegHF, row.names=FALSE, digits=0,
+                     align=c('l','l','l','r'),
                      caption='Totalt antall registrerte opphold med hovedårsak covid-19
                      fra pandemistart til rapporteringstidspunktet.'),
       scalebox = nedskaler,
@@ -417,33 +396,33 @@ Dette fordi det alltid må være minst 3 observasjoner i ei gruppe.}
 
 
 
-\begin{frame}[fragile] {Risikofaktorer}
-<<'Risikofaktorer', results='asis'>>=
-RisikoTab <- RisikoInnTab(RegData=PandemiUsiste3mnd, skjemastatusInn = 2, sens=1)$Tab
-
-xtable::xtable(RisikoTab, #digits=0, #method='compact', #
-               align=c('l', rep('r', ncol(RisikoTab))),
-               caption=paste0(
-                 'Risikofaktorer for ferdigstilte forløp fra pandemistart til ',
-                 datoTil3mnd, ' hvor covid-19 var hovedårsak til innleggelsen.
-                 Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan
-                 derfor være høyere enn antallet pasienter.'))
-@
-\end{frame}
-
-\begin{frame}[fragile] {Risikofaktorer, siste 3 måneder}
-<<'Risikofaktoreremnd', results='asis'>>=
-#RisikoTab <- RisikoInnTab(RegData=PandemiSiste3mnd[1:70,], skjemastatusInn = 2, sens=1)$Tab
-RisikoTab <- RisikoInnTab(RegData=PandemiSiste3mnd, skjemastatusInn = 2, sens=1)$Tab
-
-xtable::xtable(RisikoTab, #digits=0, #method='compact', #
-               align=c('l', rep('r', ncol(RisikoTab))),
-               caption='Risikofaktorer på rapporteringstidspunktet for
-               ferdigstilte forløp siste 3 måneder hvor covid-19 var hovedårsak til innleggelsen.
-               Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan derfor være
-               høyere enn antallet pasienter.')
-@
-\end{frame}
+% \begin{frame}[fragile] {Risikofaktorer}
+% <<'Risikofaktorer', results='asis'>>=
+% RisikoTab <- RisikoInnTab(RegData=PandemiUsiste3mnd, skjemastatusInn = 2, sens=1)$Tab
+%
+% xtable::xtable(RisikoTab, #digits=0, #method='compact', #
+%                align=c('l', rep('r', ncol(RisikoTab))),
+%                caption=paste0(
+%                  'Risikofaktorer for ferdigstilte forløp fra pandemistart til ',
+%                  datoTil3mnd, ' hvor covid-19 var hovedårsak til innleggelsen.
+%                  Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan
+%                  derfor være høyere enn antallet pasienter.'))
+% @
+% \end{frame}
+%
+% \begin{frame}[fragile] {Risikofaktorer, siste 3 måneder}
+% <<'Risikofaktoreremnd', results='asis'>>=
+% #RisikoTab <- RisikoInnTab(RegData=PandemiSiste3mnd[1:70,], skjemastatusInn = 2, sens=1)$Tab
+% RisikoTab <- RisikoInnTab(RegData=PandemiSiste3mnd, skjemastatusInn = 2, sens=1)$Tab
+%
+% xtable::xtable(RisikoTab, #digits=0, #method='compact', #
+%                align=c('l', rep('r', ncol(RisikoTab))),
+%                caption='Risikofaktorer på rapporteringstidspunktet for
+%                ferdigstilte forløp siste 3 måneder hvor covid-19 var hovedårsak til innleggelsen.
+%                Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan derfor være
+%                høyere enn antallet pasienter.')
+% @
+% \end{frame}
 
 
 
@@ -451,7 +430,7 @@ xtable::xtable(RisikoTab, #digits=0, #method='compact', #
 <<'Oppsum', results='asis'>>=
 
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert
-FerdigeReg <- FerdigeRegTab(PandemiUsiste3mnd, minN = 3)$Tab
+FerdigeReg <- FerdigeRegTab(PandemiUsiste3mnd, minN = 3)$Tab[-3, ] #Fjerner BMI 7.juli 2022
 
 Tidsrom <- paste0('(Før ', format(datoTil3mnd, format='%d.%b%y'),')')
 Kol1 <- rownames(FerdigeReg)
@@ -469,7 +448,7 @@ print(
                )
       , include.rownames = FALSE)
 
-  FerdigeReg3mnd <- FerdigeRegTab(PandemiSiste3mnd, minN = 3)$Tab
+  FerdigeReg3mnd <- FerdigeRegTab(PandemiSiste3mnd, minN = 3)$Tab[-3,] #Fjerner BMI
 
   Tidsrom <- paste0('(F.o.m. ', format(datoTil3mnd, format='%d.%b%y'),')')
 Kol1 <- rownames(FerdigeReg3mnd)

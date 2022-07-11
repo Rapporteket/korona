@@ -75,7 +75,7 @@ Kobl <- merge(KoroDataPre[,c("PersonId","SkjemaGUID")], #, "InnTidspunkt", "UtTi
 sum(!is.na(unique(Kobl$SkjemaGUIDBered)))
 sort(table(Kobl$SkjemaGUIDBered))
 KoblRed <- Kobl %>% group_by(SkjemaGUID) %>%
-  summarise(SkjemaGUID = SkjemaGUID[1],
+  dplyr::summarise(SkjemaGUID = SkjemaGUID[1],
             AntBered = sum(!is.na(SkjemaGUIDBered)),
     BeredPas = ifelse(sum(!is.na(SkjemaGUIDBered))>0 ,1 ,0)
     )

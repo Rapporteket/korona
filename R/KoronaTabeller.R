@@ -184,15 +184,15 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   RegData <- Utvalg$RegData
 
   N <- dim(RegData)[1]
-  Liggetid <- summary(as.numeric(RegData$Liggetid), na.rm = T)
-  Alder <- summary(RegData$Alder, na.rm = T)
+  Liggetid <- summary(as.numeric(RegData$Liggetid)) #, na.rm = T)
+  Alder <- summary(RegData$Alder) #, na.rm = T)
   BMI <- summary(RegData$BMI[RegData$BMI<60]) #Filtrerer bort de med BMI over 60
   AntReinn <- sum(RegData$Reinn, na.rm = T)
   PstReinn <- 100*AntReinn/sum(RegData$Reinn %in% 0:1)
   AntDod <- sum(RegData$StatusVedUtskriving==2, na.rm=T)
-  NrisikoKjent <- sum(RegData$KjentRisikofaktor %in% 1:2, na.rm=T)
-  Nrisiko <- sum(RegData$KjentRisikofaktor==1, na.rm=T)
-  pstRisiko <- 100*Nrisiko/NrisikoKjent
+  # NrisikoKjent <- sum(RegData$KjentRisikofaktor %in% 1:2, na.rm=T)
+  # Nrisiko <- sum(RegData$KjentRisikofaktor==1, na.rm=T)
+  # pstRisiko <- 100*Nrisiko/NrisikoKjent
   NisolertKjent <- sum(RegData$Isolert %in% 1:2, na.rm=T)    #Tar bort ukjente
   Nisolert <- sum(RegData$Isolert == 1, na.rm=T)
   pstIsolert <- 100*Nisolert/NisolertKjent
@@ -208,14 +208,14 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   TabFerdigeReg <- rbind(
     'Alder (år)' = c(med_IQR(Alder), N, ''),
     'Liggetid (døgn)' = c(med_IQR(Liggetid), N, ''),
-    'BMI' = c(med_IQR(BMI), N, ''),
-    'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
+    'BMI' = c(med_IQR(BMI), N-BMI[7], ''),
+    # 'Har risikofaktorer' = c('','','', Nrisiko, pstRisiko),
     'Isolert ved innleggelse' = c('','','', Nisolert, pstIsolert),
     'Ny innleggelse (>24t)' = c('','','', AntReinn, PstReinn),
     'Intensivbehandlet' = c('','','', AntBered, PstBered),
     'Døde' = c('','','',AntDod, 100*AntDod/N) #paste0(sprintf('%.f',100*AntDod/N),'%'))
   )
-  TabFerdigeReg[4:8,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:8,5])),' %')
+  TabFerdigeReg[4:7,5] <- paste0(sprintf('%.1f', as.numeric(TabFerdigeReg[4:7,5])),' %')
   colnames(TabFerdigeReg) <- c('Gj.sn', 'Median', 'IQR', 'Antall pasienter', 'Andel pasienter')
 
   AntPas <- length(unique(RegData$PersonId))
@@ -432,7 +432,7 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
 #' @export
 PasMdblReg <- function(RegData, tidsavvik=0){
   DblReg <- RegData %>% group_by(PersonId) %>%
-    summarise(N = n(),
+    dplyr::summarise(N = n(),
               #MinTid = ifelse(N>1, min(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins'), na.rm = T), NA),
               LikTid = ifelse(N>1,
                               ifelse(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins') <= tidsavvik,

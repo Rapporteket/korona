@@ -34,40 +34,37 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
   #Mange av variablene på ut-skjema er med i inn-dumpen
   #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
 
-  ## get staging data, if present
   KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
   if (isFALSE(KoroDataRaa)) {
     KoroDataRaa <-  KoronaDataSQL(koble=1)
     rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa)
   }
 
-## get staging data, if present
 KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
 if (isFALSE(KoroDataOpph)) {
-  KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-  rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph)
-}
+   KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+   rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph)
+ }
 
-BeredData <- rapbase::loadStagingData("korona", "BeredData")
-if (isFALSE(BeredData)) {
-  # BeredDataRaa <- rapbase::loadStagingData("korona", "BeredDataRaa") #Bare mellomregning
-  BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-  BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
-  rapbase::saveStagingData("korona", "BeredData", BeredData)
-}
+ BeredData <- rapbase::loadStagingData("korona", "BeredData")
+ if (isFALSE(BeredData)) {
+   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1)
+   rapbase::saveStagingData("korona", "BeredData", BeredData)
+ }
 
-KoroData <- rapbase::loadStagingData("korona", "KoroData")
-if (isFALSE(KoroData)) {
-  KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
-  KoroData <- merge(KoroData,
-                    BeredData,
-                    all.x = T,
-                    all.y = F,
-                    suffixes = c("", "Bered"),
-                    by = 'PersonId')
-  KoroData  <- KoroData %>%
-    dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
-  rapbase::saveStagingData("korona", "KoroData", KoroData)
+ KoroData <- rapbase::loadStagingData("korona", "KoroData")
+ if (isFALSE(KoroData)) {
+   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1)
+ KoroData <- merge(KoroData,
+                   BeredData,
+                   all.x = T,
+                   all.y = F,
+                   suffixes = c("", "Bered"),
+                   by = 'PersonId')
+ KoroData  <- KoroData %>%
+   dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+rapbase::saveStagingData("korona", "KoroData", KoroData)
 }
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
@@ -591,13 +588,13 @@ server <- function(input, output, session) {
   #Telle pasienter med flere forløp
   KoroDataOpph$Dato <- as.Date(KoroDataOpph$FormDate)
   PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
-    summarise(.groups = 'drop',
+    dplyr::summarise(.groups = 'drop',
               InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
   antPasFlereForlAlle <- sum(PasFlere$InnNr0>1)
 
   PasFlere <- KoroDataOpph %>% dplyr::filter(ArsakInnleggelse==1) %>%
     group_by(PasientID) %>%
-    summarise(.groups = 'drop',
+    dplyr::summarise(.groups = 'drop',
               InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
   antPasFlereForl <- sum(PasFlere$InnNr0>1)
 
@@ -635,7 +632,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hoved
       content = function(file){
         henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
                                   rolle = rolle,
-                                  valgtEnhet = egenEnhet, #as.character(input$valgtEnhet),
+                                  valgtEnhet = egenEnhet,
                                   enhetsNivaa = egetEnhetsNivaa,
                                   reshID = reshID
         ) #Vurder å ta med tidsinndeling eller startdato
@@ -735,7 +732,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hoved
           renderTable({AntKladdUtShus}, rownames = T, digits=0, spacing="xs")
         } else {
           AntKladdUtShus <-  as.data.frame(AntKladdUtShus)
-        names(AntKladdUtShus) <- c('', 'Inkl.skjema i kladd')
+        names(AntKladdUtShus) <- c('', 'Ut.skjema i kladd')
         renderTable({AntKladdUtShus}, rownames = F, digits=0, spacing="xs")}
     } else {output$skjemaUtKladdTab <- renderText('Alle utskrivingsskjema ferdigstilt!')}
 

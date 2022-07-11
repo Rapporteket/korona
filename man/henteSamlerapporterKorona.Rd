@@ -2,7 +2,7 @@
 % Please edit documentation in R/KoronaHjelpefunk.R
 \name{henteSamlerapporterKorona}
 \alias{henteSamlerapporterKorona}
-\title{Funksjon som produserer rapporten som skal sendes til mottager.}
+\title{Funksjon som produserer rapporten som skal lastes ned av mottager.}
 \usage{
 henteSamlerapporterKorona(
   filnavn,
@@ -22,12 +22,10 @@ henteSamlerapporterKorona(
 \item{Rpakke}{hvilken R-pakke fila som lager rapporten ligger i}
 
 \item{datoFra}{dato}
-
-\item{parametre}{Liste med valgfrie parametre, avhengig av type rapport}
 }
 \value{
 Full path of file produced
 }
 \description{
-Funksjon som produserer rapporten som skal sendes til mottager.
+Funksjon som produserer rapporten som skal lastes ned av mottager.
 }

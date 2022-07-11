@@ -16,19 +16,16 @@ LeggTilNyInnOverf <- function(RegData, PasientID='PasientID'){
   RegDataSort <- RegData[order(RegData$PasientID, RegData$InnTidspunkt,     #Denne tar mest tid
                                RegData$UtTidspunkt), ]
   RegDataSort$OpphNr <- as.numeric(ave(RegDataSort$PasientID, RegDataSort$PasientID, FUN=seq_along))
-  indPasFlereOpph <- which(RegDataSort$OpphNr>1) #intersect(which(RegDataSort$AntOpph>1), which(RegDataSort$OpphNr>1))
+  indPasFlereOpph <- which(RegDataSort$OpphNr>1)
   RegDataSort$TidUtInn <- NA
   RegDataSort$TidUtInn[indPasFlereOpph] <-
     difftime(as.POSIXlt(RegDataSort$InnTidspunkt[indPasFlereOpph], tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
              as.POSIXlt(RegDataSort$UtTidspunkt[indPasFlereOpph-1], tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
              units = 'hour')
   RegDataSort$SmResh <- c(FALSE, RegDataSort$ReshId[2:N] == RegDataSort$ReshId[1:N-1]) #Har sm. resh som forrige..
-  # RegDataSort$Reinn <- 0 #Ikke reinnleggelse
-  # RegDataSort$Reinn[RegDataSort$TidUtInn<12 & RegDataSort$TidUtInn >= 0] <- 1 #Reinnleggelse
-  # RegDataSort$Reinn[!(RegDataSort$SmResh)] <- 0 #Bare reinnleggelse hvis samme resh
 
   RegDataSort$Reinn <- 0 #Ikke ny innleggelse
-  RegDataSort$Reinn[RegDataSort$TidUtInn > 24 ] <- 1 #Ny innleggelse 107
+  RegDataSort$Reinn[RegDataSort$TidUtInn > 24] <- 1 #Ny innleggelse 107
 
   RegDataSort$Overf <- 0 #Ikke overføring
   RegDataSort$Overf[RegDataSort$TidUtInn > -2 & RegDataSort$TidUtInn < 24 ] <- 1 #Overført 85
@@ -36,30 +33,30 @@ LeggTilNyInnOverf <- function(RegData, PasientID='PasientID'){
 return(RegDataSort)
 }
 
-# ind <- sort(unique(c(indPasFlereOpph-1, indPasFlereOpph))) #Opphold for Pasienter med mer enn ett opp
-# test <- RegDataSort[ind, c("PasientID","Reinn", "Overf", "OverfortAnnetSykehusInnleggelse", "OverfortAnnetSykehusUtskrivning",
-#                    "TidUtInn", "InnTidspunkt", "UtTidspunkt", "ShNavn", "SkjemaGUID", "SkjemaGUIDut", "SkjemaGUIDBered")]
 
-
-#' Funksjon som produserer rapporten som skal sendes til mottager.
+#' Funksjon som produserer rapporten som skal lastes ned av mottager.
 #'
 #' @param rnwFil Navn på fila som skal kjøres. Angis uten ending (\emph{dvs uten  ".Rnw"})
 #' @param filnavn dummy
 #' @param datoFra dato
 #' @param Rpakke hvilken R-pakke fila som lager rapporten ligger i
-#' @param parametre Liste med valgfrie parametre, avhengig av type rapport
 #'
 #' @return Full path of file produced
 #' @export
 
 henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='SC',
                                       valgtEnhet = 'Alle', enhetsNivaa = 'RHF',
-                                      reshID = 0 #datoFra=Sys.Date()-180, datoTil=Sys.Date()
+                                      reshID = 0
                                 ) {
+  #Sjekker at data er relativt oppdaterte:
+  skjemaInn <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=1, koble=0)
+  skjemaUt <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=2, koble=0)
+  minAnt <- min(dim(skjemaInn)[1], dim(skjemaUt)[1])
+  rnwFil <- ifelse(minAnt > 1, rnwFil, 'KoroFeilmld.Rnw')
+
   tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
   # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
-  #owd <-
   setwd(tempdir())
   file.copy(src, tmpFile, overwrite = TRUE)
 
@@ -87,12 +84,19 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
                                valgtEnhet = 'Alle',
                              enhetsNivaa = 'RHF', rolle = 'SC'){
 
-  rnwFil <- rnwFil[[1]]
-  brukernavn <- brukernavn[[1]]
-  reshID <- reshID[[1]]
-  valgtEnhet <- valgtEnhet[[1]]
-  enhetsNivaa <- enhetsNivaa[[1]]
-  rolle <- rolle[[1]]
+
+  #Sjekker at data er relativt oppdaterte:
+  skjemaInn <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=1, koble=0)
+  skjemaUt <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=2, koble=0)
+  minAnt <- min(dim(skjemaInn)[1], dim(skjemaUt)[1])
+  rnwFil <- ifelse(minAnt > 1, rnwFil, 'KoroFeilmld.Rnw')
+
+  # rnwFil <- rnwFil[[1]]
+  # brukernavn <- brukernavn[[1]]
+  # reshID <- reshID[[1]]
+  # valgtEnhet <- valgtEnhet[[1]]
+  # enhetsNivaa <- enhetsNivaa[[1]]
+  # rolle <- rolle[[1]]
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],

@@ -8,6 +8,8 @@
 #' @export
 
 makeStagingData <- function() {
+  library(magrittr)
+  library(dplyr)
 
   KoroDataRaa <-  KoronaDataSQL(koble=1)
   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()

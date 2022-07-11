@@ -109,7 +109,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       if (valgtVar=='beredPas') {	#AndelGrVar/Tid
         RegData <- RegData[which(RegData$BeredPas %in% 0:1), ]    #Tar bort ukjente
         RegData$Variabel <- RegData$BeredPas
-        tittel <- 'Intensivpasienter'
+        tittel <- 'Pandemipasienter med intensivopphold'
         varTxt <- 'intensivinnlagte'
       }
       if (valgtVar=='dodSh') {	#AndelGrVar/Tid
@@ -206,13 +206,13 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
                    'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
       }
       if (valgtVar == 'aarsakInn4kat') { #Andeler
-        #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 4-nei, ingen opph, 9-ukj
+        #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste og ikke alle, 4-nei, ingen opph, 9-ukj
         #(3kategorier: 1-ja, alle opph, 2-ja, siste opphold, 3-ja, minst ett opph, men ikke siste, nei, ingen opph, 9-ukj)
         gr <- c(1:4,9)
         retn <- 'H'
         tittel <- 'Covid-19 hovedårsak til sykehusopphold?'
         RegData$VariabelGr <- factor(RegData$ArsakInnNy, levels=gr)
-        grtxt <- c('Alle opph.', 'Minst siste opph.', 'Minst ett, ikke siste', 'Ingen opph.', 'Ukjent')
+        grtxt <- c('Alle opphold', 'Siste, men ikke alle', 'Minst ett, ikke siste/alle', 'Ingen opphold', 'Ukjent')
       }
 
 
