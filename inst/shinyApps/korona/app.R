@@ -589,20 +589,27 @@ server <- function(input, output, session) {
   KoroDataOpph$Dato <- as.Date(KoroDataOpph$FormDate)
   PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
     dplyr::summarise(.groups = 'drop',
-              InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
-  antPasFlereForlAlle <- sum(PasFlere$InnNr0>1)
+              InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
+              InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
+              PasientID = paste0(PasientID, '_', InnNr),
+              CovidAarsak = ifelse(sum(ArsakInnleggelse==1)>0, 1, 0),
+              CovidAarsakAlle = ifelse(sum(ArsakInnleggelse==n())>0, 1, 0)
+    )
+  antPasFlereForlAlle <- length(unique(PasFlere$PasientID[PasFlere$InnNr > 1])) #sum(InnNr0>1))
+  antPasFlereForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsak==1 & PasFlere$InnNr > 1])) #sum(InnNr0>1))
+  #antPasFlereAlleForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsakAlle==1 & PasFlere$InnNr > 1]))
 
-  PasFlere <- KoroDataOpph %>% dplyr::filter(ArsakInnleggelse==1) %>%
-    group_by(PasientID) %>%
-    dplyr::summarise(.groups = 'drop',
-              InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
-  antPasFlereForl <- sum(PasFlere$InnNr0>1)
+  # PasFlere <- KoroDataOpph %>% dplyr::filter(ArsakInnleggelse==1) %>%
+  #   group_by(PasientID) %>%
+  #   dplyr::summarise(.groups = 'drop',
+  #             InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+  # antPasFlereForlGml <- sum(PasFlere$InnNr0>1)
 
   output$antFlereForl <- renderUI(h5(HTML(paste0('Resultatene er stort sett basert på antall pasienter. Det betyr at alle opphold
   for overflyttede eller reinnlagte pasienter er aggregerte til ett forløp per pasient.
   Det er ikke tatt hensyn til at en pasient kan ha flere Covid-forløp.
 Per i dag er det på landsbasis ', antPasFlereForlAlle, ' som har mer enn ett forløp
-og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hovedårsak.'))))
+og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hovedårsak til minst ett av oppholdene.'))))
 
 
 

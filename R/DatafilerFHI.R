@@ -126,7 +126,7 @@ BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 # write.table(BeredskapDataRaaFHI, file = paste0('A:/Pandemi/BeredskapDataRaaFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
-RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa)
+RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa, tellFlereForlop = 1)
 varBort <- c('AgeAdmitted','PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive',
               'CreationDate', 'FirstTimeClosed', 'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
 varNy <- c('Alder', 'erMann', 'Bekreftet', 'Liggetid', 'ReinnResp', 'RespTid') #'PersonId',
