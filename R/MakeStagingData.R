@@ -14,9 +14,9 @@ makeStagingData <- function() {
   KoroDataRaa <-  KoronaDataSQL(koble=1)
   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
 
-  KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
+  KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1)
   KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-  BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
+  BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
 
   KoroData <- merge(KoroData,
                     BeredData,

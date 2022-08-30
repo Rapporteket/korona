@@ -49,13 +49,13 @@ if (isFALSE(KoroDataOpph)) {
  BeredData <- rapbase::loadStagingData("korona", "BeredData")
  if (isFALSE(BeredData)) {
    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1)
+   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
    rapbase::saveStagingData("korona", "BeredData", BeredData)
  }
 
  KoroData <- rapbase::loadStagingData("korona", "KoroData")
  if (isFALSE(KoroData)) {
-   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1)
+   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1)
  KoroData <- merge(KoroData,
                    BeredData,
                    all.x = T,

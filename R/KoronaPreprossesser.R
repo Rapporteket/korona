@@ -370,14 +370,25 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
 
   if (kobleBered==1){
     if (aggPers==0) {stop('Kan bare koble til beredskapsskjema for aggregerte data')}
+
     BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
+    if (tellFlereForlop == 0){
+    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1, tellFlereForlop = 0)
     RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
                      by = 'PersonId')
+    }
+    if (tellFlereForlop == 1){
+      #MÅ OGSÅ SJEKKE AT INTENSIVFORLØPET LIGGER MELLOM INN OG UT-DATO FOR SYKEHUSOPPHOLDET. Gjelder alle intensivforløp.
+      #Plukk først ut sykehusforløp som har intensivopphold (inner join). Koble. Legg så til resten av sykehusopp så vi får en
+      #left join.
+      #Sjekk makeStagingData.R
+      BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1, tellFlereForlop = 0)
+      RegData
+      RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
+                       by = 'PersonId')
+    }
     RegData  <- RegData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
-
   }
-
 
 
   ##Kode om  pasienter som er overført til/fra egen avdeling til "ikke-overført"
