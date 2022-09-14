@@ -383,7 +383,12 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
       #left join.
       #Sjekk makeStagingData.R
       BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1, tellFlereForlop = 0)
-      RegData
+      indPersMbered <- which(RegData$PersonId %in% unique(BeredData$PersonId))
+      #table(table(RegData$PersonId[indPersMbered]))
+      RegDataMber <- RegData[indPersMbered,]
+      head(RegDataMber[order(RegDataMber$InnTidspunkt),c('PersonId', 'InnTidspunkt', "UtTidspunkt", 'Liggetid')])
+      head(BeredData[order(BeredData$Innleggelsestidspunkt), c('PersonId', 'Innleggelsestidspunkt', "DateDischargedIntensive", 'Liggetid')])
+
       RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
                        by = 'PersonId')
     }

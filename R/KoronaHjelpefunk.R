@@ -49,10 +49,10 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
                                       reshID = 0
                                 ) {
   #Sjekker at data er relativt oppdaterte:
-  skjemaInn <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=1, koble=0)
-  skjemaUt <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=2, koble=0)
-  minAnt <- min(dim(skjemaInn)[1], dim(skjemaUt)[1])
-  rnwFil <- ifelse(minAnt > 1, rnwFil, 'KoroFeilmld.Rnw')
+  RegData <- korona::KoronaDataSQL(skjema=2, koble=1)
+  minAnt <- min(length(unique(RegData$SkjemaGUID)), length(unique(RegData$SkjemaGUIDut)))#min(dim(skjemaInn)[1], dim(skjemaUt)[1])
+  antInnlagte <- sum(is.na(RegData$FormDateUt))
+  rnwFil <- ifelse(minAnt < 26000 | antInnlagte > 1000, 'KoroFeilmld.Rnw', rnwFil)
 
   tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
@@ -86,17 +86,10 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
 
   #Sjekker at data er relativt oppdaterte:
-  skjemaInn <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=1, koble=0)
-  skjemaUt <- korona::KoronaDataSQL(datoFra = Sys.Date()-100, datoTil = Sys.Date(), skjema=2, koble=0)
-  minAnt <- min(dim(skjemaInn)[1], dim(skjemaUt)[1])
-  rnwFil <- ifelse(minAnt > 1, rnwFil, 'KoroFeilmld.Rnw')
-
-  # rnwFil <- rnwFil[[1]]
-  # brukernavn <- brukernavn[[1]]
-  # reshID <- reshID[[1]]
-  # valgtEnhet <- valgtEnhet[[1]]
-  # enhetsNivaa <- enhetsNivaa[[1]]
-  # rolle <- rolle[[1]]
+  RegData <- korona::KoronaDataSQL(skjema=2, koble=1)
+  minAnt <- min(length(unique(RegData$SkjemaGUID)), length(unique(RegData$SkjemaGUIDut)))#min(dim(skjemaInn)[1], dim(skjemaUt)[1])
+  antInnlagte <- sum(is.na(RegData$FormDateUt))
+  rnwFil <- ifelse(minAnt < 26000 | antInnlagte > 1000, 'KoroFeilmld.Rnw', rnwFil)
 
   raplog::subLogger(author = brukernavn, registryName = 'Pandemi',
                     reshId = reshID[[1]],
