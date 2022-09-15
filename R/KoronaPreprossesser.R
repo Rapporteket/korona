@@ -376,21 +376,42 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
     BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1, tellFlereForlop = 0)
     RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
                      by = 'PersonId')
-    }
+      }
     if (tellFlereForlop == 1){
       #MÅ OGSÅ SJEKKE AT INTENSIVFORLØPET LIGGER MELLOM INN OG UT-DATO FOR SYKEHUSOPPHOLDET. Gjelder alle intensivforløp.
       #Plukk først ut sykehusforløp som har intensivopphold (inner join). Koble. Legg så til resten av sykehusopp så vi får en
       #left join.
       #Sjekk makeStagingData.R
-      BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1, tellFlereForlop = 0)
-      indPersMbered <- which(RegData$PersonId %in% unique(BeredData$PersonId))
+      BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
+      BeredData <- BeredData[!is.na(BeredData$DateDischargedIntensive), ] #Tar bort intensivpas. uten ut-registrering
+      indUtReg <- !is.na(RegData$UtDato)
+      RegDataMber <- RegData[indUtReg, ] #Tar bort pandemipas uten ut-registrering
+      indPersMbered <- which(RegDataMber$PersonId %in% unique(BeredData$PersonId) )
       #table(table(RegData$PersonId[indPersMbered]))
-      RegDataMber <- RegData[indPersMbered,]
+      RegDataMber <- RegDataMber[indPersMbered,]
       head(RegDataMber[order(RegDataMber$InnTidspunkt),c('PersonId', 'InnTidspunkt', "UtTidspunkt", 'Liggetid')])
       head(BeredData[order(BeredData$Innleggelsestidspunkt), c('PersonId', 'Innleggelsestidspunkt', "DateDischargedIntensive", 'Liggetid')])
 
-      RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
-                       by = 'PersonId')
+#      For hver linje i pandemi - finne linje(r) som har match i beredskap
+#NB: Fjern variabler fra Bered som hvis de finnes i pandemi fra før.
+      #MÅ TA HØYDE FOR IKKE UTSKREVNE PASIENTER!!
+      BeredData$PersonIdBered <- BeredData$PersonId
+      BeredData$InnDatoBered <- BeredData$InnDato
+      BeredData <- BeredData[ ,-which(names(BeredData) %in% names(RegDataMber))]
+      for (k in 1:length(indPersMbered)){
+        ind <- which(BeredData$PersonId %in% RegDataMber$PersonId[k])
+        for (j in 1:length(ind)) {
+          if (RegDataMber$InnDato[k] <= BeredData$InnDatoBered[ind[j]] & #Lagt inn før lagt inn intensiv
+              RegDataMber$UtDato[k] >= BeredData$DateDischargedIntensive[ind[j]]) { #Skrevet ut etter ut av intensiv
+ #FEIL!!?            RegDataMber[k, ] <- cbind(RegDataMber[k, ], BeredData[ind[j],])
+            #BEDRE Å LAGE EN VEKTOR SOM SIER HVILKEN INTENSIVREGISTRERING SOM TILHØRER HVER LINJE
+          }
+
+        }
+      }
+      test <- BeredData[ind, ]
+      sum(BeredData$PersonId == RegDataMber$PersonId[k])
+      #      RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"), by = 'PersonId')
     }
     RegData  <- RegData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
   }
