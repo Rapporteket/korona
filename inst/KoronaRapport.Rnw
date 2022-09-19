@@ -88,7 +88,7 @@ PandemiOpph$EnhNivaaVis <- as.factor(PandemiOpph$EnhNivaaVis)
 
 #Innparametre:  enhetsNivaa, valgtEnhet, rolle
 #Personaggregerte data
-Pandemi <- KoronaPreprosesser(Pandemi)
+Pandemi <- KoronaPreprosesser(Pandemi, tellFlereForlop = 1)
 NinneliggAlleLandet <- sum(is.na(Pandemi$UtDato))
 
 Pandemi$EnhNivaaVis <- switch(as.character(rolle),
@@ -144,8 +144,9 @@ Datagrunnlaget er oppdatert med alle registreringer gjort inntil 4 timer før ra
 Alle innlagte med covid-19 blir registrert i NIPaR, uavhengig av om covid-19 er hovedårsak til innleggelsen.
 I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er Covid-19.
 
-For resultater basert på personaggregerte data, er skjema aggregert til ett forløp per pasient,
-uavhengig av om pasienten har reinnleggelser eller flere forløp. Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett forløp og \Sexpr{antPasFlereForl} av disse har mer enn ett forløp med Covid-19 som hovedårsak.
+For resultater basert på personaggregerte data, er skjema aggregert til ett eller flere forløp per pasient. Hvis det er mer enn 3 måneder mellom to opphold,
+regnes det som to forløp, ellers som ett.
+Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett forløp og \Sexpr{antPasFlereForl} av disse har mer enn ett forløp med Covid-19 som hovedårsak.
 For personaggregerte resultater vises pasienter
 hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
 ferdigstilt eller ikke, dersom ikke annet er oppgitt.

@@ -94,6 +94,7 @@ aarsakInnValg <- c(
 #last modul(er)
 source(system.file("shinyApps/korona/R/resultatmodul.R", package = "korona"), encoding = 'UTF-8')
 
+
 ui <- tagList(
   navbarPage(id='hovedark',
              title = div(img(src="rap/logo.svg", alt="Rapporteket", height="26px"),
@@ -154,6 +155,7 @@ ui <- tagList(
                                 tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
                                 uiOutput('manglerRegResh'),
                                 h3('Resultater fra pandemiregistrering, korona.'),
+                                uiOutput('Advarsel'),
                                 uiOutput('antFlereForl'),
                                 h5('Merk at resultatene kan inkludere ufullstendige registreringer'),
                                 h4('Sidene er organisert i faner. Mer detaljert informasjon fra registreringer i
@@ -585,6 +587,17 @@ server <- function(input, output, session) {
   updateSelectInput(session, "valgtEnhetRes",
                     choices = enhetsvalg)
 
+  #Sjekk av dataoverføring:
+  minAnt <- min(length(unique(KoroDataRaa$SkjemaGUID)), length(unique(KoroDataRaa$SkjemaGUIDut)))
+  antInnlagte <- sum(is.na(KoroData$FormDateUt))
+  txt <- ifelse(minAnt < 25000 | antInnlagte >1000,
+                'ADVARSEL: Dataoverføringa kan være ufullstendig. Det anbefales å logge inn på nytt om ca 3 timer.',
+                '') #paste0('ant:', minAnt, 'innl', antInnlagte))
+
+  output$Advarsel <- renderUI(
+    h2(HTML(txt), style = "color:red")
+    )
+
   #Telle pasienter med flere forløp
   KoroDataOpph$Dato <- as.Date(KoroDataOpph$FormDate)
   PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
@@ -599,16 +612,9 @@ server <- function(input, output, session) {
   antPasFlereForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsak==1 & PasFlere$InnNr > 1])) #sum(InnNr0>1))
   #antPasFlereAlleForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsakAlle==1 & PasFlere$InnNr > 1]))
 
-  # PasFlere <- KoroDataOpph %>% dplyr::filter(ArsakInnleggelse==1) %>%
-  #   group_by(PasientID) %>%
-  #   dplyr::summarise(.groups = 'drop',
-  #             InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
-  # antPasFlereForlGml <- sum(PasFlere$InnNr0>1)
-
-  output$antFlereForl <- renderUI(h5(HTML(paste0('Resultatene er stort sett basert på antall pasienter. Det betyr at alle opphold
-  for overflyttede eller reinnlagte pasienter er aggregerte til ett forløp per pasient.
-  Det er ikke tatt hensyn til at en pasient kan ha flere Covid-forløp.
-Per i dag er det på landsbasis ', antPasFlereForlAlle, ' som har mer enn ett forløp
+    output$antFlereForl <- renderUI(h5(HTML(paste0('Resultatene er stort sett basert på at opphold
+  for overflyttede eller reinnlagte pasienter er aggregerte til ett eller flere (>90 dager mellom to innleggelser) forløp per pasient.
+   Per i dag er det på landsbasis ', antPasFlereForlAlle, ' som har mer enn ett forløp
 og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hovedårsak til minst ett av oppholdene.'))))
 
 
