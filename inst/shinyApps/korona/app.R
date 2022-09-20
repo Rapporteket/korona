@@ -456,7 +456,7 @@ tabPanel(p("Abonnement",
            sidebarPanel(width = 3,
                         selectInput("subscriptionRep", "Dokument:", c("Koronarapport")), #Evt legg til influensarapport
                         selectInput("subscriptionFreq", "Frekvens:",
-                                    list(Månedlig="Månedlig-month",
+                                    list(Maanedlig="Månedlig-month",
                                          Ukentlig="Ukentlig-week",
                                          Daglig="Daglig-DSTday"),
                                     selected = "Ukentlig-week"),
@@ -1271,9 +1271,9 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
   ## ui: velg frekvens
   output$freqUts <- renderUI({
     selectInput("dispatchmentFreq", "Frekvens:",
-                list(Årlig = "Årlig-year",
+                list(Aarlig = "Årlig-year",
                       Kvartalsvis = "Kvartalsvis-quarter",
-                      Månedlig = "Månedlig-month",
+                      Maanedlig = "Månedlig-month",
                       Ukentlig = "Ukentlig-week",
                       Daglig = "Daglig-DSTday"),
                 selected = dispatchment$freq)
