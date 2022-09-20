@@ -1341,7 +1341,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
 
   # Rediger eksisterende auto rapport (alle typer)
   observeEvent(input$edit_button, {
-    repId <- strsplit(input$edit_button, "_")[[1]][2]
+    repId <- strsplit(input$edit_button, "_")[[1]][3]
     rep <- rapbase::readAutoReportData()[[repId]]
     if (rep$type == "subscription") {#abonnement
 
@@ -1359,7 +1359,8 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
 
   # Slett eksisterende auto rapport (alle typer)
   observeEvent(input$del_button, {
-    repId <- strsplit(input$del_button, "_")[[1]][2]
+    repId <- strsplit(input$del_button, "_")[[1]][3]
+    repIdny <- as.character(input$del_button)
     rapbase::deleteAutoReport(repId)
     subscription$tab <-
       rapbase::makeAutoReportTab(session, type = "subscription")
