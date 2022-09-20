@@ -52,7 +52,7 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
   RegData <- korona::KoronaDataSQL(skjema=2, koble=1)
   minAnt <- min(length(unique(RegData$SkjemaGUID)), length(unique(RegData$SkjemaGUIDut)))#min(dim(skjemaInn)[1], dim(skjemaUt)[1])
   antInnlagte <- sum(is.na(RegData$FormDateUt))
-  rnwFil <- ifelse(minAnt < 26000 | antInnlagte > 1000, 'KoroFeilmld.Rnw', rnwFil)
+  rnwFil <- ifelse(minAnt < 25000 | antInnlagte > 1000, 'KoroFeilmld.Rnw', rnwFil)
 
   tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))

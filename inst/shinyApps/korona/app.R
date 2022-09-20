@@ -612,9 +612,9 @@ server <- function(input, output, session) {
   antPasFlereForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsak==1 & PasFlere$InnNr > 1])) #sum(InnNr0>1))
   #antPasFlereAlleForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsakAlle==1 & PasFlere$InnNr > 1]))
 
-    output$antFlereForl <- renderUI(h5(HTML(paste0('Resultatene er stort sett basert på at opphold
-  for overflyttede eller reinnlagte pasienter er aggregerte til ett eller flere (>90 dager mellom to innleggelser) forløp per pasient.
-   Per i dag er det på landsbasis ', antPasFlereForlAlle, ' som har mer enn ett forløp
+    output$antFlereForl <- renderUI(h5(HTML(paste0('De fleste resultater er basert på at opphold for hver pasient er aggregert til ett forløp.
+    Pasienter som har mer enn 90 dager mellom to innleggelser teller som to eller flere forløp.
+   Per i dag er det på landsbasis ', antPasFlereForlAlle, ' pasienter som har mer enn ett forløp
 og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hovedårsak til minst ett av oppholdene.'))))
 
 
@@ -1314,7 +1314,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
     if (length(dispatchment$tab) != 0) { #(!is.na(dispatchment$koblRoller[1])) {
     merge(as.data.frame(dispatchment$tab), as.data.frame(dispatchment$koblRoller), by = 'id',
           sort=F, all.x=T, all.y=F)[ ,c("Ansvarlig", "Rapport", "Datakilde", "Rolle", "Mottaker",
-                                        "Periode", "Utløp", "Neste", "Endre", "Slett")]} else NULL,
+                                        "Periode", "Slutt", "Neste", "Endre", "Slett")]} else NULL,
     server = FALSE, escape = FALSE, selection = 'none',
     options = list(dom = 'tp', ordning = FALSE), #, columnDefs = list(list(visible = FALSE, targets = 9))
                    rownames = FALSE
