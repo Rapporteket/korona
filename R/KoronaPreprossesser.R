@@ -367,25 +367,17 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   RegData$InnDag <- RegData$InnDato
 
   if (kobleBered==1){
-    if (aggPers==0) {stop('Kan bare koble til beredskapsskjema for aggregerte data')}
-
     BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-    if (tellFlereForlop == 0){
-    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1, tellFlereForlop = 0)
-    RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
-                     by = 'PersonId')
-      }
-    if (tellFlereForlop == 1){
-      #MÅ SJEKKE AT INTENSIVFORLØPET LIGGER MELLOM INN OG UT-DATO FOR SYKEHUSOPPHOLDET.
-      #Plukk først ut sykehusforløp som har intensivopphold (inner join). Koble. Legg så til resten av sykehusopp så vi får en
-      #left join.
-      BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
+    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = aggPers, tellFlereForlop = tellFlereForlop)
+
+    if ((aggPers==1) & (tellFlereForlop == 0)){
+        RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
+                         by = 'PersonId')
+    } else {  #if ((aggPers == 1 & tellFlereForlop==1) | aggPers == 0) {
 
       BeredData$PersonIdBered <- BeredData$PersonId
       BeredData$InnDatoBered <- BeredData$InnDato
 
-
-      #vecMatchBeredTilPan <- match(RegDataMber$PersonId, BeredData$PersonIdBered)
       RegData <- as.data.frame(
         RegData %>%
           dplyr::group_by(PersonId, InnDato, UtDato)%>%
@@ -399,8 +391,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
       RegDataMbered <- cbind(RegData,
                              BeredData[RegData$vecMatchBeredTilPan, ])
 
-      RegData  <- RegDataMbered %>% mutate(BeredPas = ifelse(is.na(PersonIdBered), 0, 1))
-
 # #Testing
       # RegDataMbered[1:3, c('PersonId', 'InnTidspunkt', "UtTidspunkt")]
       # BeredData[RegDataMber$vecMatchBeredTilPan[1:3], c('PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
@@ -412,7 +402,8 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
       # BeredData[BeredData$PersonId == '0x3029E3F3B7B757E4EFB60D142FDF5911E8A3FF759B4E4C761C228E1D585D1589', c('PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
       #KoroData[c(3,89,345, 678, 2000), c('PersonId', 'InnTidspunkt', "UtTidspunkt", 'PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
     }
-  }
+  RegData  <- RegDataMbered %>% dplyr::mutate(BeredPas = ifelse(is.na(PersonIdBered), 0, 1))
+} #koble bered
 
 
   ##Kode om  pasienter som er overført til/fra egen avdeling til "ikke-overført"
