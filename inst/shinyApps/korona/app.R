@@ -610,7 +610,6 @@ server <- function(input, output, session) {
     )
   antPasFlereForlAlle <- length(unique(PasFlere$PasientID[PasFlere$InnNr > 1])) #sum(InnNr0>1))
   antPasFlereForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsak==1 & PasFlere$InnNr > 1])) #sum(InnNr0>1))
-  #antPasFlereAlleForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsakAlle==1 & PasFlere$InnNr > 1]))
 
     output$antFlereForl <- renderUI(h5(HTML(paste0('De fleste resultater er basert på at opphold for hver pasient er aggregert til ett forløp.
     Pasienter som har mer enn 90 dager mellom to innleggelser teller som to eller flere forløp.
@@ -1341,7 +1340,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
 
   # Rediger eksisterende auto rapport (alle typer)
   observeEvent(input$edit_button, {
-    repId <- strsplit(input$edit_button, "_")[[1]][3]
+    repId <- strsplit(input$edit_button, "__")[[1]][2]
     rep <- rapbase::readAutoReportData()[[repId]]
     if (rep$type == "subscription") {#abonnement
 
@@ -1359,7 +1358,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
 
   # Slett eksisterende auto rapport (alle typer)
   observeEvent(input$del_button, {
-    repId <- strsplit(input$del_button, "_")[[1]][3]
+    repId <- strsplit(input$del_button, "__")[[1]][2]
     repIdny <- as.character(input$del_button)
     rapbase::deleteAutoReport(repId)
     subscription$tab <-
