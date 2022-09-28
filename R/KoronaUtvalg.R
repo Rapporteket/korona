@@ -78,7 +78,7 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
     if (skjemastatusUt %in% 0:5){paste('Skjemastatus, utskriving:',
                                         c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
     if (aarsakInn %in% 1:4){paste0('Covid-19, hovedårsak? ',
-                                   c('Ja, alle opph.', 'Ja, (minst) siste opph.', 'Ja, minst ett opph.', 'Nei, ingen opph.')[aarsakInn])},
+                                   c('Ja, alle opphold', 'Ja, (minst) siste opphold', 'Ja, minst ett opphold', 'Nei, ingen opphold')[aarsakInn])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
     if (dodSh %in% 1:3) {paste0('Tilstand ved utskriving: ', c('Levende','Død','Alle utskrevne')[as.numeric(dodSh)])},
     if ((valgtEnhet != 'Alle') &(enhetsUtvalg == 2)) {paste('Valgt enhet:', valgtEnhet)},

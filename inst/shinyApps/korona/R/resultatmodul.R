@@ -16,7 +16,7 @@ koronaresultater_UI <- function(id){
                                                 'Antall inneliggende'='antinn')
                         ),
                         selectInput(inputId = ns("velgTidsenhet"), label="Velg tidsenhet",
-                                    choices = c("Dag"="dag", "Uke"="uke", "Måned"="maaned")),
+                                    choices = c("Dag"="dag", "Uke"="uke", "Måned"="maaned", "År"="aar")),
                         selectInput(inputId = ns("velgAntVisning"), label="Velg antall dager",
                                     choices = c(10, 20, 30, 50, 100, 200, 300, 500, 1000), selected = 30),
                         dateInput(inputId = ns("velgSluttdatoRes"), label = 'Velg sluttdato', language="nb",
@@ -80,7 +80,9 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
             "uke" = updateSelectInput(session, "velgAntVisning", label="Velg antall uker",
                                       choices = c(4, 8, 12, 26, 105, 160, 210), selected = 8),
             "maaned" = updateSelectInput(session, "velgAntVisning", label="Velg antall måneder",
-                                         choices = c(6, 12, 24, 36), selected = 6)
+                                         choices = c(6, 12, 24, 36), selected = 6),
+            "aar" = updateSelectInput(session, "velgAntVisning", label="Velg antall år",
+                                         choices = c(1,2,3,4), selected = 3)
     )
   )
   observe({
@@ -101,7 +103,9 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
                        "uke" = floor_date(input$velgSluttdatoRes - weeks(as.numeric(input$velgAntVisning)-1),
                                           unit = 'week', week_start = 1),
                        "maaned" = floor_date(input$velgSluttdatoRes %m-% months(as.numeric(input$velgAntVisning)-1),
-                                             unit = 'month')
+                                             unit = 'month'),
+                       "aar" = floor_date(input$velgSluttdatoRes %m-% years(as.numeric(input$velgAntVisning)-1),
+                                          unit = 'year')
     ),
 
   )

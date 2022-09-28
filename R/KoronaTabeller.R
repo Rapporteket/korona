@@ -4,7 +4,7 @@
 #' Detaljerinsnivå er styrt av tilgangsnivå
 #'
 #' @param RegData dataramme med preprossesserte data
-#' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
+#' @param tidsenhet 'dag' (standard), 'uke', 'maaned', 'aar'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
 #' @param HF benytte kortnavn for HF 0-nei, 1-ja
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
@@ -31,7 +31,9 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
                                               levels = paste0('U', format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 week'))), '%V.%Y'))),
                              maaned = factor(format(RegData$InnDato, '%b %y'),
-                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")))
+                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")),
+                             aar = factor(format(RegData$InnDato, '%Y'),
+                                          levels = format(seq(datoFra, datoTil, by="year"), "%Y")))
 
   RegData <- RegData[!is.na(RegData$TidsVar), ]
 

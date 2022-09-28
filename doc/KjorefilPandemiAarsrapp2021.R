@@ -186,7 +186,7 @@ KoroData1aar$BeredPas <- ifelse(KoroData1aar$Nir_beredskapsskjema_CoV2==1, 1, 0)
 
 Nokkeltall <- FerdigeRegTab(RegData=KoroData1aar)
 tab <- Nokkeltall$Tab[-3, ]
-colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opph.', 'Del opph.')
+colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opphald', 'Del opphald')
 intBehPas <- round(100*prop.table(table(KoroDataPers$BeredPas))[2],1)
 
 print(xtable::xtable(tab, align=c('l','r','r','c','r','r'),
@@ -201,7 +201,7 @@ for (enh in HFer) {
 Nokkeltall <- FerdigeRegTab(RegData=KoroData1aar,
                             valgtEnhet=enh,
                             enhetsNivaa = 'HF')
-colnames(Nokkeltall$Tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opph.', 'Del opph.')
+colnames(Nokkeltall$Tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opphald', 'Del opphald')
 
 #tabInn <- table(KoroDataPers$BeredPas[KoroDataPers$HF == enh])
 #intBehInn <- round(100*prop.table(tabInn)[2],1)
