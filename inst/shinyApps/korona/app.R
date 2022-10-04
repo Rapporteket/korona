@@ -630,12 +630,17 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp med Covid-19 som hoved
       filename = function(){
         paste0('KoronaRapport', Sys.time(), '.pdf')},
       content = function(file){
+        message('Starter henteSamlerapporterKorona')
         henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
                                   rolle = rolle,
                                   valgtEnhet = egenEnhet,
                                   enhetsNivaa = egetEnhetsNivaa,
                                   reshID = reshID
         ) #Vurder å ta med tidsinndeling eller startdato
+      message('file: ', file)
+      message('Størrelse Rnw: ', file.size("tmpKoronaRapport.Rnw"))
+      message('Størrelse tex: ', file.size("tmpKoronaRapport.tex"))
+      message('Størrelse pdf: ', file.size("tmpKoronaRapport.pdf"))
       }
     )
   })
