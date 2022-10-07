@@ -69,6 +69,7 @@ dum <- unique(KoroData[,c('HF', "HFresh")])
 HFreshValg <- dum$HFresh
 names(HFreshValg) <- dum$HF
 HFreshValg <- HFreshValg[order(dum$HF)]
+HFbered <- c('Alle', as.character(sort(unique(BeredData$HF))))
 
 #updateTextInput(session, inputId, label = NULL, value = NULL). Hvis input skal endres som følge av et annet input.
 startDato <- as.Date('2020-03-01') #min(KoroData$InnDato, na.rm = T)
@@ -384,8 +385,16 @@ ui <- tagList(
                   ),
                   tabPanel('Intensivskjema som mangler pandemiskjema',
                            h3('Intensivskjema uten matchende pandemiskjema'),
-                #            h4('Sjekken er basert på at opphold er registrert med tidspunketer i følgende rekkefølge:
-                # Inn på sykehus -> Inn på intensiv -> Ut fra intensiv -> Ut fra sykehus'),
+                                       h4('Sjekken er basert på at opphold er registrert med tidspunketer i følgende rekkefølge:
+                            Inn på sykehus -> Inn på intensiv -> Ut fra intensiv -> Ut fra sykehus'),
+                           dateInput(inputId = 'fraDatoBerUpan', label = 'Velg startdato',
+                                     value = '2020-03-01',
+                                     min = '2020-03-01', max = Sys.Date()),
+                           selectInput(inputId = "HFberUpan",
+                                       label="Velg HF for intensivopphold",
+                                       choices = HFbered
+                           ),
+
                            downloadButton(outputId = 'lastNed_TabintUPan', label='Last ned tabell', class = "butt"),
                            tableOutput('TabintUPan')
                   ),
@@ -1017,8 +1026,12 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
       })
 
 
-   TabintUPan <- finnBeredUpandemi(KoroDataMberedOpph = KoroDataOpph)$TabBeredUPan #, datoFra = input)
-   output$TabintUPan <- renderTable(TabintUPan)
+
+   output$TabintUPan <- renderTable(
+      TabintUPan <- finnBeredUpandemi(KoroDataMberedOpph = KoroDataOpph,
+                                      datoFra = input$fraDatoBerUpan,
+                                      HF = input$HFberUpan)
+   )
 
    output$lastNed_TabintUPan <- downloadHandler(
       filename = function(){
