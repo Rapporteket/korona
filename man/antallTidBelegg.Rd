@@ -21,7 +21,7 @@ antallTidBelegg(
 \arguments{
 \item{RegData}{dataramme med preprossesserte data}
 
-\item{tidsenhet}{'dag' (standard), 'uke', 'maaned'}
+\item{tidsenhet}{'dag' (standard), 'uke', 'maaned', 'aar'}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 

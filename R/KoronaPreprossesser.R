@@ -359,15 +359,14 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   RegData$Halvaar <- ceiling(RegData$MndNum/6)
   RegData$Aar <- as.numeric(format(RegData$InnDato, '%Y'))
   RegData$UkeNr <- format(RegData$InnDato, '%V')
-  #RegData$UkeAar <- format(RegData$InnDato, '%G.%V') #%G -The week-based year, %V - Week of the year as decimal number (01–53) as defined in ISO 8601
-  #RegData$UkeAar <- as.factor(RegData$UkeAar)
-  #RegData$Dag <- format(RegData$InnDato, '%d.%B')
   RegData$Dag <- factor(format(RegData$InnDato, '%d.%m.%y'),
                         levels = format(seq(min(RegData$InnDato), max(RegData$InnDato), by="day"), '%d.%m.%y'))
   RegData$InnDag <- RegData$InnDato
 
   if (kobleBered==1){
-    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL() #datoFra = datoFra
+     #tellFlereForlop <- 0
+     #aggPers <- 0
     BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = aggPers, tellFlereForlop = tellFlereForlop)
 
     if ((aggPers==1) & (tellFlereForlop == 0)){
@@ -375,21 +374,38 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                          by = 'PersonId')
     } else {  #if ((aggPers == 1 & tellFlereForlop==1) | aggPers == 0) {
 
-      BeredData$PersonIdBered <- BeredData$PersonId
-      BeredData$InnDatoBered <- BeredData$InnDato
+      BeredData <- BeredData %>% dplyr::rename(PersonIdBered = PersonId,
+                                               #SkjemaGUIDBered = SkjemaGUID,
+                                               InnDatoBered = InnDato)
+
 
       RegData <- as.data.frame(
         RegData %>%
-          dplyr::group_by(PersonId, InnDato, UtDato)%>%
+          dplyr::group_by(PersonId, InnTidspunkt, UtTidspunkt)%>%
           dplyr::mutate(vecMatchBeredTilPan=match(TRUE,
-                                    PersonId == BeredData$PersonIdBered &
-                                    InnDato <= as.Date(BeredData$InnDatoBered) &  #Lagt inn før lagt inn intensiv
-                                    UtDato >= as.Date(BeredData$DateDischargedIntensive))) #Skrevet ut etter utskriv. int.
-      )
-      BeredData <- BeredData[ ,-which(names(BeredData) %in% names(RegData))] #Fjerner variabler som finnes i både bered og pand.
+                                                  PersonId == BeredData$PersonIdBered &
+                                                    InnTidspunkt <= as.POSIXct(BeredData$DateAdmittedIntensive) &  #Lagt inn før lagt inn intensiv
+                                                    UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive)) #Skrevet ut etter utskriv. int.
+                       #  PersTest = sum(PersonId == BeredData$PersonIdBered, na.rm = T),
+                       #  InnTest = sum(InnTidspunkt <= BeredDataRaa$DateAdmittedIntensive, na.rm = T),
+                       # InnTest2 = sum(InnTidspunkt < as.POSIXct(BeredData$DateAdmittedIntensive), na.rm = T),
+                       # UtTest = match(TRUE, UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive))
+      ))
 
+      # RegData <- as.data.frame(
+      #   RegData %>%
+      #     dplyr::group_by(PersonId, InnDato, UtDato)%>%
+      #     dplyr::mutate(vecMatchBeredTilPan=match(TRUE,
+      #                               PersonId == BeredData$PersonIdBered &
+      #                               InnDato <= as.Date(BeredData$InnDatoBered) &  #Lagt inn før lagt inn intensiv
+      #                               UtDato >= as.Date(BeredData$DateDischargedIntensive))) #Skrevet ut etter utskriv. int.
+      # )
+
+      fellesNavn <- which(names(BeredData) %in% names(RegData))
+      BeredDataNyeNavn <- rename_with(BeredData, ~paste0(names(BeredData)[fellesNavn], 'Bered'), fellesNavn)
+      #names(RegDataNyeNavn)
       RegDataMbered <- cbind(RegData,
-                             BeredData[RegData$vecMatchBeredTilPan, ])
+                             BeredDataNyeNavn[RegData$vecMatchBeredTilPan, ])
 
 # #Testing
       # RegDataMbered[1:3, c('PersonId', 'InnTidspunkt', "UtTidspunkt")]

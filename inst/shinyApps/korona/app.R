@@ -42,7 +42,7 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
 
 KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
 if (isFALSE(KoroDataOpph)) {
-   KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
+   KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0, kobleBered = 1)
    rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph)
  }
 
@@ -55,16 +55,8 @@ if (isFALSE(KoroDataOpph)) {
 
  KoroData <- rapbase::loadStagingData("korona", "KoroData")
  if (isFALSE(KoroData)) {
-   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1)
- KoroData <- merge(KoroData,
-                   BeredData,
-                   all.x = T,
-                   all.y = F,
-                   suffixes = c("", "Bered"),
-                   by = 'PersonId')
- KoroData  <- KoroData %>%
-   dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
-rapbase::saveStagingData("korona", "KoroData", KoroData)
+   KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1, kobleBered = 1)
+ rapbase::saveStagingData("korona", "KoroData", KoroData)
 }
 
 #-----Definere utvalgsinnhold og evt. parametre som er statiske i appen----------
@@ -393,7 +385,14 @@ tabPanel('Datakvalitet',
              h3('Pasienter som har to innleggelsesskjema med like innleggelsestidspunkt (<30 min.) '),
              downloadButton(outputId = 'lastNed_dblInn', label='Last ned tabell'),
              tableOutput('dblInn')
-             )
+             ),
+    tabPanel('Intensivskjema som mangler pandemiskjema',
+             h3('Intensivskjema uten matchende pandemiskjema'),
+             h4('Sjekken er basert på at opphold er registrert med tidspunketer i følgende rekkefølge:
+                Inn på sykehus -> Inn på intensiv -> Ut fra intensiv -> Ut fra sykehus'),
+             downloadButton(outputId = 'lastNed_IntUPan', label='Last ned tabell'),
+             tableOutput('intUPan')
+    )
 
 )), #Datakvalitet
 #---------Intensivregistreringer--------------------------------
@@ -1015,6 +1014,21 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
     content = function(file, filename){
       write.csv2(TabDblInn, file, row.names = F, na = '')
     })
+
+
+  TabintUPan <- finnBeredUpandemi(KoroDataMberedOpph = KoroDataOpph)$TabBeredUPan #, datoFra = input)
+  TabintUPan$DateAdmittedIntensive <- as.Date(TabintUPan$DateAdmittedIntensive)
+  output$intUPan <- renderTable(TabintUPan)
+
+  output$lastNed_intUPan <- downloadHandler(
+    filename = function(){
+      paste0('IntSkjemaUpandemi.csv')
+    },
+    content = function(file, filename){
+      write.csv2(TabintUPan, file, row.names = F, na = '')
+    })
+
+
 
 
   #Antall opphold

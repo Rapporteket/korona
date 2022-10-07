@@ -233,6 +233,8 @@ if (koble==0){
 
 if (koble==1){
 
+  #queryInn <- paste0('SELECT * FROM InklusjonSkjemaDataContract Inn')
+  #queryUt <- paste0('SELECT * FROM UtskrivningSkjemaDataContract Ut')
   queryInn <- paste0('SELECT ',
                      varPandemiInn,
                     ' FROM InklusjonSkjemaDataContract Inn

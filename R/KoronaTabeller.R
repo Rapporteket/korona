@@ -424,6 +424,48 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
   tabUt <- tab[with(tab, order(HF, ShNavn, InnDato)), ] #
 }
 
+#' Tabell med oversikt over hvilke beredskapsskjema som mangler pandemiskjema
+#'
+#' @param datoFra - startdato for innleggelse på intensiv
+#'
+#' @return
+#' @export
+#'
+finnBeredUpandemi <- function(KoroDataMberedOpph, datoFra='2020-01-01'){
+  #library(korona)
+  #library(magrittr)
+  datoFraPan <- as.Date(datoFra) - 90 #For å ta høyde for at pasienten kan ha ligget en stund på avd. før opphold på intensiv
+  #KoroData <- korona::KoronaDataSQL(datoFra = datoFraPan)
+  #KoroDataMberedOpph <- KoronaPreprosesser(RegData = KoroData, aggPers = 0, kobleBered = 1)
+  KoroDataMberedOpph <- dplyr::filter(KoroDataMberedOpph, InnDato >= as.Date(datoFraPan))
+
+  BeredData <- intensivberedskap::NIRPreprosessBeredsk(
+    RegData=intensivberedskap::NIRberedskDataSQL(datoFra = datoFra), aggPers = 0)
+
+  #To intensivopphold som knyttes til samme pandemiopphold
+  skjema2 <- names(table(KoroDataMberedOpph$SkjemaGUIDBered)[table(KoroDataMberedOpph$SkjemaGUIDBered)==2])
+  TabSmBeredToPand <- NULL
+  if (length(skjema2)>0) {
+  TabSmBeredToPand <- KoroDataMberedOpph[which(KoroDataMberedOpph$SkjemaGUIDBered %in% skjema2),
+                         c("InnDato", "DateAdmittedIntensive", "UtDato", "DateDischargedIntensive", "PersonId", "PersonIdBered",
+                           "ShNavn", 'ShNavnBered', "HF", "HFBered", "SkjemaGUID", "SkjemaGUIDBered")]
+  }
+
+  #Beredskapsskjema uten pandemiskjema:
+  beredUmatch <- setdiff(sort(BeredData$SkjemaGUID), sort(KoroDataMberedOpph$SkjemaGUIDBered))
+  TabBeredUPand <- BeredData[which(BeredData$SkjemaGUID %in% beredUmatch), c("SkjemaGUID", "DateAdmittedIntensive", "HF", "ShNavn")]
+  TabBeredUPand$DateAdmittedIntensive <- as.character(TabBeredUPand$DateAdmittedIntensive)
+  #Har alle med Nir_beredskapsskjema_CoV2==1 BeredPas==1: JA
+
+  #Disse "skal" ha bered-skjema:
+  # pers <- KoroDataMberedOpph$PersonId[which(KoroDataMberedOpph$BeredPas==0)]
+  # KoroDataMberedOpph[KoroDataMberedOpph$PersonId==pers[2], c("InnTidspunkt", "UtTidspunkt", "ShNavn",  "HF", 'BeredPas')]
+  # BeredData[BeredData$PersonId==pers[2], c("DateAdmittedIntensive", "DateDischargedIntensive", "ShNavn",  "HF")]
+  # KoroDataMberedOpph$InnTidspunkt[KoroDataMberedOpph$PersonId==pers[2]] <= BeredData$DateAdmittedIntensive[BeredData$PersonId==pers[2]]
+  return(UtData <- list(TabBeredUPand=TabBeredUPand, TabSmBeredToPand=TabSmBeredToPand))
+
+}
+
 
 #' Finner pasienter med dobbeltregistrerte skjema
 #'
