@@ -2,6 +2,7 @@ koronaresultater_UI <- function(id){
   ns <- shiny::NS(id)
 
 
+
   shiny::sidebarLayout(
     shiny::sidebarPanel(id = ns('brukervalgRes'),
 
@@ -70,21 +71,42 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
     shinyjs::reset("brukervalgRes")
   })
 
-  # enhetsvalg <- if (rolle=='SC'){c('Alle', rhfNavn)} else {c(egenEnhet,'Alle')}
-  updateSelectInput(session, "valgtEnhetRes", choices = enhetsvalg)
+   observe({
+     dagValg <-  c(10, 20, 30, 50, 100, 200, 300, 500, 1000)
+     ukeValg <- c(4, 8, 12, 26, 105, 160, 210)
+     mndValg <- c(6, 12, 24, 36)
+     aarValg <- c(1,2,3,4)
 
-  observe(
-    switch (input$velgTidsenhet,
+     if (input$valgtVar == 'antinn') {
+        dagValg <- dagValg[1:6]
+        #ukeValg <- ukeValg[1:4]
+        mndValg <- mndValg[1:2]
+        aarValg <- 1
+        }
+
+         switch (input$velgTidsenhet,
             "dag" = updateSelectInput(session, "velgAntVisning", label="Velg antall dager",
-                                      choices = c(10, 20, 30, 50, 100, 200, 300, 500, 1000), selected = 30), #c(10, 20, 30, 50, 100, 200, 300, 500)
+                                      choices = dagValg, selected = 30),
             "uke" = updateSelectInput(session, "velgAntVisning", label="Velg antall uker",
-                                      choices = c(4, 8, 12, 26, 105, 160, 210), selected = 8),
+                                      choices = if (input$valgtVar == 'antinn') {
+                                         ukeValg[1:4]} else {ukeValg}, selected = 8),
             "maaned" = updateSelectInput(session, "velgAntVisning", label="Velg antall måneder",
-                                         choices = c(6, 12, 24, 36), selected = 6),
+                                         choices = mndValg, selected = 6),
             "aar" = updateSelectInput(session, "velgAntVisning", label="Velg antall år",
-                                         choices = c(1,2,3,4), selected = 3)
+                                         choices = aarValg, selected = 3)
     )
-  )
+
+     valgtVarValg <- c('Antall innleggelser'='antreg',
+                       'Antall døde'='antdod',
+                       'Antall utskrivinger'= 'antut',
+                       'Antall inneliggende'='antinn')
+     # updateSelectInput(session, "valgtVar",
+     #                   choices = if (input$velgTidsenhet %in% c('maaned', 'aar')) {
+     #                      valgtVarValg[1:3]} else {valgtVarValg}
+     #                   )
+
+  })
+
   observe({
     updateSelectInput(session, "aarsakInnRes", label="Covid-19 hovedårsak til innleggelse?",
                       choices = if (input$valgtVar == 'antinn') {c("Ja"=1, "Alle reg."=9, "Nei"=2)

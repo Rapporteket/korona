@@ -15,7 +15,10 @@
 KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFlereForlop=0)	#, reshID=reshID)
 {
   ReshNivaa <- korona::ReshNivaa
-
+  if (aggPers==0 & tellFlereForlop==1){
+     warning('Ugyldig kombinasjon: aggPers==0 & tellFlereForlop==1. "tellFlereForlop" endres til 0')
+     tellFlereForlop <- 0
+  }
   # Endre variabelnavn:
   names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
   names(RegData)[which(names(RegData) == 'UnitId')] <- 'ReshId'
@@ -338,9 +341,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                                           format="%Y-%m-%d %H:%M:%S" )
 
   #Beregnede variabler
-  #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
-  #!! MÅ TA HENSYN TIL REINNLEGGELSE
-  #indUReinn <- RegData$Reinn==0
   RegData$LiggetidTot <- as.numeric(difftime(RegData$UtTidspunkt,
                                              RegData$InnTidspunkt,
                                              units = 'days'))
@@ -350,9 +350,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   RegData <- RegData[which((RegData$InnDato>'2020-01-01') & (RegData$InnDato <= Sys.Date())),]
 
   # Nye tidsvariable:
-  # RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
-  #                                    format="%Y-%m-%d %H:%M:%S" )
-  #RegData$MndNum <- RegData$InnTidspunkt$mon +1
   RegData$MndNum <- as.numeric(format(RegData$InnTidspunkt, '%m'))
   RegData$MndAar <- format(RegData$InnTidspunkt, '%b%y')
   RegData$Kvartal <- ceiling(RegData$MndNum/3)
@@ -379,27 +376,23 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                                                InnDatoBered = InnDato)
 
 
-      RegData <- as.data.frame(
+      RegData1 <- as.data.frame(
         RegData %>%
           dplyr::group_by(PersonId, InnTidspunkt, UtTidspunkt)%>%
-          dplyr::mutate(vecMatchBeredTilPan=match(TRUE,
-                                                  PersonId == BeredData$PersonIdBered &
-                                                    InnTidspunkt <= as.POSIXct(BeredData$DateAdmittedIntensive) &  #Lagt inn før lagt inn intensiv
-                                                    UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive)) #Skrevet ut etter utskriv. int.
+          dplyr::mutate(
+             vecMatchBeredTilPan=match(TRUE,
+                                       PersonId == BeredData$PersonIdBered &
+                                          InnTidspunkt <= BeredData$DateAdmittedIntensive &  #Lagt inn før lagt inn intensiv
+                                          UtTidspunkt >= BeredData$DateDischargedIntensive) #Skrevet ut etter utskriv. int.
+                                       # InnTidspunkt <= as.POSIXlt(BeredData$DateAdmittedIntensive,
+                                       #                            tz= 'UTC', format='%Y-%m-%d %H:%M:%S') &  #Lagt inn før lagt inn intensiv
+                                       # UtTidspunkt >= as.POSIXlt(BeredData$DateDischargedIntensive,
+                                       #                           tz= 'UTC', format='%Y-%m-%d %H:%M:%S')) #Skrevet ut etter utskriv. int.
                        #  PersTest = sum(PersonId == BeredData$PersonIdBered, na.rm = T),
                        #  InnTest = sum(InnTidspunkt <= BeredDataRaa$DateAdmittedIntensive, na.rm = T),
                        # InnTest2 = sum(InnTidspunkt < as.POSIXct(BeredData$DateAdmittedIntensive), na.rm = T),
                        # UtTest = match(TRUE, UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive))
       ))
-
-      # RegData <- as.data.frame(
-      #   RegData %>%
-      #     dplyr::group_by(PersonId, InnDato, UtDato)%>%
-      #     dplyr::mutate(vecMatchBeredTilPan=match(TRUE,
-      #                               PersonId == BeredData$PersonIdBered &
-      #                               InnDato <= as.Date(BeredData$InnDatoBered) &  #Lagt inn før lagt inn intensiv
-      #                               UtDato >= as.Date(BeredData$DateDischargedIntensive))) #Skrevet ut etter utskriv. int.
-      # )
 
       fellesNavn <- which(names(BeredData) %in% names(RegData))
       BeredDataNyeNavn <- rename_with(BeredData, ~paste0(names(BeredData)[fellesNavn], 'Bered'), fellesNavn)
