@@ -106,6 +106,7 @@ ui <- tagList(
                             downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
                             tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                             br(),
+                            shiny::downloadButton("koroAlt", "Test koronarapport"),
                             br(),
                             h3('Gjør filtreringer/utvalg:'),
 
@@ -660,6 +661,24 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
          }
       )
    })
+
+   output$koroAlt <- shiny::downloadHandler(
+      filename = basename(
+         tempfile(pattern = "KoronaRapport", fileext = ".pdf")
+      ),
+      content = function(file) {
+         owd <- setwd(tempdir())
+         on.exit(setwd(owd))
+         rolle <- "SC"
+         valgtEnhet <- "Alle"
+         enhetsNivaa <- "RHF"
+         reshID <- 0
+         fn <- knitr::knit2pdf(
+            system.file("KoronaRapport.Rnw", package = "korona")
+         )
+         file.rename(fn, file)
+      }
+   )
 
    output$KoroRappTxt <- renderUI(tagList(
       h3(HTML('Koronarapport med samling av resultater')),
