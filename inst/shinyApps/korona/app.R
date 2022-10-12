@@ -106,7 +106,7 @@ ui <- tagList(
                             downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
                             tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                             br(),
-                            shiny::downloadButton("koroAlt", "Test koronarapport"),
+                            shiny::downloadButton("koroAlt", "TEST koronarapport TEST"),
                             br(),
                             h3('Gjør filtreringer/utvalg:'),
 
