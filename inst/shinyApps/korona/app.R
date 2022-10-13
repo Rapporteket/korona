@@ -667,14 +667,12 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
          tempfile(pattern = "KoronaRapport", fileext = ".pdf")
       ),
       content = function(file) {
-         owd <- setwd(tempdir())
-         on.exit(setwd(owd))
-         rolle <- "SC"
-         valgtEnhet <- "Alle"
-         enhetsNivaa <- "RHF"
-         reshID <- 0
-         fn <- knitr::knit2pdf(
-            system.file("KoronaRapport.Rnw", package = "korona")
+         fn <- rapbase::renderRmd(
+            system.file("testReportSource.Rmd", package = "rapbase"),
+            outputType = "pdf",
+            params = list(
+               reglogo = system.file("template/logo.png", package = "rapbase")
+            )
          )
          file.rename(fn, file)
       }
