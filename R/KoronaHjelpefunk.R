@@ -57,12 +57,12 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
   tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
   # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
-  setwd(tempdir())
+  owd <- setwd(tempdir())
+  on.exit(setwd(owd))
   file.copy(src, tmpFile, overwrite = TRUE)
 
   knitr::knit2pdf(tmpFile)
 
-  gc() #Opprydning gc-"garbage collection"
   file.copy(paste0(substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf'), filnavn)
 }
 
