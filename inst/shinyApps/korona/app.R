@@ -103,7 +103,7 @@ ui <- tagList(
                sidebarPanel(id = 'brukervalgStartside',
                             width = 3,
                             uiOutput('KoroRappTxt'),
-                            downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
+                            downloadButton(outputId = 'KoroRappPdf', label='Last ned Koronarapport', class = "butt"),
                             tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
                             br(),
                             shiny::downloadButton("koroAlt", "TEST koronarapport TEST"),
@@ -647,7 +647,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
 
    #-------- Laste ned Samlerapporter------------
    #valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
-   output$KoroRapp.pdf <- downloadHandler(
+   output$KoroRappPdf <- downloadHandler(
       filename = basename(
          tempfile(pattern = "KoronaRapport", fileext = ".pdf")
       ),
