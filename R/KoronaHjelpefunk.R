@@ -54,16 +54,17 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
   antInnlagte <- sum(is.na(RegData$FormDateUt))
   rnwFil <- ifelse(minAnt < 25000 | antInnlagte > 1000, 'KoroFeilmld.Rnw', rnwFil)
 
-  tmpFile <- paste0('tmp',rnwFil)
   src <- normalizePath(system.file(rnwFil, package=Rpakke))
   # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
   owd <- setwd(tempdir())
   on.exit(setwd(owd))
-  file.copy(src, tmpFile, overwrite = TRUE)
 
-  knitr::knit2pdf(tmpFile)
+  pdfFile <- knitr::knit2pdf(
+     input = src,
+     output = tempfile(fileext = ".tex")
+  )
 
-  file.copy(paste0(substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf'), filnavn)
+  file.copy(pdfFile, filnavn)
 }
 
 #' Funksjon som produserer rapporten som skal sendes til mottager.
