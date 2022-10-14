@@ -646,22 +646,20 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
 
 
    #-------- Laste ned Samlerapporter------------
-   observe({
-      #valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
-      output$KoroRapp.pdf <- downloadHandler(
-         filename = basename(
-            tempfile(pattern = "KoronaRapport", fileext = ".pdf")
-         ),
-         content = function(file){
-            henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
-                                      rolle = rolle,
-                                      valgtEnhet = egenEnhet,
-                                      enhetsNivaa = egetEnhetsNivaa,
-                                      reshID = reshID
-            ) #Vurder å ta med tidsinndeling eller startdato
-         }
-      )
-   })
+   #valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
+   output$KoroRapp.pdf <- downloadHandler(
+      filename = basename(
+         tempfile(pattern = "KoronaRapport", fileext = ".pdf")
+      ),
+      content = function(file){
+         henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
+                                   rolle = rolle,
+                                   valgtEnhet = egenEnhet,
+                                   enhetsNivaa = egetEnhetsNivaa,
+                                   reshID = reshID
+         ) #Vurder å ta med tidsinndeling eller startdato
+      }
+   )
 
    output$koroAlt <- shiny::downloadHandler(
       filename = basename(
