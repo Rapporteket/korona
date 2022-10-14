@@ -1,6 +1,6 @@
 Package: korona
 Title: Resultattjeneste for registrering av Korona-pandemi
-Version: 1.7.1
+Version: 1.7.1.9000
 Date: 2022-07-08
 Authors@R: 
     person(given = "Lena Ringstad",
