@@ -649,8 +649,9 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
    observe({
       #valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
       output$KoroRapp.pdf <- downloadHandler(
-         filename = function(){
-            paste0('KoronaRapport', Sys.time(), '.pdf')},
+         filename = basename(
+            tempfile(pattern = "KoronaRapport", fileext = ".pdf")
+         ),
          content = function(file){
             henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
                                       rolle = rolle,
