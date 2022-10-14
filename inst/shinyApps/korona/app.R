@@ -652,12 +652,14 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
          tempfile(pattern = "KoronaRapport", fileext = ".pdf")
       ),
       content = function(file){
-         henteSamlerapporterKorona(file, rnwFil="KoronaRapport.Rnw",
-                                   rolle = rolle,
-                                   valgtEnhet = egenEnhet,
-                                   enhetsNivaa = egetEnhetsNivaa,
-                                   reshID = reshID
+         pdfFile <- henteSamlerapporterKorona(
+            file, rnwFil="KoronaRapport.Rnw",
+            rolle = rolle,
+            valgtEnhet = egenEnhet,
+            enhetsNivaa = egetEnhetsNivaa,
+            reshID = reshID
          ) #Vurder å ta med tidsinndeling eller startdato
+         file.rename(pdfFile, file)
       }
    )
 
