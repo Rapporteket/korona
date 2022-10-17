@@ -59,7 +59,9 @@ henteSamlerapporterKorona <- function(filnavn, rnwFil, Rpakke='korona', rolle='S
   owd <- setwd(tempdir())
   on.exit(setwd(owd))
 
-  knitr::knit2pdf(input = src, output = tempfile(fileext = ".tex"))
+  filePath <- knitr::knit2pdf(input = src, output = tempfile(fileext = ".tex"))
+  print(normalizePath(list.files()))
+  filePath
 }
 
 #' Funksjon som produserer rapporten som skal sendes til mottager.

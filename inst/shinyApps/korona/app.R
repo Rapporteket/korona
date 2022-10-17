@@ -653,7 +653,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
       ),
       content = function(file){
          pdfFile <- henteSamlerapporterKorona(
-            file, rnwFil="KoroFeilmld.Rnw",
+            file, rnwFil="KoronaRapport.Rnw",
             rolle = rolle,
             valgtEnhet = egenEnhet,
             enhetsNivaa = egetEnhetsNivaa,
