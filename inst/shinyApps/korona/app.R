@@ -620,7 +620,8 @@ server <- function(input, output, session) {
    antPasFlereForlAlle <- length(unique(PasFlere$PasientID[PasFlere$InnNr > 1])) #sum(InnNr0>1))
    antPasFlereForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsak==1 & PasFlere$InnNr > 1])) #sum(InnNr0>1))
 
-   output$antFlereForl <- renderUI(h5(HTML(paste0('De fleste resultater er basert på at opphold for hver pasient er aggregert til ett forløp.
+   output$antFlereForl <- renderUI(h5(HTML(paste0('De fleste resultater er basert på at opphold for hver pasient er
+   aggregert til ett smitteforløp.
     Pasienter som har mer enn 90 dager mellom to innleggelser teller som to eller flere forløp.
    Per i dag er det på landsbasis ', antPasFlereForlAlle, ' pasienter som har mer enn ett forløp
 og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hovedårsak til minst ett av oppholdene.'))))
@@ -645,7 +646,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
 
 
    #-------- Laste ned Samlerapporter------------
-   observe({
+   #observe({
       #valgtEnhet <- ifelse(rolle == 'LU', egetRHF, as.character(input$valgtEnhet))
       output$KoroRapp.pdf <- downloadHandler(
          filename = function(){
@@ -659,7 +660,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
             ) #Vurder å ta med tidsinndeling eller startdato
          }
       )
-   })
+   #})
 
    output$KoroRappTxt <- renderUI(tagList(
       h3(HTML('Koronarapport med samling av resultater')),
@@ -1025,13 +1026,14 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
          write.csv2(TabDblInn, file, row.names = F, na = '')
       })
 
+observe({
+   TabintUPan <- finnBeredUpandemi(
+      KoroDataMberedOpph = KoroDataOpph,
+      datoFra = input$fraDatoBerUpan,
+      HF = input$HFberUpan)
 
 
-   output$TabintUPan <- renderTable(
-      TabintUPan <- finnBeredUpandemi(KoroDataMberedOpph = KoroDataOpph,
-                                      datoFra = input$fraDatoBerUpan,
-                                      HF = input$HFberUpan)
-   )
+   output$TabintUPan <- renderTable(TabintUPan)
 
    output$lastNed_TabintUPan <- downloadHandler(
       filename = function(){
@@ -1041,7 +1043,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
          write.csv2(TabintUPan, file, row.names = F, na = '')
       })
 
-
+})
 
 
    #Antall opphold

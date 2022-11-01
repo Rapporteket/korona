@@ -16,11 +16,14 @@ KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleB
 KoronaFigAndelTid(RegData=KoroIntData)
 
 
-RegData <- KoronaDataSQL()
+RegData <- KoronaDataSQL(datoFra = '2022-01-01', datoTil = '2022-02-01') #10805
 DataOpph <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 0, tellFlereForlop = 0)
+DataOpphBered <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 0, tellFlereForlop = 0, kobleBered = 1)
 DataPers <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 0)
-DataForlop <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 1)
+DataForlop <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 1, kobleBered = 1) #
 
+table(DataOpphBered$BeredPas)
+DataForlopTest4 <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 1)
 
 #Tidsenheter og oppholdstabell
 KoroDataRaa <- KoronaDataSQL(datoFra = '2020-01-01')

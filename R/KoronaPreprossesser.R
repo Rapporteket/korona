@@ -376,7 +376,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                                                InnDatoBered = InnDato)
 
 
-      RegData1 <- as.data.frame(
+      RegData <- as.data.frame(
         RegData %>%
           dplyr::group_by(PersonId, InnTidspunkt, UtTidspunkt)%>%
           dplyr::mutate(
