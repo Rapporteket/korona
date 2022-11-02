@@ -73,6 +73,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
 
   RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
   RegData$HFkort[RegData$HFkort==''] <- 'Mangler HF'
+  RegData$HFlang <- RegData$HF
   RegData$HF <- RegData$HFkort
   RegData$ShNavn[indRegHF] <- RegData$HFkort[indRegHF]
 
@@ -370,35 +371,37 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
         RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
                          by = 'PersonId')
     } else {  #if ((aggPers == 1 & tellFlereForlop==1) | aggPers == 0) {
+       # personid
+       # samme HF
+       # inn, pandemi < inn, intensiv
+       # inn, intensiv < ut, pandemi
 
       BeredData <- BeredData %>% dplyr::rename(PersonIdBered = PersonId,
+                                               HFbered = HF,
                                                #SkjemaGUIDBered = SkjemaGUID,
                                                InnDatoBered = InnDato)
 
 
-      RegData <- as.data.frame(
+      RegDataNy <- as.data.frame(
         RegData %>%
-          dplyr::group_by(PersonId, InnTidspunkt, UtTidspunkt)%>%
+          dplyr::group_by(PersonId, InnTidspunkt)%>% #, UtTidspunkt
           dplyr::mutate(
              vecMatchBeredTilPan=match(TRUE,
                                        PersonId == BeredData$PersonIdBered &
+                                          HFlang == BeredData$HFbered &
                                           InnTidspunkt <= BeredData$DateAdmittedIntensive &  #Lagt inn før lagt inn intensiv
-                                          UtTidspunkt >= BeredData$DateDischargedIntensive) #Skrevet ut etter utskriv. int.
-                                       # InnTidspunkt <= as.POSIXlt(BeredData$DateAdmittedIntensive,
-                                       #                            tz= 'UTC', format='%Y-%m-%d %H:%M:%S') &  #Lagt inn før lagt inn intensiv
-                                       # UtTidspunkt >= as.POSIXlt(BeredData$DateDischargedIntensive,
-                                       #                           tz= 'UTC', format='%Y-%m-%d %H:%M:%S')) #Skrevet ut etter utskriv. int.
+                                          UtTidspunkt > BeredData$DateAdmittedIntensive) #Ut fra pandemi etter at lagt inn intensiv (IKKE:Skrevet ut etter utskriv. int.
                        #  PersTest = sum(PersonId == BeredData$PersonIdBered, na.rm = T),
                        #  InnTest = sum(InnTidspunkt <= BeredDataRaa$DateAdmittedIntensive, na.rm = T),
                        # InnTest2 = sum(InnTidspunkt < as.POSIXct(BeredData$DateAdmittedIntensive), na.rm = T),
                        # UtTest = match(TRUE, UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive))
       ))
 
+      sum(!is.na(RegDataNy$vecMatchBeredTilPan))
       fellesNavn <- which(names(BeredData) %in% names(RegData))
       BeredDataNyeNavn <- rename_with(BeredData, ~paste0(names(BeredData)[fellesNavn], 'Bered'), fellesNavn)
-      #names(RegDataNyeNavn)
-      RegDataMbered <- cbind(RegData,
-                             BeredDataNyeNavn[RegData$vecMatchBeredTilPan, ])
+      RegDataMbered <- cbind(RegDataNy,
+                             BeredDataNyeNavn[RegDataNy$vecMatchBeredTilPan, ])
 
 # #Testing
       # RegDataMbered[1:3, c('PersonId', 'InnTidspunkt', "UtTidspunkt")]

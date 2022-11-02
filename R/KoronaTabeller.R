@@ -431,16 +431,19 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
 #' @return
 #' @export
 #'
-finnBeredUpandemi <- function(KoroDataMberedOpph, datoFra='2020-01-01', HF='Alle'){
+finnBeredUpandemi <- function(KoroDataMberedOpph=0, datoFra='2020-01-01', datoTil=Sys.Date(), HF='Alle'){
   #library(korona)
   #library(magrittr)
   datoFraPan <- as.Date(datoFra) - 90 #For å ta høyde for at pasienten kan ha ligget en stund på avd. før opphold på intensiv
-  #KoroData <- korona::KoronaDataSQL(datoFra = datoFraPan)
-  #KoroDataMberedOpph <- KoronaPreprosesser(RegData = KoroData, aggPers = 0, kobleBered = 1)
-  KoroDataMberedOpph <- dplyr::filter(KoroDataMberedOpph, InnDato >= as.Date(datoFraPan))
+  if (KoroDataMberedOpph==0) {
+     KoroData <- korona::KoronaDataSQL(datoFra = datoFraPan)
+     KoroDataMberedOpph <- KoronaPreprosesser(RegData = KoroData, aggPers = 0, kobleBered = 1)
+  }
 
   BeredData <- intensivberedskap::NIRPreprosessBeredsk(
-    RegData=intensivberedskap::NIRberedskDataSQL(datoFra = datoFra), aggPers = 0)
+    RegData=intensivberedskap::NIRberedskDataSQL(datoFra = datoFra, datoTil = datoTil), aggPers = 0)
+  #Kun ferdigstilte beredskapsskjema
+  BeredData <- BeredData[BeredData$FormStatus==2,]
   if (HF != 'Alle'){
      BeredData <- BeredData[BeredData$HF == HF, ]
   }
@@ -451,12 +454,36 @@ finnBeredUpandemi <- function(KoroDataMberedOpph, datoFra='2020-01-01', HF='Alle
   # if (length(skjema2)>0) {
   # TabSmBeredToPand <- KoroDataMberedOpph[which(KoroDataMberedOpph$SkjemaGUIDBered %in% skjema2),
   #                        c("InnDato", "DateAdmittedIntensive", "UtDato", "DateDischargedIntensive", "PersonId", "PersonIdBered",
-  #                          "ShNavn", 'ShNavnBered', "HF", "HFBered", "SkjemaGUID", "SkjemaGUIDBered")]
+  #                          "ShNavn", 'ShNavnBered', "HF", "SkjemaGUID", "SkjemaGUIDBered")]
   # }
+
+  # (<5% skal mangle pandemiskjema)
+  # For de som mangler: Sjekk om haket av for inneliggende på pandemi av annen årsak inntil 30 (lek med antall) dager før innleggelse på intensiv
 
   #Beredskapsskjema uten pandemiskjema:
   beredUmatch <- setdiff(sort(BeredData$SkjemaGUID), sort(KoroDataMberedOpph$SkjemaGUIDBered))
-  TabBeredUPand <- BeredData[which(BeredData$SkjemaGUID %in% beredUmatch), c("HF", "ShNavn", "DateAdmittedIntensive","SkjemaGUID")]
+  BeredUPand <- BeredData[which(BeredData$SkjemaGUID %in% beredUmatch), ]
+  #Sjekk om haket av for inneliggende på pandemi av annen årsak inntil 30 (lek med antall) dager før innleggelse på intensiv
+  #  Sjekke dette for hvert beredskjema uten pandemi eller
+  #  for hvert pandemiskjema mot beredskapsskjema som ikke har pandemiskjema
+  dagerFoer <- 30
+  BeredAnnenPand <- as.data.frame(
+     BeredUPand %>%
+        dplyr::group_by(PersonId, Innleggelsestidspunkt)%>% #, UtTidspunkt
+        dplyr::mutate(
+           vecMatchBeredTilPan=match(TRUE,
+                                     PersonId == KoroDataMberedOpph$PersonId &
+                                        HF == KoroDataMberedOpph$HF &
+                                        DateAdmittedIntensive  >= KoroDataMberedOpph$InnDato - dagerFoer &  #Lagt inn før lagt inn intensiv
+                                       DateAdmittedIntensive < KoroDataMberedOpph$UtTidspunkt) #Ut fra pandemi etter at lagt inn intensiv (IKKE:Skrevet ut etter utskriv. int.
+           #  PersTest = sum(PersonId == BeredData$PersonIdBered, na.rm = T),
+           #  InnTest = sum(InnTidspunkt <= BeredDataRaa$DateAdmittedIntensive, na.rm = T),
+           # InnTest2 = sum(InnTidspunkt < as.POSIXct(BeredData$DateAdmittedIntensive), na.rm = T),
+           # UtTest = match(TRUE, UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive))
+        ))
+  sum(is.na(BeredAnnenPand$vecMatchBeredTilPan))
+
+  TabBeredUPand <- BeredUPand[ , c("HF", "ShNavn", "DateAdmittedIntensive","SkjemaGUID")]
   TabBeredUPand$DateAdmittedIntensive <- as.character(TabBeredUPand$DateAdmittedIntensive)
   tabUt <- TabBeredUPand[with(TabBeredUPand, order(HF, ShNavn, DateAdmittedIntensive)), ]
 

@@ -4,7 +4,12 @@
 \alias{finnBeredUpandemi}
 \title{Tabell med oversikt over hvilke beredskapsskjema som mangler pandemiskjema}
 \usage{
-finnBeredUpandemi(datoFra = "2020-01-01")
+finnBeredUpandemi(
+  KoroDataMberedOpph,
+  datoFra = "2020-01-01",
+  datoTil = Sys.Date(),
+  HF = "Alle"
+)
 }
 \arguments{
 \item{datoFra}{- startdato for innleggelse på intensiv}

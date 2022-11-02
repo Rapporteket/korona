@@ -1026,25 +1026,6 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
          write.csv2(TabDblInn, file, row.names = F, na = '')
       })
 
-observe({
-   TabintUPan <- finnBeredUpandemi(
-      KoroDataMberedOpph = KoroDataOpph,
-      datoFra = input$fraDatoBerUpan,
-      HF = input$HFberUpan)
-
-
-   output$TabintUPan <- renderTable(TabintUPan)
-
-   output$lastNed_TabintUPan <- downloadHandler(
-      filename = function(){
-         paste0('IntSkjemaUpandemi.csv')
-      },
-      content = function(file, filename){
-         write.csv2(TabintUPan, file, row.names = F, na = '')
-      })
-
-})
-
 
    #Antall opphold
    output$tabOpphHF <- renderTable({
@@ -1449,6 +1430,26 @@ observe({
       #rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
       subscription$tab <-
          rapbase::makeAutoReportTab(session, type = "subscription")
+
+   })
+
+   #Beredskapsskjema som mangler pandemiskjema
+   observe({
+      TabintUPan <- finnBeredUpandemi(
+         KoroDataMberedOpph = KoroDataOpph,
+         datoFra = input$fraDatoBerUpan,
+         HF = input$HFberUpan)
+
+
+      output$TabintUPan <- renderTable(TabintUPan)
+
+      output$lastNed_TabintUPan <- downloadHandler(
+         filename = function(){
+            paste0('IntSkjemaUpandemi.csv')
+         },
+         content = function(file, filename){
+            write.csv2(TabintUPan, file, row.names = F, na = '')
+         })
 
    })
 
