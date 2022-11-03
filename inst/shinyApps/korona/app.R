@@ -383,21 +383,6 @@ ui <- tagList(
                            downloadButton(outputId = 'lastNed_innManglerUt', label='Last ned tabell', class = "butt"),
                            tableOutput('innManglerUtTab')
                   ),
-                  tabPanel('Intensivskjema som mangler pandemiskjema',
-                           h3('Intensivskjema uten matchende pandemiskjema'),
-                                       h4('Sjekken er basert på at opphold er registrert med tidspunketer i følgende rekkefølge:
-                            Inn på sykehus -> Inn på intensiv -> Ut fra intensiv -> Ut fra sykehus'),
-                           dateInput(inputId = 'fraDatoBerUpan', label = 'Velg startdato',
-                                     value = '2020-03-01',
-                                     min = '2020-03-01', max = Sys.Date()),
-                           selectInput(inputId = "HFberUpan",
-                                       label="Velg HF for intensivopphold",
-                                       choices = HFbered
-                           ),
-
-                           downloadButton(outputId = 'lastNed_TabintUPan', label='Last ned tabell', class = "butt"),
-                           tableOutput('TabintUPan')
-                  ),
                   tabPanel('Dobbeltregistrering av inn-skjema',
                            h3('Pasienter som har to innleggelsesskjema med like innleggelsestidspunkt (<30 min.) '),
                            downloadButton(outputId = 'lastNed_dblInn', label='Last ned tabell'),
@@ -484,59 +469,82 @@ ui <- tagList(
 
       #----------Registeradministrasjon----------------------------------
       tabPanel(p("Registeradm",
-                 title='Side som bare vises for Marianne S., Eivind, Eirik og Reidar'),
+                 title='Side som bare vises for Marianne S., Eivind, Eirik, Anita og Kristine'),
                value = 'Registeradm',
-               sidebarLayout(
-                  sidebarPanel(width = 4,
-                               h4('Last ned data'),
-                               br(),
-                               downloadButton(outputId = 'lastNed_dataPandemiRaa',
-                                              label='Last ned ubesudlede pandemidata', class = "butt"),
-                               downloadButton(outputId = 'lastNed_dataPandemiPas',
-                                              label='Last ned pandemidata, pasientaggregert', class = "butt"),
-                               br(),
-                               br(),
-                               br(),
-                               h4('Data til FHI'),
-                               selectInput("hvilkeFilerTilFHI", "Data:", c("Pandemi, beredskap og influensa" = "DataFHIPanBeredInflu", #c("Pandemi og beredskap" = "DataFHIPanBered",
-                                                                           "Testfil" = "Testfil")),
-                               actionButton("bestillDataTilFHI", "Bestill data til FHI"),
-                               br(),
-                               downloadButton(outputId = 'lastNed_filstiDataNHN',
-                                              label='Send filer til NHN og last ned filsti', class = "butt"),
-                               #),
-                               br(),
-                               br(),
-                               br(),
-                               h4('Lage abonnementslister for utsendinger'),
-                               uiOutput("reportUts"),
-                               uiOutput("freqUts"),
-                               uiOutput("HFreshUts"),
-                               uiOutput("rolleUts"),
-                               h5('E-postmottagere legges inn en og en. Trykk legg til e-postmottager for hver gang.
+
+               tabsetPanel(
+                  tabPanel('Utsendinger',
+                           sidebarPanel(
+                              h4('Lage abonnementslister for utsendinger'),
+                              uiOutput("reportUts"),
+                              uiOutput("freqUts"),
+                              uiOutput("HFreshUts"),
+                              uiOutput("rolleUts"),
+                              h5('E-postmottagere legges inn en og en. Trykk legg til e-postmottager for hver gang.
                            Når du har lagt til alle, trykker du på lag utsending. '),
-                               textInput("email", "Epostmottakere:"),
-                               uiOutput("editEmail"),
-                               htmlOutput("recipients"),
-                               tags$hr(),
-                               uiOutput("makeDispatchment") #utsending
+                              textInput("email", "Epostmottakere:"),
+                              uiOutput("editEmail"),
+                              htmlOutput("recipients"),
+                              tags$hr(),
+                              uiOutput("makeDispatchment") #utsending
+                           ),
+                           mainPanel(
+                              uiOutput("dispatchmentContent")
+                           )
+                  ), #tab Utsendinger
+                  tabPanel('Intensivskjema som mangler pandemiskjema',
+                           h3('Ferdigstilte intensivskjema uten matchende pandemiskjema'),
+                           h4('Koblinga er basert på at opphold er registrert med tidspunketer i følgende rekkefølge:
+                            Inn på sykehus -> Inn på intensiv -> Ut fra sykehus'),
+                           h4('I tillegg skal pandemi og intensivskjema tilhøre samme HF.'),
+                           sidebarPanel(
+                              dateRangeInput(inputId = "fraDatoBerUpan", label = "Tidsperiode",
+                                             start = startDato, end = Sys.Date(),
+                                             separator="t.o.m.", language="nb"),
+                              # dateInput(inputId = 'fraDatoBerUpan', label = 'Velg startdato',
+                              #           value = '2020-03-01',
+                              #           min = '2020-03-01', max = Sys.Date()),
+                              selectInput(inputId = "HFberUpan",
+                                          label="Velg HF for intensivopphold",
+                                          choices = HFbered)
+                           ),
+                           mainPanel(
+                              downloadButton(outputId = 'lastNed_TabintUPan', label='Last ned tabell', class = "butt"),
+                              tableOutput('TabintUPan')
+                           )
                   ),
-                  mainPanel(
-                     uiOutput("dispatchmentContent")
+
+                  tabPanel('Nedlasting av rådata',
+                     sidebarPanel(width = 4,
+                                  h4('Last ned data'),
+                                  br(),
+                                  downloadButton(outputId = 'lastNed_dataPandemiRaa',
+                                                 label='Last ned ubesudlede pandemidata', class = "butt"),
+                                  downloadButton(outputId = 'lastNed_dataPandemiPas',
+                                                 label='Last ned pandemidata, pasientaggregert', class = "butt"),
+                                  br(),
+                                  br(),
+                                  br(),
+                                  h4('Data til FHI'),
+                                  selectInput("hvilkeFilerTilFHI", "Data:", c("Pandemi, beredskap og influensa" = "DataFHIPanBeredInflu", #c("Pandemi og beredskap" = "DataFHIPanBered",
+                                                                              "Testfil" = "Testfil")),
+                                  actionButton("bestillDataTilFHI", "Bestill data til FHI"),
+                                  br(),
+                                  downloadButton(outputId = 'lastNed_filstiDataNHN',
+                                                 label='Send filer til NHN og last ned filsti', class = "butt"),
+                                  ),
+                     ), #Nedlasting/sende FHI
+                  shiny::tabPanel(
+                     "Eksport",
+                     shiny::sidebarPanel(
+                        rapbase::exportUCInput("koronaExport")
+                     ),
+                     shiny::mainPanel(
+                        rapbase::exportGuideUI("koronaExportGuide")
+                     )
                   )
-               )
-      ), #tab registeradm.
-      shiny::tabPanel(
-         "Eksport",
-         shiny::sidebarLayout(
-            shiny::sidebarPanel(
-               rapbase::exportUCInput("koronaExport")
-            ),
-            shiny::mainPanel(
-               rapbase::exportGuideUI("koronaExportGuide")
-            )
-         )
-      )
+               ) #tabset
+      ) #tab registeradm.
 
    ) # navbarPage
 ) # tagList
@@ -1437,7 +1445,8 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
    observe({
       TabintUPan <- finnBeredUpandemi(
          KoroDataMberedOpph = KoroDataOpph,
-         datoFra = input$fraDatoBerUpan,
+         datoFra = input$fraDatoBerUpan[1],
+         datoTil = input$fraDatoBerUpan[2],
          HF = input$HFberUpan)
 
 

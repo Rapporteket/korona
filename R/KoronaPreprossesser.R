@@ -3,7 +3,7 @@
 #' Denne funksjonen navner om variabler og beregner evt. nye.
 #'
 #' @param RegData Koronaskjema
-#' @param kobleBered Koble data med beredskapsdata? 0: nei(standard), 1:ja
+#' @param kobleBered Koble data med beredskapsdata? 0: nei(standard), 1:ja. NB: Kobler bare til ett beredskapsskjema. Kan ha flere.
 #' @param aggPers 1: aggregere til personnivå (standard), 0: ikke aggregere
 #' @param tellFlereForlop 0: aggregerer til personnivå
 #'             1: Identifiserer inntil 3 forløp per person
