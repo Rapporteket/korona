@@ -514,7 +514,7 @@ ui <- tagList(
                            )
                   ),
 
-                  tabPanel('Nedlasting av rådata',
+                  tabPanel('Nedlasting av data',
                      sidebarPanel(width = 4,
                                   h4('Last ned data'),
                                   br(),
@@ -533,6 +533,11 @@ ui <- tagList(
                                   downloadButton(outputId = 'lastNed_filstiDataNHN',
                                                  label='Send filer til NHN og last ned filsti', class = "butt"),
                                   ),
+                     mainPanel(
+                        br(),
+                        h3('Hvis man av en eller annen grunn ønsker å oppdatere staging-data utenom de faste oppdateringstidene, trykk på knappen:'),
+                        actionButton("oppdatStaging", "Oppdater stagingdata"),
+                     )
                      ), #Nedlasting/sende FHI
                   shiny::tabPanel(
                      "Eksport",
@@ -588,6 +593,7 @@ server <- function(input, output, session) {
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
+      #shinyjs::hide(id = 'oppdatStaging')
    }
 
    if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon',
@@ -1469,9 +1475,12 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
    ## veileding
    rapbase::exportGuideServer("koronaExportGuide", registryName)
 
+#Oppdater stagingdata
+   observeEvent(
+      input$oppdatStaging,
+         makeStagingData())
 
-
-}
+   } #serverdel
 # Run the application
 shinyApp(ui = ui, server = server)
 
