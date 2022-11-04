@@ -105,6 +105,7 @@ ui <- tagList(
                             uiOutput('KoroRappTxt'),
                             downloadButton(outputId = 'KoroRapp.pdf', label='Last ned Koronarapport', class = "butt"),
                             tags$head(tags$style(".butt{background-color:#6baed6;} .butt{color: white;}")), # background color and font color
+                            h5('NB: Nedlastinga tar litt tid (ca 1 minutt). I mellomtida får man ikke gjort noe annet på Rapporteket.'),
                             br(),
                             br(),
                             h3('Gjør filtreringer/utvalg:'),
@@ -535,7 +536,7 @@ ui <- tagList(
                                   ),
                      mainPanel(
                         br(),
-                        h3('Hvis man av en eller annen grunn ønsker å oppdatere staging-data utenom de faste oppdateringstidene, trykk på knappen:'),
+                        h4('Hvis man av en eller annen grunn ønsker å oppdatere staging-data utenom de faste oppdateringstidene, trykk på knappen:'),
                         actionButton("oppdatStaging", "Oppdater stagingdata"),
                      )
                      ), #Nedlasting/sende FHI

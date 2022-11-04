@@ -220,6 +220,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 Gravid = sum(Gravid)>0,
                 HFut = dplyr::last(HF, order_by = FormDate),
                 HF = dplyr::first(HF, order_by = FormDate),
+                HFlang = dplyr::first(HFlang, order_by = FormDate),
                 HFresh = dplyr::first(HFresh, order_by = FormDate),
                 #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
@@ -370,7 +371,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
     if ((aggPers==1) & (tellFlereForlop == 0)){
         RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
                          by = 'PersonId')
-    } else {  #if ((aggPers == 1 & tellFlereForlop==1) | aggPers == 0) {
+    } else {  if ((aggPers == 1 & tellFlereForlop==1) | aggPers == 0) {
        # personid
        # samme HF
        # inn, pandemi < inn, intensiv
@@ -413,7 +414,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
       # RegDataMber[RegDataMber$PersonId == '0x3029E3F3B7B757E4EFB60D142FDF5911E8A3FF759B4E4C761C228E1D585D1589', c('PersonId', 'InnTidspunkt', "UtTidspunkt")]
       # BeredData[BeredData$PersonId == '0x3029E3F3B7B757E4EFB60D142FDF5911E8A3FF759B4E4C761C228E1D585D1589', c('PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
       #KoroData[c(3,89,345, 678, 2000), c('PersonId', 'InnTidspunkt', "UtTidspunkt", 'PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
-    }
+    }}
   RegData  <- RegDataMbered %>% dplyr::mutate(BeredPas = ifelse(is.na(PersonIdBered), 0, 1))
 } #koble bered
 
