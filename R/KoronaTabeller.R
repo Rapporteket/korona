@@ -525,4 +525,56 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 }
 
 
+#Antall personer, smitteforløp, forløp i samme tabell per HF
+#' Title
+#'
+#' @param RegData dataramme
+#' @param datoFra startdato
+#' @param datoTil sluttdato
+#' @param enhetsNivaa 'HF' eller 'RHF'
+#'
+#' @return
+#' @export
+#'
+tabAntPersOpph <- function(RegData, datoFra, datoTil, enhetsNivaa){
 
+  datoFra <- max(as.Date('2020-03-10'), as.Date(datoDum)) # max(as.Date('2020-03-01'), as.Date(datoDum))
+  datoTil <- max(as.Date(datoTil), as.Date(datoFra))
+
+  InnData <- read.table('C:/Registerdata/nipar/InklusjonSkjemaDataContract2022-11-14.csv', sep=';',
+                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  UtData <- read.table('C:/Registerdata/nipar/UtskrivningSkjemaDataContract2022-11-14.csv', sep=';',
+                       stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+  RegDataRaa <-
+
+    RegData <- KoronaPreprosesser(RegData=RegDataRaa, aggPers=0)
+  RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
+                     & RegData$InnDato > as.Date(datoFra, tz='UTC'),]
+
+  AntPas
+
+  BeredMedPand <- as.data.frame(
+    RegData %>%
+      dplyr::group_by(PersonId, Innleggelsestidspunkt)%>% #, UtTidspunkt
+      dplyr::mutate(
+        vecMatchPanTilBered=match(TRUE,
+                                  PersonId == KoroDataOpph$PersonId &
+                                    HF == KoroDataOpph$HFlang &
+                                    DateAdmittedIntensive  >= KoroDataOpph$InnDato & #- dagerFoer &  #Lagt inn før lagt inn intensiv
+                                    DateAdmittedIntensive < KoroDataOpph$UtTidspunkt) #Ut fra pandemi etter at lagt inn intensiv (IKKE:Skrevet ut etter utskriv. int.
+      ))
+
+  if (dim(RegData)[1]>0){
+
+    tabEnhTid <- table(RegData[ , c(enhetsNivaa, 'TidsEnhet')])
+    #colnames(tabEnhTid) <- tidsenheter #format(ymd(colnames(tabAvdMnd1)), '%b %y')
+    tabEnhTid <- addmargins((tabEnhTid))
+
+    tabAntPersOpph <- xtable::xtable(tabAntPersOpph, digits = 0)
+  } else {
+    tabAntPersOpph <- 'Ingen registreringer'
+  }
+  return(tabAntPersOpph)
+
+
+}
