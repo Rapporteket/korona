@@ -50,9 +50,6 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 1: egen enhet mot resten av landet,
 2: egen enhet (NB: returnerer hele landet i ind$Rest)}
 }
-\value{
-
-}
 \description{
 Returnerer filtrert dataramme og utvalgstekst.
 NB: RegData filtreres IKKE på enhet. Velg enhetsutvalg 1 el 2 for

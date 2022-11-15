@@ -15,9 +15,6 @@ statusNaaTab(
 \arguments{
 \item{RegData}{pandemiskjema}
 }
-\value{
-
-}
 \description{
 Status nå
 }

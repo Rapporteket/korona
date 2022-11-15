@@ -525,7 +525,7 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 }
 
 
-#' Title
+#' Antall personer, smitteforløp, forløp i samme tabell per HF
 #'
 #' @param RegData dataramme
 #' @param datoFra startdato
@@ -555,7 +555,6 @@ tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa){
                      #Tid = as.numeric(Dato-min(Dato))
     )
   RegData <- merge(RegData, PasFlere[,c("SkjemaGUID", "PersonId_sforl")], by='SkjemaGUID')
-  #Antall personer, smitteforløp, forløp i samme tabell per HF
 
   if (dim(RegData)[1]>0){
 
@@ -567,7 +566,6 @@ tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa){
           AntSforl = length(unique(PersonId_sforl)),
           AntPas = length(unique(PersonId))
         ), row.names = NULL)
-   #tabAnt <- xtable::xtable(Tab, digits = 0)
   } else {
     Tab <- 'Ingen registreringer'
   }

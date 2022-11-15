@@ -6,9 +6,6 @@
 \usage{
 lagDatafilerTilFHI()
 }
-\value{
-
-}
 \description{
 Henter data og tilrettelegger filer for overføring til FHI
 }

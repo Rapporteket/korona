@@ -5,17 +5,14 @@
 \title{Tabell med oversikt over hvilke beredskapsskjema som mangler pandemiskjema}
 \usage{
 finnBeredUpandemi(
-  KoroDataMberedOpph,
   datoFra = "2020-01-01",
   datoTil = Sys.Date(),
-  HF = "Alle"
+  HF = "Alle",
+  ...
 )
 }
 \arguments{
 \item{datoFra}{- startdato for innleggelse på intensiv}
-}
-\value{
-
 }
 \description{
 Tabell med oversikt over hvilke beredskapsskjema som mangler pandemiskjema

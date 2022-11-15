@@ -17,8 +17,11 @@ KoronaFigAndelTid(RegData=KoroIntData)
 
 
 
-tabAntPersOpph(RegData=RegDataPre, datoFra= '2022-06-01', datoTil=Sys.Date(), enhetsNivaa='RHF')
-
+korona::tabAntPersOpph(RegData=RegDataPre, datoFra= '2022-06-01', datoTil=Sys.Date(), enhetsNivaa='RHF')
+tabAntPersOpph(RegData=KoroDataOpph,
+               datoFra = input$valgtDatoForl[1],
+               datoTil=input$valgtDatoForl[1],
+               enhetsNivaa = input$enhetsNivaaForl)
 
 
 RegData <- KoronaDataSQL(datoFra = '2022-01-01', datoTil = '2022-02-01') #10805

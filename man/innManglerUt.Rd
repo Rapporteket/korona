@@ -13,9 +13,6 @@ innManglerUt(RegData, valgtEnhet = "Alle", enhetsNivaa = "RHF")
 
 \item{enhetsNivaa}{eget/valgt enhetsnivå}
 }
-\value{
-
-}
 \description{
 Finn innleggelser som mangler utskriving
 }

@@ -44,9 +44,6 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 
 \item{minald}{kjønn, 0-kvinne, 1-mann}
 }
-\value{
-
-}
 \description{
 Tabell med oversikt over tilstander som medfører økt risiko ved Coronasmitte
 }

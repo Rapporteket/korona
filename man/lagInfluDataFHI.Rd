@@ -6,9 +6,6 @@
 \usage{
 lagInfluDataFHI()
 }
-\value{
-
-}
 \description{
 Henter data og velger variabler for overføring til FHI
 }
