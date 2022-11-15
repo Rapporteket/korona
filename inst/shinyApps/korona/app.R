@@ -910,7 +910,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
                        enhetsNivaa = input$enhetsNivaaOpph,
                        tidsenhet = input$tidsenhetOpph,
                        antTidsenh=input$antTidsenhOpph,
-                       covidInn = as.numeric(input$aarsakInnOpph),),
+                       covidInn = as.numeric(input$aarsakInnOpph)),
       rownames = T, digits = 0
    )
    output$tabAntForlEnh <- renderTable(
