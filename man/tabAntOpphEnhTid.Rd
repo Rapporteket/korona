@@ -11,7 +11,8 @@ tabAntOpphEnhTid(
   datoTil = Sys.Date(),
   enhetsNivaa = "ShNavn",
   tidsenhet = "Mnd",
-  antTidsenh = 6
+  antTidsenh = 6,
+  covidInn = 0
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ tabAntOpphEnhTid(
 \item{enhetsNivaa}{Aggregeringsnivå RHF, HF, ShNavn (sykehus, standard)}
 
 \item{antTidsenh}{antall måneder som skal vises}
+
+\item{covidInn}{covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei}
 
 \item{tidsEnhet}{- Mnd, Kvartal, Aar}
 }

@@ -90,12 +90,18 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
 #' @param tidsEnhet - Mnd, Kvartal, Aar
 #' @param antTidsenh antall måneder som skal vises
 #' @param datoTil siste registrering som vises
+#' @param covidInn covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei
 #'
 #' @export
 tabAntOpphEnhTid <- function(RegData, datoTil=Sys.Date(),
-                            enhetsNivaa = 'ShNavn', tidsenhet = 'Mnd', antTidsenh=6){
+                            enhetsNivaa = 'ShNavn', tidsenhet = 'Mnd', antTidsenh=6,
+                            covidInn=0){
 
   #Må legge på "levels" for å unngå at f.eks. siste måned ikke har registreringer
+  #1-ja, 2-nei, 3-ukjent
+  if (covidInn %in% 1:2) {
+    RegData <- RegData[RegData$ArsakInnleggelse==covidInn,]
+  }
 
 datoDum <-   switch(tidsenhet,
                     Mnd = lubridate::floor_date(as.Date(datoTil), 'month') - months(antTidsenh, abbreviate = T), #antTidsenh-1
@@ -531,16 +537,22 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 #' @param datoFra startdato
 #' @param datoTil sluttdato
 #' @param enhetsNivaa 'HF' eller 'RHF'
+#' @param covidInn covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei
 #'
 #' @return
 #' @export
 #'
-tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa){
+tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa, covidInn=0){
 
   datoFra <- min(as.Date(datoFra), as.Date(datoTil)) # max(as.Date('2020-03-01'), as.Date(datoDum))
   datoTil <- max(as.Date(datoTil), as.Date(datoFra))
   RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
                      & RegData$InnDato > as.Date(datoFra, tz='UTC'),]
+
+  #1-ja, 2-nei, 3-ukjent
+  if (covidInn %in% 1:2) {
+    RegData <- RegData[RegData$ArsakInnleggelse==covidInn,]
+  }
 
   RegData$Dato <- as.Date(RegData$FormDate)
   RegData$Enhetsnivaa <- RegData[,enhetsNivaa]

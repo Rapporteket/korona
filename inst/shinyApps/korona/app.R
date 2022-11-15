@@ -232,7 +232,12 @@ ui <- tagList(
                               sliderInput(inputId = 'antTidsenhOpph',
                                           label = 'Velg antall hele måneder/kvartal/år forut for "sluttdato"',
                                           value = 6, step = 1,
-                                          min = 1, max = 13)
+                                          min = 1, max = 13),
+                              selectInput(inputId = "aarsakInnOpph", label="Covid-19 hovedårsak til innleggelse?",
+                                          choices = c('Alle registreringer' = 0,
+                                                      'Ja, alle opphold' = 1,
+                                                      'Nei, ingen opphold' = 2)
+                              )
                            ),
                            mainPanel(
                               h2('Antall opphold i valgt tidsperiode'),
@@ -247,6 +252,12 @@ ui <- tagList(
                                                       'RHF' = 'RHF'),
                                           selected = 'HF'
                               ),
+                           ),
+                           selectInput(inputId = "aarsakInnForl", label="Covid-19 som hovedårsak til innleggelse?",
+                                       choices = c('Alle registreringer' = 0,
+                                                   'Ja, alle opphold' = 1,
+                                                   'Nei, ingen opphold' = 2)
+                           ),
                               dateRangeInput(inputId = "valgtDatoForl", label = "Tidsperiode",
                                              start = startDato, end = Sys.Date(),
                                              separator="t.o.m.", language="nb")
@@ -899,13 +910,15 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
                        datoTil=input$tilDatoOpph,
                        enhetsNivaa = input$enhetsNivaaOpph,
                        tidsenhet = input$tidsenhetOpph,
-                       antTidsenh=input$antTidsenhOpph),
+                       antTidsenh=input$antTidsenhOpph,
+                       covidInn = as.numeric(input$aarsakInnOpph),),
       rownames = T, digits = 0
    )
    output$tabAntForlEnh <- renderTable(
       tabAntPersOpph(RegData=KoroDataOpph,
                      datoFra = as.Date(input$valgtDatoForl[1]),
                        datoTil=as.Date(input$valgtDatoForl[2]),
+                     covidInn = as.numeric(input$aarsakInnForl),
                        enhetsNivaa = input$enhetsNivaaForl),
       rownames = F, digits = 0
    )

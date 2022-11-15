@@ -15,6 +15,17 @@ RegData[RegData$PatientInRegistryGuid == "4442C54B-848C-EB11-A970-00155D0B4E21",
 KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleBered = 1)
 KoronaFigAndelTid(RegData=KoroIntData)
 
+KoroDataInn <- read.table('C:/Registerdata/nipar/InklusjonSkjemaDataContract2022-11-14.csv', sep=';',
+                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+KoroDataUt <- read.table('C:/Registerdata/nipar/UtskrivningSkjemaDataContract2022-11-14.csv', sep=';',
+                         stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID",
+#            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
+KoroData <- merge(KoroDataInn, KoroDataUt, suffixes = c('','Ut'),
+                   by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+RegData <- KoroData
+
+
 
 
 korona::tabAntPersOpph(RegData=RegDataPre, datoFra= '2022-06-01', datoTil=Sys.Date(), enhetsNivaa='RHF')
@@ -566,22 +577,6 @@ PandemiInn$Dag <- format(PandemiInn$InnDato, '%d.%B')
 
 
 library(korona)
-KoroDataInn <- KoronaDataSQL(skjema=1, koble=0)
-KoroDataUt <- KoronaDataSQL(skjema=2)
-# varUt <- c("Antifungalbehandling", "AntiviralBehandling" , "HovedskjemaGUID",
-#            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
-# KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
-#                   by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
-RegData <- KoroData
-
-KoroDataInn <- read.table('A:/Pandemi/InklusjonSkjemaDataContract2020-04-06.csv', sep=';',
-                       stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-KoroDataUt <- read.table('A:/Pandemi/UtskrivningSkjemaDataContract2020-04-06.csv', sep=';',
-                          stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-max(sort(table(KoroDataInn$SkjemaGUID)))
-max(sort(table(KoroDataUt$HovedskjemaGUID)))
-max(sort(table(KoroDataUt$SkjemaGUID)))
-
 table(KoroDataInn$PasientGUID)[table(KoroDataInn$PasientGUID)>1]
 sort(table(KoroDataUt$PasientGUID)) #[table(KoroDataUt$PasientGUID)>1]
 

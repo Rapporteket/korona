@@ -2,9 +2,15 @@
 % Please edit documentation in R/KoronaTabeller.R
 \name{tabAntPersOpph}
 \alias{tabAntPersOpph}
-\title{Title}
+\title{Antall personer, smitteforløp, forløp i samme tabell per HF}
 \usage{
-tabAntPersOpph(RegData, datoFra, datoTil = Sys.Date(), enhetsNivaa)
+tabAntPersOpph(
+  RegData,
+  datoFra,
+  datoTil = Sys.Date(),
+  enhetsNivaa,
+  covidInn = 0
+)
 }
 \arguments{
 \item{RegData}{dataramme}
@@ -14,7 +20,9 @@ tabAntPersOpph(RegData, datoFra, datoTil = Sys.Date(), enhetsNivaa)
 \item{datoTil}{sluttdato}
 
 \item{enhetsNivaa}{'HF' eller 'RHF'}
+
+\item{covidInn}{covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei}
 }
 \description{
-Title
+Antall personer, smitteforløp, forløp i samme tabell per HF
 }
