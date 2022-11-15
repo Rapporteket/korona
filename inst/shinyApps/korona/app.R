@@ -252,7 +252,6 @@ ui <- tagList(
                                                       'RHF' = 'RHF'),
                                           selected = 'HF'
                               ),
-                           ),
                            selectInput(inputId = "aarsakInnForl", label="Covid-19 som hovedårsak til innleggelse?",
                                        choices = c('Alle registreringer' = 0,
                                                    'Ja, alle opphold' = 1,
