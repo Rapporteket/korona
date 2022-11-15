@@ -229,7 +229,8 @@ ui <- tagList(
                               ),
                               dateInput(inputId = 'tilDatoOpph', label = 'Velg sluttdato',
                                         min = '2020-03-15', max = Sys.Date()),
-                              sliderInput(inputId = 'antTidsenhOpph', label = 'Velg antall hele måneder/kvartal/år forut for "sluttdato"',
+                              sliderInput(inputId = 'antTidsenhOpph',
+                                          label = 'Velg antall hele måneder/kvartal/år forut for "sluttdato"',
                                           value = 6, step = 1,
                                           min = 1, max = 13)
                            ),
@@ -243,7 +244,8 @@ ui <- tagList(
                               selectInput(inputId = 'enhetsNivaaForl', label='Velg enhetsnivå',
                                           choices = c("Sykehus"='ShNavn',
                                                       'HF' = 'HF',
-                                                      'RHF' = 'RHF')
+                                                      'RHF' = 'RHF'),
+                                          selected = 'HF'
                               ),
                               dateRangeInput(inputId = "valgtDatoForl", label = "Tidsperiode",
                                              start = startDato, end = Sys.Date(),
@@ -902,8 +904,8 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
    )
    output$tabAntForlEnh <- renderTable(
       tabAntPersOpph(RegData=KoroDataOpph,
-                     datoFra = input$valgtDatoForl[1],
-                       datoTil=input$valgtDatoForl[1],
+                     datoFra = as.Date(input$valgtDatoForl[1]),
+                       datoTil=as.Date(input$valgtDatoForl[2]),
                        enhetsNivaa = input$enhetsNivaaForl),
       rownames = T, digits = 0
    )
