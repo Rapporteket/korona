@@ -252,7 +252,7 @@ ui <- tagList(
                                              separator="t.o.m.", language="nb")
                            ),
                            mainPanel(
-                              h2('Antall forløp i valgt tidsperiode'),
+                              h3('Antall opphold og pasienter per enhet'),
                               tableOutput('tabAntForlEnh')
                            )
                   ),
@@ -907,7 +907,7 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
                      datoFra = as.Date(input$valgtDatoForl[1]),
                        datoTil=as.Date(input$valgtDatoForl[2]),
                        enhetsNivaa = input$enhetsNivaaForl),
-      rownames = T, digits = 0
+      rownames = F, digits = 0
    )
 
    #------------Fordelinger---------------------
