@@ -525,7 +525,6 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 }
 
 
-#Antall personer, smitteforløp, forløp i samme tabell per HF
 #' Title
 #'
 #' @param RegData dataramme
@@ -536,45 +535,41 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 #' @return
 #' @export
 #'
-tabAntPersOpph <- function(RegData, datoFra, datoTil, enhetsNivaa){
+tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa){
 
-  datoFra <- max(as.Date('2020-03-10'), as.Date(datoDum)) # max(as.Date('2020-03-01'), as.Date(datoDum))
+  datoFra <- min(as.Date(datoFra), as.Date(datoTil)) # max(as.Date('2020-03-01'), as.Date(datoDum))
   datoTil <- max(as.Date(datoTil), as.Date(datoFra))
-
-  InnData <- read.table('C:/Registerdata/nipar/InklusjonSkjemaDataContract2022-11-14.csv', sep=';',
-                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  UtData <- read.table('C:/Registerdata/nipar/UtskrivningSkjemaDataContract2022-11-14.csv', sep=';',
-                       stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-  RegDataRaa <-
-
-    RegData <- KoronaPreprosesser(RegData=RegDataRaa, aggPers=0)
   RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
                      & RegData$InnDato > as.Date(datoFra, tz='UTC'),]
 
-  AntPas
+  RegData$Dato <- as.Date(RegData$FormDate)
+  RegData$Enhetsnivaa <- RegData[,enhetsNivaa]
 
-  BeredMedPand <- as.data.frame(
-    RegData %>%
-      dplyr::group_by(PersonId, Innleggelsestidspunkt)%>% #, UtTidspunkt
-      dplyr::mutate(
-        vecMatchPanTilBered=match(TRUE,
-                                  PersonId == KoroDataOpph$PersonId &
-                                    HF == KoroDataOpph$HFlang &
-                                    DateAdmittedIntensive  >= KoroDataOpph$InnDato & #- dagerFoer &  #Lagt inn før lagt inn intensiv
-                                    DateAdmittedIntensive < KoroDataOpph$UtTidspunkt) #Ut fra pandemi etter at lagt inn intensiv (IKKE:Skrevet ut etter utskriv. int.
-      ))
+  #Identifiserer inntil 3 forløp
+  PasFlere <- RegData %>% dplyr::group_by(PersonId) %>%
+    dplyr::summarise(.groups = 'drop',
+                     SkjemaGUID = SkjemaGUID,
+                     InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
+                     InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
+                     PersonId_sforl = paste0(PersonId, '_', InnNr)
+                     #Tid = as.numeric(Dato-min(Dato))
+    )
+  RegData <- merge(RegData, PasFlere[,c("SkjemaGUID", "PersonId_sforl")], by='SkjemaGUID')
+  #Antall personer, smitteforløp, forløp i samme tabell per HF
 
   if (dim(RegData)[1]>0){
 
-    tabEnhTid <- table(RegData[ , c(enhetsNivaa, 'TidsEnhet')])
-    #colnames(tabEnhTid) <- tidsenheter #format(ymd(colnames(tabAvdMnd1)), '%b %y')
-    tabEnhTid <- addmargins((tabEnhTid))
-
-    tabAntPersOpph <- xtable::xtable(tabAntPersOpph, digits = 0)
+    Tab <- as.data.frame(
+      RegData %>%
+        dplyr::group_by(Enhetsnivaa)%>%
+        summarise(
+          AntOpph = n(),
+          AntSforl = length(unique(PersonId_sforl)),
+          AntPas = length(unique(PersonId))
+        ), row.names = NULL)
+   #tabAnt <- xtable::xtable(Tab, digits = 0)
   } else {
-    tabAntPersOpph <- 'Ingen registreringer'
+    Tab <- 'Ingen registreringer'
   }
-  return(tabAntPersOpph)
-
-
+  return(Tab)
 }

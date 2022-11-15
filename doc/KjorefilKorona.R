@@ -16,6 +16,11 @@ KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleB
 KoronaFigAndelTid(RegData=KoroIntData)
 
 
+
+tabAntPersOpph(RegData=RegDataPre, datoFra= '2022-06-01', datoTil=Sys.Date(), enhetsNivaa='RHF')
+
+
+
 RegData <- KoronaDataSQL(datoFra = '2022-01-01', datoTil = '2022-02-01') #10805
 DataOpph <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 0, tellFlereForlop = 0)
 DataOpphBered <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 0, tellFlereForlop = 0, kobleBered = 1)
@@ -564,14 +569,7 @@ KoroDataUt <- KoronaDataSQL(skjema=2)
 #            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
 # KoroData <- merge(KoroDataInn, KoroDataUt[,varUt], suffixes = c('','Ut'),
 #                   by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
-KoroDataInn <- KoronaDataSQL(skjema=1, koble = 0)
-KoroDataUt <- KoronaDataSQL(skjema=2, koble=0)
-
-KoroData <- KoronaPreprosesser(RegData = KoronaDataSQL(koble=1))
 RegData <- KoroData
-
-UtData <- KoronaUtvalg(RegData=KoroData, dodSh = 2)
-
 
 KoroDataInn <- read.table('A:/Pandemi/InklusjonSkjemaDataContract2020-04-06.csv', sep=';',
                        stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
