@@ -238,6 +238,22 @@ ui <- tagList(
                               tableOutput('tabAntOpphEnhTid')
                            )
                   ),
+                  tabPanel("Ant.forløp",
+                           sidebarPanel(
+                              selectInput(inputId = 'enhetsNivaaForl', label='Velg enhetsnivå',
+                                          choices = c("Sykehus"='ShNavn',
+                                                      'HF' = 'HF',
+                                                      'RHF' = 'RHF')
+                              ),
+                              dateRangeInput(inputId = "valgtDatoForl", label = "Tidsperiode",
+                                             start = startDato, end = Sys.Date(),
+                                             separator="t.o.m.", language="nb")
+                           ),
+                           mainPanel(
+                              h2('Antall forløp i valgt tidsperiode'),
+                              tableOutput('tabAntForlEnh')
+                           )
+                  ),
                   tabPanel("Belegg",
                            koronabelegg_UI("koronabelegg_id")
                   ),
@@ -881,7 +897,15 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
                        datoTil=input$tilDatoOpph,
                        enhetsNivaa = input$enhetsNivaaOpph,
                        tidsenhet = input$tidsenhetOpph,
-                       antTidsenh=input$antTidsenhOpph), rownames = T, digits = 0
+                       antTidsenh=input$antTidsenhOpph),
+      rownames = T, digits = 0
+   )
+   output$tabAntForlEnh <- renderTable(
+      tabAntPersOpph(RegData=KoroDataOpph,
+                     datoFra = input$valgtDatoForl[1],
+                       datoTil=input$valgtDatoForl[1],
+                       enhetsNivaa = input$enhetsNivaaForl),
+      rownames = T, digits = 0
    )
 
    #------------Fordelinger---------------------
