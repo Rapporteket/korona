@@ -34,26 +34,41 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
 #Mange av variablene på ut-skjema er med i inn-dumpen
 #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
 
-KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
+   KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
+
 if (isFALSE(KoroDataRaa)) {
+   if (context == ""){
+      KoroDataInn <- read.table('C:/Registerdata/nipar/InklusjonSkjemaDataContract2022-11-14.csv', sep=';',
+                                stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+      KoroDataUt <- read.table('C:/Registerdata/nipar/UtskrivningSkjemaDataContract2022-11-14.csv', sep=';',
+                               stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+      KoroDataRaa <- merge(KoroDataInn, KoroDataUt, suffixes = c('','Ut'),
+                           by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
+      KoroDataRaa <- dplyr::rename(KoroDataRaa, SkjemaGUIDut = SkjemaGUIDUt)
+   } else {
    KoroDataRaa <-  KoronaDataSQL(koble=1)
    rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa)
+}}
+
+   BeredData <- rapbase::loadStagingData("korona", "BeredData")
+if (isFALSE(BeredData)) {
+   if (context == ""){
+      BeredDataRaa <- read.table('C:/Registerdata/nipar/ReadinessFormDataContract2022-11-14.csv', sep=';',
+                    stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
+      } else {
+      BeredDataRaa <- intensivberedskap::NIRberedskDataSQL() }
+   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
+   rapbase::saveStagingData("korona", "BeredData", BeredData)
 }
 
-KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
+   KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
 if (isFALSE(KoroDataOpph)) {
    KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0, kobleBered = 1)
    rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph)
 }
 
-BeredData <- rapbase::loadStagingData("korona", "BeredData")
-if (isFALSE(BeredData)) {
-   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
-   rapbase::saveStagingData("korona", "BeredData", BeredData)
-}
 
-KoroData <- rapbase::loadStagingData("korona", "KoroData")
+   KoroData <- rapbase::loadStagingData("korona", "KoroData")
 if (isFALSE(KoroData)) {
    KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1, kobleBered = 1)
    rapbase::saveStagingData("korona", "KoroData", KoroData)
@@ -679,7 +694,8 @@ og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hoved
    #,'<br> Org: ', egenOrg) )}
 
    # User info in widget
-   userInfo <- rapbase::howWeDealWithPersonalData(session, callerPkg = "korona")
+   if (Sys.getenv("R_RAP_INSTANCE") != "") {
+   userInfo <- rapbase::howWeDealWithPersonalData(session, callerPkg = "korona")}
    observeEvent(input$userInfo, {
       shinyalert::shinyalert("Dette vet Rapporteket om deg:", userInfo,
                              type = "", imageUrl = "rap/logo.svg",

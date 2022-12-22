@@ -15,6 +15,7 @@ RegData[RegData$PatientInRegistryGuid == "4442C54B-848C-EB11-A970-00155D0B4E21",
 KoroIntData <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1, kobleBered = 1)
 KoronaFigAndelTid(RegData=KoroIntData)
 
+#Hente og koble data fra csv-filer
 KoroDataInn <- read.table('C:/Registerdata/nipar/InklusjonSkjemaDataContract2022-11-14.csv', sep=';',
                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
 KoroDataUt <- read.table('C:/Registerdata/nipar/UtskrivningSkjemaDataContract2022-11-14.csv', sep=';',
@@ -23,9 +24,46 @@ KoroDataUt <- read.table('C:/Registerdata/nipar/UtskrivningSkjemaDataContract202
 #            'FormStatus', 'FormDate', "OverfortAnnetSykehusUtskrivning", "StatusVedUtskriving")
 KoroData <- merge(KoroDataInn, KoroDataUt, suffixes = c('','Ut'),
                    by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
-RegData <- KoroData
 
 
+KoroDataInn$Aar <- substr(KoroDataInn$FormDate, 1,4)
+table(KoroDataInn[KoroDataInn$ArsakInnleggelse==1, c('Aar', 'Isolert')])
+table(KoroDataInn$Aar)
+
+test <- RegData[, c("PatientInRegistryGuid", "FormDate", "HelseenhetKortNavn", "UnitId",
+                    'SkjemaGUID', "FormDateUt", 'SkjemaGUIDut')]
+
+RegDataRed <- KoroData %>% dplyr::group_by(PersonId) %>%
+   dplyr::summarise(
+Isolert = JaNeiUkjVar(Isolert)
+)
+
+#AkuttRespirasjonsvikt, AkuttSirkulasjonsvikt, ja:2:5, nei:1
+#AkuttNyresvikt, EndretBevissthet, Isolert, ja:1, nei:2
+#AceHemmerInnkomst/AceHemmerInnkomst2 - tomme!
+variable <- c('AkuttRespirasjonsvikt', 'AkuttSirkulasjonsvikt', 'AkuttNyresvikt',
+              'EndretBevissthet','Isolert')
+RegData$AkuttRespirasjonsvikt <- ifelse(RegData$AkuttRespirasjonsvikt %in% 1:5,
+                                        ifelse(RegData$AkuttRespirasjonsvikt==1, 0, 1), NA)
+table(RegData$AkuttRespirasjonsvikt, useNA = 'a')
+RegData$AkuttSirkulasjonsvikt <- ifelse(RegData$AkuttSirkulasjonsvikt %in% 1:5,
+                                        ifelse(RegData$AkuttSirkulasjonsvikt==1, 0, 1), NA)
+table(RegData$AkuttSirkulasjonsvikt, useNA = 'a')
+table(RegData$AkuttNyresvikt, useNA = 'a')
+#   -1     1     2     3  <NA>
+#   291  2109 18037  8026     0
+table(RegData$EndretBevissthet, useNA = 'a')
+#-1     1     2     3  <NA>
+#754  3012 16193  8504     0
+table(KoroData$Isolert, useNA = 'a')
+#    0     1  <NA>
+#25302  3161     0
+var <- c('AkuttNyresvikt', 'EndretBevissthet', 'Isolert')
+RegData[, var][which(RegData[ ,var] == -1, arr.ind = T)] <- NA
+RegData[, var][which(RegData[ ,var] == 3, arr.ind = T)] <- NA
+RegData[, var][which(RegData[ ,var] == 2, arr.ind = T)] <- 0
+
+table(RegData[,variable[5]], useNA = 'a')
 
 
 korona::tabAntPersOpph(RegData=RegDataPre, datoFra= '2022-06-01', datoTil=Sys.Date(), enhetsNivaa='RHF')

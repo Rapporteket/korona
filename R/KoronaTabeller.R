@@ -578,7 +578,7 @@ tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa, co
           AntSforl = length(unique(PersonId_sforl)),
           AntPas = length(unique(PersonId))
         ), row.names = NULL)
-    colnames(Tab) <- c('Enhet', 'Opph.', 'Sykdomsforløp', 'Personer')
+    colnames(Tab) <- c('Enhet', 'Opphold', 'Sykdomsforløp', 'Personer')
   } else {
     Tab <- 'Ingen registreringer'
   }

@@ -136,10 +136,12 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                                         units = 'hours')) < 1)
   RegData$UtDato[intersect(indIkkeUtDato, indSmDag)] <- NA
 
-  RegData$Liggetid = as.numeric(difftime(RegData$Utskrivningsdato, RegData$FormDate, units = "days")) #Bare for utskrevne pasienter
+  RegData$Liggetid = as.numeric(difftime(
+     as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
+     as.POSIXct(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
+                                         units = "days")) #Bare for utskrevne pasienter
 
-
-  #------SLÅ SAMMEN TIL PER PASIENT
+#------SLÅ SAMMEN TIL PER PASIENT
   if (aggPers == 1) {
     #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
     JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
@@ -363,9 +365,8 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   RegData$InnDag <- RegData$InnDato
 
   if (kobleBered==1){
-    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL() #datoFra = datoFra
-     #tellFlereForlop <- 0
-     #aggPers <- 0
+     if (Sys.getenv("R_RAP_INSTANCE") != "") {
+    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()}
     BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = aggPers, tellFlereForlop = tellFlereForlop)
 
     if ((aggPers==1) & (tellFlereForlop == 0)){
@@ -390,13 +391,14 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
              vecMatchBeredTilPan=match(TRUE,
                                        PersonId == BeredData$PersonIdBered &
                                           HFlang == BeredData$HFbered &
-                                          InnTidspunkt <= BeredData$DateAdmittedIntensive &  #Lagt inn før lagt inn intensiv
-                                          UtTidspunkt > BeredData$DateAdmittedIntensive) #Ut fra pandemi etter at lagt inn intensiv (IKKE:Skrevet ut etter utskriv. int.
+                                          InnTidspunkt <= BeredData$FormDate &  #Lagt inn før lagt inn intensiv, DateAdmittedIntensive
+                                          UtTidspunkt > BeredData$FormDate) #Ut fra pandemi etter at lagt inn intensiv (IKKE:Skrevet ut etter utskriv. int.
                        #  PersTest = sum(PersonId == BeredData$PersonIdBered, na.rm = T),
                        #  InnTest = sum(InnTidspunkt <= BeredDataRaa$DateAdmittedIntensive, na.rm = T),
                        # InnTest2 = sum(InnTidspunkt < as.POSIXct(BeredData$DateAdmittedIntensive), na.rm = T),
                        # UtTest = match(TRUE, UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive))
       ))
+
 
       sum(!is.na(RegDataNy$vecMatchBeredTilPan))
       fellesNavn <- which(names(BeredData) %in% names(RegData))
