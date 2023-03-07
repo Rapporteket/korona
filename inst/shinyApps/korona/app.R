@@ -37,26 +37,13 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
    KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
 
 if (isFALSE(KoroDataRaa)) {
-   if (context == ""){
-      KoroDataInn <- read.table('C:/Registerdata/nipar/InklusjonSkjemaDataContract2022-11-14.csv', sep=';',
-                                stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-      KoroDataUt <- read.table('C:/Registerdata/nipar/UtskrivningSkjemaDataContract2022-11-14.csv', sep=';',
-                               stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-      KoroDataRaa <- merge(KoroDataInn, KoroDataUt, suffixes = c('','Ut'),
-                           by.x = 'SkjemaGUID', by.y = 'HovedskjemaGUID', all.x = T, all.y=F)
-      KoroDataRaa <- dplyr::rename(KoroDataRaa, SkjemaGUIDut = SkjemaGUIDUt)
-   } else {
    KoroDataRaa <-  KoronaDataSQL(koble=1)
    rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa)
-}}
+}
 
    BeredData <- rapbase::loadStagingData("korona", "BeredData")
 if (isFALSE(BeredData)) {
-   if (context == ""){
-      BeredDataRaa <- read.table('C:/Registerdata/nipar/ReadinessFormDataContract2022-11-14.csv', sep=';',
-                    stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-      } else {
-      BeredDataRaa <- intensivberedskap::NIRberedskDataSQL() }
+   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
    rapbase::saveStagingData("korona", "BeredData", BeredData)
 }

@@ -14,6 +14,9 @@
 #'
 KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFlereForlop=0)	#, reshID=reshID)
 {
+
+   #------Preprosessering-------
+
   ReshNivaa <- korona::ReshNivaa
   if (aggPers==0 & tellFlereForlop==1){
      warning('Ugyldig kombinasjon: aggPers==0 & tellFlereForlop==1. "tellFlereForlop" endres til 0')
@@ -91,12 +94,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                         RegData$Vekt/(RegData$Hoyde/100)^2,
                         NA)
-  #FEIL I KODEBOK LAGER KRØLL!
-  # boolske_var_inklusjon <-
-  #    as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
-  # RegData[, intersect(names(RegData), boolske_var_inklusjon)] <-
-  #    apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
-
   #Konvertere boolske variable fra tekst til boolske variable...
   # TilLogiskeVar <- function(Skjema){
   #   verdiGML <- c('True','False')
@@ -141,7 +138,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
      as.POSIXct(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
                                          units = "days")) #Bare for utskrevne pasienter
 
-#------SLÅ SAMMEN TIL PER PASIENT
+#------SLÅ SAMMEN TIL PER PASIENT--------------
   if (aggPers == 1) {
     #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
     JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
@@ -165,21 +162,24 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
     if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
 
       RegData$Dato <- as.Date(RegData$FormDate)
-
-      #Identifiserer inntil 3 forløp
-      PasFlere <- RegData %>% dplyr::group_by(PasientID) %>%
+      RegData$PasientIDgml <- RegData$PasientID
+      #Identifiserer inntil 5 forløp
+      PasFlere <- RegData %>% dplyr::group_by(PasientIDgml) %>%
         dplyr::summarise(.groups = 'drop',
                   SkjemaGUID = SkjemaGUID,
-                  InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
-                  InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
+                  InnNrDum1 = ifelse(Dato-min(Dato)>90, 2, 1),
+                  InnNrDum2 = ifelse(InnNrDum1>1, ifelse(Dato - min(Dato[InnNrDum1==2])>90, 3, 2), 1),
+                  InnNrDum3 = ifelse(InnNrDum2>2, ifelse(Dato - min(Dato[InnNrDum2==3])>90, 4, 3), InnNrDum2),
+                  InnNr   =   ifelse(InnNrDum3>3, ifelse(Dato - min(Dato[InnNrDum3==4])>90, 5, 4), InnNrDum3),
                   PasientID = paste0(PasientID, '_', InnNr)
                   #Tid = as.numeric(Dato-min(Dato))
         )
+      # Test <- RegData[which(RegData$PasientIDgml.x == PasFlere$PasientIDgml[PasFlere$InnNr==5]),
+      #                 c("PasientID", 'FormDate', "ReshId")]
 
-      RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")], PasFlere, by='SkjemaGUID')
-      # which(RegDataNy$InnNr==2)
-      # Test <- RegDataNy[c(1:10, which(RegDataNy$InnNr==2)),c("PasientID", "PasientIDny")]
-      #For testing: RegData$Dato[RegData$PasientID=='EAC1F8C2-B10F-EC11-A974-00155D0B4D1A'][3:4] <- as.Date(c('2023-01-02', '2024-01-03'))
+      RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")],
+                       PasFlere[ ,c("SkjemaGUID", "InnNr", "PasientID")],
+                       by='SkjemaGUID')
     }
 
     RegDataRed <- RegData %>% dplyr::group_by(PasientID) %>%
@@ -227,6 +227,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
                 Isolert = JaNeiUkjVar(Isolert), #1-ja, 2-nei, 3-ukjent
+                InnNr = max(InnNr),
                 Karbapenem = sum(Karbapenem)>0,
                 Kinolon = sum(Kinolon),
                 KjentRisikofaktor = JaNeiUkjVar(KjentRisikofaktor), #1-ja, 2-nei, 3-ukjent
@@ -363,6 +364,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   RegData$Dag <- factor(format(RegData$InnDato, '%d.%m.%y'),
                         levels = format(seq(min(RegData$InnDato), max(RegData$InnDato), by="day"), '%d.%m.%y'))
   RegData$InnDag <- RegData$InnDato
+
 
   if (kobleBered==1){
      if (Sys.getenv("R_RAP_INSTANCE") != "") {

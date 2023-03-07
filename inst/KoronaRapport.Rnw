@@ -56,19 +56,21 @@ Automatisk generert rapport - sykehusbehandlede pasienter med covid-19, \\ ', fo
 context <- Sys.getenv("R_RAP_INSTANCE") #Blir tom hvis jobber lokalt
 paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 
-  if (paaServer) {
-    Pandemi <- KoronaDataSQL(koble = 1)
-    #PandemiUt <- KoronaDataSQL(skjema=2)
-    } else {
-      Pandemi <- read.table('A:/Pandemi/XX.csv', sep=';',
-                       stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-      rolle <- 'LC'
-      enhetsNivaa <- 'HF'
-      valgtEnhet <- 'Nord'
-      }
+
+ PandemiRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #KoronaDataSQL(koble = 1)
+ if (isFALSE(PandemiRaa)) {
+   PandemiRaa <-  KoronaDataSQL(koble=1)
+}
 
 #Data per opphold
-PandemiOpph <- KoronaPreprosesser(RegData = Pandemi, aggPers = 0)
+#PandemiOpph <- KoronaPreprosesser(RegData = PandemiRaa, aggPers = 0)
+   PandemiOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
+if (isFALSE(PandemiOpph)) {
+   PandemiOpph <- KoronaPreprosesser(RegData = PandemiRaa, aggPers = 0, kobleBered = 1)
+}
+
+
+
 #stopifnot(rolle %in% c('SC', 'LC', 'LU'), print(paste0('rolle:', rolle)))
 PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
 
@@ -78,32 +80,47 @@ PandemiOpph$EnhNivaaVis <- switch(rolle,
                                 LU = PandemiOpph$ShNavn)
 PandemiOpphAlleInnlEgen <-  KoronaUtvalg(RegData=PandemiOpph,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
+
 #Telle pasienter med flere forløp, covid hovedårsak
     PasFlere <- PandemiOpphAlleInnlEgen %>% group_by(PasientID) %>%
       dplyr::summarise(.groups = 'drop',
                 InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+
     antPasFlereForlAlleInn <- sum(PasFlere$InnNr0>1)
+    # antPasFlereForlAlleInn <- sum(unique(PandemiOpphAlleInnlEgen$PasientIDgml[
+    #   PandemiOpphAlleInnlEgen$InnNr>1]))
 PandemiOpph <-  PandemiOpphAlleInnlEgen[PandemiOpphAlleInnlEgen$ArsakInnleggelse==1, ]
 PandemiOpph$EnhNivaaVis <- as.factor(PandemiOpph$EnhNivaaVis)
 
 #Innparametre:  enhetsNivaa, valgtEnhet, rolle
 #Personaggregerte data
-Pandemi <- KoronaPreprosesser(Pandemi, tellFlereForlop = 1)
+   Pandemi <- rapbase::loadStagingData("korona", "KoroData") #KoronaPreprosesser(Pandemi, tellFlereForlop = 1)
+if (isFALSE(Pandemi)) {
+   Pandemi <- KoronaPreprosesser(RegData = Pandemi, aggPers = 1, tellFlereForlop = 1, kobleBered = 1)
+}
+
+
 NinneliggAlleLandet <- sum(is.na(Pandemi$UtDato))
 
 Pandemi$EnhNivaaVis <- switch(as.character(rolle),
                                 'SC' = Pandemi$RHF,
                                 'LC' = Pandemi$HF,
                                 'LU' = Pandemi$ShNavn)
-BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
-#Kobler pandemi og beredskap:
-Pandemi <- merge(Pandemi, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
-                     by = 'PersonId')
-Pandemi  <- Pandemi %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+# BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+# BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
+   BeredData <- rapbase::loadStagingData("korona", "BeredData")
+if (isFALSE(BeredData)) {
+   BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+   BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
+}
+
+
+#Kobler pandemi og beredskap: - SLETTES. DETTE ER GJORT I PREPROSESS
+# Pandemi <- merge(Pandemi, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
+#                      by = 'PersonId')
+# Pandemi  <- Pandemi %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
 
 PandemiLandet <- KoronaUtvalg(RegData=Pandemi, aarsakInn = 2)$RegData
-#NinneliggPgaCovLandet <- dim(Pandemi[is.na(PandemiLandet$UtDato)])[1]
 
 PandemiAlleInnlEgen <-  KoronaUtvalg(RegData=Pandemi,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
