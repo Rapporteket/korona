@@ -385,6 +385,12 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                                                #SkjemaGUIDBered = SkjemaGUID,
                                                InnDatoBered = InnDato)
 
+#Fjerner personer som er dobbeltregistrert:
+ test <-  RegData %>%
+         dplyr::group_by(PersonId, InnTidspunkt) %>%
+         summarize(Ant = dplyr::n())
+ ind <- which(RegData$PersonId %in% test$PersonId[test$Ant>1])
+ RegData <- RegData[-ind,]
 
       RegDataNy <- as.data.frame(
         RegData %>%
@@ -402,7 +408,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
       ))
 
 
-      sum(!is.na(RegDataNy$vecMatchBeredTilPan))
+      #sum(!is.na(RegDataNy$vecMatchBeredTilPan))
       fellesNavn <- which(names(BeredData) %in% names(RegData))
       BeredDataNyeNavn <- rename_with(BeredData, ~paste0(names(BeredData)[fellesNavn], 'Bered'), fellesNavn)
       RegDataMbered <- cbind(RegDataNy,
