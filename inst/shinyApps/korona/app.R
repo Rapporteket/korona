@@ -89,7 +89,7 @@ aarsakInnValg <- c(
 #last modul(er)
 source(system.file("shinyApps/korona/R/resultatmodul.R", package = "korona"), encoding = 'UTF-8')
 
-
+#---- Start ui-del ----
 ui <- tagList(
    navbarPage(
       id='hovedark',
@@ -653,23 +653,27 @@ server <- function(input, output, session) {
    )
 
    #Telle pasienter med flere forløp
-   KoroDataOpph$Dato <- as.Date(KoroDataOpph$FormDate)
-   PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
-      dplyr::summarise(.groups = 'drop',
-                       InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
-                       InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
-                       PasientID = paste0(PasientID, '_', InnNr),
-                       CovidAarsak = ifelse(sum(ArsakInnleggelse==1)>0, 1, 0),
-                       CovidAarsakAlle = ifelse(sum(ArsakInnleggelse==n())>0, 1, 0)
-      )
-   antPasFlereForlAlle <- length(unique(PasFlere$PasientID[PasFlere$InnNr > 1])) #sum(InnNr0>1))
-   antPasFlereForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsak==1 & PasFlere$InnNr > 1])) #sum(InnNr0>1))
+   # KoroDataOpph$Dato <- as.Date(KoroDataOpph$FormDate)
+   # PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
+   #    dplyr::summarise(.groups = 'drop',
+   #                     InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
+   #                     InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
+   #                     PasientID = paste0(PasientID, '_', InnNr),
+   #                     CovidAarsak = ifelse(sum(ArsakInnleggelse==1)>0, 1, 0),
+   #                     CovidAarsakAlle = ifelse(sum(ArsakInnleggelse==n())>0, 1, 0)
+   #    )
+   # antPasFlereForlAlle <- length(unique(PasFlere$PasientID[PasFlere$InnNr > 1])) #sum(InnNr0>1))
+   # antPasFlereForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsak==1 & PasFlere$InnNr > 1])) #sum(InnNr0>1))
+#Antall forløp telles nå i preprosesseringa
+   antPasFlereForlAlle <- sum(KoroData$InnNr>1)
+   antPasFlereForlCov <-  sum(KoroData$ArsakInnNy %in% 1:3 & KoroData$InnNr>1)
+
 
    output$antFlereForl <- renderUI(h5(HTML(paste0('De fleste resultater er basert på at opphold for hver pasient er
    aggregert til ett smitteforløp.
-    Pasienter som har mer enn 90 dager mellom to innleggelser teller som to eller flere forløp.
-   Per i dag er det på landsbasis ', antPasFlereForlAlle, ' pasienter som har mer enn ett forløp
-og ', antPasFlereForl, ' av disse har mer enn ett forløp hvor Covid-19 er hovedårsak til minst ett av oppholdene.'))))
+    Pasienter som har mer enn 90 dager mellom to innleggelser teller som to eller flere smitteforløp.
+   Per i dag er det på landsbasis ', antPasFlereForlAlle, ' pasienter som har mer enn ett smitteforløp i registeret
+og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19 er hovedårsak til minst ett av oppholdene.'))))
 
 
 

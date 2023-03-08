@@ -21,7 +21,7 @@
 #' @param skjemastatusInn status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
 #' @param skjemastatusUt status på utskrivingsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
 #' @param aarsakInn covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
-#' 3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj
+#' 3-ja, minst ett opph, 4-nei, ingen opph, 9-ukj
 #' @param enhetsNivaa organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
 #'  RHF (SC og LC-brukere), HF (LU-brukere)
 #' @param valgtEnhet - gis ut fra resh
@@ -45,12 +45,12 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
  if (skjemastatusInn %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatusInn)}
  if (skjemastatusUt %in% 1:2){RegData <- subset(RegData, RegData$FormStatusUt==skjemastatusUt)}
 # if (aarsakInn %in% 1:2){RegData <- subset(RegData, RegData$ArsakInnleggelse==aarsakInn)}
-  if (aarsakInn %in% 1:4){
+  if (aarsakInn %in% 1:4){ ##ArsakInnNy: 1-ja, alle opph, 2-ja, siste opph, ikke alle, 3-ja, minst ett opph, ikke siste, 4-nei, ingen opph
     ind <- switch(as.character(aarsakInn),
-                  '1' = which(RegData$ArsakInnNy==1),
-                  '2' = which(RegData$ArsakInnNy %in% 1:2),
-                  '3' = which(RegData$ArsakInnNy %in% 1:3),
-                  '4' = which(RegData$ArsakInnNy == 4)
+                  '1' = which(RegData$ArsakInnNy==1), #alle opph
+                  '2' = which(RegData$ArsakInnNy %in% 1:2), #siste opph
+                  '3' = which(RegData$ArsakInnNy %in% 1:3), #minst ett opph
+                  '4' = which(RegData$ArsakInnNy == 4) #Ingen opph
                   )
     RegData <- RegData[ind, ]
     }

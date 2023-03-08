@@ -81,14 +81,6 @@ PandemiOpph$EnhNivaaVis <- switch(rolle,
 PandemiOpphAlleInnlEgen <-  KoronaUtvalg(RegData=PandemiOpph,
                          enhetsNivaa = enhetsNivaa, valgtEnhet=valgtEnhet)$RegData
 
-#Telle pasienter med flere forløp, covid hovedårsak
-    PasFlere <- PandemiOpphAlleInnlEgen %>% group_by(PasientID) %>%
-      dplyr::summarise(.groups = 'drop',
-                InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
-
-    antPasFlereForlAlleInn <- sum(PasFlere$InnNr0>1)
-    # antPasFlereForlAlleInn <- sum(unique(PandemiOpphAlleInnlEgen$PasientIDgml[
-    #   PandemiOpphAlleInnlEgen$InnNr>1]))
 PandemiOpph <-  PandemiOpphAlleInnlEgen[PandemiOpphAlleInnlEgen$ArsakInnleggelse==1, ]
 PandemiOpph$EnhNivaaVis <- as.factor(PandemiOpph$EnhNivaaVis)
 
@@ -98,6 +90,23 @@ PandemiOpph$EnhNivaaVis <- as.factor(PandemiOpph$EnhNivaaVis)
 if (isFALSE(Pandemi)) {
    Pandemi <- KoronaPreprosesser(RegData = Pandemi, aggPers = 1, tellFlereForlop = 1, kobleBered = 1)
 }
+
+   #Telle pasienter med flere forløp, covid hovedårsak
+    # PasFlere <- PandemiOpphAlleInnlEgen %>% group_by(PasientID) %>%
+    #   dplyr::summarise(.groups = 'drop',
+    #             InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+
+    antPasFlereForlAlleInn <- sum(Pandemi$InnNr>1) #sum(PasFlere$InnNr0>1)
+    # antPasFlereForlAlleInn <- sum(unique(PandemiOpphAlleInnlEgen$PasientIDgml[
+    #   PandemiOpphAlleInnlEgen$InnNr>1]))
+
+#Telle pasienter med flere forløp, covid hovedårsak
+    # PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
+    #   dplyr::summarise(.groups = 'drop',
+    #             InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
+
+antPasFlereForlCov <-  sum(Pandemi$ArsakInnNy %in% 1:3 & Pandemi$InnNr>1)
+   #sum(PasFlere$InnNr0>1)
 
 
 NinneliggAlleLandet <- sum(is.na(Pandemi$UtDato))
@@ -142,12 +151,6 @@ txtAlder <- if (dim(Pandemi)[1]>2){paste0('Alderen er mellom ',
                            Alder[4], ' år.')} else {''}
 
 
-#Telle pasienter med flere forløp, covid hovedårsak
-#PandemiOpph$Dato <- as.Date(PandemiOpph$FormDate)
-    PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
-      dplyr::summarise(.groups = 'drop',
-                InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
-    antPasFlereForl <- sum(PasFlere$InnNr0>1)
 @
 
 
@@ -157,13 +160,13 @@ Dette er en automatisk generert rapport fra Norsk intensiv- og pandemiregister (
 Dokumentet inneholder oversikt over \bf{sykehusbehandlede pasienter med covid-19} for \textbf{\Sexpr{forHvem}}.
 I denne sammenhengen betyr det at pasienten er innlagt på sykehus og har en positiv prøve for SARS-CoV-2
 i løpet av de siste 3 månedene før innleggelse.
-Datagrunnlaget er oppdatert med alle registreringer gjort inntil 4 timer før rapporten ble lastet ned.
+Datagrunnlaget er oppdatert med alle registreringer gjort dagen før rapporten ble lastet ned.
 Alle innlagte med covid-19 blir registrert i NIPaR, uavhengig av om covid-19 er hovedårsak til innleggelsen.
 I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er Covid-19.
 
-For resultater basert på personaggregerte data, er skjema aggregert til ett eller flere forløp per pasient. Hvis det er mer enn 3 måneder mellom to opphold,
-regnes det som to forløp, ellers som ett.
-Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett forløp og \Sexpr{antPasFlereForl} av disse har mer enn ett forløp med Covid-19 som hovedårsak.
+For resultater basert på personaggregerte data, er skjema aggregert til ett eller flere smitteforløp per pasient.
+Hvis det er mer enn 3 måneder mellom to opphold, regnes det som to smitteforløp, ellers som ett.
+Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett smitteforløp og \Sexpr{antPasFlereForlCov} av av disse har mer enn ett smitteforløp hvor Covid-19 er hovedårsak til minst ett av oppholdene i smitteforløpet.
 For personaggregerte resultater vises pasienter
 hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
 ferdigstilt eller ikke, dersom ikke annet er oppgitt.
