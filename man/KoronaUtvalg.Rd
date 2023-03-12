@@ -22,7 +22,7 @@ KoronaUtvalg(
 )
 }
 \arguments{
-\item{RegData}{data, beredskapsskjema}
+\item{RegData}{data, covid-skjema}
 
 \item{datoFra}{startdato 'yyyy-mm-dd'}
 
@@ -49,6 +49,13 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 \item{enhetsUtvalg}{0: hele landet,
 1: egen enhet mot resten av landet,
 2: egen enhet (NB: returnerer hele landet i ind$Rest)}
+
+\item{beredPas}{Har pasienten vært innlagt på intensiv? 0-nei, 1-ja.
+Per nå (12.03.23) basert på at faktisk finner et tilhørende beredskapsskjema.Vurder om
+vi heller skal basere på variabelen Nir_beredskapsskjema_CoV2}
+}
+\value{
+Filtrerte data
 }
 \description{
 Returnerer filtrert dataramme og utvalgstekst.

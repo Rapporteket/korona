@@ -52,7 +52,7 @@ Data_koblet = data_pandemi %>%
 # er registrert i pandemiregisteret, men dette ikke alltid tilfellet.
 # I de tilfellene hvor det finnes flere intensivoppholdsskjema for perioden, må data gjerne aggregeres på forhånd.
 # Vi har brukt definisjonene 12 timer for pandemiregisteret og 24 timer for intensivregisteret for
-# å identifisere påfølgende opphold som er del av samme sykdomsforløp.
+# å identifisere påfølgende opphold som er del av samme smitteforløp.
 
 d_pandemi_forløp = d_pandemi_samlet %>%
     group_by(PersonId) %>%
@@ -63,7 +63,7 @@ d_pandemi_forløp = d_pandemi_samlet %>%
       overfort_nummer = cumsum(innen_12_timer & radnummer != 1L),
       sykdomsforlop = radnummer - overfort_nummer)
 
-#Vi kan da aggregere data vha sykdomsforløp som grupperingsvariabel før en kobling gjøres.
+#Vi kan da aggregere data vha smitteforløp som grupperingsvariabel før en kobling gjøres.
 
 #FULL KODE
 library(tidyverse)

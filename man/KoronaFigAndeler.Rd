@@ -57,6 +57,10 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 
 \item{enhetsUtvalg}{Gjør gruppeutvalg med eller uten sammenlikning. Se \strong{Details} for oversikt.}
 
+\item{beredPas}{Har pasienten vært innlagt på intensiv? 0-nei, 1-ja.
+Per nå (12.03.23) basert på at faktisk finner et tilhørende beredskapsskjema.Vurder om
+vi heller skal basere på variabelen Nir_beredskapsskjema_CoV2}
+
 \item{hentData}{Gjør spørring mot database
 0: Nei, RegData gis som input til funksjonen (Standard)
 1: Ja}

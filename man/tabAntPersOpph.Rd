@@ -2,7 +2,7 @@
 % Please edit documentation in R/KoronaTabeller.R
 \name{tabAntPersOpph}
 \alias{tabAntPersOpph}
-\title{Antall personer, smitteforløp, forløp i samme tabell per HF}
+\title{Antall personer, smitteforløp, opphold i samme tabell per HF}
 \usage{
 tabAntPersOpph(
   RegData,
@@ -13,7 +13,7 @@ tabAntPersOpph(
 )
 }
 \arguments{
-\item{RegData}{dataramme}
+\item{RegData}{dataramme, ikke-aggregerte opphold}
 
 \item{datoFra}{startdato}
 
@@ -24,5 +24,5 @@ tabAntPersOpph(
 \item{covidInn}{covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei}
 }
 \description{
-Antall personer, smitteforløp, forløp i samme tabell per HF
+Antall personer, smitteforløp, opphold i samme tabell per HF
 }

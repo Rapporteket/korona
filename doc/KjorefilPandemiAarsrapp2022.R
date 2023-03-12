@@ -1,8 +1,14 @@
 #  FIGURER OG TABELLER TIL ÅRSRAPPORT, NiPar, Pandemi-data
-# Henter alle data, aggregerer til personnivå, men tar høyde for flere sykdomsforløp (3 forløp: 6pers, 4 forl:1pers)
-#Filtrerer på sykdomsforløp hvor covid er hovedårsak til første innleggelse i sykdomsforløpet
+# Henter alle data, aggregerer til personnivå, men tar høyde for flere smitteforløp (3 forløp: 6pers, 4 forl:1pers)
+#Filtrerer på smitteforløp hvor covid er hovedårsak til første innleggelse i smitteforløpet
 
 #--------Klargjøre data-----------
+#Legger til re-/nyinnleggelser osv. NB: Hvis vi kun ser på Covid som hovedårsak, mister vi noen reinnleggelser/overføringer.
+#2021: valgt å beregne overføringer/nye innleggelser først og så filtrere på hovedårsak covid.
+#Vi får dermed flere overføringer sammenlignet med 2020.
+#2022: Vi skal ha personaggregerte data hvor vi teller flere smitteforløp. Smitteforløp med minst ett opphold hvor Covid hovedårsak.
+
+setwd('AarsRappFig/')
 library(intensiv)
 library(intensivberedskap)
 library(korona)
@@ -10,49 +16,37 @@ datoFra <- '2020-03-01' #Vi har pandemi fra 1.mars 2020
 datoTil <- '2022-12-31'	#
 datoFra1aar <- '2022-01-01'
 
-KoroDataRaa <- KoronaDataSQL(datoFra = '2021-01-01', datoTil = '2022-12-31')
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
-#KoroDataPre <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-KoroDataPre <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1, tellFlereForlop=1)
-#Legger til re-/nyinnleggelser osv. NB: Hvis vi kun ser på Covid som hovedårsak, mister vi noen reinnleggelser/overføringer.
-#2021: valgt å beregne overføringer/nye innleggelser først og så filtrere på hovedårsak covid.
-#Vi får dermed flere overføringer sammenlignet med 2020.
-#2022: Vi skal ha personaggregerte data hvor vi teller flere sykdomsforløp. Velger inn-årsak covid i første innleggelse
+KoroDataOpph <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=0, kobleBered=1)
+KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1, tellFlereForlop=1)
+#ELLER: (pass på at staging oppdatert)
+KoroDataPers <- rapbase::loadStagingData("korona", "KoroData")
 
-#KoroDataPre <- korona::LeggTilNyInnOverf(RegData=KoroDataPre, PasientID='PasientID') Dette er inkludert i preprosess
-KoroData <- KoroDataPre[KoroDataPre$ArsakInnleggelse==1, ] #Bare innleggelser pga Covid
+#Bare smitteforløp med minst ett opph med Covid som hovedårsak
+KoroData <- KoronaUtvalg(RegData = KoroDataPers, aarsakInn = 1, datoTil = datoTil)$RegData
 KoroData1aar <- KoroData[KoroData$InnDato >= as.Date(datoFra1aar), ]
-
-BeredDataRaa <- NIRberedskDataSQL(datoTil = datoTil)
-BeredData <- NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 0)
-BeredData1aar <- NIRPreprosessBeredsk(RegData=NIRberedskDataSQL(datoFra = datoFra1aar, datoTil = datoTil), aggPers = 0)
-#BeredDataPers <- NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = 1)
-
-# Personnivå
-#6.mars 2023: Usikker på om trenger disse.
-# KoroDataPersAlle <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 1)
-# KoroDataPersAlle$BeredPas <-  ifelse(!is.na(match(KoroDataPersAlle$PersonId, BeredData$PersonId)), 1, 0)
-# KoroDataPersAlle$BeredPasMRS <- ifelse(KoroDataPersAlle$Nir_beredskapsskjema_CoV2==1, 1,0) #Variabelen finner alle personer med intensivopphold
-# KoroDataPersAlle$Diff <- KoroDataPersAlle$BeredPas - KoroDataPersAlle$BeredPasMRS
-# KoroDataPers <- KoroDataPers[KoroDataPers$InnDato < '2022-01-01', ]
-# test <- KoroDataPersAlle[which(KoroDataPers$Diff != 0), ]
-# table(KoroDataPersAlle$BeredPas)
-# KoroDataPers <- KoroDataPers[KoroDataPers$ArsakInnleggelse == 1,]
-
 
 #-----------------------TABELLER--------------------------------
 
-#------------Nøkkeltall pr HF---------
+#----Nøkkeltall pr HF---
 #FerdigeRegTab pas -> opph.
 #Inneholder: liggetid, alder, BMI, om pasienten har risikofaktorer, andel reinnleggelse (>24t),
 #andel døde + andel isolert ved innleggelse (kval.ind), antall pasienter
 
-KoroData1aar$BeredPas <- ifelse(KoroData1aar$Nir_beredskapsskjema_CoV2==1, 1, 0)
+KoroData1aar$BeredPasTest <- ifelse(KoroData1aar$Nir_beredskapsskjema_CoV2==1, 1, 0)
+#Antall med beredskapsskjema stemmer ikke med antall som vi får koblet til.
+#For 2022 kobles 536 smitteforløp til beredskapsforløp, mens det er 601 forløp som skal ha intensivopphold,
+#basert på "Nir_beredskapsskjema_CoV2", altså 65 forløp hvor man ikke finner det aktuelle beredskapsskjemaet.
+#                         BeredPas
+# Nir_beredskapsskjema_CoV2     0     1
+#                          1    65   536
+#                          2 11202     0
+
 
 Nokkeltall <- FerdigeRegTab(RegData=KoroData1aar)
 tab <- Nokkeltall$Tab[-3, ]
 colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opphald', 'Del opphald')
-intBehPas <- round(100*prop.table(table(KoroDataPers$BeredPas))[2],1)
+intBehPas <- round(100*prop.table(table(KoroData$BeredReg))[2],1)
 
 print(xtable::xtable(tab, align=c('l','r','r','c','r','r'),
                      label = 'tab:pan_tot',
@@ -68,12 +62,6 @@ Nokkeltall <- FerdigeRegTab(RegData=KoroData1aar,
                             enhetsNivaa = 'HF')
 colnames(Nokkeltall$Tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opphald', 'Del opphald')
 
-#tabInn <- table(KoroDataPers$BeredPas[KoroDataPers$HF == enh])
-#intBehInn <- round(100*prop.table(tabInn)[2],1)
-#tabUt <- table(KoroDataPers$BeredPas[KoroDataPers$HFut == enh])
-#intBehUt <- round(100*prop.table(tabUt)[2],1)
-
-
 print(xtable::xtable(Nokkeltall$Tab[-3, ], align=c('l','r','r','c','r','r'),
                #digits=0, #method='compact', #align=c('l', rep('r', ncol(alderDIV))),
                caption=paste0('Nøkkeltal for ', enh,'. De ', Nokkeltall$N,
@@ -85,33 +73,57 @@ print(xtable::xtable(Nokkeltall$Tab[-3, ], align=c('l','r','r','c','r','r'),
 }
 
 #-------------FIGURER-------------
+#Innleggelser
+AntTab <- antallTidEnhTab(RegData=KoroDataOpph, datoTil = as.Date(datoTil), #tilgangsNivaa=rolle,valgtEnhet= egenEnhet,
+                          tidsenhet= 'maaned'
+                          )
+korona::FigTidEnhet(AntTab, outfile='KoronaInnleggelserMnd.pdf')
+
 #Alder- og kjønnsfigur
-AlderKjFig(RegData=KoroData, datoFra = datoFra1aar, outfile='KoronaAlderKj.pdf')
+#Annen visning
+dum <- AlderKjFig(RegData=KoroData1aar, outfile='KoronaAlderKj.pdf')
 
 #Covid-19 hovedårsak til innleggeslse?
-Aarsak <- paste0(sprintf('%.1f', prop.table(table(KoroDataPre$ArsakInnleggelse[KoroDataPre$InnDato > as.Date(datoFra1aar)]))*100),' %')
+Aarsak <- paste0(sprintf('%.1f', prop.table(table(KoroData$ArsakInnleggelse[KoroData$InnDato > as.Date(datoFra1aar)]))*100),' %')
 names(Aarsak) <- c('Ja', 'Nei', 'Ukjent')
 
-#----------------Alle fordelingsfigurer, basert på opphold-----------------
-variabler <- c( 'demografi', 'liggetid', 'risikoInn',
-                'antibiotikaInn', 'antibiotikaUt', 'regForsinkelseInn', 'regForsinkelseUt',
-                'respSviktInn', 'respSviktUt', 'sirkSviktInn', 'sirkSviktUt', 'tilstandInn')
-#Ikke brukt -20: 'alder',
-
+#----------------Alle fordelingsfigurer, basert på smitteforløp-----------------
+# 'liggetid',
+variabler <- c('regForsinkelseInn', 'regForsinkelseUt')
 for (valgtVar in variabler) {
-  KoronaFigAndeler(RegData=KoroData, datoFra=datoFra1aar, valgtVar=valgtVar, outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
+  KoronaFigAndeler(RegData=KoroData, datoFra=datoFra1aar, valgtVar=valgtVar, aarsakInn=1,
+                   outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
+}
+
+#Kun for 2020 - 1.kvartal 2022
+variabler <- c('respSviktInn', 'respSviktUt', 'risikoInn', 'sirkSviktInn', 'sirkSviktUt', 'tilstandInn')
+for (valgtVar in variabler) {
+   KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
+                    datoTil='2022-03-31', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
+}
+
+#Kun for 2020 - 1.kvartal 2022 - MÅ OPPDATERE MED Antimykotisk behandling
+variabler <-c('antibiotikaInn', 'antibiotikaUt')
+for (valgtVar in variabler) {
+   KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
+                    datoTil='2022-03-31', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
 }
 
 
-#----------------Alle figurer, tidsuvikling, basert på opphold-----------------
-variabler <- c('alder_u18', 'alder_u40', 'alder_o60', 'alder_o80', 'isolertInn',  'dodSh')
+
+#----------------Alle figurer, tidsuvikling, basert på smitteforløp-----------------
+variabler <- c('alder_u18', 'alder_u40', 'alder_o60', 'alder_o80', 'beredPas', 'dodSh',
+               'isolertInn')
 for (valgtVar in variabler) {
-KoronaFigAndelTid(RegData=KoroData, valgtVar=valgtVar, tidsenhet = 'Kvartal',
+   KoronaFigAndelTid(RegData=KoroData, valgtVar=valgtVar,
+                     tidsenhet = 'Kvartal', aarsakInn=1,
+                     outfile = paste0('KoronaUtvTid_', valgtVar, '.pdf'))
+}
+
+KoronaFigAndelTid(RegData=KoroData, valgtVar='risikoInn', datoTil = '2022-03-31',
+                  tidsenhet = 'Kvartal', aarsakInn=1,
                   outfile = paste0('KoronaUtvTid_', valgtVar, '.pdf'))
-}
 
-KoroData$BeredPas <- ifelse(KoroData$Nir_beredskapsskjema_CoV2==1, 1, 0)
-KoronaFigAndelTid(RegData=KoroData, valgtVar='beredPas', tidsenhet = 'Kvartal', outfile = 'KoronaUtvTid_beredOpph.pdf')
 
 #--------------------Testing-----------------------------
 test <- KoroData[,c('OverfortAnnetSykehusInnleggelse', 'OverfortAnnetSykehusUtskrivning', "Overf")]

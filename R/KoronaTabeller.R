@@ -11,7 +11,7 @@
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return Liste med tabell og beregnede verdier
 #' @export
 #'
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoTil=Sys.Date(), #valgtVar='innlagt',
@@ -136,7 +136,7 @@ if (dim(RegData)[1]>0){
 
 #' Status nå
 #' @param RegData pandemiskjema
-#' @return
+#' @return Tabell med status nå
 #' @export
 statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=9, erMann=9){
@@ -204,7 +204,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   NisolertKjent <- sum(RegData$Isolert %in% 1:2, na.rm=T)    #Tar bort ukjente
   Nisolert <- sum(RegData$Isolert == 1, na.rm=T)
   pstIsolert <- 100*Nisolert/NisolertKjent
-  AntBered <- sum(RegData$BeredPas)
+  AntBered <- sum(RegData$BeredReg)
   PstBered <- 100*AntBered/N
 
   med_IQR <- function(x){
@@ -480,11 +480,11 @@ finnBeredUpandemi <- function(datoFra='2020-01-01', datoTil=Sys.Date(), HF='Alle
    TabBeredUPand$DateAdmittedIntensive <- as.character(TabBeredUPand$DateAdmittedIntensive)
    tabUt <- TabBeredUPand[with(TabBeredUPand, order(HF, ShNavn, DateAdmittedIntensive)), ]
 
-   #Har alle med Nir_beredskapsskjema_CoV2==1 BeredPas==1: JA
+   #Har alle med Nir_beredskapsskjema_CoV2==1 BeredReg==1: JA
 
    #TEST: Disse "skal" ha bered-skjema:
-   # pers <- KoroDataMberedOpph$PersonId[which(KoroDataMberedOpph$BeredPas==0)]
-   # KoroDataMberedOpph[KoroDataMberedOpph$PersonId==pers[2], c("InnTidspunkt", "UtTidspunkt", "ShNavn",  "HF", 'BeredPas')]
+   # pers <- KoroDataMberedOpph$PersonId[which(KoroDataMberedOpph$BeredReg==0)]
+   # KoroDataMberedOpph[KoroDataMberedOpph$PersonId==pers[2], c("InnTidspunkt", "UtTidspunkt", "ShNavn",  "HF", 'BeredReg')]
    # BeredData[BeredData$PersonId==pers[2], c("DateAdmittedIntensive", "DateDischargedIntensive", "ShNavn",  "HF")]
    # KoroDataMberedOpph$InnTidspunkt[KoroDataMberedOpph$PersonId==pers[2]] <= BeredData$DateAdmittedIntensive[BeredData$PersonId==pers[2]]
 
@@ -531,9 +531,9 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 }
 
 
-#' Antall personer, smitteforløp, forløp i samme tabell per HF
+#' Antall personer, smitteforløp, opphold i samme tabell per HF
 #'
-#' @param RegData dataramme
+#' @param RegData dataramme, ikke-aggregerte opphold
 #' @param datoFra startdato
 #' @param datoTil sluttdato
 #' @param enhetsNivaa 'HF' eller 'RHF'
@@ -578,7 +578,7 @@ tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa, co
           AntSforl = length(unique(PersonId_sforl)),
           AntPas = length(unique(PersonId))
         ), row.names = NULL)
-    colnames(Tab) <- c('Enhet', 'Opphold', 'Sykdomsforløp', 'Personer')
+    colnames(Tab) <- c('Enhet', 'Opphold', 'Smitteforløp', 'Personer')
   } else {
     Tab <- 'Ingen registreringer'
   }

@@ -390,7 +390,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
          dplyr::group_by(PersonId, InnTidspunkt) %>%
          summarize(Ant = dplyr::n())
  ind <- which(RegData$PersonId %in% test$PersonId[test$Ant>1])
- RegData <- RegData[-ind,]
+ if (length(ind)>0) {RegData <- RegData[-ind,]}
 
       RegDataNy <- as.data.frame(
         RegData %>%
@@ -407,10 +407,11 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                        # UtTest = match(TRUE, UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive))
       ))
 
-
       #sum(!is.na(RegDataNy$vecMatchBeredTilPan))
-      fellesNavn <- which(names(BeredData) %in% names(RegData))
-      BeredDataNyeNavn <- rename_with(BeredData, ~paste0(names(BeredData)[fellesNavn], 'Bered'), fellesNavn)
+      indFellesNavn <- which(names(BeredData) %in% names(RegData))
+      BeredDataNyeNavn <- BeredData
+      names(BeredDataNyeNavn)[indFellesNavn] <- paste0(names(BeredDataNyeNavn)[indFellesNavn], 'Bered')
+         #rename_with(BeredData, ~paste0(names(BeredData)[indFellesNavn], 'Bered'), .cols = indFellesNavn)
       RegDataMbered <- cbind(RegDataNy,
                              BeredDataNyeNavn[RegDataNy$vecMatchBeredTilPan, ])
 
@@ -425,7 +426,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
       # BeredData[BeredData$PersonId == '0x3029E3F3B7B757E4EFB60D142FDF5911E8A3FF759B4E4C761C228E1D585D1589', c('PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
       #KoroData[c(3,89,345, 678, 2000), c('PersonId', 'InnTidspunkt', "UtTidspunkt", 'PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
     }}
-  RegData  <- RegDataMbered %>% dplyr::mutate(BeredPas = ifelse(is.na(PersonIdBered), 0, 1))
+  RegData  <- RegDataMbered %>% dplyr::mutate(BeredReg = ifelse(is.na(PersonIdBered), 0, 1))
 } #koble bered
 
 

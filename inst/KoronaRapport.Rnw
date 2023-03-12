@@ -91,7 +91,7 @@ if (isFALSE(Pandemi)) {
    Pandemi <- KoronaPreprosesser(RegData = Pandemi, aggPers = 1, tellFlereForlop = 1, kobleBered = 1)
 }
 
-   #Telle pasienter med flere forløp, covid hovedårsak
+   #Telle pasienter med flere smitteforløp, covid hovedårsak
     # PasFlere <- PandemiOpphAlleInnlEgen %>% group_by(PasientID) %>%
     #   dplyr::summarise(.groups = 'drop',
     #             InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
@@ -100,7 +100,7 @@ if (isFALSE(Pandemi)) {
     # antPasFlereForlAlleInn <- sum(unique(PandemiOpphAlleInnlEgen$PasientIDgml[
     #   PandemiOpphAlleInnlEgen$InnNr>1]))
 
-#Telle pasienter med flere forløp, covid hovedårsak
+#Telle pasienter med flere smitteforløp, covid hovedårsak
     # PasFlere <- PandemiOpph %>% group_by(PasientID) %>%
     #   dplyr::summarise(.groups = 'drop',
     #             InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1))
@@ -123,11 +123,6 @@ if (isFALSE(BeredData)) {
    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1, tellFlereForlop = 1)
 }
 
-
-#Kobler pandemi og beredskap: - SLETTES. DETTE ER GJORT I PREPROSESS
-# Pandemi <- merge(Pandemi, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
-#                      by = 'PersonId')
-# Pandemi  <- Pandemi %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
 
 PandemiLandet <- KoronaUtvalg(RegData=Pandemi, aarsakInn = 2)$RegData
 
@@ -325,7 +320,7 @@ print(
 
 
 
-\begin{frame}[fragile] {Antall avsluttede forløp per uke}
+\begin{frame}[fragile] {Antall avsluttede smitteforløp per uke}
 
 <<'Utskrevne', results='asis'>>=
 
@@ -335,7 +330,7 @@ bredde <- 6/ncol(AntUt)
 colnames(AntUt) <- paste0(paste0("\\multicolumn{1}{p{", bredde, "cm}}{"), colnames(AntUt),'}')
 fra <- max(1, (nrow(AntUt)-13))
 print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align=c('l', rep('r', ncol(alderDIV))),
-                     caption='Antall avsluttede forløp (utskrevne) med covid-19 som hovedårsak siste tre måneder,
+                     caption='Antall avsluttede smitteforløp (utskrevne) med covid-19 som hovedårsak siste tre måneder,
                      samt totalt antall fra pandemistart til rapporteringstidspuktet.
                      Enhetstilhørighet er basert på siste opphold i forløpet.')
       #, scalebox = skalering
@@ -424,7 +419,7 @@ Dette fordi det alltid må være minst 3 observasjoner i ei gruppe.}
 % xtable::xtable(RisikoTab, #digits=0, #method='compact', #
 %                align=c('l', rep('r', ncol(RisikoTab))),
 %                caption=paste0(
-%                  'Risikofaktorer for ferdigstilte forløp fra pandemistart til ',
+%                  'Risikofaktorer for ferdigstilte smitteforløp fra pandemistart til ',
 %                  datoTil3mnd, ' hvor covid-19 var hovedårsak til innleggelsen.
 %                  Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan
 %                  derfor være høyere enn antallet pasienter.'))
@@ -439,7 +434,7 @@ Dette fordi det alltid må være minst 3 observasjoner i ei gruppe.}
 % xtable::xtable(RisikoTab, #digits=0, #method='compact', #
 %                align=c('l', rep('r', ncol(RisikoTab))),
 %                caption='Risikofaktorer på rapporteringstidspunktet for
-%                ferdigstilte forløp siste 3 måneder hvor covid-19 var hovedårsak til innleggelsen.
+%                ferdigstilte smitteforløp siste 3 måneder hvor covid-19 var hovedårsak til innleggelsen.
 %                Pasienter kan ha mer enn èn risikofaktor. Totalt antall i tabellen kan derfor være
 %                høyere enn antallet pasienter.')
 % @
@@ -447,7 +442,7 @@ Dette fordi det alltid må være minst 3 observasjoner i ei gruppe.}
 
 
 
-\begin{frame}[fragile] {Resultater for ferdigstilte forløp}
+\begin{frame}[fragile] {Resultater for ferdigstilte smitteforløp}
 <<'Oppsum', results='asis'>>=
 
 #Form status: 0 = Ingen	1 = Kladd	2 = Ferdigstilt	4 = Slettet	5 = Returnert

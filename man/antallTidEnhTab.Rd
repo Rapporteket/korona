@@ -43,6 +43,9 @@ antallTidEnhTab(
 \item{HF}{benytte kortnavn for HF 0-nei, 1-ja
 ('RHF', 'HF', 'ShNavn') resultatene skal vises for}
 }
+\value{
+Liste med tabell og beregnede verdier
+}
 \description{
 Antall tilfeller for valgt tidsenhet og enhetsnivå. Filtreringer kan også gjøres.
 Detaljerinsnivå er styrt av tilgangsnivå

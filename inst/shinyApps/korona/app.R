@@ -54,7 +54,6 @@ if (isFALSE(KoroDataOpph)) {
    rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph)
 }
 
-
    KoroData <- rapbase::loadStagingData("korona", "KoroData")
 if (isFALSE(KoroData)) {
    KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1, kobleBered = 1)

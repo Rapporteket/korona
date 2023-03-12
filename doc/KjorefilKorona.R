@@ -79,7 +79,7 @@ DataOpphBered <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 0, tell
 DataPers <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 0)
 DataForlop <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 1, kobleBered = 1) #
 
-table(DataOpphBered$BeredPas)
+table(DataOpphBered$BeredReg)
 DataForlopTest4 <- korona::KoronaPreprosesser(RegData = RegData, aggPers = 1, tellFlereForlop = 1)
 
 #Tidsenheter og oppholdstabell
