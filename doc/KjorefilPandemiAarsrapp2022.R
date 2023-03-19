@@ -22,7 +22,12 @@ KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1,
 #ELLER: (pass på at staging oppdatert)
 KoroDataPers <- rapbase::loadStagingData("korona", "KoroData")
 
-#Bare smitteforløp med minst ett opph med Covid som hovedårsak
+# sjekk <- KoroDataOpph[KoroDataOpph$Nir_beredskapsskjema_CoV2==1 & KoroDataOpph$BeredReg==0 &
+#                          KoroDataOpph$Aar==2022 & KoroDataOpph$ArsakInnleggelse==1,
+#                       c("SkjemaGUID", "InnDato", 'Aar')]
+# table(KoroDataOpph[ ,c('Nir_beredskapsskjema_CoV2', 'Aar')])
+
+#Bare smitteforløp hvor alle opph har Covid som hovedårsak
 KoroData <- KoronaUtvalg(RegData = KoroDataPers, aarsakInn = 1, datoTil = datoTil)$RegData
 KoroData1aar <- KoroData[KoroData$InnDato >= as.Date(datoFra1aar), ]
 
@@ -99,17 +104,15 @@ for (valgtVar in variabler) {
 variabler <- c('respSviktInn', 'respSviktUt', 'risikoInn', 'sirkSviktInn', 'sirkSviktUt', 'tilstandInn')
 for (valgtVar in variabler) {
    KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
-                    datoTil='2022-03-31', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
+                    datoTil='2022-04-11', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
 }
 
-#Kun for 2020 - 1.kvartal 2022 - MÅ OPPDATERE MED Antimykotisk behandling
-variabler <-c('antibiotikaInn', 'antibiotikaUt')
+#Kun for 2020 - 1.kvartal 2022
+variabler <- c('antibiotikaInn', 'antibiotikaUt')
 for (valgtVar in variabler) {
    KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
-                    datoTil='2022-03-31', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
+                    datoTil='2022-04-11', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
 }
-
-
 
 #----------------Alle figurer, tidsuvikling, basert på smitteforløp-----------------
 variabler <- c('alder_u18', 'alder_u40', 'alder_o60', 'alder_o80', 'beredPas', 'dodSh',
@@ -122,7 +125,7 @@ for (valgtVar in variabler) {
 
 KoronaFigAndelTid(RegData=KoroData, valgtVar='risikoInn', datoTil = '2022-03-31',
                   tidsenhet = 'Kvartal', aarsakInn=1,
-                  outfile = paste0('KoronaUtvTid_', valgtVar, '.pdf'))
+                  outfile = paste0('KoronaUtvTid_risikoInn.pdf'))
 
 
 #--------------------Testing-----------------------------

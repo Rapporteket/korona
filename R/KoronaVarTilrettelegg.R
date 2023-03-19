@@ -271,21 +271,16 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         statusUt <- 2
         variable <- paste0('Uts', c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
                       'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
-                      'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika'))
+                      'Karbapenem', 'Makrolid', 'Antifungalbehandling',
+                      'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika'))
         grtxt <- c('Penicillin', 'Penicillin m/enzymhemmer', 'Aminoglykosid',
                    '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
-                   'Karbapenem', 'Makrolid', 'Annet', 'Ukjent type', 'Antibiotika, tot.')
-        #Trenger bare kode om Antibiotika tot.:
+                   'Karbapenem', 'Makrolid', 'Antimykotisk beh.',
+                   'Annet', 'Ukjent type', 'Antibiotika, tot.')
+        #Må kode om :
         RegData$UtsAntibiotika <- ifelse(RegData$UtsAntibiotika==1, TRUE, FALSE)
-        #ind01 <- which(RegData[ ,variable] %in% ..., arr.ind = T) #Alle ja/nei
-        #ind1 <- which(RegData[ ,variable] == TRUE, arr.ind=T) #Ja i alle variable
-        #Kodes om til indikatorvariabel:
-        #RegData[ ,variable] <- NA
-        #RegData[ ,variable][ind01] <- 0
-        #RegData[ ,variable][ind1] <- 1
+        RegData$UtsAntifungalbehandling <- ifelse(RegData$UtsAntifungalbehandling==1, TRUE, FALSE)
         xAkseTxt <- 'Andel pasienter (%)'
-        #Beregne direkte:
-        #apply(RegData[,variable], MARGIN=2, FUN=function(x) sum(x %in% 0:1))
       }
 
 

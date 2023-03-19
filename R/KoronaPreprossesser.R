@@ -257,7 +257,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 RHFresh = dplyr::first(RHFresh, order_by = FormDate),
                 RontgenThorax = RontgenThorax[1], #1-5...?
                 Royker = sum(Royker)>0,
-                #Sykehus"
                 TredjeGencefalosporin = sum(TredjeGencefalosporin)>0,
                 UtsAkuttNyresvikt = JaNeiUkjVar(UtsAkuttNyresvikt),  #1-ja, 2-nei, 3-ukjent
                 UtsAkuttRespirasjonsvikt = SviktVar(UtsAkuttRespirasjonsvikt), #1-nei, 2:5-ja, 999-ukjent
@@ -267,8 +266,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 UtsAntibiotika = UtsAntibiotika[1], #1-ja, 2-nei, 3-ukjent
                 UtsAntibiotikaAnnet = sum(UtsAntibiotikaAnnet)>0,
                 UtsAntibiotikaUkjent = sum(UtsAntibiotikaUkjent)>0,
-                #?Antifungalbehandling = Antifungalbehandling[1], #1-ja, 2-nei, 3-ukjent
-                #?AntiviralBehandling"
                 UtsAntifungalbehandling = JaNeiUkjVar(UtsAntifungalbehandling), #1-ja, 2-nei, 3-ukjent
                 UtsAntiviralBehandling = JaNeiUkjVar(UtsAntiviralBehandling),  #1-ja, 2-nei, 3-ukjent
                 UtsKarbapenem = sum(UtsKarbapenem)>0,
@@ -277,7 +274,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 UtsPenicillin = sum(UtsPenicillin)>0,
                 UtsPenicillinEnzymhemmer = sum(UtsPenicillinEnzymhemmer)>0,
                 UtsTredjeGencefalosporin = sum(UtsTredjeGencefalosporin)>0,
-                #HovedskjemaGUID
                 #OverfortAnnetSykehusUtskrivning #1-ja, 2-nei
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
                 #Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død

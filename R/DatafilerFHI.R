@@ -2,14 +2,15 @@
 
 #' Henter data og tilrettelegger filer for overføring til FHI
 #'
-#' @return
+#' @return datafiler
 #' @export
 #'
-lagDatafilerTilFHI <- function(){
-#Rådata
-library(korona) #  library(tidyverse) #
+lagDatafilerTilFHIgml <- function(){
 
-  RegDataRaa <- KoronaDataSQL() #KoroDataRaa
+  #Rådata
+library(korona)
+
+  RegDataRaa <- KoronaDataSQL()
 varFHIraa <- c(
   #PasientGUID',
                 'PersonIdBC19Hash'
@@ -74,15 +75,11 @@ varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
               'AntInnSkjema', 'ReinnTid', 'ReinnNaar', 'ArsakInnNy')
 #setdiff(varFHIpp, names(RegData))
 PandemiDataPpFHI <- RegData[ ,varFHIpp]
-# write.table(PandemiDataPpFHI, file = paste0('A:/Pandemi/PandemiDataPpFHI', Sys.Date(), '.csv'),
-#             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
 #---------Beredskap--------------
 
 library(intensivberedskap)
-# BeredskapData <-read.table('A:/intensiv/ReadinessFormDataContract2020-04-29.csv', sep=';',
-#                           stringsAsFactors=FALSE, header=T, encoding = 'UTF-8')
-#setdiff(varFHIraa, sort(names(BeredskapData)))
+
 RegDataRaa <- NIRberedskDataSQL() #BeredskapData #
 varFHIraa <- c(
    'PersonIdBC19Hash', #  'PatientInRegistryGuid'
@@ -123,7 +120,7 @@ varFHIraa <- c(
  ) #De nye variablene må enten legges til i varBort, eller FHI må varsles om at de kommer på ny plass i den aggregerte fila
 BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 #setdiff(varFHIraa, names(RegDataRaa))
-# write.table(BeredskapDataRaaFHI, file = paste0('A:/Pandemi/BeredskapDataRaaFHI', Sys.Date(), '.csv'),
+# write.table(BeredskapDataRaaFHI, file = paste0('BeredskapDataRaaFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
 RegData <- NIRPreprosessBeredsk(RegData=RegDataRaa, tellFlereForlop = 1)
@@ -136,10 +133,14 @@ varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
               'AgeAdmitted')
 BeredskapDataPpFHI <- RegData[ ,varFHIpp]
 #setdiff(varFHIpp, sort(names(RegData)))
-# write.table(BeredskapDataPpFHI, file = paste0('A:/Pandemi/BeredskapDataPpFHI', Sys.Date(), '.csv'),
+# write.table(BeredskapDataPpFHI, file = paste0('BeredskapDataPpFHI', Sys.Date(), '.csv'),
 #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
 InfluensaDataRaaFHI <- korona::lagInfluDataFHI()
+PandemiDataRaaFHI = PandemiDataRaaFHI
+PandemiDataPpFHI = PandemiDataPpFHI
+BeredskapDataRaaFHI = BeredskapDataRaaFHI
+BeredskapDataPpFHI = BeredskapDataPpFHI
 
 UtData <- list(PandemiDataRaaFHI = PandemiDataRaaFHI, PandemiDataPpFHI = PandemiDataPpFHI,
                BeredskapDataRaaFHI = BeredskapDataRaaFHI, BeredskapDataPpFHI = BeredskapDataPpFHI,

@@ -8,6 +8,33 @@ RegData <- Pandemi
 DataBeredRaa <- NIRberedskDataSQL()
 DataBered <- NIRPreprosessBeredsk(DataBeredRaa)
 
+#Test av hentDatafiler til FHI
+#Kjørende versjon:
+dataNaa <- lagDatafilerTilFHI()
+dataNy <- lagDatafilerTilFHI()
+
+PandPpNaa <- dataNaa$PandemiDataPpFHI
+PandPpNy <- dataNy$PandemiDataPpFHI
+
+BeredPpNaa <- dataNaa$BeredskapDataPpFHI
+BeredPpNy <- dataNy$BeredskapDataPpFHI
+
+IntNaa <- dataNaa$InfluensaDataRaaFHI
+IntNy <- dataNaa$InfluensaDataRaaFHI
+
+data2levering <- lagDatafilerTilFHI(personIDvar = 'PersonId',
+                                    bered=1,
+                                    pand=1,
+                                    influ=0)
+PandPp2 <- data2levering$PandemiDataPpFHI
+BeredPp2 <- data2levering$BeredskapDataPpFHI
+PandPp2$Per
+
+
+
+
+
+
 PasientID == "4442C54B-848C-EB11-A970-00155D0B4E21"
 RegData[RegData$PatientInRegistryGuid == "4442C54B-848C-EB11-A970-00155D0B4E21",]
 
