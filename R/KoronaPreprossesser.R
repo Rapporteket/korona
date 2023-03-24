@@ -18,10 +18,10 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
    #------Preprosessering-------
 
   ReshNivaa <- korona::ReshNivaa
-  if (aggPers==0 & tellFlereForlop==1){
-     warning('Ugyldig kombinasjon: aggPers==0 & tellFlereForlop==1. "tellFlereForlop" endres til 0')
-     tellFlereForlop <- 0
-  }
+  # if (aggPers==0 & tellFlereForlop==1){ NEI: Kan godt endre personid slik at endres til smitteforløp.
+  #    warning('Ugyldig kombinasjon: aggPers==0 & tellFlereForlop==1. "tellFlereForlop" endres til 0')
+  #    tellFlereForlop <- 0
+  # }
   # Endre variabelnavn:
   names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
   names(RegData)[which(names(RegData) == 'UnitId')] <- 'ReshId'
@@ -138,6 +138,31 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
      as.POSIXct(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
                                          units = "days")) #Bare for utskrevne pasienter
 
+
+  #Identifisere pasienter med flere innleggelser (var tidligere plassert i aggPers=1)
+  if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
+
+    RegData$Dato <- as.Date(RegData$FormDate)
+    RegData$PasientIDgml <- RegData$PasientID
+    #Identifiserer inntil 5 forløp
+    PasFlere <- RegData %>% dplyr::group_by(PasientIDgml) %>%
+      dplyr::reframe(         #summarise(.groups = 'drop',
+        SkjemaGUID = SkjemaGUID,
+        InnNrDum1 = ifelse(Dato-min(Dato)>90, 2, 1),
+        InnNrDum2 = ifelse(InnNrDum1>1, ifelse(Dato - min(Dato[InnNrDum1==2])>90, 3, 2), 1),
+        InnNrDum3 = ifelse(InnNrDum2>2, ifelse(Dato - min(Dato[InnNrDum2==3])>90, 4, 3), InnNrDum2),
+        InnNr   =   ifelse(InnNrDum3>3, ifelse(Dato - min(Dato[InnNrDum3==4])>90, 5, 4), InnNrDum3),
+        PasientID = paste0(PasientID, '_', InnNr)
+        #Tid = as.numeric(Dato-min(Dato))
+      )
+    #Test <- RegData[which(RegData$PasientIDgml == PasFlere$PasientIDgml[PasFlere$InnNr==4]), c("PasientID", 'FormDate', "ReshId")]
+
+    RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")],
+                     PasFlere[ ,c("SkjemaGUID", "InnNr", "PasientID")],
+                     by='SkjemaGUID')
+  }
+
+
 #------SLÅ SAMMEN TIL PER PASIENT--------------
   if (aggPers == 1) {
     #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
@@ -153,37 +178,14 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
         sum(x == 1) == N ~ 1, #alle
         dplyr::last(x, order_by = FormDate) == 1  ~ 2, #siste, men ikke alle
         1 %in% x  ~ 3,      #Minst ett, ikke siste alle
-        #sum(x == 1) == N ~ 1,
         sum(x == 2) == N  ~ 4, #Ingen
         (sum (x == 3) == N) | (sum(x == -1))  ~ 9 #Ukjent
       )}
 
-    #Identifisere pasienter med flere innleggelser
-    if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
-
-      RegData$Dato <- as.Date(RegData$FormDate)
-      RegData$PasientIDgml <- RegData$PasientID
-      #Identifiserer inntil 5 forløp
-      PasFlere <- RegData %>% dplyr::group_by(PasientIDgml) %>%
-        dplyr::summarise(.groups = 'drop',
-                  SkjemaGUID = SkjemaGUID,
-                  InnNrDum1 = ifelse(Dato-min(Dato)>90, 2, 1),
-                  InnNrDum2 = ifelse(InnNrDum1>1, ifelse(Dato - min(Dato[InnNrDum1==2])>90, 3, 2), 1),
-                  InnNrDum3 = ifelse(InnNrDum2>2, ifelse(Dato - min(Dato[InnNrDum2==3])>90, 4, 3), InnNrDum2),
-                  InnNr   =   ifelse(InnNrDum3>3, ifelse(Dato - min(Dato[InnNrDum3==4])>90, 5, 4), InnNrDum3),
-                  PasientID = paste0(PasientID, '_', InnNr)
-                  #Tid = as.numeric(Dato-min(Dato))
-        )
-      # Test <- RegData[which(RegData$PasientIDgml.x == PasFlere$PasientIDgml[PasFlere$InnNr==5]),
-      #                 c("PasientID", 'FormDate', "ReshId")]
-
-      RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")],
-                       PasFlere[ ,c("SkjemaGUID", "InnNr", "PasientID")],
-                       by='SkjemaGUID')
-    }
 
     RegDataRed <- RegData %>% dplyr::group_by(PasientID) %>%
-      dplyr::summarise(PersonId = PersonId[1],
+      dplyr::summarise(
+                PersonId = PersonId[1],
                 PersonIdBC19Hash = PersonIdBC19Hash[1],
                 Alder = Alder[1],
                 AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
@@ -202,10 +204,9 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
                 CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
                 ArsakInnNy = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate),
-                #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 4-nei, ingen opph, 9-ukj
+                      #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 4-nei, ingen opph, 9-ukj
                 ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
                 Astma = sum(Astma)>0,
-                #Bilirubin,
                 BMI = sort(BMI, decreasing = T)[1],
                 CreationDate =  dplyr::first(CreationDate, order_by = FormDate),
                 CreationDateUt =  dplyr::last(CreationDateUt, order_by = FormDateUt),
@@ -224,7 +225,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 HF = dplyr::first(HF, order_by = FormDate),
                 HFlang = dplyr::first(HFlang, order_by = FormDate),
                 HFresh = dplyr::first(HFresh, order_by = FormDate),
-                #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
                 Isolert = JaNeiUkjVar(Isolert), #1-ja, 2-nei, 3-ukjent
                 InnNr = max(InnNr),

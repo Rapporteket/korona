@@ -57,13 +57,6 @@ KoroDataInn$Aar <- substr(KoroDataInn$FormDate, 1,4)
 table(KoroDataInn[KoroDataInn$ArsakInnleggelse==1, c('Aar', 'Isolert')])
 table(KoroDataInn$Aar)
 
-test <- RegData[, c("PatientInRegistryGuid", "FormDate", "HelseenhetKortNavn", "UnitId",
-                    'SkjemaGUID', "FormDateUt", 'SkjemaGUIDut')]
-
-RegDataRed <- KoroData %>% dplyr::group_by(PersonId) %>%
-   dplyr::summarise(
-Isolert = JaNeiUkjVar(Isolert)
-)
 
 #AkuttRespirasjonsvikt, AkuttSirkulasjonsvikt, ja:2:5, nei:1
 #AkuttNyresvikt, EndretBevissthet, Isolert, ja:1, nei:2

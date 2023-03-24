@@ -558,8 +558,7 @@ tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa, co
 
   #Identifiserer inntil 3 forløp
   PasFlere <- RegData %>% dplyr::group_by(PersonId) %>%
-    dplyr::summarise(.groups = 'drop',
-                     SkjemaGUID = SkjemaGUID,
+    dplyr::reframe(SkjemaGUID = SkjemaGUID,
                      InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
                      InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
                      PersonId_sforl = paste0(PersonId, '_', InnNr)
@@ -572,7 +571,7 @@ tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa, co
     Tab <- as.data.frame(
       RegData %>%
         dplyr::group_by(Enhetsnivaa)%>%
-        summarise(
+        dplyr::summarise(
           AntOpph = n(),
           AntSforl = length(unique(PersonId_sforl)),
           AntPas = length(unique(PersonId))

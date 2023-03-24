@@ -651,22 +651,8 @@ server <- function(input, output, session) {
       h2(HTML(txt), style = "color:red")
    )
 
-   #Telle pasienter med flere forløp
-   # KoroDataOpph$Dato <- as.Date(KoroDataOpph$FormDate)
-   # PasFlere <- KoroDataOpph %>% group_by(PasientID) %>%
-   #    dplyr::summarise(.groups = 'drop',
-   #                     InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
-   #                     InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
-   #                     PasientID = paste0(PasientID, '_', InnNr),
-   #                     CovidAarsak = ifelse(sum(ArsakInnleggelse==1)>0, 1, 0),
-   #                     CovidAarsakAlle = ifelse(sum(ArsakInnleggelse==n())>0, 1, 0)
-   #    )
-   # antPasFlereForlAlle <- length(unique(PasFlere$PasientID[PasFlere$InnNr > 1])) #sum(InnNr0>1))
-   # antPasFlereForl <- length(unique(PasFlere$PasientID[PasFlere$CovidAarsak==1 & PasFlere$InnNr > 1])) #sum(InnNr0>1))
-#Antall forløp telles nå i preprosesseringa
    antPasFlereForlAlle <- sum(KoroData$InnNr>1)
    antPasFlereForlCov <-  sum(KoroData$ArsakInnNy %in% 1:3 & KoroData$InnNr>1)
-
 
    output$antFlereForl <- renderUI(h5(HTML(paste0('De fleste resultater er basert på at opphold for hver pasient er
    aggregert til ett smitteforløp.

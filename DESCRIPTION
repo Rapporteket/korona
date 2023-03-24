@@ -27,7 +27,7 @@ Imports:
     knitr,
     magrittr,
     lubridate,
-    plyr,
+    dplyr,
     rapbase,
     rapFigurer,
     raplog,

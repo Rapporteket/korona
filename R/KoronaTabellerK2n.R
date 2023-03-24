@@ -274,11 +274,8 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
           dag = datoer <- unique(format(datoer, '%d.%m.%y')),
                     uke = datoer <- unique(paste0('U', format(datoer, '%V.%Y'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
-  #if (tidsenhet %in% c("dag", "uke", "maaned")) {
     names(datoer) <- datoer
-  #}
 
-  # if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$InnDato >= datoFra, ]}
   #Trenger utvalg når totalen ikke er summen av det som vises.
   RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   } else {
