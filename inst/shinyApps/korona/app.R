@@ -551,7 +551,7 @@ ui <- tagList(
                                   downloadButton(outputId = 'lastNed_dataPandemiRaa',
                                                  label='Last ned ubesudlede pandemidata', class = "butt"),
                                   downloadButton(outputId = 'lastNed_dataPandemiPas',
-                                                 label='Last ned pandemidata, pasientaggregert', class = "butt"),
+                                                 label='Last ned data aggregert til smitteforløp', class = "butt"),
                                   br(),
                                   br(),
                                   br(),

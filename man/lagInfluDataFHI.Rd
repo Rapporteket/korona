@@ -4,7 +4,7 @@
 \alias{lagInfluDataFHI}
 \title{Henter data og velger variabler for overføring til FHI}
 \usage{
-lagInfluDataFHI()
+lagInfluDataFHI(personIDvar = "PersonIdBC19Hash")
 }
 \value{
 #Influensadata tilrettelagt for FHI

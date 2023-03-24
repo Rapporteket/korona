@@ -55,10 +55,11 @@ return(UtData)
 
 #' Henter data og velger variabler for overføring til FHI
 #'
+#' @inheritParams lagDatafilerTilFHI
 #' @return Pandemidata tilrettelagt for FHI
 #' @export
 #'
-hentPandemiDataFHI <- function(personIDvar='PersonIdBC19Hash'){
+hentPandemiDataFHI <- function(personIDvar='PersonIdBC19Hash', raa=1, aggP=1 ){
 
 RegDataRaa <- korona::KoronaDataSQL()
 
@@ -111,22 +112,26 @@ varFHIraa <- c(
 PandemiDataRaaFHI <- RegDataRaa[,varFHIraa]
 
 
+if (aggP == 1){
+   #Preprossesserte data
+   RegData <- korona::KoronaPreprosesser(RegDataRaa, tellFlereForlop = 1)
+   varBort <- c('PatientAge', 'PatientGender',
+                'Vekt', 'VektUkjent', 'Hoyde', 'HoydeUkjent',
+                "CreationDate", "CreationDateUt", "FirstTimeClosed", "FirstTimeClosedUt",
+                'FoerstePositivProeve')
+   varNy <- c('Alder', 'erMann', 'BMI', 'Reinn', 'FormDateSiste', 'Liggetid')
+   varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
+                 'AntInnSkjema', 'ReinnTid', 'ReinnNaar', 'ArsakInnNy')
+   PandemiDataPpFHI <- RegData[ ,varFHIpp]
+}
 
-#Preprossesserte data
-RegData <- korona::KoronaPreprosesser(RegDataRaa, tellFlereForlop = 1)
-varBort <- c('PatientAge', 'PatientGender',
-             'Vekt', 'VektUkjent', 'Hoyde', 'HoydeUkjent',
-             "CreationDate", "CreationDateUt", "FirstTimeClosed", "FirstTimeClosedUt",
-             'FoerstePositivProeve')
-varNy <- c('Alder', 'erMann', 'BMI', 'Reinn', 'FormDateSiste', 'Liggetid')
-varFHIpp <- c(varNy, varFHIraa[-which(varFHIraa %in% varBort)],
-              'AntInnSkjema', 'ReinnTid', 'ReinnNaar', 'ArsakInnNy')
-PandemiDataPpFHI <- RegData[ ,varFHIpp]
-
-
-UtData <- list(
-   PandemiDataRaaFHI = PandemiDataRaaFHI,
-   PandemiDataPpFHI = PandemiDataPpFHI)
+UtData <- NULL
+if (raa==1){
+   UtData <- append(UtData,
+                    list(PandemiDataRaaFHI = PandemiDataRaaFHI))}
+if (aggP==1) {
+   UtData <- append(UtData,
+                    list(PandemiDataPpFHI = PandemiDataPpFHI))}
 
 return(UtData)
 }
@@ -135,10 +140,11 @@ return(UtData)
 
 #' Henter data og velger variabler for overføring til FHI
 #'
+#' @inheritParams lagDatafilerTilFHI
 #' @return Beredskapsdata tilrettelagt for FHI
 #' @export
 #'
-hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash'){
+hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash', raa=1, Pagg=1){
 
    RegDataRaa <- intensivberedskap::NIRberedskDataSQL() #BeredskapData #
 
@@ -183,7 +189,7 @@ hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash'){
       BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
 
 
-
+if (aggP==1) {
    RegData <- intensivberedskap:: NIRPreprosessBeredsk(RegData=RegDataRaa, tellFlereForlop = 1)
    varBort <- c('AgeAdmitted','PatientAge', 'PatientGender', 'Diagnosis', 'DateAdmittedIntensive',
                 'CreationDate', 'FirstTimeClosed', 'DaysAdmittedIntensiv') #'PatientInRegistryGuid',
@@ -196,9 +202,14 @@ hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash'){
    #setdiff(varFHIpp, sort(names(RegData)))
    # write.table(BeredskapDataPpFHI, file = paste0('BeredskapDataPpFHI', Sys.Date(), '.csv'),
    #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
-
-   UtData <- list(BeredskapDataRaaFHI = BeredskapDataRaaFHI,
-                  BeredskapDataPpFHI = BeredskapDataPpFHI)
+}
+      UtData <- NULL
+      if (raa==1){
+      UtData <- append(UtData,
+                       list(BeredskapDataRaaFHI = BeredskapDataRaaFHI))}
+      if (aggP==1) {
+         UtData <- append(UtData,
+                          list(BeredskapDataPpFHI = BeredskapDataPpFHI))}
    return(UtData)
 }
 
@@ -210,20 +221,23 @@ hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash'){
 #' @param bered hente beredskapsdata? 1-ja (standard), 0-nei
 #' @param pand hente pandemidata? 1-ja (standard), 0-nei
 #' @param influ hente influensadata? 1-ja (standard), 0-nei
+#' @param raa hente rådata= 1-ja (standard), 0-nei
+#' @param aggP hente persondata aggregert til smitteforløp? 1-ja (standard), 0-nei
 #'
 #' @return datafiler samlet i ei liste
 #' @export
 lagDatafilerTilFHI <- function(personIDvar='PersonIdBC19Hash',
-                               bered=1, pand=1, influ=1){
+                               bered=1, pand=1, influ=1,
+                               raa=1, Pagg=1){
 
   UtData <- NULL
   if (pand==1) {
-    dataPandemi <- korona::hentPandemiDataFHI(personIDvar=personIDvar)
+    dataPandemi <- korona::hentPandemiDataFHI(personIDvar=personIDvar, raa=raa, Pagg=Pagg)
     UtData <- append(UtData,
                      dataPandemi)
                      }
   if (bered==1) {
-    dataBered <- korona::hentBeredDataFHI(personIDvar=personIDvar)
+    dataBered <- korona::hentBeredDataFHI(personIDvar=personIDvar, raa=raa, Pagg=Pagg)
     UtData <- append(UtData,
                      dataBered)
   }

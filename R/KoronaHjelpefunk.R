@@ -242,7 +242,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 #' @param datoer datoer som inneligging skal avgjøres for
 #' @param regdata Dataramme som inneholder InnDato og Utdato per pasient
 #'
-#' @return
+#' @return antall inneliggende på gitte datoer
 #' @export
 erInneliggende <- function(datoer, regdata){
   # regnes som inneliggende på aktuell dato hvis den faller mellom inn- og utdato eller

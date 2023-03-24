@@ -6,6 +6,9 @@
 \usage{
 lagInfluDataFHI_flyttet()
 }
+\value{
+data
+}
 \description{
 Henter data og velger variabler for overføring til FHI
 }

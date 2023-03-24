@@ -39,6 +39,9 @@ antallTidBelegg(
 
 \item{valgtEnhet}{NULL for SC-bruker, ellers eget RHF/HF}
 }
+\value{
+belegg
+}
 \description{
 Belegg per tidsenhet  og HF. Filtreringer kan også gjøres.
 Detaljerinsnivå er styrt av tilgangsnivå

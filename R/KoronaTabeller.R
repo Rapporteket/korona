@@ -178,7 +178,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' Ferdigstilte registreringer, utskrevne pasienter
 #' @param RegData korona-registreringer
 #' @inheritParams KoronaUtvalg
-#' @return
+#' @return Oppsummeringstabell
 #' @export
 FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                           minN=0,
@@ -255,7 +255,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' @param sens 0: standard, 1: Maskere verdier <3
 #' @inheritParams KoronaUtvalg
 #' @export
-#' @return
+#' @return Tabell med risikofaktorer
 RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
                          erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
                          sens=0,
@@ -313,11 +313,11 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
 
 
 
-#' Aldersfordeling, tabell
+#' Aldersfordeling, tabell.
 #' @param RegData datatabell, beredskapsdata
 #' @inheritParams KoronaUtvalg
 #' @param enhetsNivaa styres av tilgangsnivå 'Alle', 'RHF', 'HF'
-#' @return
+#' @return Tabell med aldersfordeling
 #' @export
 AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', minN=0,
                      skjemastatusInn=9,  aarsakInn=9, dodSh=9, erMann=9){
@@ -415,7 +415,7 @@ lagTabavFigFord <- function(UtDataFraFig){
 #' @param valgtEnhet egen/valgt enhet
 #' @param enhetsNivaa eget/valgt enhetsnivå
 #'
-#' @return
+#' @return innskjema uten utskjema
 #' @export
 innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
   RegData <- KoronaPreprosesser(RegData, aggPers = 0)
@@ -433,8 +433,7 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
 #' Tabell med oversikt over hvilke beredskapsskjema som mangler pandemiskjema
 #'
 #' @param datoFra - startdato for innleggelse på intensiv
-#'
-#' @return
+#' @return Beredskapsskjema som mangler pandemiskjema
 #' @export
 #'
 finnBeredUpandemi <- function(datoFra='2020-01-01', datoTil=Sys.Date(), HF='Alle', ...){
@@ -499,7 +498,7 @@ finnBeredUpandemi <- function(datoFra='2020-01-01', datoTil=Sys.Date(), HF='Alle
 #' @param RegData dataramme fra pandemi registeret, inn og utskr.skjema
 #' @param tidssavik - maks tidsavvik (minutter) mellom to påfølgende registreringer som sjekkes
 #'
-#' @return
+#' @return dobbeltregistrering av inn-skjema
 #' @export
 PasMdblReg <- function(RegData, tidsavvik=0){
   DblReg <- RegData %>% group_by(PersonId) %>%
@@ -531,7 +530,7 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 }
 
 
-#' Antall personer, smitteforløp, opphold i samme tabell per HF
+#' Antall personer, smitteforløp, opphold i samme tabell per enhetsnivå
 #'
 #' @param RegData dataramme, ikke-aggregerte opphold
 #' @param datoFra startdato
@@ -539,7 +538,7 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 #' @param enhetsNivaa 'HF' eller 'RHF'
 #' @param covidInn covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei
 #'
-#' @return
+#' @return Personer, smitteforløp og opphold per enhetsnivå
 #' @export
 #'
 tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa, covidInn=0){

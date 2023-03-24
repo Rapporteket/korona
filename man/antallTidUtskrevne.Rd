@@ -38,6 +38,9 @@ antallTidUtskrevne(
 
 \item{valgtEnhet}{NULL for SC-bruker, ellers eget RHF/HF}
 }
+\value{
+antall utskrevne per tidsenhet
+}
 \description{
 Antall utskrevne per tidsenhet (basert på avdøddato) og enhetsnivå. Filtreringer kan også gjøres.
 Detaljerinsnivå er styrt av tilgangsnivå

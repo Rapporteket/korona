@@ -35,6 +35,9 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 
 \item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 }
+\value{
+Oppsummeringstabell
+}
 \description{
 Ferdigstilte registreringer, utskrevne pasienter
 }

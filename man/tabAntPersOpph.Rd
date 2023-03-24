@@ -2,7 +2,7 @@
 % Please edit documentation in R/KoronaTabeller.R
 \name{tabAntPersOpph}
 \alias{tabAntPersOpph}
-\title{Antall personer, smitteforløp, opphold i samme tabell per HF}
+\title{Antall personer, smitteforløp, opphold i samme tabell per enhetsnivå}
 \usage{
 tabAntPersOpph(
   RegData,
@@ -23,6 +23,9 @@ tabAntPersOpph(
 
 \item{covidInn}{covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei}
 }
+\value{
+Personer, smitteforløp og opphold per enhetsnivå
+}
 \description{
-Antall personer, smitteforløp, opphold i samme tabell per HF
+Antall personer, smitteforløp, opphold i samme tabell per enhetsnivå
 }

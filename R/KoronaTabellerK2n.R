@@ -10,7 +10,7 @@
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return antall døde per tidsenhet
 #' @export
 antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
                             datoFra=0, datoTil=Sys.Date(),
@@ -97,7 +97,7 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return antall utskrevne per tidsenhet
 #' @export
 antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
                                datoTil=Sys.Date(), skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
@@ -207,7 +207,7 @@ tr_summarize_output <- function(x, grvarnavn=''){
 #' @param aarsakInn 1-ja, 2-nei, 9-alle reg
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return antall inneliggende per tidsenhet
 #' @export
 antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
                                   datoFra=0, datoTil=Sys.Date(),
@@ -334,7 +334,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return belegg
 #' @export
 antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
                             datoFra = 0, datoTil = Sys.Date(),

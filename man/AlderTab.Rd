@@ -2,7 +2,7 @@
 % Please edit documentation in R/KoronaTabeller.R
 \name{AlderTab}
 \alias{AlderTab}
-\title{Aldersfordeling, tabell}
+\title{Aldersfordeling, tabell.}
 \usage{
 AlderTab(
   RegData,
@@ -31,6 +31,9 @@ AlderTab(
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 }
+\value{
+Tabell med aldersfordeling
+}
 \description{
-Aldersfordeling, tabell
+Aldersfordeling, tabell.
 }

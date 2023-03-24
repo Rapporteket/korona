@@ -8,17 +8,24 @@ lagDatafilerTilFHI(
   personIDvar = "PersonIdBC19Hash",
   bered = 1,
   pand = 1,
-  influ = 1
+  influ = 1,
+  raa = 1,
+  Pagg = 1
 )
 }
 \arguments{
-\item{personIDvar}{angi variabel for personid}
+\item{personIDvar}{angi variabel for personid
+'PersonIdBC19Hash' - standard, 'PersonId' - alternativ}
 
 \item{bered}{hente beredskapsdata? 1-ja (standard), 0-nei}
 
 \item{pand}{hente pandemidata? 1-ja (standard), 0-nei}
 
 \item{influ}{hente influensadata? 1-ja (standard), 0-nei}
+
+\item{raa}{hente rådata= 1-ja (standard), 0-nei}
+
+\item{aggP}{hente persondata aggregert til smitteforløp? 1-ja (standard), 0-nei}
 }
 \value{
 datafiler samlet i ei liste

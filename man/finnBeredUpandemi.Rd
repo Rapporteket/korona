@@ -14,6 +14,9 @@ finnBeredUpandemi(
 \arguments{
 \item{datoFra}{- startdato for innleggelse på intensiv}
 }
+\value{
+Beredskapsskjema som mangler pandemiskjema
+}
 \description{
 Tabell med oversikt over hvilke beredskapsskjema som mangler pandemiskjema
 }
