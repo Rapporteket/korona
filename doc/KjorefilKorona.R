@@ -8,6 +8,35 @@ RegData <- Pandemi
 DataBeredRaa <- NIRberedskDataSQL()
 DataBered <- NIRPreprosessBeredsk(DataBeredRaa)
 
+
+
+JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
+#Variabler med 1-nei, 2:5 ja, 999 ukjent. Velger mest alvorlige (høyeste) nivå. Ikke utfylt får også ukjent
+SviktVar <- function(x) {
+  test <- x %in% 1:5
+  ifelse(sum(test)>0, max(x[test]), 999)} #1-nei, 2:5 ja, 999 ukjent.
+
+
+Aarsak <- function(x, N, FormDate) {
+  dplyr::case_when(
+    sum(x == 1) == N ~ 1, #alle
+    dplyr::last(x, order_by = FormDate) == 1  ~ 2, #siste, men ikke alle
+    1 %in% x  ~ 3,      #Minst ett, ikke siste alle
+    sum(x == 2) == N  ~ 4, #Ingen
+    (sum (x == 3) == N) | (sum(x == -1))  ~ 9 #Ukjent
+  )}
+
+
+#aarsakInn covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
+# 3-ja, minst ett opph, 4-nei, ingen opph, 9-ukj
+
+RegDataRed <- RegData %>% dplyr::group_by(PasientID) %>%
+  dplyr::summarise(
+    AntInnSkjema = dplyr::n(),
+    ArsakInnNy = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate)
+#1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 4-nei, ingen opph, 9-ukj
+)
+
 #Test av hentDatafiler til FHI
 #Kjørende versjon:
 dataNaa <- lagDatafilerTilFHI()
@@ -56,6 +85,49 @@ KoroData <- merge(KoroDataInn, KoroDataUt, suffixes = c('','Ut'),
 KoroDataInn$Aar <- substr(KoroDataInn$FormDate, 1,4)
 table(KoroDataInn[KoroDataInn$ArsakInnleggelse==1, c('Aar', 'Isolert')])
 table(KoroDataInn$Aar)
+
+
+
+# PANDEMI - oppdater til dplyr 1.1.0
+# mutate() requires that each argument returns the same number of rows as the input,
+# summarise() requires that each argument returns a single value, and
+# Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in dplyr 1.1.0.
+# reframe() is a more general workhorse with no requirements on the number of rows returned per group. Please use `reframe()` instead.
+
+# When switching from `summarise()` to `reframe()`, remember that `reframe()`  always returns an ungrouped data frame and adjust accordingly.
+
+
+load('d:/mydata/RegDataKoro.RData')
+RegData <- RegDataKoro
+RegData$Dato <- as.Date(RegData$FormDate)
+RegData$PasientIDgml <- RegData$PasientID
+
+Foer <- Sys.time()
+PasFlere <- RegData %>% dplyr::group_by(PasientIDgml) %>%
+  dplyr::reframe(SkjemaGUID = SkjemaGUID,
+                 InnNrDum1 = ifelse(Dato-min(Dato)>90, 2, 1),
+                 InnNrDum2 = ifelse(InnNrDum1>1, ifelse(Dato - min(Dato[InnNrDum1==2])>90, 3, 2), 1),
+                 InnNrDum3 = ifelse(InnNrDum2>2, ifelse(Dato - min(Dato[InnNrDum2==3])>90, 4, 3), InnNrDum2),
+                 InnNr   =   ifelse(InnNrDum3>3, ifelse(Dato - min(Dato[InnNrDum3==4])>90, 5, 4), InnNrDum3),
+                 PasientID = paste0(PasientID, '_', InnNr)
+                 #Tid = as.numeric(Dato-min(Dato))
+  )
+(Tidsbruk <- Sys.time() - Foer)
+table(PasFlere$InnNr)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #AkuttRespirasjonsvikt, AkuttSirkulasjonsvikt, ja:2:5, nei:1

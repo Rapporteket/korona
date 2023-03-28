@@ -245,28 +245,6 @@ ui <- tagList(
                               tableOutput('tabAntOpphEnhTid')
                            )
                   ),
-                  tabPanel("Ant.forløp",
-                           sidebarPanel(
-                              selectInput(inputId = 'enhetsNivaaForl', label='Velg enhetsnivå',
-                                          choices = c("Sykehus"='ShNavn',
-                                                      'HF' = 'HF',
-                                                      'RHF' = 'RHF'),
-                                          selected = 'HF'
-                              ),
-                           selectInput(inputId = "aarsakInnForl", label="Covid-19 som hovedårsak til innleggelse?",
-                                       choices = c('Alle registreringer' = 0,
-                                                   'Ja, alle opphold' = 1,
-                                                   'Nei, ingen opphold' = 2)
-                           ),
-                              dateRangeInput(inputId = "valgtDatoForl", label = "Tidsperiode",
-                                             start = startDato, end = Sys.Date(),
-                                             separator="t.o.m.", language="nb")
-                           ),
-                           mainPanel(
-                              h3('Antall opphold og pasienter per enhet'),
-                              tableOutput('tabAntForlEnh')
-                           )
-                  ),
                   tabPanel("Belegg",
                            koronabelegg_UI("koronabelegg_id")
                   ),
@@ -543,7 +521,28 @@ ui <- tagList(
                               tableOutput('TabintUPan')
                            )
                   ),
-
+                  tabPanel("Ant.forløp",
+                           sidebarPanel(
+                              selectInput(inputId = 'enhetsNivaaForl', label='Velg enhetsnivå',
+                                          choices = c("Sykehus"='ShNavn',
+                                                      'HF' = 'HF',
+                                                      'RHF' = 'RHF'),
+                                          selected = 'HF'
+                              ),
+                              selectInput(inputId = "aarsakInnForl", label="Covid-19 som hovedårsak til innleggelse?",
+                                          choices = c('Alle registreringer' = 0,
+                                                      'Ja, alle opphold' = 1,
+                                                      'Nei, ingen opphold' = 2)
+                              ),
+                              dateRangeInput(inputId = "valgtDatoForl", label = "Tidsperiode",
+                                             start = startDato, end = Sys.Date(),
+                                             separator="t.o.m.", language="nb")
+                           ),
+                           mainPanel(
+                              h3('Antall opphold og pasienter per enhet'),
+                              tableOutput('tabAntForlEnh')
+                           )
+                  ),
                   tabPanel('Nedlasting av data',
                      sidebarPanel(width = 4,
                                   h4('Last ned data'),
