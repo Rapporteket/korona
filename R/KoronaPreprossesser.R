@@ -402,6 +402,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                        # InnTest2 = sum(InnTidspunkt < as.POSIXct(BeredData$DateAdmittedIntensive), na.rm = T),
                        # UtTest = match(TRUE, UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive))
       ))
+# ?? Kan vi risikere å finne flere beredskapsskjema for ett pandemiskjema?
 
       #sum(!is.na(RegDataNy$vecMatchBeredTilPan))
       indFellesNavn <- which(names(BeredData) %in% names(RegData))

@@ -63,7 +63,6 @@ paaServer <- context %in% c("DEV", "TEST", "QA", "PRODUCTION")
 }
 
 #Data per opphold
-#PandemiOpph <- KoronaPreprosesser(RegData = PandemiRaa, aggPers = 0)
    PandemiOpph <- rapbase::loadStagingData("korona", "KoroDataOpph")
 if (isFALSE(PandemiOpph)) {
    PandemiOpph <- KoronaPreprosesser(RegData = PandemiRaa, aggPers = 0, kobleBered = 1)
@@ -295,7 +294,7 @@ print(xtable::xtable(BeleggTab[fra:AntRader, ],
 \end{frame}
 
 
-\begin{frame}[fragile] {Antall registrerte opphold per uke}
+\begin{frame}[fragile] {Antall registrerte smitteforløp per uke}
 
 <<'RegRHF', results='asis'>>=
 AntTab <- antallTidEnhTab(RegData=PandemiLandet , tilgangsNivaa=rolle, #nivå avgjort av rolle #
@@ -350,7 +349,6 @@ nivaa2 <- ifelse(rolle=='LU', 'ShNavn', 'HFnavn')
 
 RegHF <- if (rolle == 'LU') {PandemiOpph %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = n())
   } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
-#sort(table(Pandemi$HF), decreasing = T)
 RegHF <- rbind(as.matrix(RegHF),
       c('','Totalt', sum(RegHF$Antall)))
 
