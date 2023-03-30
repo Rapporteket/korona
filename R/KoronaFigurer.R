@@ -4,8 +4,8 @@
 #' @param RegData datatabell, beredskapsdata
 #' @param minN minste antall: Maskerer verdier under minN, standard: 0 (ingen maskering)
 #' @inheritParams KoronaUtvalg
-#' @return
-#' @export Alders- og kjønnsfordeling
+#' @return Alders- og kjønnsfordeling
+#' @export
 AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa='RHF',
                        datoFra='2020-03-01', datoTil=Sys.Date(), skjemastatusInn=9,
                        minN = 0,
