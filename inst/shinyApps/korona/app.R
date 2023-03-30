@@ -501,10 +501,10 @@ ui <- tagList(
                            )
                   ), #tab Utsendinger
                   tabPanel('Intensivskjema som mangler pandemiskjema',
-                           h3('Ferdigstilte intensivskjema uten matchende pandemiskjema'),
+                           h3('Ferdigstilte beredskapsskjema uten tilhørende pandemiskjema'),
                            h4('Koblinga er basert på at opphold er registrert med tidspunketer i følgende rekkefølge:
                             Inn på sykehus -> Inn på intensiv -> Ut fra sykehus'),
-                           h4('I tillegg skal pandemi og intensivskjema tilhøre samme HF.'),
+                           h4('I tillegg skal pandemi- og beredskapsskjema tilhøre samme HF.'),
                            sidebarPanel(
                               dateRangeInput(inputId = "fraDatoBerUpan", label = "Tidsperiode",
                                              start = startDato, end = Sys.Date(),
