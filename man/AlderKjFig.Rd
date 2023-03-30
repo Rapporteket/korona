@@ -43,6 +43,9 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 }
+\value{
+Alders- og kjønnsfordeling
+}
 \description{
 Aldersfordeling, tabell
 }
