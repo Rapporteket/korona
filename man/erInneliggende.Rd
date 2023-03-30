@@ -11,6 +11,9 @@ erInneliggende(datoer, regdata)
 
 \item{regdata}{Dataramme som inneholder InnDato og Utdato per pasient}
 }
+\value{
+antall inneliggende på gitte datoer
+}
 \description{
 Returnerer TRUE for datoer pasienten er inneliggende
 }

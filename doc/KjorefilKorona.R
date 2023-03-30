@@ -1,14 +1,23 @@
 #Kjørefil for Rapporteket-Pandemi
 rm(list=(ls()))
 library(korona)
+t1 <- Sys.time()
 RegDataRaa <- KoronaDataSQL(datoFra = '2020-01-01')
-RegData <- KoronaPreprosesser(RegData = RegDataRaa, aggPers = 1)
+t2 <- Sys.time()
+RegData <- KoronaPreprosesser(RegData = RegDataRaa[1:1000,], aggPers = 1, kobleBered = 1, tellFlereForlop = 1)
 Pandemi <- KoronaPreprosesser(KoronaDataSQL(koble=1))
 RegData <- Pandemi
 DataBeredRaa <- NIRberedskDataSQL()
 DataBered <- NIRPreprosessBeredsk(DataBeredRaa)
 
+load('D:/mydata/AllePandemiData.RData')
+t1 <- Sys.time()
+RegData <- KoronaPreprosesser(RegData = KoroDataRaa[1:1000, ], aggPers = 1, kobleBered = 1, tellFlereForlop = 1)
+t2 <- Sys.time()
+t2-t1
 
+
+remotes::install_github('tidyverse/dplyr', ref = 'd2f79bb') #Versjon 1.1.1
 
 JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
 #Variabler med 1-nei, 2:5 ja, 999 ukjent. Velger mest alvorlige (høyeste) nivå. Ikke utfylt får også ukjent
