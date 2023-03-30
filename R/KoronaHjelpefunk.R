@@ -91,29 +91,29 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   antInnlagte <- sum(is.na(RegData$FormDateUt))
   rnwFil <- ifelse(minAnt < 26000 | antInnlagte > 1000, 'KoroFeilmld.Rnw', rnwFil)
 
-  rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
-                    reshId = reshID[[1]],
-                    msg = paste0('1)starter abonnementkjøring: Pandemi-rapport med PARAMETRE: rnwFil: ',
-                                 rnwFil, ', brukernavn: ', brukernavn,
-               ', reshID: ', reshID, ', valgtEnhet: ', valgtEnhet,
-  ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle)
-  )
+  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
+  #                   reshId = reshID[[1]],
+  #                   msg = paste0('1)starter abonnementkjøring: Pandemi-rapport med PARAMETRE: rnwFil: ',
+  #                                rnwFil, ', brukernavn: ', brukernavn,
+  #              ', reshID: ', reshID, ', valgtEnhet: ', valgtEnhet,
+  # ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle)
+  # )
 
-  rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
-                    reshId = reshID[[1]],
-                    msg = paste0('2)klasse:', 'reshID: ', class(reshID), ',
-                                 valgtEnhet: ', class(valgtEnhet),
-                                 ', enhetsNivaa: ', class(enhetsNivaa), ',
-                                                          rolle: ', class(rolle))
-  )
+  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
+  #                   reshId = reshID[[1]],
+  #                   msg = paste0('2)klasse:', 'reshID: ', class(reshID), ',
+  #                                valgtEnhet: ', class(valgtEnhet),
+  #                                ', enhetsNivaa: ', class(enhetsNivaa), ',
+  #                                                         rolle: ', class(rolle))
+  # )
 
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
   src <- normalizePath(system.file(rnwFil, package='korona'))
 
-  rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
-                    reshId = reshID[[1]],
-                    msg = "3) filbase, tmpFile, src ok")
+  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
+  #                   reshId = reshID[[1]],
+  #                   msg = "3) filbase, tmpFile, src ok")
 
 
 # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
@@ -152,8 +152,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   # brukernavn <- brukernavn[[1]]
   # zipFilNavn <- zipFilNavn[[1]]
 
-  rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                    msg = paste0("Vil lage filer for dataoverføring: ", zipFilNavn))
+  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+  #                   msg = paste0("Vil lage filer for dataoverføring: ", zipFilNavn))
 
   #opprKat <- getwd()
   opprKat <- setwd(tempdir())
@@ -163,8 +163,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   if (zipFilNavn == 'DataFHIPanBeredInflu') {
     Filer <- korona::lagDatafilerTilFHI()
 
-    rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                      msg = paste0("Har hentet ekte filer for sending til FHI"))
+    # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+    #                   msg = paste0("Har hentet ekte filer for sending til FHI"))
 
     datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI', 'InfluensaDataRaaFHI')
     for (fil in datasett){
@@ -172,8 +172,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
       write.table(Fil, file = paste0(fil, '.csv'),
                   fileEncoding = 'UTF-8', row.names=F, sep=';', na='')}
 
-    rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                      msg = paste0("Har lagret ekte filer for sending til FHI"))
+    # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+    #                   msg = paste0("Har lagret ekte filer for sending til FHI"))
 
     #utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
 
@@ -203,8 +203,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   }
   zipfilSti <- paste0(kat, '/', zipFilNavn, '.zip')
 
-  rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                    msg = paste0("Har laget zip-fil: ", zipfilSti))
+  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+  #                   msg = paste0("Har laget zip-fil: ", zipfilSti))
 
   #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
   #Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
@@ -218,8 +218,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
   # if (length(test) >0 ){
   # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
   #                  msg = warnings()) #, utfil))}
-  rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                    msg = paste("Har levert data til NHN/FHI ")) #, utfil))
+  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+  #                   msg = paste("Har levert data til NHN/FHI ")) #, utfil))
   write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
   utfilsti <- paste0(kat, '/', 'zipfilSti.csv')
 
