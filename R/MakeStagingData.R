@@ -11,28 +11,19 @@ makeStagingData <- function() {
   library(magrittr)
   library(dplyr)
 
-  KoroDataRaa <-  KoronaDataSQL(koble=1)
-  BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
+  KoroDataRaa <-  KoronaDataSQL(koble=1) #28.feb-23: 2.2s
 
-  KoroData <- KoronaPreprosesser(RegData = KoroDataRaa)
-  KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0)
-  BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa)
+  KoroDataOpph <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 0, kobleBered = 1) #28.feb-23: 14.8s
+  KoroData <- KoronaPreprosesser(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1, kobleBered = 1) #28.feb-23: 44min.
 
-  KoroData <- merge(KoroData,
-                    BeredData,
-                    all.x = T,
-                    all.y = F,
-                    suffixes = c("", "Bered"),
-                    by = 'PersonId')
-  KoroData  <- KoroData %>%
-    dplyr::mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+  BeredDataRaa <- intensivberedskap::NIRberedskDataSQL() #28.feb-23: 0.14
+  BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData = BeredDataRaa, aggPers = 1, tellFlereForlop = 1) #28.feb-23: 17.2
 
-
-  rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa)
-  rapbase::saveStagingData("korona", "BeredDataRaa", BeredDataRaa)
-  rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph)
-  rapbase::saveStagingData("korona", "BeredData", BeredData)
-  rapbase::saveStagingData("korona", "KoroData", KoroData)
+  rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa) #28.feb-23: 0.7s
+  rapbase::saveStagingData("korona", "BeredDataRaa", BeredDataRaa) #28.feb-23: 0.3s
+  rapbase::saveStagingData("korona", "KoroDataOpph", KoroDataOpph) #28.feb-23: 0.8s
+  rapbase::saveStagingData("korona", "BeredData", BeredData) #28.feb-23: 0.04s
+  rapbase::saveStagingData("korona", "KoroData", KoroData)#28.feb-23: 0.7s
 
   invisible(rapbase::listStagingData("korona"))
 }

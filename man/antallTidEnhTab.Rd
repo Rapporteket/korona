@@ -21,7 +21,7 @@ antallTidEnhTab(
 \arguments{
 \item{RegData}{dataramme med preprossesserte data}
 
-\item{tidsenhet}{'dag' (standard), 'uke', 'maaned'}
+\item{tidsenhet}{'dag' (standard), 'uke', 'maaned', 'aar'}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
@@ -36,7 +36,7 @@ antallTidEnhTab(
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
-3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
+3-ja, minst ett opph, 4-nei, ingen opph, 9-ukj}
 
 \item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 
@@ -44,7 +44,7 @@ antallTidEnhTab(
 ('RHF', 'HF', 'ShNavn') resultatene skal vises for}
 }
 \value{
-
+Liste med tabell og beregnede verdier
 }
 \description{
 Antall tilfeller for valgt tidsenhet og enhetsnivå. Filtreringer kan også gjøres.

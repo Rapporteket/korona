@@ -3,7 +3,7 @@
 #' Denne funksjonen navner om variabler og beregner evt. nye.
 #'
 #' @param RegData Koronaskjema
-#' @param kobleBered Koble data med beredskapsdata? 0: nei(standard), 1:ja
+#' @param kobleBered Koble data med beredskapsdata? 0: nei(standard), 1:ja. NB: Kobler bare til ett beredskapsskjema. Kan ha flere.
 #' @param aggPers 1: aggregere til personnivå (standard), 0: ikke aggregere
 #' @param tellFlereForlop 0: aggregerer til personnivå
 #'             1: Identifiserer inntil 3 forløp per person
@@ -14,8 +14,14 @@
 #'
 KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFlereForlop=0)	#, reshID=reshID)
 {
-  ReshNivaa <- korona::ReshNivaa
 
+   #------Preprosessering-------
+
+  ReshNivaa <- korona::ReshNivaa
+  # if (aggPers==0 & tellFlereForlop==1){ NEI: Kan godt endre personid slik at endres til smitteforløp.
+  #    warning('Ugyldig kombinasjon: aggPers==0 & tellFlereForlop==1. "tellFlereForlop" endres til 0')
+  #    tellFlereForlop <- 0
+  # }
   # Endre variabelnavn:
   names(RegData)[which(names(RegData) == 'PatientAge')] <- 'Alder'
   names(RegData)[which(names(RegData) == 'UnitId')] <- 'ReshId'
@@ -70,6 +76,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
 
   RegData$HFkort <- as.character(HFmap$HFnavn[match(RegData$HFresh, HFmap$HFresh)])
   RegData$HFkort[RegData$HFkort==''] <- 'Mangler HF'
+  RegData$HFlang <- RegData$HF
   RegData$HF <- RegData$HFkort
   RegData$ShNavn[indRegHF] <- RegData$HFkort[indRegHF]
 
@@ -87,12 +94,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   RegData$BMI <- ifelse(RegData$Vekt>0 & RegData$Hoyde>0,
                         RegData$Vekt/(RegData$Hoyde/100)^2,
                         NA)
-  #FEIL I KODEBOK LAGER KRØLL!
-  # boolske_var_inklusjon <-
-  #    as.character(kodebok$inklusjon$Variabelnavn)[which(as.character(kodebok$inklusjon$Felttype) == 'Avkrysning')]
-  # RegData[, intersect(names(RegData), boolske_var_inklusjon)] <-
-  #    apply(RegData[, intersect(names(RegData), boolske_var_inklusjon)], 2, as.logical)
-
   #Konvertere boolske variable fra tekst til boolske variable...
   # TilLogiskeVar <- function(Skjema){
   #   verdiGML <- c('True','False')
@@ -131,13 +132,38 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   indSmDag <- which(as.numeric(difftime(RegData$CreationDateUt, RegData$CreationDate,
                                         units = 'hours')) < 1)
   RegData$UtDato[intersect(indIkkeUtDato, indSmDag)] <- NA
-  #inneliggereInd <- is.na(RegData$UtDato)
-  #Inneliggende <- length(unique(RegData$PatientInRegistryGuid[inneliggereInd]))
 
-  RegData$Liggetid = as.numeric(difftime(RegData$Utskrivningsdato, RegData$FormDate, units = "days")) #Bare for utskrevne pasienter
+  RegData$Liggetid = as.numeric(difftime(
+     as.POSIXct(RegData$Utskrivningsdato, tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
+     as.POSIXct(RegData$FormDate, tz= 'UTC', format="%Y-%m-%d %H:%M:%S"),
+                                         units = "days")) #Bare for utskrevne pasienter
 
 
-  #------SLÅ SAMMEN TIL PER PASIENT
+  #Identifisere pasienter med flere innleggelser (var tidligere plassert i aggPers=1)
+  if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
+
+    RegData$Dato <- as.Date(RegData$FormDate)
+    RegData$PasientIDgml <- RegData$PasientID
+    #Identifiserer inntil 5 forløp
+    PasFlere <- RegData %>% dplyr::group_by(PasientIDgml) %>%
+      dplyr::reframe(         #summarise(.groups = 'drop',
+        SkjemaGUID = SkjemaGUID,
+        InnNrDum1 = ifelse(Dato-min(Dato)>90, 2, 1),
+        InnNrDum2 = ifelse(InnNrDum1>1, ifelse(Dato - min(Dato[InnNrDum1==2])>90, 3, 2), 1),
+        InnNrDum3 = ifelse(InnNrDum2>2, ifelse(Dato - min(Dato[InnNrDum2==3])>90, 4, 3), InnNrDum2),
+        InnNr   =   ifelse(InnNrDum3>3, ifelse(Dato - min(Dato[InnNrDum3==4])>90, 5, 4), InnNrDum3),
+        PasientID = paste0(PasientID, '_', InnNr)
+        #Tid = as.numeric(Dato-min(Dato))
+      )
+    #Test <- RegData[which(RegData$PasientIDgml == PasFlere$PasientIDgml[PasFlere$InnNr==4]), c("PasientID", 'FormDate', "ReshId")]
+
+    RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")],
+                     PasFlere[ ,c("SkjemaGUID", "InnNr", "PasientID")],
+                     by='SkjemaGUID')
+  }
+
+
+#------SLÅ SAMMEN TIL PER PASIENT--------------
   if (aggPers == 1) {
     #Variabler med 1-ja, 2-nei, 3-ukjent: Prioritet: ja-nei-ukjent. Ikke utfylt får også ukjent
     JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
@@ -152,34 +178,14 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
         sum(x == 1) == N ~ 1, #alle
         dplyr::last(x, order_by = FormDate) == 1  ~ 2, #siste, men ikke alle
         1 %in% x  ~ 3,      #Minst ett, ikke siste alle
-        #sum(x == 1) == N ~ 1,
         sum(x == 2) == N  ~ 4, #Ingen
         (sum (x == 3) == N) | (sum(x == -1))  ~ 9 #Ukjent
       )}
 
-    #Identifisere pasienter med flere innleggelser
-    if (tellFlereForlop==1) { #Tar med flere forløp for hver pasient
-
-      RegData$Dato <- as.Date(RegData$FormDate)
-
-      #Identifiserer inntil 3 forløp
-      PasFlere <- RegData %>% dplyr::group_by(PasientID) %>%
-        dplyr::summarise(.groups = 'drop',
-                  SkjemaGUID = SkjemaGUID,
-                  InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
-                  InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
-                  PasientID = paste0(PasientID, '_', InnNr)
-                  #Tid = as.numeric(Dato-min(Dato))
-        )
-
-      RegData <- merge(RegData[ ,-which(names(RegData)=="PasientID")], PasFlere, by='SkjemaGUID')
-      # which(RegDataNy$InnNr==2)
-      # Test <- RegDataNy[c(1:10, which(RegDataNy$InnNr==2)),c("PasientID", "PasientIDny")]
-      #For testing: RegData$Dato[RegData$PasientID=='EAC1F8C2-B10F-EC11-A974-00155D0B4D1A'][3:4] <- as.Date(c('2023-01-02', '2024-01-03'))
-    }
 
     RegDataRed <- RegData %>% dplyr::group_by(PasientID) %>%
-      dplyr::summarise(PersonId = PersonId[1],
+      dplyr::summarise(
+                PersonId = PersonId[1],
                 PersonIdBC19Hash = PersonIdBC19Hash[1],
                 Alder = Alder[1],
                 AceHemmerInnkomst = JaNeiUkjVar(AceHemmerInnkomst), #1-ja, 2-nei, 3-ukjent
@@ -198,10 +204,9 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 CovidNei = ifelse(sum(ArsakInnleggelse == 2) == AntInnSkjema, 5, 0),
                 CovidUkjent = ifelse((sum (ArsakInnleggelse == 3) == AntInnSkjema) | (sum(ArsakInnleggelse == -1)), 9,0),
                 ArsakInnNy = Aarsak(ArsakInnleggelse, N=AntInnSkjema, FormDate=FormDate),
-                #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 4-nei, ingen opph, 9-ukj
+                      #1-ja, alle opph, 2-ja, siste opphold, men ikke alle, 3-ja, minst ett opph, men ikke siste, 4-nei, ingen opph, 9-ukj
                 ArsakInnleggelse = JaNeiUkjVar(ArsakInnleggelse), #1-ja, 2-nei, 3-ukjent
                 Astma = sum(Astma)>0,
-                #Bilirubin,
                 BMI = sort(BMI, decreasing = T)[1],
                 CreationDate =  dplyr::first(CreationDate, order_by = FormDate),
                 CreationDateUt =  dplyr::last(CreationDateUt, order_by = FormDateUt),
@@ -218,10 +223,11 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 Gravid = sum(Gravid)>0,
                 HFut = dplyr::last(HF, order_by = FormDate),
                 HF = dplyr::first(HF, order_by = FormDate),
+                HFlang = dplyr::first(HFlang, order_by = FormDate),
                 HFresh = dplyr::first(HFresh, order_by = FormDate),
-                #Hjertefrekvens,
                 Hjertesykdom = sum(Hjertesykdom)>0,
                 Isolert = JaNeiUkjVar(Isolert), #1-ja, 2-nei, 3-ukjent
+                InnNr = max(InnNr),
                 Karbapenem = sum(Karbapenem)>0,
                 Kinolon = sum(Kinolon),
                 KjentRisikofaktor = JaNeiUkjVar(KjentRisikofaktor), #1-ja, 2-nei, 3-ukjent
@@ -251,7 +257,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 RHFresh = dplyr::first(RHFresh, order_by = FormDate),
                 RontgenThorax = RontgenThorax[1], #1-5...?
                 Royker = sum(Royker)>0,
-                #Sykehus"
                 TredjeGencefalosporin = sum(TredjeGencefalosporin)>0,
                 UtsAkuttNyresvikt = JaNeiUkjVar(UtsAkuttNyresvikt),  #1-ja, 2-nei, 3-ukjent
                 UtsAkuttRespirasjonsvikt = SviktVar(UtsAkuttRespirasjonsvikt), #1-nei, 2:5-ja, 999-ukjent
@@ -261,8 +266,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 UtsAntibiotika = UtsAntibiotika[1], #1-ja, 2-nei, 3-ukjent
                 UtsAntibiotikaAnnet = sum(UtsAntibiotikaAnnet)>0,
                 UtsAntibiotikaUkjent = sum(UtsAntibiotikaUkjent)>0,
-                #?Antifungalbehandling = Antifungalbehandling[1], #1-ja, 2-nei, 3-ukjent
-                #?AntiviralBehandling"
                 UtsAntifungalbehandling = JaNeiUkjVar(UtsAntifungalbehandling), #1-ja, 2-nei, 3-ukjent
                 UtsAntiviralBehandling = JaNeiUkjVar(UtsAntiviralBehandling),  #1-ja, 2-nei, 3-ukjent
                 UtsKarbapenem = sum(UtsKarbapenem)>0,
@@ -271,7 +274,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 UtsPenicillin = sum(UtsPenicillin)>0,
                 UtsPenicillinEnzymhemmer = sum(UtsPenicillinEnzymhemmer)>0,
                 UtsTredjeGencefalosporin = sum(UtsTredjeGencefalosporin)>0,
-                #HovedskjemaGUID
                 #OverfortAnnetSykehusUtskrivning #1-ja, 2-nei
                 StatusVedUtskriving = sort(StatusVedUtskriving, decreasing = T)[1],  #1-levende, 2-død
                 #Status30Dager = sort(Status30Dager, decreasing = T)[1], #0-levende, 1-død
@@ -340,9 +342,6 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                                           format="%Y-%m-%d %H:%M:%S" )
 
   #Beregnede variabler
-  #names(RegData)[which(names(RegData) == 'DaysAdmittedIntensiv')] <- 'liggetid'
-  #!! MÅ TA HENSYN TIL REINNLEGGELSE
-  #indUReinn <- RegData$Reinn==0
   RegData$LiggetidTot <- as.numeric(difftime(RegData$UtTidspunkt,
                                              RegData$InnTidspunkt,
                                              units = 'days'))
@@ -352,32 +351,80 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
   RegData <- RegData[which((RegData$InnDato>'2020-01-01') & (RegData$InnDato <= Sys.Date())),]
 
   # Nye tidsvariable:
-  # RegData$InnTidspunkt <- as.POSIXct(RegData$FormDate, tz= 'UTC',
-  #                                    format="%Y-%m-%d %H:%M:%S" )
-  #RegData$MndNum <- RegData$InnTidspunkt$mon +1
   RegData$MndNum <- as.numeric(format(RegData$InnTidspunkt, '%m'))
   RegData$MndAar <- format(RegData$InnTidspunkt, '%b%y')
   RegData$Kvartal <- ceiling(RegData$MndNum/3)
   RegData$Halvaar <- ceiling(RegData$MndNum/6)
   RegData$Aar <- as.numeric(format(RegData$InnDato, '%Y'))
   RegData$UkeNr <- format(RegData$InnDato, '%V')
-  #RegData$UkeAar <- format(RegData$InnDato, '%G.%V') #%G -The week-based year, %V - Week of the year as decimal number (01–53) as defined in ISO 8601
-  #RegData$UkeAar <- as.factor(RegData$UkeAar)
-  #RegData$Dag <- format(RegData$InnDato, '%d.%B')
   RegData$Dag <- factor(format(RegData$InnDato, '%d.%m.%y'),
                         levels = format(seq(min(RegData$InnDato), max(RegData$InnDato), by="day"), '%d.%m.%y'))
   RegData$InnDag <- RegData$InnDato
 
+
   if (kobleBered==1){
-    if (aggPers==0) {stop('Kan bare koble til beredskapsskjema for aggregerte data')}
-    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()
-    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa)
-    RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
-                     by = 'PersonId')
-    RegData  <- RegData %>% mutate(BeredPas = ifelse(is.na(PasientIDBered), 0, 1))
+     if (Sys.getenv("R_RAP_INSTANCE") != "") {
+    BeredDataRaa <- intensivberedskap::NIRberedskDataSQL()}
+    BeredData <- intensivberedskap::NIRPreprosessBeredsk(RegData=BeredDataRaa, aggPers = aggPers, tellFlereForlop = tellFlereForlop)
 
-  }
+    if ((aggPers==1) & (tellFlereForlop == 0)){
+        RegData <- merge(RegData, BeredData, all.x = T, all.y = F, suffixes = c("", "Bered"),
+                         by = 'PersonId')
+    } else {  if ((aggPers == 1 & tellFlereForlop==1) | aggPers == 0) {
+       # personid
+       # samme HF
+       # inn, pandemi < inn, intensiv
+       # inn, intensiv < ut, pandemi
 
+      BeredData <- BeredData %>% dplyr::rename(PersonIdBered = PersonId,
+                                               HFbered = HF,
+                                               #SkjemaGUIDBered = SkjemaGUID,
+                                               InnDatoBered = InnDato)
+
+#Fjerner personer som er dobbeltregistrert:
+ test <-  RegData %>%
+         dplyr::group_by(PersonId, InnTidspunkt) %>%
+         summarize(Ant = dplyr::n())
+ ind <- which(RegData$PersonId %in% test$PersonId[test$Ant>1])
+ if (length(ind)>0) {RegData <- RegData[-ind,]}
+
+      RegDataNy <- as.data.frame(
+        RegData %>%
+          dplyr::group_by(PersonId, InnTidspunkt)%>% #, UtTidspunkt
+          dplyr::mutate(
+             vecMatchBeredTilPan=match(TRUE,
+                                       PersonId == BeredData$PersonIdBered &
+                                          HFlang == BeredData$HFbered &
+                                          InnTidspunkt <= BeredData$FormDate &  #Lagt inn før lagt inn intensiv, DateAdmittedIntensive
+                                          UtTidspunkt > BeredData$FormDate) #Ut fra pandemi etter at lagt inn intensiv (IKKE:Skrevet ut etter utskriv. int.
+                       #  PersTest = sum(PersonId == BeredData$PersonIdBered, na.rm = T),
+                       #  InnTest = sum(InnTidspunkt <= BeredDataRaa$DateAdmittedIntensive, na.rm = T),
+                       # InnTest2 = sum(InnTidspunkt < as.POSIXct(BeredData$DateAdmittedIntensive), na.rm = T),
+                       # UtTest = match(TRUE, UtTidspunkt >= as.POSIXct(BeredData$DateDischargedIntensive))
+      ))
+# ?? Kan vi risikere å finne flere beredskapsskjema for ett pandemiskjema?
+
+      #sum(!is.na(RegDataNy$vecMatchBeredTilPan))
+      indFellesNavn <- which(names(BeredData) %in% names(RegData))
+      BeredDataNyeNavn <- BeredData
+      names(BeredDataNyeNavn)[indFellesNavn] <- paste0(names(BeredDataNyeNavn)[indFellesNavn], 'Bered')
+         #rename_with(BeredData, ~paste0(names(BeredData)[indFellesNavn], 'Bered'), .cols = indFellesNavn)
+      RegDataMbered <- cbind(RegDataNy,
+                             BeredDataNyeNavn[RegDataNy$vecMatchBeredTilPan, ])
+
+# #Testing
+      # RegDataMbered[1:3, c('PersonId', 'InnTidspunkt', "UtTidspunkt")]
+      # BeredData[RegDataMber$vecMatchBeredTilPan[1:3], c('PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
+      #
+      # per2bered <- names(table(BeredData$PersonId)[table(BeredData$PersonId)>1])
+      # per2pand <- names(table(RegDataMber$PersonId)[table(RegDataMber$PersonId)>1])
+      #
+      # RegDataMber[RegDataMber$PersonId == '0x3029E3F3B7B757E4EFB60D142FDF5911E8A3FF759B4E4C761C228E1D585D1589', c('PersonId', 'InnTidspunkt', "UtTidspunkt")]
+      # BeredData[BeredData$PersonId == '0x3029E3F3B7B757E4EFB60D142FDF5911E8A3FF759B4E4C761C228E1D585D1589', c('PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
+      #KoroData[c(3,89,345, 678, 2000), c('PersonId', 'InnTidspunkt', "UtTidspunkt", 'PersonIdBered', 'Innleggelsestidspunkt', "DateDischargedIntensive")]
+    }}
+  RegData  <- RegDataMbered %>% dplyr::mutate(BeredReg = ifelse(is.na(PersonIdBered), 0, 1))
+} #koble bered
 
 
   ##Kode om  pasienter som er overført til/fra egen avdeling til "ikke-overført"

@@ -112,7 +112,7 @@ write.table(test)
 
 #RegData <- KoroData
 Nokkeltall <- FerdigeRegTab(RegData=KoroData)
-colnames(Nokkeltall$Tab) <- c('Gj.sn', 'Median', 'IQR', 'Antall opph.', 'Andel opph.')
+colnames(Nokkeltall$Tab) <- c('Gj.sn', 'Median', 'IQR', 'Antall opphold', 'Andel opphold')
 enh <- 'Alle'
 
 

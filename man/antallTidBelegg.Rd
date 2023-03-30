@@ -21,7 +21,7 @@ antallTidBelegg(
 \arguments{
 \item{RegData}{dataramme med preprossesserte data}
 
-\item{tidsenhet}{'dag' (standard), 'uke', 'maaned'}
+\item{tidsenhet}{'dag' (standard), 'uke', 'maaned', 'aar'}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
@@ -35,12 +35,12 @@ antallTidBelegg(
 \item{skjemastatusInn}{status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert}
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
-3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
+3-ja, minst ett opph, 4-nei, ingen opph, 9-ukj}
 
 \item{valgtEnhet}{NULL for SC-bruker, ellers eget RHF/HF}
 }
 \value{
-
+belegg
 }
 \description{
 Belegg per tidsenhet  og HF. Filtreringer kan også gjøres.

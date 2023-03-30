@@ -5,7 +5,7 @@
 #' @param minN minste antall: Maskerer verdier under minN, standard: 0 (ingen maskering)
 #' @inheritParams KoronaUtvalg
 #' @return
-#' @export
+#' @export Alders- og kjønnsfordeling
 AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa='RHF',
                        datoFra='2020-03-01', datoTil=Sys.Date(), skjemastatusInn=9,
                        minN = 0,
@@ -112,7 +112,7 @@ AlderKjFig <- function(RegData, valgtVar='Alder', valgtEnhet='Alle', enhetsNivaa
 #'
 #' @param AntTab Dataramme med nødvendige figurparametre
 #'
-#' @return
+#' @return Figur for antall per tid og enhet
 #' @export
 FigTidEnhet <- function(AntTab, outfile=''){
 

@@ -29,14 +29,14 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 \item{datoTil}{sluttdato 'yyyy-mm-dd'}
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
-3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
+3-ja, minst ett opph, 4-nei, ingen opph, 9-ukj}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
 \item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 }
 \value{
-
+Oppsummeringstabell
 }
 \description{
 Ferdigstilte registreringer, utskrevne pasienter

@@ -16,7 +16,7 @@ KoronaPreprosesser(
 
 \item{aggPers}{1: aggregere til personnivå (standard), 0: ikke aggregere}
 
-\item{kobleBered}{Koble data med beredskapsdata? 0: nei(standard), 1:ja}
+\item{kobleBered}{Koble data med beredskapsdata? 0: nei(standard), 1:ja. NB: Kobler bare til ett beredskapsskjema. Kan ha flere.}
 
 \item{tellFlereForlop}{0: aggregerer til personnivå
 1: Identifiserer inntil 3 forløp per person}

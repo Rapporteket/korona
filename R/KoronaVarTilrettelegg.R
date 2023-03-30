@@ -41,13 +41,6 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       verdiTxt <- '' 	#pstTxt, ...
       sortAvtagende <- TRUE  #Sortering av resultater
       varTxt <- 'hendelser'
-
-      #aarsakInn <-9
-      # skjemastatusInn <- 9
-      # skjemastatusUt <- 9
-      # dodSh <- 9
-      # minald <- 0
-      # maxald <- 110
       tittel <- 'Mangler tittel'
       variable <- 'Ingen'
       RegData$Variabel <- 0
@@ -55,8 +48,6 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
 
 
       #-------------------------------------
-
-
 
       if (valgtVar=='alder') {	#Fordeling, GjsnGrVar, GjsnTid
             RegData <- RegData[which(RegData$Alder>=0), ]    #Tar bort alder<0
@@ -107,8 +98,8 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         varTxt <- 'isolerte'
       }
       if (valgtVar=='beredPas') {	#AndelGrVar/Tid
-        RegData <- RegData[which(RegData$BeredPas %in% 0:1), ]    #Tar bort ukjente
-        RegData$Variabel <- RegData$BeredPas
+        RegData <- RegData[which(RegData$BeredReg %in% 0:1), ]    #Tar bort ukjente
+        RegData$Variabel <- RegData$BeredReg
         tittel <- 'Pandemipasienter med intensivopphold'
         varTxt <- 'intensivinnlagte'
       }
@@ -233,11 +224,14 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       #Vi sender tilbake alle variable som indikatorvariable, dvs. med 0,1,NA
       #(Alternativt kan vi gjøre beregninga her og sende tilbake teller og nevner for den sammensatte variabelen)
 
-      if (valgtVar == 'risikoInn' ) {   # Andeler
+      if (valgtVar == 'risikoInn' ) {   # Andeler #AndelGrVar/Tid
             tittel <- 'Risikofaktorer, innleggelse'
             retn <- 'H'
             flerevar <- 1
             RegData <- RegData[RegData$KjentRisikofaktor %in% 1:2, ]
+            if (figurtype == 'andelGrVar'){
+               RegData$Variabel[RegData$KjentRisikofaktor==1] <- 1
+            } else {
             RegData$Fedme <- RegData$BMI>30
             RegData$ACEhemmmer <- RegData$AceHemmerInnkomst==1
             RegData$ACEhemmmer[RegData$AceHemmerInnkomst==3] <- NA
@@ -250,9 +244,8 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
                        'Gravid', 'Fedme (KMI>30)', 'Røyker', 'Risikofaktorer (minst en)')
             #Trenger bare kode om Risikofaktorer:
             RegData$KjentRisikofaktor <- ifelse(RegData$KjentRisikofaktor==1, TRUE, FALSE)
+            }
             xAkseTxt <- 'Andel pasienter (%)'
-            #Beregne direkte:
-            #apply(RegData[,variable], MARGIN=2, FUN=function(x) sum(x %in% 0:1))
       }
       if (valgtVar == 'antibiotikaInn' ) {   # Andeler
         tittel <- 'Antibiotika ved innleggelse'
@@ -278,21 +271,16 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         statusUt <- 2
         variable <- paste0('Uts', c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
                       'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
-                      'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika'))
+                      'Karbapenem', 'Makrolid', 'Antifungalbehandling',
+                      'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika'))
         grtxt <- c('Penicillin', 'Penicillin m/enzymhemmer', 'Aminoglykosid',
                    '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
-                   'Karbapenem', 'Makrolid', 'Annet', 'Ukjent type', 'Antibiotika, tot.')
-        #Trenger bare kode om Antibiotika tot.:
+                   'Karbapenem', 'Makrolid', 'Antimykotisk beh.',
+                   'Annet', 'Ukjent type', 'Antibiotika, tot.')
+        #Må kode om :
         RegData$UtsAntibiotika <- ifelse(RegData$UtsAntibiotika==1, TRUE, FALSE)
-        #ind01 <- which(RegData[ ,variable] %in% ..., arr.ind = T) #Alle ja/nei
-        #ind1 <- which(RegData[ ,variable] == TRUE, arr.ind=T) #Ja i alle variable
-        #Kodes om til indikatorvariabel:
-        #RegData[ ,variable] <- NA
-        #RegData[ ,variable][ind01] <- 0
-        #RegData[ ,variable][ind1] <- 1
+        RegData$UtsAntifungalbehandling <- ifelse(RegData$UtsAntifungalbehandling==1, TRUE, FALSE)
         xAkseTxt <- 'Andel pasienter (%)'
-        #Beregne direkte:
-        #apply(RegData[,variable], MARGIN=2, FUN=function(x) sum(x %in% 0:1))
       }
 
 

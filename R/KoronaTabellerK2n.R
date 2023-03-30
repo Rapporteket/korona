@@ -4,13 +4,13 @@
 #' Detaljerinsnivå er styrt av tilgangsnivå. Datointervaller baseres følgelig på "ut-dato"
 #'
 #' @param RegData dataramme med preprossesserte data
-#' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
+#' @param tidsenhet 'dag' (standard), 'uke', 'maaned', 'aar'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return antall døde per tidsenhet
 #' @export
 antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
                             datoFra=0, datoTil=Sys.Date(),
@@ -45,7 +45,9 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
                                               levels = paste0('U', format(rev(seq(datoTil, datoFra,
                                                                                      by=paste0('-1 week'))), '%V.%Y'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b %y'),
-                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")))
+                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")),
+                                 aar = factor(format(RegDataAlle$UtDato, '%Y'),
+                                              levels = format(seq(datoFra, datoTil, by="year"), "%Y")))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
   #RegData <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
@@ -89,13 +91,13 @@ antallTidAvdode <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 #' Detaljerinsnivå er styrt av tilgangsnivå
 #'
 #' @param RegData dataramme med preprossesserte data
-#' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
+#' @param tidsenhet 'dag' (standard), 'uke', 'maaned', 'aar'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return antall utskrevne per tidsenhet
 #' @export
 antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC', datoFra=0,
                                datoTil=Sys.Date(), skjemastatusInn=9, aarsakInn=9, valgtEnhet='Alle'){
@@ -131,7 +133,9 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
                                               levels = paste0('U', format(rev(seq(datoTil, datoFra ,
                                                                                      by=paste0('-1 week'))), '%V.%Y'))),
                                  maaned = factor(format(RegDataAlle$UtDato, '%b %y'),
-                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")))
+                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")),
+                                 aar = factor(format(RegDataAlle$UtDato, '%Y'),
+                                              levels = format(seq(datoFra, datoTil, by="year"), "%Y")))
 
   RegDataAlle <- RegDataAlle[!is.na(RegDataAlle$TidsVar), ]
 
@@ -196,14 +200,14 @@ tr_summarize_output <- function(x, grvarnavn=''){
 #' Detaljerinsnivå er styrt av tilgangsnivå
 #'
 #' @param RegData dataramme med preprossesserte data, NB: IKKE personaggregert
-#' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
+#' @param tidsenhet 'dag' (standard), 'uke', 'maaned', 'aar'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @param aarsakInn 1-ja, 2-nei, 9-alle reg
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return antall inneliggende per tidsenhet
 #' @export
 antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
                                   datoFra=0, datoTil=Sys.Date(),
@@ -247,7 +251,9 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     aux$Tid <- switch (tidsenhet,
                        'dag' = format(aux$Tid, '%d.%m.%y'),
                         'uke' = paste0('U', format(aux$Tid, "%V.%Y")),
-                        'maaned' = format(aux$Tid, "%b.%Y")
+                        'maaned' = format(aux$Tid, "%b.%Y"),
+                       'aar' = factor(format(RegDataAlle$UtDato, '%Y'),
+                                    levels = format(seq(datoFra, datoTil, by="year"), "%Y"))
     )
     aux <- aux %>% group_by(PasientID, Tid) %>%
       dplyr::summarise(er_inne = max(verdi) #TRUE/FALSE
@@ -268,11 +274,8 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
           dag = datoer <- unique(format(datoer, '%d.%m.%y')),
                     uke = datoer <- unique(paste0('U', format(datoer, '%V.%Y'))),
                     maaned = datoer <- unique(format(datoer, '%b.%Y')))
-  #if (tidsenhet %in% c("dag", "uke", "maaned")) {
     names(datoer) <- datoer
-  #}
 
-  # if (datoFra != 0) {RegDataAlle <- RegDataAlle[RegDataAlle$InnDato >= datoFra, ]}
   #Trenger utvalg når totalen ikke er summen av det som vises.
   RegData <- if (tilgangsNivaa == 'SC') { RegDataAlle
   } else {
@@ -322,13 +325,13 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 #' Detaljerinsnivå er styrt av tilgangsnivå
 #'
 #' @param RegData dataramme med preprossesserte data
-#' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
+#' @param tidsenhet 'dag' (standard), 'uke', 'maaned', 'aar'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return belegg
 #' @export
 antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='SC',
                             datoFra = 0, datoTil = Sys.Date(),

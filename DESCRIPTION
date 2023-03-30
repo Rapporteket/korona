@@ -1,7 +1,7 @@
 Package: korona
 Title: Resultattjeneste for registrering av Korona-pandemi
-Version: 1.7.1
-Date: 2022-07-08
+Version: 1.8.0
+Date: 2023-03-30
 Authors@R: 
     person(given = "Lena Ringstad",
            family = "Olsen",
@@ -27,7 +27,7 @@ Imports:
     knitr,
     magrittr,
     lubridate,
-    plyr,
+    dplyr,
     rapbase,
     rapFigurer,
     raplog,
@@ -43,4 +43,4 @@ Imports:
 VignetteBuilder: knitr
 Suggests: 
     testthat (>= 2.1.0)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3

@@ -22,7 +22,7 @@ KoronaUtvalg(
 )
 }
 \arguments{
-\item{RegData}{data, beredskapsskjema}
+\item{RegData}{data, covid-skjema}
 
 \item{datoFra}{startdato 'yyyy-mm-dd'}
 
@@ -39,7 +39,7 @@ KoronaUtvalg(
 \item{dodSh}{død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)}
 
 \item{aarsakInn}{covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
-3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj}
+3-ja, minst ett opph, 4-nei, ingen opph, 9-ukj}
 
 \item{enhetsNivaa}{organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
 RHF (SC og LC-brukere), HF (LU-brukere)}
@@ -49,9 +49,13 @@ RHF (SC og LC-brukere), HF (LU-brukere)}
 \item{enhetsUtvalg}{0: hele landet,
 1: egen enhet mot resten av landet,
 2: egen enhet (NB: returnerer hele landet i ind$Rest)}
+
+\item{beredPas}{Har pasienten vært innlagt på intensiv? 0-nei, 1-ja.
+Per nå (12.03.23) basert på at faktisk finner et tilhørende beredskapsskjema.Vurder om
+vi heller skal basere på variabelen Nir_beredskapsskjema_CoV2}
 }
 \value{
-
+Filtrerte data
 }
 \description{
 Returnerer filtrert dataramme og utvalgstekst.

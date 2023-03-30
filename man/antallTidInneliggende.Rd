@@ -20,7 +20,7 @@ antallTidInneliggende(
 \arguments{
 \item{RegData}{dataramme med preprossesserte data, NB: IKKE personaggregert}
 
-\item{tidsenhet}{'dag' (standard), 'uke', 'maaned'}
+\item{tidsenhet}{'dag' (standard), 'uke', 'maaned', 'aar'}
 
 \item{erMann}{kjønn, 0-kvinne, 1-mann}
 
@@ -38,7 +38,7 @@ antallTidInneliggende(
 \item{valgtEnhet}{NULL for SC-bruker, ellers eget RHF/HF}
 }
 \value{
-
+antall inneliggende per tidsenhet
 }
 \description{
 Antall inneliggende per tidsenhet  og enhetsnivå. Filtreringer kan også gjøres.

@@ -52,7 +52,7 @@ Data_koblet = data_pandemi %>%
 # er registrert i pandemiregisteret, men dette ikke alltid tilfellet.
 # I de tilfellene hvor det finnes flere intensivoppholdsskjema for perioden, må data gjerne aggregeres på forhånd.
 # Vi har brukt definisjonene 12 timer for pandemiregisteret og 24 timer for intensivregisteret for
-# å identifisere påfølgende opphold som er del av samme sykdomsforløp.
+# å identifisere påfølgende opphold som er del av samme smitteforløp.
 
 d_pandemi_forløp = d_pandemi_samlet %>%
     group_by(PersonId) %>%
@@ -63,7 +63,7 @@ d_pandemi_forløp = d_pandemi_samlet %>%
       overfort_nummer = cumsum(innen_12_timer & radnummer != 1L),
       sykdomsforlop = radnummer - overfort_nummer)
 
-#Vi kan da aggregere data vha sykdomsforløp som grupperingsvariabel før en kobling gjøres.
+#Vi kan da aggregere data vha smitteforløp som grupperingsvariabel før en kobling gjøres.
 
 #FULL KODE
 library(tidyverse)
@@ -186,7 +186,7 @@ KoroData1aar$BeredPas <- ifelse(KoroData1aar$Nir_beredskapsskjema_CoV2==1, 1, 0)
 
 Nokkeltall <- FerdigeRegTab(RegData=KoroData1aar)
 tab <- Nokkeltall$Tab[-3, ]
-colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opph.', 'Del opph.')
+colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opphald', 'Del opphald')
 intBehPas <- round(100*prop.table(table(KoroDataPers$BeredPas))[2],1)
 
 print(xtable::xtable(tab, align=c('l','r','r','c','r','r'),
@@ -201,7 +201,7 @@ for (enh in HFer) {
 Nokkeltall <- FerdigeRegTab(RegData=KoroData1aar,
                             valgtEnhet=enh,
                             enhetsNivaa = 'HF')
-colnames(Nokkeltall$Tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opph.', 'Del opph.')
+colnames(Nokkeltall$Tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opphald', 'Del opphald')
 
 #tabInn <- table(KoroDataPers$BeredPas[KoroDataPers$HF == enh])
 #intBehInn <- round(100*prop.table(tabInn)[2],1)

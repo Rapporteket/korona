@@ -4,14 +4,14 @@
 #' Detaljerinsnivå er styrt av tilgangsnivå
 #'
 #' @param RegData dataramme med preprossesserte data
-#' @param tidsenhet 'dag' (standard), 'uke', 'maaned'
+#' @param tidsenhet 'dag' (standard), 'uke', 'maaned', 'aar'
 #' @param tilgangsNivaa SC, LC og LU bestemmer hvilket enhetsNivaa
 #' @param HF benytte kortnavn for HF 0-nei, 1-ja
 #' ('RHF', 'HF', 'ShNavn') resultatene skal vises for
 #' @param valgtEnhet NULL for SC-bruker, ellers eget RHF/HF
 #' @inheritParams KoronaUtvalg
 #'
-#' @return
+#' @return Liste med tabell og beregnede verdier
 #' @export
 #'
 antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoTil=Sys.Date(), #valgtVar='innlagt',
@@ -31,7 +31,9 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
                                               levels = paste0('U', format(rev(seq(datoTil, datoFra,
                                                                       by=paste0('-1 week'))), '%V.%Y'))),
                              maaned = factor(format(RegData$InnDato, '%b %y'),
-                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")))
+                                                 levels = format(seq(datoFra, datoTil, by="month"), "%b %y")),
+                             aar = factor(format(RegData$InnDato, '%Y'),
+                                          levels = format(seq(datoFra, datoTil, by="year"), "%Y")))
 
   RegData <- RegData[!is.na(RegData$TidsVar), ]
 
@@ -88,12 +90,18 @@ antallTidEnhTab <- function(RegData, tidsenhet='dag', erMann=9, datoFra=0, datoT
 #' @param tidsEnhet - Mnd, Kvartal, Aar
 #' @param antTidsenh antall måneder som skal vises
 #' @param datoTil siste registrering som vises
+#' @param covidInn covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei
 #'
 #' @export
 tabAntOpphEnhTid <- function(RegData, datoTil=Sys.Date(),
-                            enhetsNivaa = 'ShNavn', tidsenhet = 'Mnd', antTidsenh=6){
+                            enhetsNivaa = 'ShNavn', tidsenhet = 'Mnd', antTidsenh=6,
+                            covidInn=0){
 
   #Må legge på "levels" for å unngå at f.eks. siste måned ikke har registreringer
+  #1-ja, 2-nei, 3-ukjent
+  if (covidInn %in% 1:2) {
+    RegData <- RegData[RegData$ArsakInnleggelse==covidInn,]
+  }
 
 datoDum <-   switch(tidsenhet,
                     Mnd = lubridate::floor_date(as.Date(datoTil), 'month') - months(antTidsenh, abbreviate = T), #antTidsenh-1
@@ -128,7 +136,7 @@ if (dim(RegData)[1]>0){
 
 #' Status nå
 #' @param RegData pandemiskjema
-#' @return
+#' @return Tabell med status nå
 #' @export
 statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                          aarsakInn=9, erMann=9){
@@ -170,7 +178,7 @@ statusNaaTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' Ferdigstilte registreringer, utskrevne pasienter
 #' @param RegData korona-registreringer
 #' @inheritParams KoronaUtvalg
-#' @return
+#' @return Oppsummeringstabell
 #' @export
 FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
                           minN=0,
@@ -196,7 +204,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
   NisolertKjent <- sum(RegData$Isolert %in% 1:2, na.rm=T)    #Tar bort ukjente
   Nisolert <- sum(RegData$Isolert == 1, na.rm=T)
   pstIsolert <- 100*Nisolert/NisolertKjent
-  AntBered <- sum(RegData$BeredPas)
+  AntBered <- sum(RegData$BeredReg)
   PstBered <- 100*AntBered/N
 
   med_IQR <- function(x){
@@ -247,7 +255,7 @@ FerdigeRegTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF',
 #' @param sens 0: standard, 1: Maskere verdier <3
 #' @inheritParams KoronaUtvalg
 #' @export
-#' @return
+#' @return Tabell med risikofaktorer
 RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
                          erMann='', skjemastatusInn=9, dodSh=9, aarsakInn=9,
                          sens=0,
@@ -305,11 +313,11 @@ RisikoInnTab <- function(RegData, datoFra='2020-03-01', datoTil=Sys.Date(),
 
 
 
-#' Aldersfordeling, tabell
+#' Aldersfordeling, tabell.
 #' @param RegData datatabell, beredskapsdata
 #' @inheritParams KoronaUtvalg
 #' @param enhetsNivaa styres av tilgangsnivå 'Alle', 'RHF', 'HF'
-#' @return
+#' @return Tabell med aldersfordeling
 #' @export
 AlderTab <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF', minN=0,
                      skjemastatusInn=9,  aarsakInn=9, dodSh=9, erMann=9){
@@ -407,7 +415,7 @@ lagTabavFigFord <- function(UtDataFraFig){
 #' @param valgtEnhet egen/valgt enhet
 #' @param enhetsNivaa eget/valgt enhetsnivå
 #'
-#' @return
+#' @return innskjema uten utskjema
 #' @export
 innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
   RegData <- KoronaPreprosesser(RegData, aggPers = 0)
@@ -422,13 +430,75 @@ innManglerUt <- function(RegData, valgtEnhet='Alle', enhetsNivaa='RHF'){
   tabUt <- tab[with(tab, order(HF, ShNavn, InnDato)), ] #
 }
 
+#' Tabell med oversikt over hvilke beredskapsskjema som mangler pandemiskjema
+#'
+#' @param datoFra - startdato for innleggelse på intensiv
+#' @return Beredskapsskjema som mangler pandemiskjema
+#' @export
+#'
+finnBeredUpandemi <- function(datoFra='2020-01-01', datoTil=Sys.Date(), HF='Alle', ...){
+   #library(korona)
+   #library(magrittr)
+   datoFraPan <- as.Date(datoFra) - 90 #For å ta høyde for at pasienten kan ha ligget en stund på avd. før opphold på intensiv
+   if (!exists('KoroDataOpph')){
+   KoroData <- korona::KoronaDataSQL(datoFra = datoFraPan)
+   KoroDataOpph <- KoronaPreprosesser(RegData = KoroData, aggPers = 0, kobleBered = 0)
+   }
+
+   BeredData <- intensivberedskap::NIRPreprosessBeredsk(
+      RegData=intensivberedskap::NIRberedskDataSQL(datoFra = datoFra, datoTil = datoTil), aggPers = 0)
+   #Kun ferdigstilte beredskapsskjema
+   BeredData <- BeredData[BeredData$FormStatus==2,]
+   if (HF != 'Alle'){
+      BeredData <- BeredData[BeredData$HF == HF, ]
+   }
+
+   # (<5% skal mangle pandemiskjema)
+   # For de som mangler: Sjekk om haket av for inneliggende på pandemi av annen årsak inntil 30 (lek med antall) dager før innleggelse på intensiv
+
+   #! Mange pandemiskjema har flere tilhørende beredskapsskjema. Ved kobling i preprosess, kobles bare ett på.
+   # dagerFoer <- 30
+   BeredMedPand <- as.data.frame(
+      BeredData %>%
+         dplyr::group_by(PersonId, Innleggelsestidspunkt)%>% #, UtTidspunkt
+         dplyr::mutate(
+            vecMatchPanTilBered=match(TRUE,
+                                      PersonId == KoroDataOpph$PersonId &
+                                         HF == KoroDataOpph$HFlang &
+                                         DateAdmittedIntensive  >= KoroDataOpph$InnDato & #- dagerFoer &  #Lagt inn før lagt inn intensiv
+                                         DateAdmittedIntensive < KoroDataOpph$UtTidspunkt) #Ut fra pandemi etter at lagt inn intensiv (IKKE:Skrevet ut etter utskriv. int.
+         ))
+   #Sjekker om det er mange pandemiskjema som har flere beredskapsskjema:
+   # table(table(BeredMedPand$vecMatchPanTilBered)) #197 pandemiskjema har to eller flere beredskapsskjema
+   # ind <- as.numeric(names(table(BeredMedPand$vecMatchPanTilBered)[table(BeredMedPand$vecMatchPanTilBered)==5]))
+   # testKoro <- KoroDataMberedOpph[ind[1], ]
+   # testBered <- BeredMedPand[which(BeredMedPand$vecMatchPanTilBered == ind[1]), ]
+   # sum(is.na(BeredMedPand$vecMatchPanTilBered)) #285
+
+   TabBeredUPand <- BeredMedPand[is.na(BeredMedPand$vecMatchPanTilBered) , c("HF", "ShNavn", "DateAdmittedIntensive","SkjemaGUID")]  #BeredUPand
+   TabBeredUPand$DateAdmittedIntensive <- as.character(TabBeredUPand$DateAdmittedIntensive)
+   tabUt <- TabBeredUPand[with(TabBeredUPand, order(HF, ShNavn, DateAdmittedIntensive)), ]
+
+   #Har alle med Nir_beredskapsskjema_CoV2==1 BeredReg==1: JA
+
+   #TEST: Disse "skal" ha bered-skjema:
+   # pers <- KoroDataMberedOpph$PersonId[which(KoroDataMberedOpph$BeredReg==0)]
+   # KoroDataMberedOpph[KoroDataMberedOpph$PersonId==pers[2], c("InnTidspunkt", "UtTidspunkt", "ShNavn",  "HF", 'BeredReg')]
+   # BeredData[BeredData$PersonId==pers[2], c("DateAdmittedIntensive", "DateDischargedIntensive", "ShNavn",  "HF")]
+   # KoroDataMberedOpph$InnTidspunkt[KoroDataMberedOpph$PersonId==pers[2]] <= BeredData$DateAdmittedIntensive[BeredData$PersonId==pers[2]]
+
+   #return(TabBeredUPand)
+   #return(UtData <- list(TabBeredUPand=TabBeredUPand, TabSmBeredToPand=TabSmBeredToPand))
+
+}
+
 
 #' Finner pasienter med dobbeltregistrerte skjema
 #'
 #' @param RegData dataramme fra pandemi registeret, inn og utskr.skjema
 #' @param tidssavik - maks tidsavvik (minutter) mellom to påfølgende registreringer som sjekkes
 #'
-#' @return
+#' @return dobbeltregistrering av inn-skjema
 #' @export
 PasMdblReg <- function(RegData, tidsavvik=0){
   DblReg <- RegData %>% group_by(PersonId) %>%
@@ -460,4 +530,55 @@ PasMdblReg <- function(RegData, tidsavvik=0){
 }
 
 
+#' Antall personer, smitteforløp, opphold i samme tabell per enhetsnivå
+#'
+#' @param RegData dataramme, ikke-aggregerte opphold
+#' @param datoFra startdato
+#' @param datoTil sluttdato
+#' @param enhetsNivaa 'HF' eller 'RHF'
+#' @param covidInn covid hovedårsak til innleggelse? 0-alle reg., 1-ja, 2-nei
+#'
+#' @return Personer, smitteforløp og opphold per enhetsnivå
+#' @export
+#'
+tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa, covidInn=0){
 
+  datoFra <- min(as.Date(datoFra), as.Date(datoTil)) # max(as.Date('2020-03-01'), as.Date(datoDum))
+  datoTil <- max(as.Date(datoTil), as.Date(datoFra))
+  RegData <- RegData[RegData$InnDato <= as.Date(datoTil, tz='UTC')
+                     & RegData$InnDato > as.Date(datoFra, tz='UTC'),]
+
+  #1-ja, 2-nei, 3-ukjent
+  if (covidInn %in% 1:2) {
+    RegData <- RegData[RegData$ArsakInnleggelse==covidInn,]
+  }
+
+  RegData$Dato <- as.Date(RegData$FormDate)
+  RegData$Enhetsnivaa <- RegData[,enhetsNivaa]
+
+  #Identifiserer inntil 3 forløp
+  PasFlere <- RegData %>% dplyr::group_by(PersonId) %>%
+    dplyr::reframe(SkjemaGUID = SkjemaGUID,
+                     InnNr0 = ifelse(Dato-min(Dato)>90, 2, 1),
+                     InnNr = ifelse(InnNr0>1, ifelse(Dato - min(Dato[InnNr0==2])>90, 3, 2), 1),
+                     PersonId_sforl = paste0(PersonId, '_', InnNr)
+                     #Tid = as.numeric(Dato-min(Dato))
+    )
+  RegData <- merge(RegData, PasFlere[,c("SkjemaGUID", "PersonId_sforl")], by='SkjemaGUID')
+
+  if (dim(RegData)[1]>0){
+
+    Tab <- as.data.frame(
+      RegData %>%
+        dplyr::group_by(Enhetsnivaa)%>%
+        dplyr::summarise(
+          AntOpph = n(),
+          AntSforl = length(unique(PersonId_sforl)),
+          AntPas = length(unique(PersonId))
+        ), row.names = NULL)
+    colnames(Tab) <- c('Enhet', 'Opphold', 'Smitteforløp', 'Personer')
+  } else {
+    Tab <- 'Ingen registreringer'
+  }
+  return(Tab)
+}

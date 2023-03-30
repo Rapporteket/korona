@@ -2,10 +2,10 @@
 
 #' Henter data og velger variabler for overføring til FHI
 #'
-#' @return
+#' @return data
 #' @export
 #'
-lagInfluDataFHI <- function(){
+lagInfluDataFHI_flyttet <- function(){
 #Rådata
 library(intensivberedskap) #  library(tidyverse) #
 

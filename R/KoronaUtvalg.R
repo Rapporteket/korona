@@ -13,7 +13,7 @@
 #'
 
 #'
-#' @param RegData data, beredskapsskjema
+#' @param RegData data, covid-skjema
 #' @param datoFra startdato 'yyyy-mm-dd'
 #' @param datoTil sluttdato 'yyyy-mm-dd'
 #' @param minald kjønn, 0-kvinne, 1-mann
@@ -21,7 +21,7 @@
 #' @param skjemastatusInn status på inklusjonsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
 #' @param skjemastatusUt status på utskrivingsskjema 0-ingen, 1-kladd, 2-ferdigstilt, 4-slettet, 5-returnert
 #' @param aarsakInn covid-19 som hovedårsak til innleggelse 1-ja, alle opph, 2-ja, minst siste opphold,
-#' 3-ja, minst ett opph, 5-nei, ingen opph, 9-ukj
+#' 3-ja, minst ett opph, 4-nei, ingen opph, 9-ukj
 #' @param enhetsNivaa organisatorisk nivå, dvs. filtreringsnivå for egen enhet.
 #'  RHF (SC og LC-brukere), HF (LU-brukere)
 #' @param valgtEnhet - gis ut fra resh
@@ -29,8 +29,11 @@
 #'                     1: egen enhet mot resten av landet,
 #'                     2: egen enhet (NB: returnerer hele landet i ind$Rest)
 #' @param dodSh død på sykehus 1-'nei', 2-'ja', 3-'ja og nei' (=ferdigstilte?)
+#' @param beredPas Har pasienten vært innlagt på intensiv? 0-nei, 1-ja.
+#' Per nå (12.03.23) basert på at faktisk finner et tilhørende beredskapsskjema.Vurder om
+#' vi heller skal basere på variabelen Nir_beredskapsskjema_CoV2
 #'
-#' @return
+#' @return Filtrerte data
 #' @export
 #'
 KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxald=110,
@@ -40,17 +43,17 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
 
   #if (enhetsNivaa == 'HF') {enhetsNivaa <- 'HFkort'} #Vil benytte HFkort siden HF er mangelfull
 
-  if ('BeredPas' %in% names(RegData)) { #Sjekker om data koblet på beredskapsskjema
-    if (beredPas %in% 0:1) {RegData <- subset(RegData, RegData$BeredPas == beredPas)}}
+  if ('BeredReg' %in% names(RegData)) { #Sjekker om data koblet på beredskapsskjema
+    if (beredPas %in% 0:1) {RegData <- subset(RegData, RegData$BeredReg == beredPas)}}
  if (skjemastatusInn %in% 1:2){RegData <- subset(RegData, RegData$FormStatus==skjemastatusInn)}
  if (skjemastatusUt %in% 1:2){RegData <- subset(RegData, RegData$FormStatusUt==skjemastatusUt)}
 # if (aarsakInn %in% 1:2){RegData <- subset(RegData, RegData$ArsakInnleggelse==aarsakInn)}
-  if (aarsakInn %in% 1:4){
+  if (aarsakInn %in% 1:4){ ##ArsakInnNy: 1-ja, alle opph, 2-ja, siste opph, ikke alle, 3-ja, minst ett opph, ikke siste, 4-nei, ingen opph
     ind <- switch(as.character(aarsakInn),
-                  '1' = which(RegData$ArsakInnNy==1),
-                  '2' = which(RegData$ArsakInnNy %in% 1:2),
-                  '3' = which(RegData$ArsakInnNy %in% 1:3),
-                  '4' = which(RegData$ArsakInnNy == 4)
+                  '1' = which(RegData$ArsakInnNy==1), #alle opph
+                  '2' = which(RegData$ArsakInnNy %in% 1:2), #siste opph
+                  '3' = which(RegData$ArsakInnNy %in% 1:3), #minst ett opph
+                  '4' = which(RegData$ArsakInnNy == 4) #Ingen opph
                   )
     RegData <- RegData[ind, ]
     }
@@ -78,11 +81,11 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
     if (skjemastatusUt %in% 0:5){paste('Skjemastatus, utskriving:',
                                         c('ingen', 'kladd', 'ferdigstilt', '','slettet', 'returnert')[skjemastatusInn+1])},
     if (aarsakInn %in% 1:4){paste0('Covid-19, hovedårsak? ',
-                                   c('Ja, alle opph.', 'Ja, (minst) siste opph.', 'Ja, minst ett opph.', 'Nei, ingen opph.')[aarsakInn])},
+                                   c('Ja, alle opphold', 'Ja, (minst) siste opphold', 'Ja, minst ett opphold', 'Nei, ingen opphold')[aarsakInn])},
     if (erMann %in% 0:1) {paste0('Kjønn: ', c('Kvinner', 'Menn')[erMann+1])},
     if (dodSh %in% 1:3) {paste0('Tilstand ved utskriving: ', c('Levende','Død','Alle utskrevne')[as.numeric(dodSh)])},
     if ((valgtEnhet != 'Alle') &(enhetsUtvalg == 2)) {paste('Valgt enhet:', valgtEnhet)},
-    if ('BeredPas' %in% names(RegData)) { #Sjekker om data koblet på beredskapsskjema
+    if ('BeredReg' %in% names(RegData)) { #Sjekker om data koblet på beredskapsskjema
       if (beredPas %in% 0:1) {paste0('Intensivpasient? ', c('Nei', 'Ja')[beredPas+1])}}
   )
 # utvalgTxt <- ifelse(is.null(utvalgTxt), '', utvalgTxt)
