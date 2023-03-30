@@ -4,13 +4,15 @@
 \alias{hentBeredDataFHI}
 \title{Henter data og velger variabler for overføring til FHI}
 \usage{
-hentBeredDataFHI(personIDvar = "PersonIdBC19Hash", raa = 1, Pagg = 1)
+hentBeredDataFHI(personIDvar = "PersonIdBC19Hash", raa = 1, aggP = 1)
 }
 \arguments{
 \item{personIDvar}{angi variabel for personid
 'PersonIdBC19Hash' - standard, 'PersonId' - alternativ}
 
 \item{raa}{hente rådata= 1-ja (standard), 0-nei}
+
+\item{aggP}{hente persondata aggregert til smitteforløp? 1-ja (standard), 0-nei}
 }
 \value{
 Beredskapsdata tilrettelagt for FHI

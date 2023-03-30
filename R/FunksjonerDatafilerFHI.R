@@ -144,7 +144,7 @@ return(UtData)
 #' @return Beredskapsdata tilrettelagt for FHI
 #' @export
 #'
-hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash', raa=1, Pagg=1){
+hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash', raa=1, aggP=1){
 
    RegDataRaa <- intensivberedskap::NIRberedskDataSQL() #BeredskapData #
 
@@ -228,16 +228,16 @@ if (aggP==1) {
 #' @export
 lagDatafilerTilFHI <- function(personIDvar='PersonIdBC19Hash',
                                bered=1, pand=1, influ=1,
-                               raa=1, Pagg=1){
+                               raa=1, aggP=1){
 
   UtData <- NULL
   if (pand==1) {
-    dataPandemi <- korona::hentPandemiDataFHI(personIDvar=personIDvar, raa=raa, Pagg=Pagg)
+    dataPandemi <- korona::hentPandemiDataFHI(personIDvar=personIDvar, raa=raa, aggP=aggP)
     UtData <- append(UtData,
                      dataPandemi)
                      }
   if (bered==1) {
-    dataBered <- korona::hentBeredDataFHI(personIDvar=personIDvar, raa=raa, Pagg=Pagg)
+    dataBered <- korona::hentBeredDataFHI(personIDvar=personIDvar, raa=raa, aggP=aggP)
     UtData <- append(UtData,
                      dataBered)
   }
