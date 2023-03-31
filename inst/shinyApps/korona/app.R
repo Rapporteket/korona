@@ -500,7 +500,7 @@ ui <- tagList(
                               uiOutput("dispatchmentContent")
                            )
                   ), #tab Utsendinger
-                  tabPanel('Intensivskjema som mangler pandemiskjema',
+                  tabPanel('Beredskapsskjema uten pandemiskjema',
                            h3('Ferdigstilte beredskapsskjema uten tilhørende pandemiskjema'),
                            h4('Koblinga er basert på at opphold er registrert med tidspunketer i følgende rekkefølge:
                             Inn på sykehus -> Inn på intensiv -> Ut fra sykehus'),
