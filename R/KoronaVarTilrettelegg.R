@@ -302,7 +302,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       }
 
 
-           if (valgtVar == 'tilstandInn' ) {
+           if (valgtVar == c('tilstandInn', 'tilstandInnAarsRapp22') ) {
 
             tittel <- 'Tilstand ved innleggelse'
             #AkuttRespirasjonsvikt, AkuttSirkulasjonsvikt, ja:2:5, nei:1
@@ -314,16 +314,25 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
                           'EndretBevissthet','Isolert')
             grtxt <- c('Akutt resp.svikt (alle grader)', 'Akutt sirk.svikt (alle grader)', 'Akutt nyresvikt',
                        'Endret bevissthet','Isolert')
+            if (valgtVar == 'tilstandInnAarsRapp22' ){
+            RegData[RegData$InnDato > as.Date('2022-04-11') ,variable[1:4]]  <- NA
+            grtxt <- paste(grtxt[1:4], '/t.o.m. 11.apr. -22')
+            }
+
             RegData$AkuttRespirasjonsvikt <- ifelse(RegData$AkuttRespirasjonsvikt %in% 1:5,
                                                       ifelse(RegData$AkuttRespirasjonsvikt==1, 0, 1), NA)
-            # RegData$AkuttSirkulasjonsvikt <- recode(RegData$AkuttSirkulasjonsvikt,
-            #                                          '1'=0, '2'=1, '3'=1, '4'=1, '5'=1, .default=NULL)
             RegData$AkuttSirkulasjonsvikt <- ifelse(RegData$AkuttSirkulasjonsvikt %in% 1:5,
                                                     ifelse(RegData$AkuttSirkulasjonsvikt==1, 0, 1), NA)
             var <- c('AkuttNyresvikt', 'EndretBevissthet', 'Isolert')
             RegData[, var][which(RegData[ ,var] == -1, arr.ind = T)] <- NA
             RegData[, var][which(RegData[ ,var] == 3, arr.ind = T)] <- NA
             RegData[, var][which(RegData[ ,var] == 2, arr.ind = T)] <- 0
+
+            if (valgtVar == 'tilstandInnAarsRapp'){
+
+            }
+
+
             xAkseTxt <- 'Andel pasienter (%)'
            }
 

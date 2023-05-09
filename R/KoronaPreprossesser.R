@@ -384,7 +384,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
 #Fjerner personer som er dobbeltregistrert:
  test <-  RegData %>%
          dplyr::group_by(PersonId, InnTidspunkt) %>%
-         summarize(Ant = dplyr::n())
+         dplyr::summarize(Ant = dplyr::n())
  ind <- which(RegData$PersonId %in% test$PersonId[test$Ant>1])
  if (length(ind)>0) {RegData <- RegData[-ind,]}
 

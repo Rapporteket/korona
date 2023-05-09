@@ -99,21 +99,10 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   # ', enhetsNivaa: ', enhetsNivaa, ', rolle: ', rolle)
   # )
 
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
-  #                   reshId = reshID[[1]],
-  #                   msg = paste0('2)klasse:', 'reshID: ', class(reshID), ',
-  #                                valgtEnhet: ', class(valgtEnhet),
-  #                                ', enhetsNivaa: ', class(enhetsNivaa), ',
-  #                                                         rolle: ', class(rolle))
-  # )
 
   filbase <- substr(rnwFil, 1, nchar(rnwFil)-4)
   tmpFile <- paste0(filbase, Sys.Date(),'_',digest::digest(brukernavn), '.Rnw')
   src <- normalizePath(system.file(rnwFil, package='korona'))
-
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
-  #                   reshId = reshID[[1]],
-  #                   msg = "3) filbase, tmpFile, src ok")
 
 
 # gå til tempdir. Har ikke skriverettigheter i arbeidskatalog
@@ -137,103 +126,6 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   return(utfil)
 }
 
-
-#' Funksjon som henter filer som skal sendes til FHI. To filer fra intensivopphold
-#' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
-#' person, for hvert register
-#'
-#' @param zipFilNavn Navn på fila som skal kjøres. DataFHIPanBeredInflu, Testfil
-#' @param brukernavn Innlogget brukernavn
-#' @return Filsti til fil med filsti til zip...
-#' @export
-
-sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
-
-  # brukernavn <- brukernavn[[1]]
-  # zipFilNavn <- zipFilNavn[[1]]
-
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-  #                   msg = paste0("Vil lage filer for dataoverføring: ", zipFilNavn))
-
-  #opprKat <- getwd()
-  opprKat <- setwd(tempdir())
-  kat <- getwd()
-
-  #zipFilNavn <- paste0(zipFilNavn, Sys.Date())
-  if (zipFilNavn == 'DataFHIPanBeredInflu') {
-    Filer <- korona::lagDatafilerTilFHI()
-
-    # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-    #                   msg = paste0("Har hentet ekte filer for sending til FHI"))
-
-    datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI', 'InfluensaDataRaaFHI')
-    for (fil in datasett){
-      Fil <- Filer[[fil]]
-      write.table(Fil, file = paste0(fil, '.csv'),
-                  fileEncoding = 'UTF-8', row.names=F, sep=';', na='')}
-
-    # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-    #                   msg = paste0("Har lagret ekte filer for sending til FHI"))
-
-    #utils::zip(zipfile = zipFilNavn, files = paste0(datasett, '.csv')) #'PandemiBeredskapTilFHI'
-
-    zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = paste0(datasett, '.csv'))
-
-  }
-
-  if (zipFilNavn == 'Testfil') {
-
-    Testfil1 <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
-    Testfil2 <- data.frame('Hei' = c(pi, 3,1), 'Nei' = c(log(2), 200, 3))
-    write.table(Testfil1, file = paste('Testfil1.csv'),
-                fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
-    write.table(Testfil2, file = paste('Testfil2.csv'),
-                fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
-
-    rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-                      msg = paste0("Har lagret testfiler"))
-    #utils::zip(zipfile = paste0(zipFilNavn), files = c('Testfil1.csv', 'Testfil2.csv'))
-    #utils::zip(zipfile = file.path(kat, zipFilNavn), files = c(file.path(kat, 'Testfil1.csv'), file.path(kat, 'Testfil2.csv')))
-
-    zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = c('Testfil1.csv', 'Testfil2.csv'))
-
-
-    #file.info(c(paste0(zipFilNavn, '.zip'), 'Testfil1.csv', 'Testfil2.csv'))['size']
-    #unzip(paste0(zipFilNavn, '.zip'), list = FALSE) #list	If TRUE, list the files and extract none
-  }
-  zipfilSti <- paste0(kat, '/', zipFilNavn, '.zip')
-
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-  #                   msg = paste0("Har laget zip-fil: ", zipfilSti))
-
-  #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
-  #Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
-  sship::sship(content=zipfilSti,
-               recipient = 'nhn', #Character string: user name uniquely defining the recipient both in terms of the public
-               #key used for securing the content and any identity control upon docking
-               pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
-               vessel = 'sftp', # ut fra beskrivelsen bare ftp
-               declaration = paste0("HerErJeg_hilsen_", zipFilNavn))
-  # test <- warnings()
-  # if (length(test) >0 ){
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-  #                  msg = warnings()) #, utfil))}
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
-  #                   msg = paste("Har levert data til NHN/FHI ")) #, utfil))
-  write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
-  utfilsti <- paste0(kat, '/', 'zipfilSti.csv')
-
-  #Fjern filer.. unntatt filstifila
-  if (zipFilNavn == 'Testfil') {
-    dum <- file.remove(c('Testfil1.csv', 'Testfil2.csv', 'Testfil.zip')) }
-  if (zipFilNavn == 'DataFHIPanBeredInflu') {
-    dum <- file.remove(paste0(zipFilNavn, '.zip'), paste0(datasett, '.csv'))
-    }
-
-  setwd(opprKat)
-
-  return(utfilsti)
-}
 
 #' Funksjon som avgjør om en pasient er inneliggende på aktuell dato
 #'

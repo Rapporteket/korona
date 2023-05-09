@@ -13,14 +13,7 @@
 #Venter avklaring: Variabellista og det meste av beskrivelsene hespeiler på opphold (ikke aggregerte) data. Betyr det at de "bare" skal ha
 #rådata? Det er slik jeg tolker bestillinga.
 
-# Ikke-sagt:
-# Når det gjelder overføringa ligger ballen hos HN-IKT. Are, som var vår ekspert på dette, har sluttet.
-# Jeg ser Sigurd hos HN-IKT er på e-postlista fra dere, så jeg overlater til HN-IKT å svare på status fra deres side.
-# FHI ønsker data overført bare annenhver uke. Det betyr at det ikke vil være mye arbeid å hente dataene selv,
-# hvis jeg tilrettelegger en datadump så de bare kan "trykke på knappen(e)". Kan det være et alternativ for å få dette kjappere på plass?
 
-
-#
    #Fødselsnummer hashet med Hemits? hash
 beredVariabler <- c('PersonId',
 'PatientAge',

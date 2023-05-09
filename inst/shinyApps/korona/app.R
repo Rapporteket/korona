@@ -7,15 +7,15 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
-library(shinyjs)
-library(magrittr)
-library(tidyverse)
-library(lubridate)
-library(kableExtra)
-library(sship)
-library(intensivberedskap)
-library(korona)
+# library(shiny)
+# library(shinyjs)
+# library(magrittr)
+# library(tidyverse)
+# library(lubridate)
+# library(kableExtra)
+# library(sship)
+# library(intensivberedskap)
+# library(korona)
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
 # ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
@@ -555,12 +555,17 @@ ui <- tagList(
                                   br(),
                                   br(),
                                   h4('Data til FHI'),
-                                  selectInput("hvilkeFilerTilFHI", "Data:", c("Pandemi, beredskap og influensa" = "DataFHIPanBeredInflu", #c("Pandemi og beredskap" = "DataFHIPanBered",
-                                                                              "Testfil" = "Testfil")),
+                                  selectInput("hvilkeFilerTilFHI", "Data:",
+                                              c("Beredt C-19: Pandemi, beredskap og influensa" = "DataFHIPanBeredInflu",
+                                                "Testfil til Beredt C-19" = "Testfil",
+                                                "Råfiler til overvåkning" = "DataFHICovMonitor",
+                                                "Testfil til overvåkning" = "Testfil")),
                                   actionButton("bestillDataTilFHI", "Bestill data til FHI"),
                                   br(),
                                   downloadButton(outputId = 'lastNed_filstiDataNHN',
-                                                 label='Send filer til NHN og last ned filsti', class = "butt"),
+                                                 label='Send filer til Beredt-C19 (NHN) og last ned filsti', class = "butt")
+                                  # downloadButton(outputId = 'lastNed_filstiDataNHN_monitor',
+                                  #                label='Send filer til Beredt-C19 (NHN) og last ned filsti', class = "butt")
                                   ),
                      mainPanel(
                         br(),
@@ -618,10 +623,11 @@ server <- function(input, output, session) {
       shinyjs::hide(id = 'KoroRappInt.pdf')
       shinyjs::hide(id = 'KoroRappTxtInt')
    }
-   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon'))){
+   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon', 'eabu'))){
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
+      #shinyjs::hide(id = 'lastNed_filstiDataNHN_monitor')
       #shinyjs::hide(id = 'oppdatStaging')
    }
 
@@ -1446,7 +1452,7 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
       filename = function(){
          paste0('Filsti', Sys.time(), '.csv')},
       content = function(file, filename){
-         Filsti <- sendDataFilerFHI(zipFilNavn=input$hvilkeFilerTilFHI) #brukernavn = brukernavn)
+         Filsti <- sendDataFilerFHI(zipFilNavn=input$hvilkeFilerTilFHI)
          write.csv2(x=Filsti, file, row.names = F, na = '') #x - r-objektet
       })
 
@@ -1458,6 +1464,7 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
       interval <- "DSTday"
       intervalName <- "Daglig"
       runDayOfYear <- rapbase::makeRunDayOfYearSequence(interval = interval)
+      #Vi kan utelate recipient som parameter siden den også styres av filpakken som er valgt
       paramNames = c('zipFilNavn', 'brukernavn')
       paramValues = c(input$hvilkeFilerTilFHI, brukernavn)
       rapbase::createAutoReport(synopsis = paste0('Sendt til FHI: ',input$hvilkeFilerTilFHI),
@@ -1471,7 +1478,7 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
                                 interval = interval,
                                 intervalName = intervalName)
 
-      #rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
+
       subscription$tab <-
          rapbase::makeAutoReportTab(session, type = "subscription")
 

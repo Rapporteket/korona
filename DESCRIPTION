@@ -14,8 +14,7 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.5.0),
-    rapbase (>= 1.0.0),
-    tidyverse
+    rapbase (>= 1.0.0)
 Remotes: 
       Rapporteket/rapbase@*release,
       Rapporteket/rapFigurer,
@@ -23,11 +22,13 @@ Remotes:
 Imports:
     digest,
     DT,
+    dplyr,
+    enc,
+    ggplot2,
     kableExtra,
     knitr,
     magrittr,
     lubridate,
-    dplyr,
     rapbase,
     rapFigurer,
     raplog,
@@ -35,11 +36,9 @@ Imports:
     shiny,
     shinyalert,
     shinyjs,
-    tidyverse,
     xtable,
     zip,
-    zoo,
-    enc
+    zoo   
 VignetteBuilder: knitr
 Suggests: 
     testthat (>= 2.1.0)

@@ -1,4 +1,4 @@
-
+#Samling av funksjoner som tilrettelegger datafiler, samt funksjon for oversendelse
 
 #' Henter data og velger variabler for overføring til FHI
 #'
@@ -249,6 +249,95 @@ lagDatafilerTilFHI <- function(personIDvar='PersonIdBC19Hash',
     }
 
   return(UtData)
+}
+
+
+#' Funksjon som henter filer som skal sendes til FHI. To filer fra intensivopphold
+#' og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
+#' person, for hvert register
+#'
+#' @param zipFilNavn Navn på fila som skal kjøres. DataFHICovMonitor, DataFHIPanBeredInflu, Testfil
+#' @param brukernavn Innlogget brukernavn
+#' @param recipient Character string: brukernavn for unik definisjon av mottager. Benyttes i sship.
+#' recipient er også hardkodet ut fra hvilken filpakke som er valgt, men må kunne velges for å sende testfil til valgt mottager.
+#' Standard: 'nhn' Valg: 'nhn', 'nhn_covmonitor'
+#' @return Filsti til fil med filsti til zip...
+#' @export
+
+sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson', recipient = 'nhn'){ #
+
+   opprKat <- setwd(tempdir())
+   kat <- getwd()
+
+   #Legger på ekstra betingelse for å sikre at ikke data sendes til feil mottager
+   if (zipFilNavn == 'DataFHICovMonitor') {
+      #Data til FHIs covid-overvåkning. Kun rådata,
+
+      recipient == 'nhn_covmonitor' #For å sikre at ikke sendes feil
+      Filer <- korona::lagDatafilerTilFHI(personIDvar='PersonId',
+                                           bered=1, pand=1, influ=0,
+                                           raa=1, aggP=0)
+      for (filnr in 1:length(Filer)){
+         write.table(Filer[[filnr]], file = paste0(names(Filer)[filnr], '.csv'),
+                     fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+      }
+      zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = paste0(names(Filer), '.csv'))
+   }
+
+
+   if (zipFilNavn == 'DataFHIPanBeredInflu') {
+      recipient == 'nhn'
+      Filer <- korona::lagDatafilerTilFHI()
+      datasett <- c('PandemiDataRaaFHI', 'PandemiDataPpFHI', 'BeredskapDataRaaFHI', 'BeredskapDataPpFHI', 'InfluensaDataRaaFHI')
+      for (fil in datasett){
+         Fil <- Filer[[fil]]
+         write.table(Fil, file = paste0(fil, '.csv'),
+                     fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+         }
+     zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = paste0(datasett, '.csv'))
+   }
+
+   if (zipFilNavn == 'Testfil') {
+
+      Testfil1 <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
+      Testfil2 <- data.frame('Hei' = c(pi, 3,1), 'Nei' = c(log(2), 200, 3))
+      write.table(Testfil1, file = paste('Testfil1.csv'),
+                  fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+      write.table(Testfil2, file = paste('Testfil2.csv'),
+                  fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
+
+      rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+                         msg = paste0("Har lagret testfiler"))
+
+      zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = c('Testfil1.csv', 'Testfil2.csv'))
+   }
+
+   zipfilSti <- paste0(kat, '/', zipFilNavn, '.zip')
+
+
+   #For each recipient a list of available vessels (transport methods) is defined and must include relevant credentials.
+   #Functions used here rely on local configuration (sship.yml - må oppdateres av hn-ikt) to access such credentials.
+   sship::sship(content=zipfilSti,
+                recipient = recipient, #Character string: user name uniquely defining the recipient both in terms of the public
+                #key used for securing the content and any identity control upon docking
+                pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
+                vessel = 'sftp', # ut fra beskrivelsen bare ftp
+                declaration = paste0("HerErJeg_hilsen_", zipFilNavn))
+   # if (length(warnings()) >0 ){
+   # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+   #                  msg = warnings()) #, utfil))}
+   write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
+   utfilsti <- paste0(kat, '/', 'zipfilSti.csv')
+
+   #Fjern filer.. unntatt filstifila
+   if (zipFilNavn == 'Testfil') {
+      dum <- file.remove(c('Testfil1.csv', 'Testfil2.csv', 'Testfil.zip')) }
+   if (zipFilNavn %in% c('DataFHIPanBeredInflu', 'DataFHICovMonitor')) {
+      dum <- file.remove(paste0(zipFilNavn, '.zip'), paste0(datasett, '.csv'))
+   }
+
+   setwd(opprKat)
+   return(utfilsti)
 }
 
 

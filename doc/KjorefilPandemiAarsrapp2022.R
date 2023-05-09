@@ -6,9 +6,11 @@
 #Legger til re-/nyinnleggelser osv. NB: Hvis vi kun ser på Covid som hovedårsak, mister vi noen reinnleggelser/overføringer.
 #2021: valgt å beregne overføringer/nye innleggelser først og så filtrere på hovedårsak covid.
 #Vi får dermed flere overføringer sammenlignet med 2020.
-#2022: Vi skal ha personaggregerte data hvor vi teller flere smitteforløp. Smitteforløp med minst ett opphold hvor Covid hovedårsak.
+#2022: Vi skal ha personaggregerte data hvor vi teller flere smitteforløp. Smitteforløp hvor ALLE opphold hvor Covid hovedårsak.
+#2022: Intensivpasient: pasienter/opphold hvor vi faktisk har et tilhørende beredskapsskjema. Ikke benyttet variabelen Nir_beredskapsskjema_CoV2.
 
-setwd('AarsRappFig/')
+
+setwd('../Aarsrappresultater/NiPar22/')
 library(intensiv)
 library(intensivberedskap)
 library(korona)
@@ -19,17 +21,22 @@ datoFra1aar <- '2022-01-01'
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
 KoroDataOpph <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=0, kobleBered=1)
 KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1, tellFlereForlop=1)
-#ELLER: (pass på at staging oppdatert)
+#ELLER: (pass på at staging oppdatert) Oppdatert 25.april
 KoroDataPers <- rapbase::loadStagingData("korona", "KoroData")
 
 # sjekk <- KoroDataOpph[KoroDataOpph$Nir_beredskapsskjema_CoV2==1 & KoroDataOpph$BeredReg==0 &
 #                          KoroDataOpph$Aar==2022 & KoroDataOpph$ArsakInnleggelse==1,
-#                       c("SkjemaGUID", "InnDato", 'Aar')]
-# table(KoroDataOpph[ ,c('Nir_beredskapsskjema_CoV2', 'Aar')])
+#                       c("SkjemaGUID", 'HovedskjemaGUID', "FormDate", 'ShNavn',"ReshId", 'Aar')]
+# write.table(sjekk, file = 'SkalHaBeredSkjema.csv', sep = ';', row.names = F, fileEncoding = 'UTF-8')
+#table(KoroDataOpph[KoroDataOpph$BeredReg==0 ,c('Nir_beredskapsskjema_CoV2', 'Aar')])
 
 #Bare smitteforløp hvor alle opph har Covid som hovedårsak
 KoroData <- KoronaUtvalg(RegData = KoroDataPers, aarsakInn = 1, datoTil = datoTil)$RegData
 KoroData1aar <- KoroData[KoroData$InnDato >= as.Date(datoFra1aar), ]
+
+Filer <- korona::lagDatafilerTilFHI(personIDvar='PersonId',
+                                    bered=1, pand=1, influ=0,
+                                    raa=1, aggP=0)
 
 #-----------------------TABELLER--------------------------------
 
@@ -101,14 +108,14 @@ for (valgtVar in variabler) {
 }
 
 #Kun for 2020 - 1.kvartal 2022
-variabler <- c('respSviktInn', 'respSviktUt', 'risikoInn', 'sirkSviktInn', 'sirkSviktUt', 'tilstandInn')
+variabler <- c('respSviktInn', 'respSviktUt', 'risikoInn', 'sirkSviktInn', 'sirkSviktUt', 'antibiotikaInn', 'antibiotikaUt')
 for (valgtVar in variabler) {
    KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
                     datoTil='2022-04-11', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
 }
 
-#Kun for 2020 - 1.kvartal 2022
-variabler <- c('antibiotikaInn', 'antibiotikaUt')
+#Kun for 2020 - 1.kvartal 2022 / hele 2022 for isolert
+variabler <- c('tilstandInnAarsRapp')
 for (valgtVar in variabler) {
    KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
                     datoTil='2022-04-11', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
@@ -199,7 +206,7 @@ tabInn <- cbind(
 
 tabInn <- tabInn[-which(names(antUkj) %in% fjernVarInn), ]
 
-
+#Endre til longtable
  xtable::xtable(tabInn,
                 digits = 0,
                 align = c('l','r','r','r','r'),
