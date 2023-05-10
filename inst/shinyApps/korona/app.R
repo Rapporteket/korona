@@ -100,7 +100,7 @@ ui <- tagList(
 
       #-------------Startside--------------
       tabPanel("Oversikt",
-               #shinyjs::useShinyjs(),
+               shinyjs::useShinyjs(),
                sidebarPanel(id = 'brukervalgStartside',
                             width = 3,
                             uiOutput('KoroRappTxt'),
