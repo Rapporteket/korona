@@ -7,7 +7,8 @@
 #    http://shiny.rstudio.com/
 #
 
-# library(shiny)
+#library(shiny)
+library(korona)
 # library(shinyjs)
 # library(magrittr)
 # library(tidyverse)
@@ -15,7 +16,6 @@
 # library(kableExtra)
 # library(sship)
 # library(intensivberedskap)
-# library(korona)
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
 # ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
@@ -100,7 +100,7 @@ ui <- tagList(
 
       #-------------Startside--------------
       tabPanel("Oversikt",
-               useShinyjs(),
+               shinyjs::useShinyjs(),
                sidebarPanel(id = 'brukervalgStartside',
                             width = 3,
                             uiOutput('KoroRappTxt'),
@@ -145,7 +145,7 @@ ui <- tagList(
 
                ),
                mainPanel(width = 9,
-                         appNavbarUserWidget(user = uiOutput("appUserName"),
+                         rapbase::appNavbarUserWidget(user = uiOutput("appUserName"),
                                              organization = uiOutput("appOrgName"),
                                              addUserInfo = TRUE),
                          tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
