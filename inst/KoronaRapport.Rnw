@@ -217,8 +217,8 @@ AntPaaSh <- sum(is.na(Pandemi$UtDato))
 
 indNaa <- which(is.na(Pandemi$UtDato))
 InneliggHF <- if (rolle == 'LU') {
-  Pandemi[indNaa,] %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise('Antall pasienter' = n())
-  } else {Pandemi[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise('Antall pasienter' = n())}
+  Pandemi[indNaa,] %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise('Antall pasienter' = dplyr::n())
+  } else {Pandemi[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise('Antall pasienter' = dplyr::n())}
 InneliggPas <- rbind(as.matrix(InneliggHF),
       c('','Totalt', AntPaaSh))
 print(xtable::xtable(InneliggPas, digits=0, align=c('l','l','l','r'),
@@ -242,7 +242,7 @@ antDodAndre <- sum(PandemiAndre$StatusVedUtskriving==2, na.rm = T) #[indFerdigUt
 
 
 indNaa <- which(is.na(PandemiAndre$UtDato))
-InneliggHFandre <- PandemiAndre[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise('Antall pasienter' = n())
+InneliggHFandre <- PandemiAndre[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise('Antall pasienter' = dplyr::n())
 InneliggPasAndre <- rbind(as.matrix(InneliggHFandre),
       c('','Totalt', AntPaaShAndre))
 @
@@ -347,8 +347,8 @@ print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align
 #nivaa1 <- enhetsNivaa
 nivaa2 <- ifelse(rolle=='LU', 'ShNavn', 'HFnavn')
 
-RegHF <- if (rolle == 'LU') {PandemiOpph %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = n())
-  } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
+RegHF <- if (rolle == 'LU') {PandemiOpph %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = dplyr::n())
+  } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = dplyr::n())}
 RegHF <- rbind(as.matrix(RegHF),
       c('','Totalt', sum(RegHF$Antall)))
 

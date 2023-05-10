@@ -365,10 +365,10 @@ UtData <- KoronaUtvalg(RegData=KoroData, valgtEnhet=valgtEnhet, enhetsNivaa = en
 unique(KoroDataRaa[ ,c("UnitId", "HelseenhetKortNavn", 'HF', 'RHF')])
 unique(KoroData[ ,c("ReshId", "ShNavn", 'HF', 'RHF')])
 Pandemi  <- KoronaUtvalg(RegData=KoroData, aarsakInn = 2)$RegData
-as.data.frame(Pandemi[Pandemi$HF=='',] %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = n()))
-as.data.frame(Pandemi %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = n()))
-Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
-705757
+as.data.frame(Pandemi[Pandemi$HF=='',] %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = dplyr::n()))
+as.data.frame(Pandemi %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = dplyr::n()))
+# Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
+# 705757
 
 #Samlerapport, sjekk
 
@@ -757,7 +757,7 @@ JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
 # OverfortAnnetSykehusUtskrivning,  #1-ja, 2-nei, 3-ukjent
 # RegDataRed <- RegData %>% dplyr::group_by(PasientGUID) %>%
 #   summarise(Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)),
-#             AntInnSkjema = n(),
+#             AntInnSkjema = dplyr::n(),
 #             Reinn = ifelse(AntInnSkjema==1, 0,
 #                            ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
 #                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
@@ -853,28 +853,28 @@ TabSh <- PanInt %>%
   dplyr::group_by(RHFPan, HFPan, ShNavnPan) %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
-    AntPas = n(),
-    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
+    AntPas = dplyr::n(),
+    AndelPaaInt = round(sum(PaaInt)/dplyr::n()*100, 1)
   )
 TabHF <- PanInt %>%
   dplyr::group_by(RHFPan, HFPan) %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
-    AntPas = n(),
-    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
+    AntPas = dplyr::n(),
+    AndelPaaInt = round(sum(PaaInt)/dplyr::n()*100, 1)
   )
 TabRHF <- PanInt %>%
   dplyr::group_by(RHFPan) %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
-    AntPas = n(),
-    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
+    AntPas = dplyr::n(),
+    AndelPaaInt = round(sum(PaaInt)/dplyr::n()*100, 1)
   )
 TabNasj <- PanInt %>%
    dplyr::summarise(
     AntPaaInt = sum(PaaInt),
-    AntPas = n(),
-    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
+    AntPas = dplyr::n(),
+    AndelPaaInt = round(sum(PaaInt)/dplyr::n()*100, 1)
   )
 install.packages(c("xlsx","openxlsx"))
 library(openxlsx)

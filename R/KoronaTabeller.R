@@ -502,7 +502,7 @@ finnBeredUpandemi <- function(datoFra='2020-01-01', datoTil=Sys.Date(), HF='Alle
 #' @export
 PasMdblReg <- function(RegData, tidsavvik=0){
   DblReg <- RegData %>% dplyr::group_by(PersonId) %>%
-    dplyr::summarise(N = n(),
+    dplyr::summarise(N = dplyr::n(),
               #MinTid = ifelse(N>1, min(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins'), na.rm = T), NA),
               LikTid = ifelse(N>1,
                               ifelse(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins') <= tidsavvik,
@@ -572,7 +572,7 @@ tabAntPersOpph <- function(RegData, datoFra, datoTil=Sys.Date(), enhetsNivaa, co
       RegData %>%
         dplyr::group_by(Enhetsnivaa)%>%
         dplyr::summarise(
-          AntOpph = n(),
+          AntOpph = dplyr::n(),
           AntSforl = length(unique(PersonId_sforl)),
           AntPas = length(unique(PersonId))
         ), row.names = NULL)
