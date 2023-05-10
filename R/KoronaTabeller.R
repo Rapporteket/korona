@@ -501,7 +501,7 @@ finnBeredUpandemi <- function(datoFra='2020-01-01', datoTil=Sys.Date(), HF='Alle
 #' @return dobbeltregistrering av inn-skjema
 #' @export
 PasMdblReg <- function(RegData, tidsavvik=0){
-  DblReg <- RegData %>% group_by(PersonId) %>%
+  DblReg <- RegData %>% dplyr::group_by(PersonId) %>%
     dplyr::summarise(N = n(),
               #MinTid = ifelse(N>1, min(difftime(FormDate[order(FormDate)][2:N], FormDate[order(FormDate)][1:(N-1)], units = 'mins'), na.rm = T), NA),
               LikTid = ifelse(N>1,

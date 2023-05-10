@@ -327,7 +327,7 @@ if (tidsenhet=='dag') {
                      'uke' = paste0('Uke ', format(aux$Tid, "%V")),
                      'maaned' = format(aux$Tid, "%b.%Y")
   )
-  aux <- aux %>% group_by(PasientID, Tid) %>%
+  aux <- aux %>% dplyr::group_by(PasientID, Tid) %>%
     summarise(er_inne = max(verdi))
   aux <- aux %>% spread(key=Tid, value = er_inne)
   RegDataAlle <- merge(RegDataAlle, aux, by = 'PasientID')
@@ -755,7 +755,7 @@ RegData <- KoronaPreprosesser(RegDataRaa)
 JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
 # OverfortAnnetSykehusInnleggelse,  #1-ja, 2-nei, 3-ukjent
 # OverfortAnnetSykehusUtskrivning,  #1-ja, 2-nei, 3-ukjent
-# RegDataRed <- RegData %>% group_by(PasientGUID) %>%
+# RegDataRed <- RegData %>% dplyr::group_by(PasientGUID) %>%
 #   summarise(Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)),
 #             AntInnSkjema = n(),
 #             Reinn = ifelse(AntInnSkjema==1, 0,
@@ -813,7 +813,7 @@ IntensivData <- read.table('A:/Intensiv/BeredskapPers2020-04-23.csv', sep=';',
                           stringsAsFactors=FALSE, header=T) #, encoding = 'UTF-8')
 var <- c("Fodselsnummer", "SkjemaGUID", 'FormDate', "HealthUnitShortName", "HF", "RHF")
 IntDataPers <- IntensivData %>%
-  group_by(Fodselsnummer) %>%
+  dplyr::group_by(Fodselsnummer) %>%
   summarise(
     SkjemaGUID = first(SkjemaGUID, order_by = FormDate),
     RHF = first(RHF, order_by = FormDate),
@@ -827,7 +827,7 @@ PandemiData <- read.table('A:/Pandemi/PandemiPers2020-04-23.csv', sep=';',
 PanData <- PandemiData[which(PandemiData$Skjematype=='Pandemiskjema'), var]
 
 PanDataPers <- PanData %>%
-  group_by(Fodselsnummer) %>%
+  dplyr::group_by(Fodselsnummer) %>%
   summarise(
     SkjemaGUID = first(SkjemaGUID, order_by = FormDate),
     RHF = first(RHF, order_by = FormDate),
@@ -1083,7 +1083,7 @@ names(BeleggLandet) <- mnd
 
 LiggeDogn <-
   RegData[,c('HF', mnd)] %>%
-  group_by(HF) %>%
+  dplyr::group_by(HF) %>%
   summarise_all(sum)
 test <-
 
@@ -1124,7 +1124,7 @@ p <-
 p + facet_grid(rows = vars(drv))
 
 belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
-belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
+belegg_rhf <- belegg_ssb %>% dplyr::group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
 belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
 
 
