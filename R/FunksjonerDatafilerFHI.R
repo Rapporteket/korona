@@ -258,13 +258,14 @@ lagDatafilerTilFHI <- function(personIDvar='PersonIdBC19Hash',
 #'
 #' @param zipFilNavn Navn på fila som skal kjøres. DataFHICovMonitor, DataFHIPanBeredInflu, Testfil
 #' @param brukernavn Innlogget brukernavn
-#' @param recipient Character string: brukernavn for unik definisjon av mottager. Benyttes i sship.
-#' recipient er også hardkodet ut fra hvilken filpakke som er valgt, men må kunne velges for å sende testfil til valgt mottager.
-#' Standard: 'nhn' Valg: 'nhn', 'nhn_covmonitor'
 #' @return Filsti til fil med filsti til zip...
 #' @export
 
-sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson', recipient = 'nhn'){ #
+sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #, recipient = 'nhn'
+#Fjernet parameter:
+   #Character string: brukernavn for unik definisjon av mottager. Benyttes i sship.
+   # recipient er også hardkodet ut fra hvilken filpakke som er valgt, men må kunne velges for å sende testfil til valgt mottager.
+   # Standard: 'nhn' Valg: 'nhn', 'nhn_covmonitor'
 
    opprKat <- setwd(tempdir())
    kat <- getwd()
@@ -272,7 +273,6 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson', re
    #Legger på ekstra betingelse for å sikre at ikke data sendes til feil mottager
    if (zipFilNavn == 'DataFHICovMonitor') {
       #Data til FHIs covid-overvåkning. Kun rådata,
-
       recipient == 'nhn_covmonitor' #For å sikre at ikke sendes feil
       Filer <- korona::lagDatafilerTilFHI(personIDvar='PersonId',
                                            bered=1, pand=1, influ=0,
@@ -297,7 +297,9 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson', re
      zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = paste0(datasett, '.csv'))
    }
 
-   if (zipFilNavn == 'Testfil') {
+   if (zipFilNavn %in% c('Testfil_BerC19', 'Testfil_CovMonitor')) {
+     if (zipFilNavn == 'Testfil_BerC19') {recipient <- 'nhn'}
+      if (zipFilNavn == 'Testfil_CovMonitor') {recipient <- 'nhn_covmonitor'}
 
       Testfil1 <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
       Testfil2 <- data.frame('Hei' = c(pi, 3,1), 'Nei' = c(log(2), 200, 3))
@@ -306,9 +308,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson', re
       write.table(Testfil2, file = paste('Testfil2.csv'),
                   fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
-      rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+      rapbase::autLogger(user = brukernavn, registryName = 'Pandemi', reshId = 0,
                          msg = paste0("Har lagret testfiler"))
-
       zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = c('Testfil1.csv', 'Testfil2.csv'))
    }
 
@@ -324,7 +325,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson', re
                 vessel = 'sftp', # ut fra beskrivelsen bare ftp
                 declaration = paste0("HerErJeg_hilsen_", zipFilNavn))
    # if (length(warnings()) >0 ){
-   # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi', reshId = 0,
+   # rapbase::autLogger(user = brukernavn, registryName = 'Pandemi', reshId = 0,
    #                  msg = warnings()) #, utfil))}
    write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
    utfilsti <- paste0(kat, '/', 'zipfilSti.csv')

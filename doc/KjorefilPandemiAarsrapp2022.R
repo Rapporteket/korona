@@ -11,7 +11,7 @@
 
 
 setwd('../Aarsrappresultater/NiPar22/')
-library(intensiv)
+#library(intensiv)
 library(intensivberedskap)
 library(korona)
 datoFra <- '2020-03-01' #Vi har pandemi fra 1.mars 2020
@@ -21,8 +21,17 @@ datoFra1aar <- '2022-01-01'
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
 KoroDataOpph <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=0, kobleBered=1)
 KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1, tellFlereForlop=1)
-#ELLER: (pass på at staging oppdatert) Oppdatert 25.april
-KoroDataPers <- rapbase::loadStagingData("korona", "KoroData")
+
+#ELLER hent fra staging: (pass på at staging oppdatert) Oppdatert med data fra hentet 25.april
+KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") # KoronaDataSQL(koble=1)
+KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph") #(RegData = KoroDataRaa, aggPers = 0, kobleBered = 1)
+KoroDataOpph <- KoroDataOpph[KoroDataOpph$InnDato <= as.Date(datoTil), ]
+KoroDataPers <- rapbase::loadStagingData("korona", "KoroData") #(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1, kobleBered = 1)
+KoroDataPers <- KoroDataPers[KoroDataPers$InnDato <= as.Date(datoTil), ]
+
+#Bare smitteforløp hvor alle opph har Covid som hovedårsak
+KoroData <- KoronaUtvalg(RegData = KoroDataPers, aarsakInn = 1, datoTil = datoTil)$RegData
+KoroData1aar <- KoroData[KoroData$InnDato >= as.Date(datoFra1aar), ]
 
 # sjekk <- KoroDataOpph[KoroDataOpph$Nir_beredskapsskjema_CoV2==1 & KoroDataOpph$BeredReg==0 &
 #                          KoroDataOpph$Aar==2022 & KoroDataOpph$ArsakInnleggelse==1,
@@ -30,13 +39,9 @@ KoroDataPers <- rapbase::loadStagingData("korona", "KoroData")
 # write.table(sjekk, file = 'SkalHaBeredSkjema.csv', sep = ';', row.names = F, fileEncoding = 'UTF-8')
 #table(KoroDataOpph[KoroDataOpph$BeredReg==0 ,c('Nir_beredskapsskjema_CoV2', 'Aar')])
 
-#Bare smitteforløp hvor alle opph har Covid som hovedårsak
-KoroData <- KoronaUtvalg(RegData = KoroDataPers, aarsakInn = 1, datoTil = datoTil)$RegData
-KoroData1aar <- KoroData[KoroData$InnDato >= as.Date(datoFra1aar), ]
-
-Filer <- korona::lagDatafilerTilFHI(personIDvar='PersonId',
-                                    bered=1, pand=1, influ=0,
-                                    raa=1, aggP=0)
+# Filer <- korona::lagDatafilerTilFHI(personIDvar='PersonId',
+#                                     bered=1, pand=1, influ=0,
+#                                     raa=1, aggP=0)
 
 #-----------------------TABELLER--------------------------------
 
@@ -57,13 +62,13 @@ KoroData1aar$BeredPasTest <- ifelse(KoroData1aar$Nir_beredskapsskjema_CoV2==1, 1
 
 Nokkeltall <- FerdigeRegTab(RegData=KoroData1aar)
 tab <- Nokkeltall$Tab[-3, ]
-colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opphald', 'Del opphald')
-intBehPas <- round(100*prop.table(table(KoroData$BeredReg))[2],1)
+colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal smitteforløp', 'Del smitteforløp')
+intBehPas <- round(100*prop.table(table(KoroData1aar$BeredReg))[2],1)
 
 print(xtable::xtable(tab, align=c('l','r','r','c','r','r'),
                      label = 'tab:pan_tot',
                      caption=paste0('Nøkkeltal for pandemipasientar. Dei ', Nokkeltall$N,
-                                    ' opphalda gjeld ', Nokkeltall$AntPas, ' pasientar. '
+                                    ' smitteforløpa gjeld ', Nokkeltall$AntPas, ' pasientar. '
                               ,intBehPas, '\\% av pasientane er intensivbehandla.')
 ))
 
@@ -84,6 +89,24 @@ print(xtable::xtable(Nokkeltall$Tab[-3, ], align=c('l','r','r','c','r','r'),
                               ))
 }
 
+#Antibiotika
+variabler <- c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
+              'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
+              'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika')
+grtxt <- c('Penicillin', 'Penicillin m/enzymhemmer', 'Aminoglykosid',
+           '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
+           'Karbapenem', 'Makrolid', 'Annet', 'Ukjent type', 'Antibiotika, tot.')
+
+
+aggregate(KoroData[ ,variabler], by=list(KoroData$HF), FUN=function(x) {sum(x==1)})
+tapply(KoroData$Antibiotika, INDEX = KoroData$HF, FUN = function(x){sum(x %in% 1:2)})
+
+#Bare de med kjent antibiotikastatus:
+ind <- which(KoroData1aar$Antibiotika %in% 1:2)
+tabAntibiotikaInn <- aggregate(KoroData1aar[ind ,variabler], by=list(KoroData1aar$HF[ind]), FUN=function(x) {100*sum(x==1)/length(x)})
+colnames(tabAntibiotikaInn) <- grtxt
+
+
 #-------------FIGURER-------------
 #Innleggelser
 AntTab <- antallTidEnhTab(RegData=KoroDataOpph, datoTil = as.Date(datoTil), #tilgangsNivaa=rolle,valgtEnhet= egenEnhet,
@@ -103,7 +126,7 @@ names(Aarsak) <- c('Ja', 'Nei', 'Ukjent')
 # 'liggetid',
 variabler <- c('regForsinkelseInn', 'regForsinkelseUt')
 for (valgtVar in variabler) {
-  KoronaFigAndeler(RegData=KoroData, datoFra=datoFra1aar, valgtVar=valgtVar, aarsakInn=1,
+  KoronaFigAndeler(RegData=KoroData, datoFra=datoFra1aar, valgtVar=valgtVar, #aarsakInn=1,
                    outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
 }
 
@@ -115,11 +138,8 @@ for (valgtVar in variabler) {
 }
 
 #Kun for 2020 - 1.kvartal 2022 / hele 2022 for isolert
-variabler <- c('tilstandInnAarsRapp')
-for (valgtVar in variabler) {
-   KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
-                    datoTil='2022-04-11', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
-}
+   KoronaFigAndeler(RegData=KoroData, valgtVar='tilstandInnAarsRapp22', datoTil = datoTil, #aarsakInn=1, tilstandInnAarsRapp22
+                    outfile = paste0('KoronaFord_tilstandInnAarsRapp.pdf'))
 
 #----------------Alle figurer, tidsuvikling, basert på smitteforløp-----------------
 variabler <- c('alder_u18', 'alder_u40', 'alder_o60', 'alder_o80', 'beredPas', 'dodSh',
@@ -130,9 +150,16 @@ for (valgtVar in variabler) {
                      outfile = paste0('KoronaUtvTid_', valgtVar, '.pdf'))
 }
 
-KoronaFigAndelTid(RegData=KoroData, valgtVar='risikoInn', datoTil = '2022-03-31',
+for (valgtVar in c('respSviktInn', 'risikoInn')) {
+   KoronaFigAndelTid(RegData=KoroData, valgtVar=valgtVar, datoTil = '2022-03-31',
                   tidsenhet = 'Kvartal', aarsakInn=1,
-                  outfile = paste0('KoronaUtvTid_risikoInn.pdf'))
+                  outfile = paste0('KoronaUtvTid_', valgtVar, '.pdf'))
+}
+
+
+KoronaFigGjsnTid(RegData=KoroData, preprosess = 0, valgtVar='liggetid', #datoTil = '2022-03-31',
+                  tidsenhet = 'Kvartal', valgtMaal = 'gjsn', aarsakInn=1,
+                  outfile = paste0('KoronaUtvTid_liggetid.pdf'))
 
 
 #--------------------Testing-----------------------------

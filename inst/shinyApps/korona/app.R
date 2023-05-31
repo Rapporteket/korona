@@ -7,8 +7,8 @@
 #    http://shiny.rstudio.com/
 #
 
-#library(shiny)
 library(korona)
+# library(shiny)
 # library(shinyjs)
 # library(magrittr)
 # library(tidyverse)
@@ -34,8 +34,7 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
 #Mange av variablene på ut-skjema er med i inn-dumpen
 #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
 
-   KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
-
+   KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa")
 if (isFALSE(KoroDataRaa)) {
    KoroDataRaa <-  KoronaDataSQL(koble=1)
    rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa)
@@ -555,15 +554,15 @@ ui <- tagList(
                                   br(),
                                   br(),
                                   h4('Data til FHI'),
-                                  selectInput("hvilkeFilerTilFHI", "Data:",
+                                  selectInput(inputId = "hvilkeFilerTilFHI", label = "Data:",
                                               c("Beredt C-19: Pandemi, beredskap og influensa" = "DataFHIPanBeredInflu",
-                                                "Testfil til Beredt C-19" = "Testfil",
+                                                "Testfil til Beredt C-19" = "Testfil_BerC19",
                                                 "Råfiler til overvåkning" = "DataFHICovMonitor",
-                                                "Testfil til overvåkning" = "Testfil")),
+                                                "Testfil til overvåkning" = "Testfil_CovMonitor")),
                                   actionButton("bestillDataTilFHI", "Bestill data til FHI"),
                                   br(),
                                   downloadButton(outputId = 'lastNed_filstiDataNHN',
-                                                 label='Send filer til Beredt-C19 (NHN) og last ned filsti', class = "butt")
+                                                 label='Send filer til NHN og last ned filsti', class = "butt")
                                   # downloadButton(outputId = 'lastNed_filstiDataNHN_monitor',
                                   #                label='Send filer til Beredt-C19 (NHN) og last ned filsti', class = "butt")
                                   ),
@@ -1094,7 +1093,7 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
       AntTab <- intensivberedskap::TabTidEnhet(RegData=BeredData, tidsenhet='dag', #valgtRHF= 'Alle',
                                                bekr=as.numeric(input$bekrInt)
       )
-      UtData <- NIRUtvalgBeredsk(RegData=BeredData,
+      UtData <- intensivberedskap::NIRUtvalgBeredsk(RegData=BeredData,
                                  bekr=as.numeric(input$bekrInt)
       )
       utvalg <- UtData$utvalgTxt

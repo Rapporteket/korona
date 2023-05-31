@@ -71,7 +71,7 @@ KoronaUtvalg <- function(RegData, datoFra=0, datoTil=0, erMann=9, minald=0, maxa
 
   N <- dim(RegData)[1]
 
-  utvalgTxt <- c(
+    utvalgTxt <- c(
     if(datoFra!=0 | datoTil!=0) {paste0(
       'Innleggelsesdatoer: ', if (N>0) {min(as.Date(RegData$InnDato), na.rm=T)} else {datoFra},
       ' til ', if (N>0) {max(as.Date(RegData$InnDato), na.rm=T)} else {datoTil})} else {NULL},

@@ -91,7 +91,7 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
   antInnlagte <- sum(is.na(RegData$FormDateUt))
   rnwFil <- ifelse(minAnt < 26000 | antInnlagte > 1000, 'KoroFeilmld.Rnw', rnwFil)
 
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
+  # rapbase::autLogger(user = brukernavn, registryName = 'Pandemi',
   #                   reshId = reshID[[1]],
   #                   msg = paste0('1)starter abonnementkjøring: Pandemi-rapport med PARAMETRE: rnwFil: ',
   #                                rnwFil, ', brukernavn: ', brukernavn,
@@ -113,14 +113,14 @@ abonnementKorona <- function(rnwFil, brukernavn='lluring', reshID=0,
 
   knitr::knit2pdf(input=tmpFile)
 
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
+  # rapbase::autLogger(user = brukernavn, registryName = 'Pandemi',
   #                   reshId = reshID[[1]],
   #                   msg ="4) Kjørt knit2pdf")
 
   #gc() #Opprydning gc-"garbage collection"
   utfil <- paste0(dir, '/', substr(tmpFile, 1, nchar(tmpFile)-3), 'pdf')
 
-  # rapbase::autLogger(author = brukernavn, registryName = 'Pandemi',
+  # rapbase::autLogger(user = brukernavn, registryName = 'Pandemi',
   #                   reshId = reshID[[1]],
   #                   msg = paste("5) Leverer abonnementsfil: ", utfil))
   return(utfil)

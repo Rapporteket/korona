@@ -6,20 +6,12 @@
 og to filer fra sykehusopphold. Dvs. Ei fil for hvert opphold og ei aggregert til
 person, for hvert register}
 \usage{
-sendDataFilerFHI(
-  zipFilNavn = "Testfil",
-  brukernavn = "testperson",
-  recipient = "nhn"
-)
+sendDataFilerFHI(zipFilNavn = "Testfil", brukernavn = "testperson")
 }
 \arguments{
 \item{zipFilNavn}{Navn på fila som skal kjøres. DataFHICovMonitor, DataFHIPanBeredInflu, Testfil}
 
 \item{brukernavn}{Innlogget brukernavn}
-
-\item{recipient}{Character string: brukernavn for unik definisjon av mottager. Benyttes i sship.
-recipient er også hardkodet ut fra hvilken filpakke som er valgt, men må kunne velges for å sende testfil til valgt mottager.
-Standard: 'nhn' Valg: 'nhn', 'nhn_covmonitor'}
 }
 \value{
 Filsti til fil med filsti til zip...

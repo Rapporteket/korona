@@ -229,7 +229,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 Isolert = JaNeiUkjVar(Isolert), #1-ja, 2-nei, 3-ukjent
                 InnNr = max(InnNr),
                 Karbapenem = sum(Karbapenem)>0,
-                Kinolon = sum(Kinolon),
+                Kinolon = sum(Kinolon)>0,
                 KjentRisikofaktor = JaNeiUkjVar(KjentRisikofaktor), #1-ja, 2-nei, 3-ukjent
                 #Kreatinin,
                 Kreft = sum(Kreft)>0,
