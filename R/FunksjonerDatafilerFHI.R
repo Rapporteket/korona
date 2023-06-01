@@ -308,11 +308,11 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
       write.table(Testfil2, file = paste('Testfil2.csv'),
                   fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
-      rapbase::autLogger(user = brukernavn, name = brukernavn,
-                         registryName = 'Pandemi', reshId = 0,
-                         pkg = 'korona', fun='sendDataFilerFHI',
-                         param = 'tester',
-                         msg = paste0("Har lagret testfiler"))
+      # rapbase::autLogger(user = brukernavn, name = brukernavn,
+      #                    registryName = 'Pandemi', reshId = 0,
+      #                    pkg = 'korona', fun='sendDataFilerFHI',
+      #                    param = 'tester',
+      #                    msg = paste0("Har lagret testfiler"))
       zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = c('Testfil1.csv', 'Testfil2.csv'))
    }
 
