@@ -265,7 +265,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 #Fjernet parameter:
    #Character string: brukernavn for unik definisjon av mottager. Benyttes i sship.
    # recipient er også hardkodet ut fra hvilken filpakke som er valgt, men må kunne velges for å sende testfil til valgt mottager.
-   # Standard: 'nhn' Valg: 'nhn', 'nhn_covmonitor'
+   # Standard: 'nhn' Valg: 'nhn', 'fhi_covmonitor'
 
    opprKat <- setwd(tempdir())
    kat <- getwd()
@@ -273,7 +273,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
    #Legger på ekstra betingelse for å sikre at ikke data sendes til feil mottager
    if (zipFilNavn == 'DataFHICovMonitor') {
       #Data til FHIs covid-overvåkning. Kun rådata,
-      recipient == 'nhn_covmonitor' #For å sikre at ikke sendes feil
+      recipient == 'fhi_covmonitor' #For å sikre at ikke sendes feil
       Filer <- korona::lagDatafilerTilFHI(personIDvar='PersonId',
                                            bered=1, pand=1, influ=0,
                                            raa=1, aggP=0)
@@ -300,7 +300,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
    if (zipFilNavn %in% c('Testfil_BerC19', 'Testfil_CovMonitor')) {
 
       if (zipFilNavn == 'Testfil_BerC19') {recipient <- 'nhn'}
-      if (zipFilNavn == 'Testfil_CovMonitor') {recipient <- 'nhn_covmonitor'}
+      if (zipFilNavn == 'Testfil_CovMonitor') {recipient <- 'fhi_covmonitor'}
 
       Testfil1 <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
       Testfil2 <- data.frame('Hei' = c(pi, 3,1), 'Nei' = c(log(2), 200, 3))
