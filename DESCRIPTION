@@ -22,7 +22,7 @@ Remotes:
 Imports:
     digest,
     DT,
-    dplyr,
+    dplyr (>= 1.1.1),
     enc,
     ggplot2,
     kableExtra,
