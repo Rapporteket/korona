@@ -298,7 +298,8 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
    }
 
    if (zipFilNavn %in% c('Testfil_BerC19', 'Testfil_CovMonitor')) {
-     if (zipFilNavn == 'Testfil_BerC19') {recipient <- 'nhn'}
+
+      if (zipFilNavn == 'Testfil_BerC19') {recipient <- 'nhn'}
       if (zipFilNavn == 'Testfil_CovMonitor') {recipient <- 'nhn_covmonitor'}
 
       Testfil1 <- data.frame('Test1'=1:5, 'Test2'=letters[1:5])
@@ -308,11 +309,12 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
       write.table(Testfil2, file = paste('Testfil2.csv'),
                   fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
 
-      # rapbase::autLogger(user = brukernavn, name = brukernavn,
-      #                    registryName = 'Pandemi', reshId = 0,
-      #                    pkg = 'korona', fun='sendDataFilerFHI',
-      #                    param = 'tester',
-      #                    msg = paste0("Har lagret testfiler"))
+      rapbase::autLogger(user = brukernavn, name = brukernavn,
+                         registryName = 'Pandemi', reshId = 0,
+                         pkg = 'korona', fun='sendDataFilerFHI',
+                         param = 'tester',
+                         type = 'fhisending',
+                         msg = paste0("Har lagret testfiler"))
       zip::zipr(zipfile = paste0(zipFilNavn, '.zip'), files = c('Testfil1.csv', 'Testfil2.csv'))
    }
 
@@ -327,9 +329,11 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
                 pubkey_holder = 'file', #Character string: the holder of the (recipient's) public key. Per nå kun github?
                 vessel = 'sftp', # ut fra beskrivelsen bare ftp
                 declaration = paste0("HerErJeg_hilsen_", zipFilNavn))
-   # if (length(warnings()) >0 ){
-   # rapbase::autLogger(user = brukernavn, registryName = 'Pandemi', reshId = 0,
-   #                  msg = warnings()) #, utfil))}
+   if (length(warnings()) >0 ){
+   rapbase::autLogger(user = brukernavn, registryName = 'Pandemi', reshId = 0,
+                    msg = warnings(), name = recipient, pkg = 'pandemi', fun = 'sship',
+                    param = zipFilNavn, type = 'sending')}
+
    write.table(zipfilSti, file = 'zipfilSti.csv',fileEncoding = 'UTF-8')
    utfilsti <- paste0(kat, '/', 'zipfilSti.csv')
 
