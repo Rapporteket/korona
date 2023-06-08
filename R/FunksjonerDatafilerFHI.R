@@ -277,6 +277,7 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
       Filer <- korona::lagDatafilerTilFHI(personIDvar='PersonId',
                                            bered=1, pand=1, influ=0,
                                            raa=1, aggP=0)
+      datasett <- names(Filer)
       for (filnr in 1:length(Filer)){
          write.table(Filer[[filnr]], file = paste0(names(Filer)[filnr], '.csv'),
                      fileEncoding = 'UTF-8', row.names=F, sep=';', na='')
