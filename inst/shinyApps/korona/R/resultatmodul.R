@@ -122,11 +122,11 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
   datoFra <- reactive(
     datoFra <- switch (input$velgTidsenhet,
                        "dag" = input$velgSluttdatoRes - lubridate::days(as.numeric(input$velgAntVisning)-1),
-                       "uke" = floor_date(input$velgSluttdatoRes - weeks(as.numeric(input$velgAntVisning)-1),
+                       "uke" = lubridate::floor_date(input$velgSluttdatoRes - weeks(as.numeric(input$velgAntVisning)-1),
                                           unit = 'week', week_start = 1),
-                       "maaned" = floor_date(input$velgSluttdatoRes %m-% months(as.numeric(input$velgAntVisning)-1),
+                       "maaned" = lubridate::floor_date(input$velgSluttdatoRes %m-% months(as.numeric(input$velgAntVisning)-1),
                                              unit = 'month'),
-                       "aar" = floor_date(input$velgSluttdatoRes %m-% years(as.numeric(input$velgAntVisning)-1),
+                       "aar" = lubridate::floor_date(input$velgSluttdatoRes %m-% years(as.numeric(input$velgAntVisning)-1),
                                           unit = 'year')
     ),
 

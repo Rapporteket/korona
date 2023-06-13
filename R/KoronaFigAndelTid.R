@@ -77,7 +77,7 @@ KoronaFigAndelTid <- function(RegData=0, hentData=0, valgtVar='alder_u18',
 
       if (N$Hoved>Ngrense) {
         #Klargjøre tidsenhet
-        RegDataFunk <- intensiv::SorterOgNavngiTidsEnhet(RegData=RegData, tidsenhet = tidsenhet)
+        RegDataFunk <- korona::SorterOgNavngiTidsEnhet(RegData=RegData, tidsenhet = tidsenhet)
             RegData <- RegDataFunk$RegData
 
             NAarHoved <- tapply(RegData[ind$Hoved, 'Variabel'], RegData[ind$Hoved ,'TidsEnhet'], length) #Tot. ant. per tidsenhet
