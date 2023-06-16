@@ -128,6 +128,7 @@ varPandemiUt <- c('SkjemaGUID
   ,CreationDate
   -- ,CurrentMunicipalNumber
   -- ,DistrictCode
+  ,ErFerdigBehandlet
   ,FirstTimeClosed
   ,FormDate
   ,FormStatus
@@ -160,6 +161,7 @@ varPandemiUt <- c('SkjemaGUID
   -- ,PostalCode
   -- ,RelevantDato
   ,RHF
+ -- ,RontgenThorax
   -- ,Skjematype
   ,Sykehus
   ,StatusVedUtskriving
@@ -188,6 +190,7 @@ varUtKoblet <- c(
   ,Ut.Antifungalbehandling AS UtsAntifungalbehandling
   ,Ut.AntiviralBehandling AS UtsAntiviralBehandling
   ,Ut.CreationDate AS CreationDateUt
+  ,Ut.ErFerdigBehandlet
   ,Ut.FirstTimeClosed AS FirstTimeClosedUt
   ,Ut.FormStatus AS FormStatusUt
   ,Ut.FormDate AS FormDateUt
@@ -201,6 +204,7 @@ varUtKoblet <- c(
   ,Ut.Penicillin AS UtsPenicillin
   ,Ut.PenicillinEnzymhemmer AS UtsPenicillinEnzymhemmer
   ,Ut.OverfortAnnetSykehusUtskrivning
+  -- ,Ut.RontgenThorax AS UtsRontgenThorax
   ,Ut.StatusVedUtskriving
   ,Ut.SteroideBehandling AS UtsSteroideBehandling
   ,Ut.TredjeGencefalosporin AS UtsTredjeGencefalosporin

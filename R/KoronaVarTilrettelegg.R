@@ -103,6 +103,23 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         tittel <- 'Pandemipasienter med intensivopphold'
         varTxt <- 'intensivinnlagte'
       }
+      # if (valgtVar=='beredMpand') {	#AndelGrVar/Tid FLYTTES TIL BEREDSKAP
+      #    # beredskapsskjema der pasienten er å finne i pandemi.
+      #    indPanMBered <- which(RegData$BeredReg == 1)
+      #    #Basert på opphold - hvordan sjekke?
+      #    KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
+      #    KoroDataOpph <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=0, kobleBered=1)
+      #    KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1, tellFlereForlop=1)
+      #
+      #    BerSkjemaMpand <- RegData$SkjemaGUIDBered
+      #    datoTil <- '2022-12-31'
+      #    BeredData <- intensivberedskap::NIRberedskDataSQL(datoTil = datoTil)
+      #    RegData <- BeredData
+      #    indBeredMPan <- which(BeredData$SkjemaGUID %in% sort(unique(KoroDataOpph$SkjemaGUIDBered)))
+      #    RegData$Variabel[indBeredMPan] <- 1
+      #    tittel <- 'Beredskapspasienter med pandemiregistrering'
+      #    varTxt <- 'med pandemireg.'
+      # }
       if (valgtVar=='dodSh') {	#AndelGrVar/Tid
         RegData <- RegData[which(RegData$StatusVedUtskriving %in% 1:2), ]    #Tar bort ukjente
         RegData$Variabel[RegData$StatusVedUtskriving == 2] <- 1
