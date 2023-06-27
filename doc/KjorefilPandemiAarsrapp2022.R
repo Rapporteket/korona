@@ -33,6 +33,10 @@ KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1,
 KoroData <- KoronaUtvalg(RegData = KoroDataPers, aarsakInn = 1, datoTil = datoTil)$RegData
 KoroData1aar <- KoroData[KoroData$InnDato >= as.Date(datoFra1aar), ]
 
+# KoroDataOpph <- KoroDataOpph[KoroDataOpph$ArsakInnleggelse==1,]
+# prop.table(table(KoroDataOpph$Isolert))
+# prop.table(table(KoroData$Isolert))
+
 # sjekk <- KoroDataOpph[KoroDataOpph$Nir_beredskapsskjema_CoV2==1 & KoroDataOpph$BeredReg==0 &
 #                          KoroDataOpph$Aar==2022 & KoroDataOpph$ArsakInnleggelse==1,
 #                       c("SkjemaGUID", 'HovedskjemaGUID', "FormDate", 'ShNavn',"ReshId", 'Aar')]
@@ -479,4 +483,107 @@ tabInn[ 'Isolert', ] <- Isolert
               digits = 0,
         caption = 'Komplettheit for variablar registrert ved utskriving i pandemidelen av registeret.',
         label = 'tab:pan_kompl_ut'
+ )
+
+
+
+
+
+
+ #----Kvalitetsindikatorer, PANDEMI---------
+ # Nevner er TRUE for alle ferdigstilte pandemiskjema hvor "ArsakInnleggelse" = 1
+ # Teller er alle ferdigstilte pandemiskjema hvor Nevner er TRUE og "Isolert" = 1.
+ # Indikatoren er på oppholdsnivå og ikke pasientnivå.
+
+
+ library(korona)
+ #KvalInd_Pand <- KoronaDataSQL()
+ KvalInd_Pand <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 0)
+ KvalInd_Pand <- KvalInd_Pand[KvalInd_Pand$ArsakInnleggelse == 1, ]
+ KvalInd_Pand <- KvalInd_Pand[which(KvalInd_Pand$Isolert %in% 1:2), ]
+ #unique(KvalInd_Pand[, c('UnitId', 'HealthUnitShortName')])
+ KvalInd_Pand$orgnr <- as.character(nyIDpand[as.character(KvalInd_Pand$ReshId)]) #nyIDpand SE LENGRE NED
+ KvalInd_Pand$var <- ifelse(KvalInd_Pand$Isolert == 1,1,0)
+ KvalInd_Pand$year <- KvalInd_Pand$Aar
+ KvalInd_Pand_Iso <- KvalInd_Pand[ , c('orgnr', 'var', 'year')]
+ KvalInd_Pand_Iso$ind_id <- 'pandemi_isolasjon'
+ KvalInd_Pand_Iso$denominator <- 1
+ KvalInd_Pand_Iso$context <- 'caregiver'
+ write.table(KvalInd_Pand_Iso, file = 'KvalIndPand.csv', sep = ';', row.names = F)
+ #table(KvalInd_Pand$orgnr, useNA = 'a')
+
+
+ #Pandemi:
+ #Nevner er TRUE for alle ferdigstilte pandemiskjema hvor "ArsakInnleggelse" = 1
+ #Teller er alle ferdigstilte pandemiskjema hvor Nevner er TRUE og "Isolert" = 1.
+ #Indikatoren er på oppholdsnivå og ikke pasientnivå.
+
+ xx <- unique(KvalInd_Pand[, c('ShNavn', 'ReshId')])
+ yy <- xx[order(xx$ShNavn),]
+
+nye <- sort(setdiff(KvalInd_Pand$ReshId, names(nyIDpand)))
+table(KvalInd_Pand$ReshId[KvalInd_Pand$ReshId %in% nye])
+
+  nyIDpand <- c(
+     '102090' = '974706490', #Ahus
+    '111487' = '974588951', #Aker
+    '4211747' = '979873190', #Alta
+    '700263' = '974631091', #Arendal
+    '102919' = '991992677', #Bergen psyk.
+    '4209961' = '974795361', #Bodø
+    '4204083' = '974705788', #Bærum
+    '108897' = '974116804', #Diakonhjemmet
+    '4204082' = '974631326', #Drammen
+    '4204086' = '974631326', #Drammen, psyk. - SLÅR SAMMEN MED DRAMMEN SOMATIKK
+    '705464' = '974631768', #Elverum
+    '700265' = '974595214', #Flekkefjord
+    '700928' = '974744570', #Førde
+    '705476' = '974632535', #Gjøvik
+    '103580' = '874606162', #Hallingdal
+    '705465' = '974724960', #Hamar
+    '4211748' = '974795833', #Hammerfest
+    '100176' = '974316285', #Haraldsplass
+    '700617' = '974795639', #Harstad
+    '102909' = '974724774', #Haugesund
+    '4207827' = '974557746', #Haukeland
+    '100085' =  '983974732', #Helse Førde HF
+    '108595' = '983971709', #Innlandet, psyk. -> Innlandet HF
+    '4209222' = '974633752', #Kalnes
+    '4211750' = '974795930', #Kirkenes
+    '700138' = '974575396', #Klinikk fysikalsk medisin og rehabilitering (Stavern)
+    '4204085' = '974631385', #Kongsberg
+    '700264' = '974733013', #Kristiansand
+    '4216807' = '974746948', #Kristiansund
+    '102250' = '974754118', #Levanger
+    '705467' = '874632562', #Lillehammer
+    '4209963' = '974795558', #Lofoten
+    '108279' = '974207532', #Lovisenberg
+    '103000' = '974745089', #Lærdal
+    '4210647' = '974795515', #Mo i Rana
+    '4216808' = '974745569', #Molde
+    '4210648' = '974795485', #Mosjøen
+    '4208039' = '974633698', #Moss
+    '105893' = '974753898', #Namsos
+    '700618' = '974795396', #Narvik
+    '103001' = '974745364', #Nordfjord
+    '103712' = '974633159', #Notodden 2 reg.
+    '705757' = '974707152', #Radiumhospitalet
+    '705577' = '874716782', #Rikshospitalet
+    '4204084' = '974631407', #Ringerike
+    '114358' = '983974724',  #Rus Bergen -> Bergen HF
+    '4210649' = '974795477', #Sandnessjøen
+    '102026' = '974633191', #Skien
+    '4201313' = '974749025', #St. Olav
+    '100320' =  '883974832', #St. Olavs Hospital HF
+    '114282' = '974703300', #Stavanger
+    '103081' = '974742985', #Stord
+    '4207919' = '914356199', #Sunnaas
+    '700720' = '974795787', #Tromsø
+    '705469' = '974725215', #Tynset
+    '103948' = '974589095', #Tønsberg
+    '109870' = '974589095', #Ullevål
+    '4209964' = '974795574', #Vesterålen
+    '4216810' = '974747545', #Volda
+    '102939' = '974743272', #Voss
+    '4216811' = '974747138' #Ålesund'
  )
