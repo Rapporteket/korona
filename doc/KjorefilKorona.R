@@ -17,6 +17,29 @@ t2 <- Sys.time()
 t2-t1
 
 
+#Filer til overvåkning, filtrert på hovedårsak Covid
+test <- korona::lagDatafilerTilFHI(personIDvar='PatientInRegistryGuid',
+                               bered=1, pand=1, influ=0, raa=1, aggP=0)
+table(test$PandemiDataRaaFHI$ArsakInnleggelse)
+
+Filer <- korona::lagDatafilerTilFHI(personIDvar='PatientInRegistryGuid',
+                                    bered=1, pand=1, influ=0,
+                                    raa=1, aggP=0)
+names(Filer)
+
+#Teste mulig feil i liggetid
+data <- KoronaDataSQL(datoTil = '2023-03-01')
+dataN <- data[data$HF == "Nordlandssykehuset HF",]
+dataNpre <- KoronaPreprosesser(RegData = dataN)
+dataNpre2023 <- dataNpre[which(dataNpre$PersonId %in% dataOpphN$PersonId),          #dataNpre$InnDato > as.Date('2023-01-16')),
+                         c('HF',"ShNavn","PersonId",'InnDato', "UtDato", "Liggetid", "LiggetidTot", "AntInnSkjema")]
+
+dataOpph <- KoronaDataSQL(datoFra = '2023-01-25', datoTil = '2023-02-07')
+dataOpphN <- dataOpph[dataOpph$HF == "Nordlandssykehuset HF", c("HelseenhetKortNavn", "FormDate", "FormDateUt", "SkjemaGUID", "PersonId")]
+persN <- dataOpphN$PersonId
+
+data[data$PersonId %in% dataOpphN$PersonId, c("HelseenhetKortNavn", "FormDate", "FormDateUt", "SkjemaGUID", "PersonId")]
+
 remotes::install_github('tidyverse/dplyr', ref = 'd2f79bb') #Versjon 1.1.1
 
 JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}

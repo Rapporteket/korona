@@ -227,7 +227,7 @@ KoronaPreprosesser <- function(RegData=RegData, aggPers=1, kobleBered=0, tellFle
                 HFresh = dplyr::first(HFresh, order_by = FormDate),
                 Hjertesykdom = sum(Hjertesykdom)>0,
                 Isolert = JaNeiUkjVar(Isolert), #1-ja, 2-nei, 3-ukjent
-                InnNr = max(InnNr),
+                #InnNr = max(InnNr), - USIKKER PÅ OM DENNE KAN TAS BORT...
                 Karbapenem = sum(Karbapenem)>0,
                 Kinolon = sum(Kinolon)>0,
                 KjentRisikofaktor = JaNeiUkjVar(KjentRisikofaktor), #1-ja, 2-nei, 3-ukjent

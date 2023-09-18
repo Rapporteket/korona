@@ -217,7 +217,7 @@ if (aggP==1) {
 #' Henter data tilrettelagt for oversendelse til FHI
 #'
 #' @param personIDvar angi variabel for personid
-#' 'PersonIdBC19Hash' - standard, 'PersonId' - alternativ
+#' 'PersonIdBC19Hash' - standard, 'PersonId' - alternativ, PatientInRegistryGuid - overvåkning
 #' @param bered hente beredskapsdata? 1-ja (standard), 0-nei
 #' @param pand hente pandemidata? 1-ja (standard), 0-nei
 #' @param influ hente influensadata? 1-ja (standard), 0-nei
@@ -233,6 +233,11 @@ lagDatafilerTilFHI <- function(personIDvar='PersonIdBC19Hash',
   UtData <- NULL
   if (pand==1) {
     dataPandemi <- korona::hentPandemiDataFHI(personIDvar=personIDvar, raa=raa, aggP=aggP)
+    #Legger på filtrering på Covid som hovedårsak til innleggelse for data til overvåkning.
+    #P.t. (sept-23) bare overvåkningsprosjektet som benytter PatientInRegistryGuid.
+    #Hvis flere - endre til å ha filtrering som egen parameter
+    if (personIDvar == 'PatientInRegistryGuid') {
+       dataPandemi$PandemiDataRaaFHI <- dataPandemi$PandemiDataRaaFHI[which(dataPandemi$PandemiDataRaaFHI$ArsakInnleggelse==1), ]}
     UtData <- append(UtData,
                      dataPandemi)
                      }
