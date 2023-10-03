@@ -163,7 +163,10 @@ Hvis det er mer enn 3 måneder mellom to opphold, regnes det som to smitteforlø
 Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett smitteforløp og \Sexpr{antPasFlereForlCov} av av disse har mer enn ett smitteforløp hvor Covid-19 er hovedårsak til minst ett av oppholdene i smitteforløpet.
 For personaggregerte resultater vises pasienter
 hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
-ferdigstilt eller ikke, dersom ikke annet er oppgitt.
+ferdigstilt eller ikke, dersom ikke annet er oppgitt. \\
+\bf{Fra 2. oktober 2023 er rapportering av sykehusinnlagte covid-19 pasienter frivillig. Nasjonale tall er dermed ikke nødvendigvis representative, da det kan være ulikt hvorvidt Helseforetakene velger å rapportere inn sykehusinnlagte covid-19 pasienter eller ikke. Tabeller over fordeling per helseforetak kan indikere hvilke helseforetak som fortsatt rapporterer.}
+
+
 
 %\vspace{0.5 cm}
 \bf{Rapporten gir en oversikt over:}
