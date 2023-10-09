@@ -245,7 +245,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
   names(datoer) <- datoer
     aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-    aux <- dplyr::bind_cols(as_tibble(RegDataAlle)[, 'PasientID'], aux) #"PasientID" #"EnhNivaaVis", 'RHF', 'HF',
+    aux <- dplyr::bind_cols(tidyr::as_tibble(RegDataAlle)[, 'PasientID'], aux) #"PasientID" #"EnhNivaaVis", 'RHF', 'HF',
     aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi) #-(1:5)
     aux$Tid <- as.Date(aux$Tid)
     aux$Tid <- switch (tidsenhet,
