@@ -258,14 +258,14 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
     aux <- aux %>% dplyr::group_by(PasientID, Tid) %>%
       dplyr::summarise(er_inne = max(verdi) #TRUE/FALSE
                 #,EnhNivaaVis = EnhNivaaVis[1]
-                #,RHF = last(RHF, order_by = InnDato),
-                #HF = last(HF, order_by = InnDato)
+                #,RHF = dplyr::last(RHF, order_by = InnDato),
+                #HF = dplyr::last(HF, order_by = InnDato)
                 )
     aux <- aux %>% tidyr::spread(key=Tid, value = er_inne)
     enh <- RegDataAlle %>% dplyr::group_by(PasientID) %>%
-      dplyr::summarise(EnhNivaaVis = last(EnhNivaaVis, order_by = InnDato),
-                RHF = last(RHF, order_by = InnDato),
-                HF = last(HF, order_by = InnDato)
+      dplyr::summarise(EnhNivaaVis = dplyr::last(EnhNivaaVis, order_by = InnDato),
+                RHF = dplyr::last(RHF, order_by = InnDato),
+                HF = dplyr::last(HF, order_by = InnDato)
       )
     RegDataAlle <- merge(enh, aux, by = 'PasientID') #merge(RegDataAlle, aux, by = 'PasientID')
   #}

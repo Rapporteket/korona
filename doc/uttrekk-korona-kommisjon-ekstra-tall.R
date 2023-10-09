@@ -410,7 +410,7 @@ d_pandemi_aggregert = d_pandemi_forløp %>%
    dplyr::summarise(PatientAge = first(PatientAge),
             Innleggelse = first(Innleggelse),
             StatusVedUtskriving = NeiJaUkjent(StatusVedUtskriving),
-            Utskrivningsdato = last(Utskrivningsdato),
+            Utskrivningsdato = dplyr::last(Utskrivningsdato),
             .groups = "drop") %>%
    dplyr::select(-sykdomsforlop)
 
@@ -419,7 +419,7 @@ d_intensiv_aggregert = d_intensiv_samlet %>%
    dplyr::summarise(InvasivVentilation = sum(InvasivVentilation, na.rm = TRUE),
             PatientAge = first(PatientAge),
             DateAdmittedIntensive = first(DateAdmittedIntensive),
-            DateDischargedIntensive = last(DateDischargedIntensive),
+            DateDischargedIntensive = dplyr::last(DateDischargedIntensive),
             DischargedIntensiveStatus = NeiJaUkjentIntensiv(DischargedIntensiveStatus),
             Diagnosis = first(Diagnosis),
             .groups = "drop") %>%
