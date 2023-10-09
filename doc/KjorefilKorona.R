@@ -348,7 +348,7 @@ if (tidsenhet=='dag') {
   names(datoer) <- datoer
   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
   aux <- dplyr::bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
-  aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi)
+  aux <- aux %>% tidyr::gather(names(aux)[-1], key=Tid, value = verdi)
   aux$Tid <- as.Date(aux$Tid)
   aux$Tid <- switch (tidsenhet,
                      'uke' = paste0('Uke ', format(aux$Tid, "%V")),
