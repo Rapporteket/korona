@@ -151,7 +151,7 @@ txtAlder <- if (dim(Pandemi)[1]>2){paste0('Alderen er mellom ',
 \begin{frame}[fragile] {Om dokumentet}
 
 Dette er en automatisk generert rapport fra Norsk intensiv- og pandemiregister (NIPaR).
-Dokumentet inneholder oversikt over \bf{sykehusbehandlede pasienter med covid-19} for \textbf{\Sexpr{forHvem}}.
+Dokumentet inneholder oversikt over \textbf{sykehusbehandlede pasienter med covid-19} for \textbf{\Sexpr{forHvem}}.
 I denne sammenhengen betyr det at pasienten er innlagt på sykehus og har en positiv prøve for SARS-CoV-2
 i løpet av de siste 3 månedene før innleggelse.
 Datagrunnlaget er oppdatert med alle registreringer gjort dagen før rapporten ble lastet ned.
@@ -164,7 +164,7 @@ Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett sm
 For personaggregerte resultater vises pasienter
 hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
 ferdigstilt eller ikke, dersom ikke annet er oppgitt. \\
-\bf{Fra 2. oktober 2023 er rapportering av sykehusinnlagte covid-19 pasienter frivillig. Nasjonale tall er dermed ikke nødvendigvis representative, da det kan være ulikt hvorvidt Helseforetakene velger å rapportere inn sykehusinnlagte covid-19 pasienter eller ikke. Tabeller over fordeling per helseforetak kan indikere hvilke helseforetak som fortsatt rapporterer.}
+\textbf{Fra 2. oktober 2023 er rapportering av sykehusinnlagte covid-19 pasienter frivillig. Nasjonale tall er dermed ikke nødvendigvis representative, da det kan være ulikt hvorvidt Helseforetakene velger å rapportere inn sykehusinnlagte covid-19 pasienter eller ikke. Tabeller over fordeling per helseforetak kan indikere hvilke helseforetak som fortsatt rapporterer.}
 
 
 
