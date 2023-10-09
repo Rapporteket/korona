@@ -8,14 +8,6 @@
 #
 
 library(korona)
-# library(shiny)
-# library(shinyjs)
-# library(magrittr)
-# library(tidyverse)
-# library(lubridate)
-# library(kableExtra)
-# library(sship)
-# library(intensivberedskap)
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
 # ReshNivaa <- read.table(system.file(file.path('extdata', 'EnhetsnivaaerResh.csv'), package = 'korona'), sep=';',
@@ -232,7 +224,7 @@ ui <- tagList(
                               sliderInput(inputId = 'antTidsenhOpph',
                                           label = 'Velg antall hele måneder/kvartal/år forut for "sluttdato"',
                                           value = 6, step = 1,
-                                          min = 1, max = 13),
+                                          min = 1, max = 20),
                               selectInput(inputId = "aarsakInnOpph", label="Covid-19 hovedårsak til innleggelse?",
                                           choices = c('Alle registreringer' = 0,
                                                       'Ja, alle opphold' = 1,
@@ -992,10 +984,10 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
                            , full_width=F
                            , digits = c(0,0,1,0,0,1)[1:antKol]
          ) %>%
-            add_header_above(c(" "=1, 'Egen enhet/gruppe' = 3, 'Resten' = 3)[1:(antKol/3+1)]) %>%
-            column_spec(column = 1, width_min = '7em') %>%
-            column_spec(column = 2:(ncol(tab)+1), width = '7em') %>%
-            row_spec(0, bold = T)
+            kableExtra::add_header_above(c(" "=1, 'Egen enhet/gruppe' = 3, 'Resten' = 3)[1:(antKol/3+1)]) %>%
+            kableExtra::column_spec(column = 1, width_min = '7em') %>%
+            kableExtra::column_spec(column = 2:(ncol(tab)+1), width = '7em') %>%
+            kableExtra::row_spec(0, bold = T)
       }
 
       output$lastNed_tabFord <- downloadHandler(

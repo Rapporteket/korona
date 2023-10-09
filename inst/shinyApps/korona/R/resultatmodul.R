@@ -75,7 +75,7 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
      dagValg <-  c(10, 20, 30, 50, 100, 200, 300, 500, 1000)
      ukeValg <- c(4, 8, 12, 26, 105, 160, 210)
      mndValg <- c(6, 12, 24, 36)
-     aarValg <- c(1,2,3,4)
+     aarValg <- c(1:5)
 
      if (input$valgtVar == 'antinn') {
         dagValg <- dagValg[1:6]
@@ -120,14 +120,24 @@ koronaresultater <- function(input, output, session, KoroData, KoroDataOpph, rol
   })
 
   datoFra <- reactive(
+    # datoFra <- switch (input$velgTidsenhet,
+    #                    "dag" = input$velgSluttdatoRes - lubridate::days(as.numeric(input$velgAntVisning)-1),
+    #                    "uke" = lubridate::floor_date(input$velgSluttdatoRes - lubridate::weeks(as.numeric(input$velgAntVisning)-1),
+    #                                       unit = 'week', week_start = 1),
+    #                    "maaned" = lubridate::floor_date(input$velgSluttdatoRes %m-% months(as.numeric(input$velgAntVisning)-1),
+    #                                          unit = 'month'),
+    #                    "aar" = lubridate::floor_date(input$velgSluttdatoRes %m-% lubridate::years(as.numeric(input$velgAntVisning)-1),
+    #                                       unit = 'year')
+    # ),
+    #Testing...
     datoFra <- switch (input$velgTidsenhet,
                        "dag" = input$velgSluttdatoRes - lubridate::days(as.numeric(input$velgAntVisning)-1),
-                       "uke" = lubridate::floor_date(input$velgSluttdatoRes - weeks(as.numeric(input$velgAntVisning)-1),
-                                          unit = 'week', week_start = 1),
-                       "maaned" = lubridate::floor_date(input$velgSluttdatoRes %m-% months(as.numeric(input$velgAntVisning)-1),
-                                             unit = 'month'),
-                       "aar" = lubridate::floor_date(input$velgSluttdatoRes %m-% years(as.numeric(input$velgAntVisning)-1),
-                                          unit = 'year')
+                       "uke" = lubridate::floor_date(input$velgSluttdatoRes - lubridate::weeks(as.numeric(input$velgAntVisning)-1),
+                                                     unit = 'week', week_start = 1),
+                       "maaned" = lubridate::floor_date(input$velgSluttdatoRes - months(as.numeric(input$velgAntVisning)-1),
+                                                        unit = 'month'),
+                       "aar" = lubridate::floor_date(input$velgSluttdatoRes - lubridate::years(as.numeric(input$velgAntVisning)-1),
+                                                     unit = 'year')
     ),
 
   )

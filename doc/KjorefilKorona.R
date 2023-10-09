@@ -16,6 +16,10 @@ RegData <- KoronaPreprosesser(RegData = KoroDataRaa[1:1000, ], aggPers = 1, kobl
 t2 <- Sys.time()
 t2-t1
 
+dato <- Sys.Date()
+lubridate::floor_date(dato - months(3), unit = 'month') #"2023-07-01"
+library('lubridate')
+floor_date(dato %m-% months(3), unit = 'month') #"2023-07-01"
 
 #Filer til overvåkning, filtrert på hovedårsak Covid
 test <- korona::lagDatafilerTilFHI(personIDvar='PatientInRegistryGuid',
@@ -331,7 +335,7 @@ erInneliggende <- function(datoer, regdata){
   # er etter inndato og det ikke finnes utddato. Flere betingelser kan legges til.
 
   auxfunc <- function(x) {(x >  regdata$InnDato & (x <= regdata$UtDato) | is.na( regdata$UtDato))}
-  map_df(datoer, auxfunc)
+  purrr::map_df(datoer, auxfunc)
 }
 
 
@@ -339,11 +343,11 @@ erInneliggende <- function(datoer, regdata){
 if (tidsenhet=='dag') {
   names(datoer) <- format(datoer, '%d.%b')
   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-  RegDataAlle <- bind_cols(RegDataAlle, aux)
+  RegDataAlle <- dplyr::bind_cols(RegDataAlle, aux)
 } else {
   names(datoer) <- datoer
   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-  aux <- bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
+  aux <- dplyr::bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
   aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi)
   aux$Tid <- as.Date(aux$Tid)
   aux$Tid <- switch (tidsenhet,
@@ -351,8 +355,8 @@ if (tidsenhet=='dag') {
                      'maaned' = format(aux$Tid, "%b.%Y")
   )
   aux <- aux %>% dplyr::group_by(PasientID, Tid) %>%
-    summarise(er_inne = max(verdi))
-  aux <- aux %>% spread(key=Tid, value = er_inne)
+    dplyr::summarise(er_inne = max(verdi))
+  aux <- aux %>% tidyr::spread(key=Tid, value = er_inne)
   RegDataAlle <- merge(RegDataAlle, aux, by = 'PasientID')
 }
 
@@ -1042,8 +1046,8 @@ inneliggende <- function(x) { #Om en pasient/skjema er inneliggende på gitt dat
   (x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato))}
 
 RegData$InnDato[is.na( RegData$UtDato)]
-# inneligendeMatr <- as.data.frame(map_df(datoer, inneliggende))
-# RegDataAlleDatoer <- bind_cols(RegData, inneligendeMatr)
+# inneligendeMatr <- as.data.frame(purrr::map_df(datoer, inneliggende))
+# RegDataAlleDatoer <- dplyr::bind_cols(RegData, inneligendeMatr)
 
 #FEIL:
 AntInneliggendeGr <- function(dato) { #Antall inneliggende for gitt dato, gruppert på variabel "gr"
@@ -1060,10 +1064,10 @@ sum(AntInneliggendeGr('2020-07-03'), na.rm = T)
 # RegData <- KoroDataPers
 beregnBelegg <- function(datoer){
   names(datoer) <- format(datoer, '%d.%B')
-  #data <- as.data.frame(map_df(datoer, inneliggende))
+  #data <- as.data.frame(purrr::map_df(datoer, inneliggende))
 
   data <- erInneliggende(datoer = datoer, regdata = RegData)
-  #RegData <- bind_cols(RegData, data)
+  #RegData <- dplyr::bind_cols(RegData, data)
 
 antDager <- length(datoer)
 antPrDagPers <- colSums(data)

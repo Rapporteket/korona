@@ -142,7 +142,8 @@ erInneliggende <- function(datoer, regdata){
   #NY: For hver dato - tell antall PID
 
   auxfunc <- function(x) {(x >  regdata$InnDato & x <= regdata$UtDato) | (x >  regdata$InnDato & is.na( regdata$UtDato))}
-  map_df(datoer, auxfunc)
+  #map_df(datoer, auxfunc)
+  purrr::map_dfr(datoer, auxfunc)
 }
 
 
