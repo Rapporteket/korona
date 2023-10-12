@@ -1,20 +1,20 @@
-# Uttrekk Korona-kommisjon 
-# 
-# Vi har i dag mottatt en ny henvendelse fra Koronakommisjonen. 
+# Uttrekk Korona-kommisjon
+#
+# Vi har i dag mottatt en ny henvendelse fra Koronakommisjonen.
 # Her er bestillingen:
-#   
+#
 # •	Antall barn 0-18 år innlagt i sykehus (inkludert intensiv)
 # •	Antall barn 0-18 år innlagt på intensiv
 # •	Antall barn som har vært respiratorbehandlet (‘InvasivVentilation’)
 # •	Antall barn døde på sykehus
 # •	Antall barn døde på intensiv
-# 
+#
 # 	Studieperiode: mars 2020 til – d.d.
 # Eirik: mtp intensivpasienter, skal vi si cut-off er 31.12.2021? Da er i hvert fall alle opphold ferdigstilt.
-# 	De ønsket at vi delte inn dette i aldersgrupper, gruppering kunne vi velge selv. Kan 5-års grupper være ok? 0-5, 6-10, 11-15, 16-18? Andre forslag mottas med takk. 
-# 	Datautlevering er ønsket som en normal excel-fil. Det skal ikke produseres figurer, men kanskje de laget en tabell. CSV var ikke nødvendig. 
+# 	De ønsket at vi delte inn dette i aldersgrupper, gruppering kunne vi velge selv. Kan 5-års grupper være ok? 0-5, 6-10, 11-15, 16-18? Andre forslag mottas med takk.
+# 	Datautlevering er ønsket som en normal excel-fil. Det skal ikke produseres figurer, men kanskje de laget en tabell. CSV var ikke nødvendig.
 
-# Bonus: Barn med innleggelsesårsak/diagnosekode (‘diagnosis’) 107, ‘Mistenkt SARS-CoV-2 med annen organmanifestasjon’ (barn med MISC (Multiorgan inflammatorisk syndrom assosiert med covid-19 (MIS-C)). Kan du sortere mellom bekreftet SARS-CoV-2 (verdi 100) og 107? 
+# Bonus: Barn med innleggelsesårsak/diagnosekode (‘diagnosis’) 107, ‘Mistenkt SARS-CoV-2 med annen organmanifestasjon’ (barn med MISC (Multiorgan inflammatorisk syndrom assosiert med covid-19 (MIS-C)). Kan du sortere mellom bekreftet SARS-CoV-2 (verdi 100) og 107?
 
 
 # les inn data ------------------------------------------------------------
@@ -178,8 +178,8 @@ d_pandemi = read_csv2(
   )
 )
 
-# Fjerner kladdeskjema 
-d_pandemi_ferdigstilt = d_pandemi %>% 
+# Fjerner kladdeskjema
+d_pandemi_ferdigstilt = d_pandemi %>%
   filter(FormStatus == 2)
 
 # Datainnlesing Intensivdata ----------------------------------------------------
@@ -340,43 +340,43 @@ d_intensiv = read_csv2(
   )
 )
 
-# Fjerner kladdeskjema 
-d_intensiv_ferdigstilt = d_intensiv %>% 
+# Fjerner kladdeskjema
+d_intensiv_ferdigstilt = d_intensiv %>%
   filter(FormStatus == 2)
 
 
 # Dataprep ----------------------------------------------------------------
-d_pandemi_alder = d_pandemi_ferdigstilt %>% 
-  filter(PatientAge < 18)
+d_pandemi_alder = d_pandemi_ferdigstilt %>%
+   dplyr::filter(PatientAge < 18)
 
-d_pandemi_innleggelse = d_pandemi_alder %>% 
-  filter(Skjematype == "Pandemiskjema") %>% 
-  select(Fødselsnummer, PatientAge, Innleggelse)
+d_pandemi_innleggelse = d_pandemi_alder %>%
+   dplyr::filter(Skjematype == "Pandemiskjema") %>%
+   dplyr::select(Fødselsnummer, PatientAge, Innleggelse)
 
-d_pandemi_utskrivning = d_pandemi_alder %>% 
-  filter(Skjematype == "UtskrivningSkjema") %>% 
-  select(Fødselsnummer, StatusVedUtskriving, Innleggelse, Utskrivningsdato)
+d_pandemi_utskrivning = d_pandemi_alder %>%
+  filter(Skjematype == "UtskrivningSkjema") %>%
+   dplyr::select(Fødselsnummer, StatusVedUtskriving, Innleggelse, Utskrivningsdato)
 
-d_intensiv_alder = d_intensiv_ferdigstilt %>% 
-  filter(PatientAge < 18)
+d_intensiv_alder = d_intensiv_ferdigstilt %>%
+   dplyr::filter(PatientAge < 18)
 
-d_intensivopphold = d_intensiv_alder %>% 
-  filter(Skjematype == "Intensivopphold",
-         date(DateAdmittedIntensive) < "2022-01-01") %>% 
-  select(Fødselsnummer, InvasivVentilation, DateAdmittedIntensive,
+d_intensivopphold = d_intensiv_alder %>%
+   dplyr::filter(Skjematype == "Intensivopphold",
+         date(DateAdmittedIntensive) < "2022-01-01") %>%
+   dplyr::select(Fødselsnummer, InvasivVentilation, DateAdmittedIntensive,
          DateDischargedIntensive, PatientAge, DischargedIntensiveStatus)
 
-d_beredskap = d_intensiv_alder %>% 
-  filter(Skjematype == "Beredskap",
-         date(DateAdmittedIntensive) < "2022-01-01") %>% 
-  select(Fødselsnummer, Diagnosis, DateAdmittedIntensive)
+d_beredskap = d_intensiv_alder %>%
+   dplyr::filter(Skjematype == "Beredskap",
+         date(DateAdmittedIntensive) < "2022-01-01") %>%
+   dplyr::select(Fødselsnummer, Diagnosis, DateAdmittedIntensive)
 
 # Koble pandemiskjema med utskrivningsskjema
-d_pandemi_samlet = d_pandemi_innleggelse %>% 
+d_pandemi_samlet = d_pandemi_innleggelse %>%
   left_join(d_pandemi_utskrivning, by = c("Fødselsnummer", "Innleggelse"))
 
-d_pandemi_forløp = d_pandemi_samlet %>% 
-  group_by(Fødselsnummer) %>% 
+d_pandemi_forløp = d_pandemi_samlet %>%
+  group_by(Fødselsnummer) %>%
   mutate(
     tid_siden_forrige = difftime(Innleggelse, lag(Utskrivningsdato), units = "hours"),
     innen_12_timer = as.numeric(tid_siden_forrige) < 12,
@@ -384,10 +384,10 @@ d_pandemi_forløp = d_pandemi_samlet %>%
     overfort_nummer = cumsum(innen_12_timer & radnummer != 1L),
     sykdomsforlop = radnummer - overfort_nummer)
 
-d_intensiv_samlet = d_intensivopphold %>%  
+d_intensiv_samlet = d_intensivopphold %>%
   distinct(Fødselsnummer, DateAdmittedIntensive, .keep_all = TRUE) %>%  # Fjerner et duplikat
-  left_join(d_beredskap, by = c("Fødselsnummer", "DateAdmittedIntensive")) %>% 
-  group_by(Fødselsnummer) %>% 
+  left_join(d_beredskap, by = c("Fødselsnummer", "DateAdmittedIntensive")) %>%
+  group_by(Fødselsnummer) %>%
   mutate(
     tid_siden_forrige = difftime(DateAdmittedIntensive, lag(DateDischargedIntensive), units = "hours"),
 innen_12_timer = as.numeric(tid_siden_forrige) < 12,
@@ -405,60 +405,60 @@ NeiJaUkjentIntensiv = function(x) {
 
 
 # Aggregere Pandemi og intensivdata --------------------------------------
-d_pandemi_aggregert = d_pandemi_forløp %>% 
-  group_by(Fødselsnummer, sykdomsforlop) %>% 
-  summarise(PatientAge = first(PatientAge), 
-            Innleggelse = first(Innleggelse), 
-            StatusVedUtskriving = NeiJaUkjent(StatusVedUtskriving), 
-            Utskrivningsdato = last(Utskrivningsdato), 
-            .groups = "drop") %>% 
-  select(-sykdomsforlop)
+d_pandemi_aggregert = d_pandemi_forløp %>%
+   dplyr::group_by(Fødselsnummer, sykdomsforlop) %>%
+   dplyr::summarise(PatientAge = first(PatientAge),
+            Innleggelse = first(Innleggelse),
+            StatusVedUtskriving = NeiJaUkjent(StatusVedUtskriving),
+            Utskrivningsdato = dplyr::last(Utskrivningsdato),
+            .groups = "drop") %>%
+   dplyr::select(-sykdomsforlop)
 
-d_intensiv_aggregert = d_intensiv_samlet %>% 
-  group_by(Fødselsnummer, sykdomsforlop) %>% 
-  summarise(InvasivVentilation = sum(InvasivVentilation, na.rm = TRUE),
-            PatientAge = first(PatientAge), 
-            DateAdmittedIntensive = first(DateAdmittedIntensive), 
-            DateDischargedIntensive = last(DateDischargedIntensive), 
-            DischargedIntensiveStatus = NeiJaUkjentIntensiv(DischargedIntensiveStatus), 
-            Diagnosis = first(Diagnosis), 
-            .groups = "drop") %>% 
-select(-sykdomsforlop)
+d_intensiv_aggregert = d_intensiv_samlet %>%
+   dplyr::group_by(Fødselsnummer, sykdomsforlop) %>%
+   dplyr::summarise(InvasivVentilation = sum(InvasivVentilation, na.rm = TRUE),
+            PatientAge = first(PatientAge),
+            DateAdmittedIntensive = first(DateAdmittedIntensive),
+            DateDischargedIntensive = dplyr::last(DateDischargedIntensive),
+            DischargedIntensiveStatus = NeiJaUkjentIntensiv(DischargedIntensiveStatus),
+            Diagnosis = first(Diagnosis),
+            .groups = "drop") %>%
+   dplyr::select(-sykdomsforlop)
 
-d_intensivdata_til_pandemi = d_pandemi_aggregert %>% 
-  left_join(d_intensiv_aggregert, by = "Fødselsnummer") %>% 
-  filter(DateAdmittedIntensive >= Innleggelse & 
-           DateAdmittedIntensive <= Utskrivningsdato) 
+d_intensivdata_til_pandemi = d_pandemi_aggregert %>%
+  left_join(d_intensiv_aggregert, by = "Fødselsnummer") %>%
+  filter(DateAdmittedIntensive >= Innleggelse &
+           DateAdmittedIntensive <= Utskrivningsdato)
 
-d_fullt_datasett = d_pandemi_aggregert %>% 
-  anti_join(d_intensivdata_til_pandemi, by = c("Fødselsnummer", "Innleggelse")) %>% 
-  bind_rows(d_intensivdata_til_pandemi)
+d_fullt_datasett = d_pandemi_aggregert %>%
+  anti_join(d_intensivdata_til_pandemi, by = c("Fødselsnummer", "Innleggelse")) %>%
+  dplyr::bind_rows(d_intensivdata_til_pandemi)
 
-d_aldersgrupper = d_fullt_datasett %>% 
-  mutate(alderskategori = case_when(PatientAge >= 0 & PatientAge <= 5 ~ "0-5 år", 
-                                    PatientAge >= 6 & PatientAge <= 10 ~ "6-10 år", 
-                                    PatientAge >= 11 & PatientAge <= 15 ~ "11-15 år", 
-                                    PatientAge >= 16 & PatientAge <= 18 ~ "16-18 år", 
-                                    TRUE ~ "FEIL"), 
+d_aldersgrupper = d_fullt_datasett %>%
+  dplyr::mutate(alderskategori = case_when(PatientAge >= 0 & PatientAge <= 5 ~ "0-5 år",
+                                    PatientAge >= 6 & PatientAge <= 10 ~ "6-10 år",
+                                    PatientAge >= 11 & PatientAge <= 15 ~ "11-15 år",
+                                    PatientAge >= 16 & PatientAge <= 18 ~ "16-18 år",
+                                    TRUE ~ "FEIL"),
          fått_invasiv = !is.na(InvasivVentilation) & InvasivVentilation != 0,
-         aldersnummer = case_when(alderskategori == "0-5 år" ~ 1, 
-                                  alderskategori == "6-10 år" ~ 2, 
-                                  alderskategori == "11-15 år" ~ 3, 
-                                  alderskategori == "16-18 år" ~ 4)) %>% 
+         aldersnummer = case_when(alderskategori == "0-5 år" ~ 1,
+                                  alderskategori == "6-10 år" ~ 2,
+                                  alderskategori == "11-15 år" ~ 3,
+                                  alderskategori == "16-18 år" ~ 4)) %>%
   arrange(aldersnummer)
 
-d_summer_alderskategori = d_aldersgrupper %>% 
-  group_by(aldersnummer) %>% 
-  summarise(`alder` = first(alderskategori), 
-            `antall innlagt på sykehus` = n(), 
+d_summer_alderskategori = d_aldersgrupper %>%
+   dplyr::group_by(aldersnummer) %>%
+   dplyr::summarise(`alder` = first(alderskategori),
+            `antall innlagt på sykehus` = dplyr::n(),
             `antall innlagt på intensiv` = sum(!is.na(DateAdmittedIntensive)),
-            `antall respiratorbehandlet (Invasiv ventilasjon)` = sum(!is.na(InvasivVentilation) & InvasivVentilation != 0), 
+            `antall respiratorbehandlet (Invasiv ventilasjon)` = sum(!is.na(InvasivVentilation) & InvasivVentilation != 0),
             `antall døde på sykehus` = sum(StatusVedUtskriving == 2, na.rm = TRUE),
             `antall døde på intensiv` = sum(DischargedIntensiveStatus == 1, na.rm = TRUE),
             `antall påvist COV-19` = sum(Diagnosis %in% 100:103, na.rm = TRUE),
-            `antall Mistenkt SARS-CoV-2 med annen organmanifestasjon` = sum(Diagnosis == 107, na.rm = TRUE)) %>% 
-  select(-aldersnummer)
-  
+            `antall Mistenkt SARS-CoV-2 med annen organmanifestasjon` = sum(Diagnosis == 107, na.rm = TRUE)) %>%
+   dplyr::select(-aldersnummer)
 
-write_csv2(d_summer_alderskategori, 
+
+write_csv2(d_summer_alderskategori,
            file = "\\\\ihelse.net\\Kvalitetsregister\\hbe\\2009-7537\\Utlevering av data\\2022\\Koronakommisjonen\\utlevering-nipar.csv")

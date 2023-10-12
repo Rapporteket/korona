@@ -109,23 +109,6 @@ varPandemiInn <- c('Inn.SkjemaGUID
   ,Inn.Trombocytter
   ,Inn.TrombocytterUkjent
   ,Inn.UnitId
---  ,Inn.UtsAkuttNyresvikt
---    ,Inn.UtsAkuttRespirasjonsvikt
---    ,Inn.UtsAkuttSirkulasjonsvikt
---    ,Inn.UtsAminoglykosid
---    ,Inn.UtsAndreGencefalosporin
---    ,Inn.UtsAntibiotika
---    ,Inn.UtsAntibiotikaAnnet
---    ,Inn.UtsAntibiotikaUkjent
---    ,Inn.UtsAntifungalbehandling
---    ,Inn.UtsAntiviralBehandling
---    ,Inn.UtsKarbapenem
---    ,Inn.UtsKinolon
-  -- ,Inn.Utskrivningsdato AS UtskrivningsdatoInnSkjema
---    ,Inn.UtsMakrolid
---    ,Inn.UtsPenicillin
---    ,Inn.UtsPenicillinEnzymhemmer
---    ,Inn.UtsTredjeGencefalosporin
   ,Inn.Vekt
   ,Inn.VektUkjent
   ')
@@ -145,6 +128,7 @@ varPandemiUt <- c('SkjemaGUID
   ,CreationDate
   -- ,CurrentMunicipalNumber
   -- ,DistrictCode
+  ,ErFerdigBehandlet
   ,FirstTimeClosed
   ,FormDate
   ,FormStatus
@@ -156,6 +140,7 @@ varPandemiUt <- c('SkjemaGUID
   -- ,Hospital
   ,UPPER(HovedskjemaGUID) AS HovedskjemaGUID
   -- ,IkkeFerdigstillt30Dager
+  ,ImmunmodBehandling
   ,Karbapenem
   ,Kinolon
   ,LastUpdate
@@ -163,6 +148,7 @@ varPandemiUt <- c('SkjemaGUID
   ,Makrolid
   -- ,MigrationInformation
   -- ,MinorVersion
+  ,Monoklonaleantistoff
   ,Municipal
   ,MunicipalNumber
   ,OverfortAnnetSykehusUtskrivning
@@ -175,9 +161,11 @@ varPandemiUt <- c('SkjemaGUID
   -- ,PostalCode
   -- ,RelevantDato
   ,RHF
+ -- ,RontgenThorax
   -- ,Skjematype
   ,Sykehus
   ,StatusVedUtskriving
+  ,SteroideBehandling
   -- ,TimerSidenRelevantDato
   ,TredjeGencefalosporin
   ,UnitId
@@ -191,7 +179,7 @@ varUtKoblet <- c(
 'UPPER(Ut.HovedskjemaGUID) AS HovedskjemaGUID
   ,Ut.Antifungalbehandling
   ,Ut.AntiviralBehandling
-    ,Ut.AkuttNyresvikt AS UtsAkuttNyresvikt
+  ,Ut.AkuttNyresvikt AS UtsAkuttNyresvikt
   ,Ut.AkuttRespirasjonsvikt AS UtsAkuttRespirasjonsvikt
   ,Ut.AkuttSirkulasjonsvikt AS UtsAkuttSirkulasjonsvikt
   ,Ut.Aminoglykosid AS UtsAminoglykosid
@@ -202,19 +190,23 @@ varUtKoblet <- c(
   ,Ut.Antifungalbehandling AS UtsAntifungalbehandling
   ,Ut.AntiviralBehandling AS UtsAntiviralBehandling
   ,Ut.CreationDate AS CreationDateUt
+  ,Ut.ErFerdigBehandlet
   ,Ut.FirstTimeClosed AS FirstTimeClosedUt
   ,Ut.FormStatus AS FormStatusUt
   ,Ut.FormDate AS FormDateUt
   ,Ut.HelseenhetKortNavn AS ShNavnUt
   ,Ut.Importert AS ImportertUt
+  ,Ut.ImmunmodBehandling AS UtsImmunmodBehandling
   ,Ut.Karbapenem AS UtsKarbapenem
   ,Ut.Kinolon AS UtsKinolon
-  -- ,Ut.Utskrivningsdato AS UtskrivningsdatoInnSkjema
   ,Ut.Makrolid AS UtsMakrolid
+  ,Ut.Monoklonaleantistoff AS UtsMonoklonaleantistoff
   ,Ut.Penicillin AS UtsPenicillin
   ,Ut.PenicillinEnzymhemmer AS UtsPenicillinEnzymhemmer
   ,Ut.OverfortAnnetSykehusUtskrivning
+  -- ,Ut.RontgenThorax AS UtsRontgenThorax
   ,Ut.StatusVedUtskriving
+  ,Ut.SteroideBehandling AS UtsSteroideBehandling
   ,Ut.TredjeGencefalosporin AS UtsTredjeGencefalosporin
   ,Ut.Utskrivningsdato
   ,Ut.SkjemaGUID AS SkjemaGUIDut

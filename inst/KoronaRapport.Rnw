@@ -151,19 +151,22 @@ txtAlder <- if (dim(Pandemi)[1]>2){paste0('Alderen er mellom ',
 \begin{frame}[fragile] {Om dokumentet}
 
 Dette er en automatisk generert rapport fra Norsk intensiv- og pandemiregister (NIPaR).
-Dokumentet inneholder oversikt over \bf{sykehusbehandlede pasienter med covid-19} for \textbf{\Sexpr{forHvem}}.
+Dokumentet inneholder oversikt over \textbf{sykehusbehandlede pasienter med covid-19} for \textbf{\Sexpr{forHvem}}.
 I denne sammenhengen betyr det at pasienten er innlagt på sykehus og har en positiv prøve for SARS-CoV-2
 i løpet av de siste 3 månedene før innleggelse.
 Datagrunnlaget er oppdatert med alle registreringer gjort dagen før rapporten ble lastet ned.
 Alle innlagte med covid-19 blir registrert i NIPaR, uavhengig av om covid-19 er hovedårsak til innleggelsen.
-I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er Covid-19.
+I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er covid-19.
 
 For resultater basert på personaggregerte data, er skjema aggregert til ett eller flere smitteforløp per pasient.
 Hvis det er mer enn 3 måneder mellom to opphold, regnes det som to smitteforløp, ellers som ett.
-Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett smitteforløp og \Sexpr{antPasFlereForlCov} av av disse har mer enn ett smitteforløp hvor Covid-19 er hovedårsak til minst ett av oppholdene i smitteforløpet.
+Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett smitteforløp og \Sexpr{antPasFlereForlCov} av av disse har mer enn ett smitteforløp hvor covid-19 er hovedårsak til minst ett av oppholdene i smitteforløpet.
 For personaggregerte resultater vises pasienter
-hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
-ferdigstilt eller ikke, dersom ikke annet er oppgitt.
+hvor covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
+ferdigstilt eller ikke, dersom ikke annet er oppgitt. \\
+\textbf{Fra 2. oktober 2023 er rapportering av sykehusinnlagte covid-19 pasienter frivillig. Nasjonale tall er dermed ikke nødvendigvis representative, da det kan være ulikt hvorvidt Helseforetakene velger å rapportere inn sykehusinnlagte covid-19 pasienter eller ikke. Tabeller over fordeling per helseforetak kan indikere hvilke helseforetak som fortsatt rapporterer.}
+
+
 
 %\vspace{0.5 cm}
 \bf{Rapporten gir en oversikt over:}
@@ -217,8 +220,8 @@ AntPaaSh <- sum(is.na(Pandemi$UtDato))
 
 indNaa <- which(is.na(Pandemi$UtDato))
 InneliggHF <- if (rolle == 'LU') {
-  Pandemi[indNaa,] %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise('Antall pasienter' = n())
-  } else {Pandemi[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise('Antall pasienter' = n())}
+  Pandemi[indNaa,] %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise('Antall pasienter' = dplyr::n())
+  } else {Pandemi[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise('Antall pasienter' = dplyr::n())}
 InneliggPas <- rbind(as.matrix(InneliggHF),
       c('','Totalt', AntPaaSh))
 print(xtable::xtable(InneliggPas, digits=0, align=c('l','l','l','r'),
@@ -242,7 +245,7 @@ antDodAndre <- sum(PandemiAndre$StatusVedUtskriving==2, na.rm = T) #[indFerdigUt
 
 
 indNaa <- which(is.na(PandemiAndre$UtDato))
-InneliggHFandre <- PandemiAndre[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise('Antall pasienter' = n())
+InneliggHFandre <- PandemiAndre[indNaa,] %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise('Antall pasienter' = dplyr::n())
 InneliggPasAndre <- rbind(as.matrix(InneliggHFandre),
       c('','Totalt', AntPaaShAndre))
 @
@@ -347,8 +350,8 @@ print(xtable::xtable(AntUt[fra:nrow(AntUt),], digits=0, method='compact', #align
 #nivaa1 <- enhetsNivaa
 nivaa2 <- ifelse(rolle=='LU', 'ShNavn', 'HFnavn')
 
-RegHF <- if (rolle == 'LU') {PandemiOpph %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = n())
-  } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = n())}
+RegHF <- if (rolle == 'LU') {PandemiOpph %>% dplyr::group_by(HF, ShNavn) %>% dplyr::summarise(Antall = dplyr::n())
+  } else {Pandemi %>% dplyr::group_by(RHF, HF) %>% dplyr::summarise(Antall = dplyr::n())}
 RegHF <- rbind(as.matrix(RegHF),
       c('','Totalt', sum(RegHF$Antall)))
 

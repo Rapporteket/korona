@@ -10,7 +10,7 @@ lagDatafilerTilFHI(
   pand = 1,
   influ = 1,
   raa = 1,
-  Pagg = 1
+  aggP = 1
 )
 }
 \arguments{

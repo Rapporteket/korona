@@ -6,10 +6,12 @@
 #Legger til re-/nyinnleggelser osv. NB: Hvis vi kun ser på Covid som hovedårsak, mister vi noen reinnleggelser/overføringer.
 #2021: valgt å beregne overføringer/nye innleggelser først og så filtrere på hovedårsak covid.
 #Vi får dermed flere overføringer sammenlignet med 2020.
-#2022: Vi skal ha personaggregerte data hvor vi teller flere smitteforløp. Smitteforløp med minst ett opphold hvor Covid hovedårsak.
+#2022: Vi skal ha personaggregerte data hvor vi teller flere smitteforløp. Smitteforløp hvor ALLE opphold hvor Covid hovedårsak.
+#2022: Intensivpasient: pasienter/opphold hvor vi faktisk har et tilhørende beredskapsskjema. Ikke benyttet variabelen Nir_beredskapsskjema_CoV2.
 
-setwd('AarsRappFig/')
-library(intensiv)
+
+setwd('~/Aarsrappresultater/NiPar22/')
+#library(intensiv)
 library(intensivberedskap)
 library(korona)
 datoFra <- '2020-03-01' #Vi har pandemi fra 1.mars 2020
@@ -19,17 +21,37 @@ datoFra1aar <- '2022-01-01'
 KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
 KoroDataOpph <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=0, kobleBered=1)
 KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1, tellFlereForlop=1)
-#ELLER: (pass på at staging oppdatert)
-KoroDataPers <- rapbase::loadStagingData("korona", "KoroData")
-
-# sjekk <- KoroDataOpph[KoroDataOpph$Nir_beredskapsskjema_CoV2==1 & KoroDataOpph$BeredReg==0 &
-#                          KoroDataOpph$Aar==2022 & KoroDataOpph$ArsakInnleggelse==1,
-#                       c("SkjemaGUID", "InnDato", 'Aar')]
-# table(KoroDataOpph[ ,c('Nir_beredskapsskjema_CoV2', 'Aar')])
+#write.table(KoroDataPers, file = '~/mydata/KoroDataPers.csv', sep = ';', row.names = F, fileEncoding = 'UTF-8')
+#ELLER hent fra staging: (pass på at staging oppdatert) Oppdatert med data fra hentet 25.april
+ KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") # KoronaDataSQL(koble=1)
+ KoroDataOpph <- rapbase::loadStagingData("korona", "KoroDataOpph") #(RegData = KoroDataRaa, aggPers = 0, kobleBered = 1)
+ KoroDataOpph <- KoroDataOpph[KoroDataOpph$InnDato <= as.Date(datoTil), ]
+ KoroDataPers <- rapbase::loadStagingData("korona", "KoroData") #(RegData = KoroDataRaa, aggPers = 1, tellFlereForlop = 1, kobleBered = 1)
+ KoroDataPers <- KoroDataPers[KoroDataPers$InnDato <= as.Date(datoTil), ]
 
 #Bare smitteforløp hvor alle opph har Covid som hovedårsak
 KoroData <- KoronaUtvalg(RegData = KoroDataPers, aarsakInn = 1, datoTil = datoTil)$RegData
 KoroData1aar <- KoroData[KoroData$InnDato >= as.Date(datoFra1aar), ]
+
+# KoroDataOpph <- KoroDataOpph[KoroDataOpph$ArsakInnleggelse==1,]
+# prop.table(table(KoroDataOpph$Isolert))
+# prop.table(table(KoroData$Isolert))
+
+# sjekk <- KoroDataOpph[KoroDataOpph$Nir_beredskapsskjema_CoV2==1 & KoroDataOpph$BeredReg==0 &
+#                          KoroDataOpph$Aar==2022 & KoroDataOpph$ArsakInnleggelse==1,
+#                       c("SkjemaGUID", 'HovedskjemaGUID', "FormDate", 'ShNavn',"ReshId", 'Aar')]
+# write.table(sjekk, file = 'SkalHaBeredSkjema.csv', sep = ';', row.names = F, fileEncoding = 'UTF-8')
+#table(KoroDataOpph[KoroDataOpph$BeredReg==0 ,c('Nir_beredskapsskjema_CoV2', 'Aar')])
+
+# KoroDataPersAlle1aar <- KoroDataPers[KoroDataPers$InnDato >= as.Date(datoFra1aar), ]
+# table(KoroDataPers$ArsakInnNy, useNA = 'a')
+# #Personer:
+#    length(unique(KoroData1aar$PersonId))
+#    KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1, tellFlereForlop=0)
+
+# Filer <- korona::lagDatafilerTilFHI(personIDvar='PersonId',
+#                                     bered=1, pand=1, influ=0,
+#                                     raa=1, aggP=0)
 
 #-----------------------TABELLER--------------------------------
 
@@ -50,14 +72,27 @@ KoroData1aar$BeredPasTest <- ifelse(KoroData1aar$Nir_beredskapsskjema_CoV2==1, 1
 
 Nokkeltall <- FerdigeRegTab(RegData=KoroData1aar)
 tab <- Nokkeltall$Tab[-3, ]
-colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal opphald', 'Del opphald')
-intBehPas <- round(100*prop.table(table(KoroData$BeredReg))[2],1)
+colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal smitteforløp', 'Del smitteforløp')
+intBehPas <- round(100*prop.table(table(KoroData1aar$BeredReg))[2],1)
 
 print(xtable::xtable(tab, align=c('l','r','r','c','r','r'),
                      label = 'tab:pan_tot',
                      caption=paste0('Nøkkeltal for pandemipasientar. Dei ', Nokkeltall$N,
-                                    ' opphalda gjeld ', Nokkeltall$AntPas, ' pasientar. '
+                                    ' smitteforløpa gjeld ', Nokkeltall$AntPas, ' pasientar. '
                               ,intBehPas, '\\% av pasientane er intensivbehandla.')
+))
+
+Nokkeltall <- FerdigeRegTab(RegData=KoroData)
+tab <- Nokkeltall$Tab[-3, ]
+colnames(tab) <- c('Gj.sn', 'Median', 'IQR', 'Tal smitteforløp', 'Del smitteforløp')
+intBehPas <- round(100*prop.table(table(KoroData$BeredReg))[2],1)
+
+print(xtable::xtable(tab, align=c('l','r','r','c','r','r'),
+                     label = 'tab:pan_nokstart',
+                     caption=paste0('Nøkkeltal for pandemipasientar frå pandemistart, mars 2020.
+                                    Dei ', Nokkeltall$N,
+                                    ' smitteforløpa gjeld ', Nokkeltall$AntPas, ' pasientar. '
+                                    ,intBehPas, '\\% av pasientane er intensivbehandla.')
 ))
 
 HFer <- unique(KoroData$HF)
@@ -77,6 +112,61 @@ print(xtable::xtable(Nokkeltall$Tab[-3, ], align=c('l','r','r','c','r','r'),
                               ))
 }
 
+#Antibiotika
+variabler <- c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
+              'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
+              'Karbapenem', 'Makrolid', 'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika')
+grtxt <- c('Penicillin', 'Penicillin m/enzymhemmer', 'Aminoglykosid',
+           '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
+           'Karbapenem', 'Makrolid', 'Annet', 'Ukjent type', 'Antibiotika, tot.')
+
+
+#aggregate(KoroData[ ,variabler], by=list(KoroData$HF), FUN=function(x) {sum(x==1)})
+tapply(KoroData$Antibiotika, INDEX = KoroData$HF, FUN = function(x){sum(x %in% 1:2)})
+
+#Bare de med kjent antibiotikastatus:
+ind <- which(KoroData1aar$Antibiotika %in% 1:2)
+tabAntibiotikaInn <- aggregate(KoroData1aar[ind ,variabler], by=list(KoroData1aar$HF[ind]), FUN=function(x) {100*sum(x==1)/length(x)})
+
+colnames(tabAntibiotikaInn) <- c('HF', grtxt)
+
+print(xtable::xtable(tabAntibiotikaInn,
+               digits = 1,
+               align = c('l', rep('r',ncol(tabAntibiotikaInn))),
+               caption = 'Antibiotikabruk ved innleggelse, pandemipasientar. Hele pandemiperioden',
+               label = 'tab:pan_antibiotika_inn'
+),
+include.rownames = FALSE)
+
+
+#Antibiotika, ut
+variablerUt <- paste0('Uts', c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
+                            'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
+                            'Karbapenem', 'Makrolid', 'Antifungalbehandling',
+                            'AntibiotikaAnnet', 'AntibiotikaUkjent', 'Antibiotika'))
+grtxt <- c('Penicillin', 'Penicillin m/enzymhemmer', 'Aminoglykosid',
+           '2. gen. cefalosporin', '3. gen. cefalosporin', 'Kinolon',
+           'Karbapenem', 'Makrolid', 'Antimykotisk beh.',
+           'Annet', 'Ukjent type', 'Antibiotika, tot.')
+
+#tapply(KoroData$UtsAntibiotika, INDEX = KoroData$HF, FUN = function(x){sum(x %in% 1:2)})
+table(KoroData1aar$UtsAntibiotika)
+
+#Bare de med kjent antibiotikastatus:
+ind <- which(KoroData1aar$UtsAntibiotika %in% 1:2)
+tabAntibiotikaUt <- aggregate(KoroData1aar[ind ,variablerUt], by=list(KoroData1aar$HF[ind]), FUN=function(x) {100*sum(x==1)/length(x)})
+
+colnames(tabAntibiotikaUt) <- c('HF', grtxt)
+
+print(xtable::xtable(tabAntibiotikaUt,
+                     digits = 1,
+                     align = c('l', rep('r',ncol(tabAntibiotikaUt))),
+                     caption = 'Antibiotikabruk ved utskriving, pandemipasientar. Hele pandemiperioden',
+                     label = 'tab:pan_antibiotika_ut'
+                     ),
+      include.rownames = FALSE)
+
+
 #-------------FIGURER-------------
 #Innleggelser
 AntTab <- antallTidEnhTab(RegData=KoroDataOpph, datoTil = as.Date(datoTil), #tilgangsNivaa=rolle,valgtEnhet= egenEnhet,
@@ -93,26 +183,23 @@ Aarsak <- paste0(sprintf('%.1f', prop.table(table(KoroData$ArsakInnleggelse[Koro
 names(Aarsak) <- c('Ja', 'Nei', 'Ukjent')
 
 #----------------Alle fordelingsfigurer, basert på smitteforløp-----------------
-# 'liggetid',
-variabler <- c('regForsinkelseInn', 'regForsinkelseUt')
+#
+variabler <- c('liggetid','regForsinkelseInn', 'regForsinkelseUt')
 for (valgtVar in variabler) {
-  KoronaFigAndeler(RegData=KoroData, datoFra=datoFra1aar, valgtVar=valgtVar, aarsakInn=1,
+  KoronaFigAndeler(RegData=KoroData, datoFra=datoFra1aar, valgtVar=valgtVar, #aarsakInn=1,
                    outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
 }
 
 #Kun for 2020 - 1.kvartal 2022
-variabler <- c('respSviktInn', 'respSviktUt', 'risikoInn', 'sirkSviktInn', 'sirkSviktUt', 'tilstandInn')
+variabler <- c('respSviktInn', 'respSviktUt', 'risikoInn', 'sirkSviktInn', 'sirkSviktUt', 'antibiotikaInn', 'antibiotikaUt')
 for (valgtVar in variabler) {
    KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
                     datoTil='2022-04-11', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
 }
 
-#Kun for 2020 - 1.kvartal 2022
-variabler <- c('antibiotikaInn', 'antibiotikaUt')
-for (valgtVar in variabler) {
-   KoronaFigAndeler(RegData=KoroData, valgtVar=valgtVar, aarsakInn=1,
-                    datoTil='2022-04-11', outfile = paste0('KoronaFord_', valgtVar, '.pdf'))
-}
+#Kun for 2020 - 1.kvartal 2022 / hele 2022 for isolert
+   KoronaFigAndeler(RegData=KoroData, valgtVar='tilstandInnAarsRapp22', datoTil = datoTil, #aarsakInn=1, tilstandInnAarsRapp22
+                    outfile = paste0('KoronaFord_tilstandInnAarsRapp.pdf'))
 
 #----------------Alle figurer, tidsuvikling, basert på smitteforløp-----------------
 variabler <- c('alder_u18', 'alder_u40', 'alder_o60', 'alder_o80', 'beredPas', 'dodSh',
@@ -123,9 +210,98 @@ for (valgtVar in variabler) {
                      outfile = paste0('KoronaUtvTid_', valgtVar, '.pdf'))
 }
 
-KoronaFigAndelTid(RegData=KoroData, valgtVar='risikoInn', datoTil = '2022-03-31',
+for (valgtVar in c('respSviktInn', 'risikoInn')) {
+   KoronaFigAndelTid(RegData=KoroData, valgtVar=valgtVar, datoTil = '2022-03-31',
                   tidsenhet = 'Kvartal', aarsakInn=1,
-                  outfile = paste0('KoronaUtvTid_risikoInn.pdf'))
+                  outfile = paste0('KoronaUtvTid_', valgtVar, '.pdf'))
+}
+
+
+KoronaFigGjsnTid(RegData=KoroData, preprosess = 0, valgtVar='liggetid', #datoTil = '2022-03-31',
+                  tidsenhet = 'Kvartal', valgtMaal = 'gjsn', aarsakInn=1,
+                  outfile = paste0('KoronaUtvTid_liggetid.pdf'))
+
+
+#----------Tidsutvikling per RHF, samt alle-------------
+#Figurer tidsutvikling, kvartalsvis, ei linje for hvert RHF + hele landet for:
+
+tidsinfo <- SorterOgNavngiTidsEnhet(RegData=KoroData, tidsenhet = 'Kvartal')
+KoroData <- tidsinfo$RegData
+
+RHFtid <- function(RegData = KoroData, valgtVar=valgtVar, tittel = '', yAkseTxt = '',
+                   statFunk = ''){
+
+   KoronaVarSpes <- KoronaVarTilrettelegg(RegData=RegData, valgtVar=valgtVar, figurtype = 'andelTid')
+   KoroData <- KoronaVarSpes$RegData
+   if (tittel=='') {tittel <- KoronaVarSpes$tittel}
+   if (yAkseTxt == 'andel (%)') {KoroData$Variabel <- 100*KoroData$Variabel}
+
+   RHFrekkef <- c('Nord', 'Midt', 'Vest', 'Sør-Øst')
+   Ngr <- table(KoroData$RHF)[RHFrekkef]
+   NtidRHF <- tapply(KoroData$Variabel, INDEX = list(KoroData$TidsEnhet, KoroData$RHF), statFunk) #Tot. ant. per tidsenhet
+   NtidLand <- tapply(KoroData$Variabel, INDEX = KoroData$TidsEnhet, statFunk) #Tot. ant. per tidsenhet
+
+   if (valgtVar == 'antall100K') {
+      innbRHF <- c(482210, 744580,1135740, 3112710)
+   NtidRHF <- t(NtidRHF[,RHFrekkef])/innbRHF*100000
+   NtidRHF <- t(NtidRHF)
+   NtidLand <- NtidLand/sum(innbRHF)*100000
+   }
+
+   FigTypUt <- rapFigurer::figtype(outfile=paste0(valgtVar, '_tidRHF.pdf')) #, fargepalett=fargepalett)
+   farger <- FigTypUt$farger
+   xskala <- 1:length(levels(KoroData$TidsEnhet)) #length(tidtxt)
+   xmax <- max(xskala)
+   ymax <- ifelse(yAkseTxt=='andel (%)',
+                  min(1.25*max(NtidRHF,na.rm=T), 119),
+                  1.2*max(c(NtidRHF, NtidLand), na.rm=T))
+   plot(xskala, rep(0, length(xskala)),  type='o', pch="'", col='white',
+        xlim= c(0.9,xmax+0.1), xaxt='n', frame.plot = FALSE,
+        cex=2, xlab='år-kvartal', ylab=yAkseTxt, ylim=c(0,ymax), yaxs = 'i')
+   grid(nx = NA, ny = NULL, col = farger[4], lty = "solid")
+   axis(side=1, at = xskala, labels = tidsinfo$tidtxt) #tidtxt)
+   title(tittel, line=1, font.main=1)
+
+
+   lines(xskala, NtidRHF[,'Nord'], col=farger[1], lwd=2, lty=5)
+   lines(xskala, NtidRHF[,'Midt'], col=farger[2], lwd=2, lty=4)
+   lines(xskala, NtidRHF[,'Vest'], col=farger[3], lwd=2, lty=5)
+   lines(xskala, NtidRHF[,'Sør-Øst'], col=farger[4], lwd=2, lty=4)
+   lines(xskala, NtidLand, col='black', lwd=2)
+
+   pos <- ifelse(min(NtidRHF, na.rm = T)>80, 'left', 'topleft')
+  # if (valgtVar == 'risikoInn') {pos <- 'right'}
+   legend(pos,
+          legend = paste0(c(RHFrekkef, 'Hele landet'),
+                                      ' (N=', c(Ngr, sum(Ngr)),')'),
+          col=c(farger, 'black'), lwd=2, lty = c(5,4,5,4,1), bty='n')
+
+   dev.off()
+}
+
+
+
+# Alder og liggetid (median?),
+# andel døde, andel på intensiv, andel isolerte,
+# andel som har risikofaktorer (frem til 11 april, Q1),
+# tall innlagte,
+
+RHFtid(RegData = KoroData, valgtVar='alder', tittel = 'Median alder ved innleggelse',
+       yAkseTxt = 'alder (år)', statFunk <- 'median')
+RHFtid(RegData = KoroData, valgtVar='liggetid', tittel = 'Median liggetid på sykehus',
+       yAkseTxt = 'døgn', statFunk <- 'median')
+RHFtid(RegData = KoroData, valgtVar='dodSh',
+       yAkseTxt = 'andel (%)', statFunk = 'mean')
+RHFtid(RegData = KoroData, valgtVar='beredPas',
+       yAkseTxt = 'andel (%)', statFunk = 'mean')
+RHFtid(RegData = KoroData[which(KoroData$InnDato <= '2022-03-31'), ], valgtVar='risikoInn',
+       yAkseTxt = 'andel (%)', statFunk = 'mean')
+RHFtid(RegData = KoroData, valgtVar='isolertInn',
+       yAkseTxt = 'andel (%)', statFunk = 'mean')
+RHFtid(RegData = KoroData, valgtVar='ant', tittel = 'Antall innlagte',
+       yAkseTxt = 'antall', statFunk = 'length')
+RHFtid(RegData = KoroData, valgtVar='antall100K', tittel = 'Antall innlagte per 100 000 innbyggere',
+       yAkseTxt = "antall per 100' ", statFunk = 'length')
 
 
 #--------------------Testing-----------------------------
@@ -145,28 +321,57 @@ table(KoroData$Overf)
 
  #-----------Datakvalitet. Kompletthet-----------------------
  # NB: Bare de med Covid som hovedårsak til innleggelse
- # 7403 inn-skjema
- # 7187 ut-skjema
 
- manglerUt <- innManglerUt(KoroData1aar) #Kun ett skjema
+ # RegData <- KoroDataRaa[as.Date(KoroDataRaa$FormDate) >= as.Date(datoFra1aar) &
+ #                           as.Date(KoroDataRaa$FormDate) <= as.Date(datoTil) &
+ #                           KoroDataRaa$ArsakInnleggelse ==1, ]
+ # manglerUt <- innManglerUt(RegData = RegData) #
 
- KoroInnDataRaa <- korona::KoronaDataSQL(datoFra = datoFra1aar, datoTil = datoTil,
-                                      skjema = 1, koble = 0)
- varNavnInn <- intersect(names(KoroInnDataRaa), names(KoroData1aar))
- KoroInnData <- KoroData1aar[KoroData1aar$ArsakInnleggelse == 1, varNavnInn]
+ #De fleste variabler er registrert t.o.m. 11.april 2022
+ "Pandemiskjema, fortsatt obligatoriske:"
+ # Dato og tidspunkt for innlegging ved denne institusjonen
+ # Er mistenkt eller påvist akutt infeksjon med COVID-19 hovudårsak til innlegging?
+ #    Blei pasienten isolert fra innkomst?
 
 
- Nkoro <- dim(KoroData1aar)[1]
- antNA <- colSums(is.na(KoroInnData)) + colSums(KoroInnData==-1, na.rm = T)
-#Ukjente.
- #AkuttSirkulasjonsvikt og  AkuttRespirasjonsvikt har ukjent kodet 999
- #RontgenThorax har ukjent kodet 5
-  antUkj <- colSums(KoroInnData ==3, na.rm = T)
- antUkj[which(names(antUkj) == 'AkuttSirkulasjonsvikt')] <- sum(KoroInnData$AkuttSirkulasjonsvikt == 999)
- antUkj[which(names(antUkj) == 'AkuttRespirasjonsvikt')] <- sum(KoroInnData$AkuttRespirasjonsvikt == 999)
- antUkj[which(names(antUkj) == 'RontgenThorax')] <- sum(KoroInnData$RontgenThorax == 5)
 
- antUkj[which(names(antUkj) == 'Antibiotika')] <- sum(KoroInnData$AntibiotikaUkjent)
+
+#----Innleggelsesskjema
+ KoroInnData <- korona::KoronaDataSQL(datoTil = '2022-12-31', skjema = 1, koble = 0) #datoFra = datoFra1aar,
+ KoroInnData <- KoroInnData[KoroInnData$ArsakInnleggelse == 1, ]
+ #varNavnInn <- intersect(names(KoroInnDataRaa), names(KoroData1aar))
+ #KoroInnData <- KoronaPreprosesser(RegData, aggPers = 0) #
+ LogVar <- names(KoroInnData)[unique(which(KoroInnData[1,] %in% c('True','False')),
+                                     which(KoroInnData[15,] %in% c('True','False')))]
+ KoroInnData[, LogVar] <- apply(KoroInnData[, LogVar], 2, as.logical)
+
+ #table(KoroInnData$KjentRisikofaktor, useNA = 'a') # 1-ja, 2-nei, 3-ukjent, -1 velg verdi
+ #Skal ikke ha med hver enkelt risikovariabel, bare totalen
+ # risikoVar <- c('Kreft', 'NedsattimmunHIV', 'Diabetes', 'Hjertesykdom',
+ #                'AceHemmerInnkomst', 'Astma', 'KroniskLungesykdom', 'Nyresykdom',
+ #                'Leversykdom', 'KroniskNevro', 'Gravid', 'Royker')
+sjekkVar <- c('AkuttSirkulasjonsvikt', 'AkuttRespirasjonsvikt', 'AkuttNyresvikt',
+               'Antibiotika', 'Bilirubin', 'Ddimer', 'DiastoliskBlodtrykk',
+               'Hjertefrekvens', 'Hoyde', 'Isolert', 'Kreatinin',
+               'KjentRisikofaktor', 'Leukocytter', 'Oksygenmetning', 'RontgenThorax',
+               'Respirasjonsfrekvens', 'SystoliskBlodtrykk', 'Temp', 'Trombocytter', 'Vekt')
+ #head(KoroInnData[,sjekkVar])
+
+#For risikofaktorer er det nok med kun modervariabel (t.o.m 11 april 2022) Det samme for antibiotika- nok med modervariabel (tom. 11.04.22)
+tomme <- sum(is.na(KoroInnData$Isolert)) + sum(KoroInnData$Isolert == -1)
+ukj <- sum(KoroInnData$Isolert == 3)
+Isolert <- c(tomme, ukj, paste0(sprintf('%.1f', 100*c(tomme, ukj)/dim(KoroInnData)[1]), '%'))
+
+indDato <- which(as.Date(KoroInnData$Innleggelse) <= '2022-04-11')
+KoroInnData <- KoroInnData[indDato, ]
+test <- KoroInnData[,c("AkuttNyresvikt", "Innleggelse", 'FormStatus')]
+table(KoroInnData$AkuttNyresvikt, useNA = 'a')
+
+ antUkj <- colSums(KoroInnData==3, na.rm = T)
+ antUkj[which(names(antUkj) == 'AkuttSirkulasjonsvikt')] <- sum(KoroInnData$AkuttSirkulasjonsvikt == 999) #har ukjent kodet 999
+ antUkj[which(names(antUkj) == 'AkuttRespirasjonsvikt')] <- sum(KoroInnData$AkuttRespirasjonsvikt == 999) #har ukjent kodet 999
+ antUkj[which(names(antUkj) == 'RontgenThorax')] <- sum(KoroInnData$RontgenThorax == 5) #RontgenThorax har ukjent kodet 5
+ #antUkj[which(names(antUkj) == 'Antibiotika')] <- sum(KoroInnData$AntibiotikaUkjent) #FEIL MÅ IKKE BRUKES
  antUkj[which(names(antUkj) == 'Bilirubin')] <- sum(KoroInnData$BilirubinUkjent)
  antUkj[which(names(antUkj) == 'Ddimer')] <- sum(KoroInnData$DdimerUkjent)
  antUkj[which(names(antUkj) == 'DiastoliskBlodtrykk')] <- sum(KoroInnData$DiastoliskBlodtrykkUkjent)
@@ -180,15 +385,19 @@ table(KoroData$Overf)
  antUkj[which(names(antUkj) == 'Temp')] <- sum(KoroInnData$TempUkjent)
  antUkj[which(names(antUkj) == 'Trombocytter')] <- sum(KoroInnData$TrombocytterUkjent)
  antUkj[which(names(antUkj) == 'Vekt')] <- sum(KoroInnData$VektUkjent)
+ #antUkj[which(names(antUkj) %in% risikoVar)] <- length(indUkjRisk)
 
- fjernVarInn <- c('AntibiotikaUkjent', 'BilirubinUkjent', 'DdimerUkjent', 'DiastoliskBlodtrykkUkjent',
-   'HjertefrekvensUkjent', 'HoydeUkjent', 'LeukocytterUkjent', 'OkysgenmetningUkjent',
-   'RespirasjonsfrekvensUkjent', 'SystoliskBlodtrykkUkjent', 'SkreatininUkjent', 'TempUkjent', 'TrombocytterUkjent', 'VektUkjent',
-   'FormDate', 'Helseenhet', 'HelseenhetID', 'HelseenhetKortNavn', 'HF', 'PersonId', 'SkjemaGUID',
-   'RHF', 'Sykehus', 'CurrentMunicipalNumber', 'DistrictCode', 'MunicipalNumber', 'Municipal', 'PersonIdBC19Hash',
-   'Importert', 'FormStatus', 'FormTypeId', 'CreationDate', 'Innleggelse',
-   'ArsakInnleggelse')
+ # fjernVarInn <- c('AntibiotikaUkjent', 'BilirubinUkjent', 'DdimerUkjent', 'DiastoliskBlodtrykkUkjent',
+ #   'HjertefrekvensUkjent', 'HoydeUkjent', 'LeukocytterUkjent', 'OkysgenmetningUkjent',
+ #   'RespirasjonsfrekvensUkjent', 'SystoliskBlodtrykkUkjent', 'SkreatininUkjent', 'TempUkjent', 'TrombocytterUkjent', 'VektUkjent',
+ #   'FormDate', 'Helseenhet', 'HelseenhetID', 'HelseenhetKortNavn', 'HF', 'PersonId', 'SkjemaGUID',
+ #   'RHF', 'Sykehus', 'CurrentMunicipalNumber', 'DistrictCode', 'MunicipalNumber', 'Municipal', 'PersonIdBC19Hash',
+ #   'Importert', 'FormStatus', 'FormTypeId', 'CreationDate', 'Innleggelse',
+ #   'ArsakInnleggelse')
 
+antUkj <- antUkj[sjekkVar]
+antNA <- colSums(is.na(KoroInnData[, sjekkVar])) + colSums(KoroInnData[, sjekkVar]==-1, na.rm = T)
+Nkoro <- dim(KoroInnData)[1]
 tabInn <- cbind(
   'Tal tomme' = antNA,
   'Tal ukjend' = antUkj,
@@ -196,48 +405,185 @@ tabInn <- cbind(
   'Del ukjend' = paste0(sprintf('%.1f', 100*antUkj/Nkoro), '%')
 )
 
-
-tabInn <- tabInn[-which(names(antUkj) %in% fjernVarInn), ]
-
+tabInn[ 'Isolert', ] <- Isolert
 
  xtable::xtable(tabInn,
                 digits = 0,
                 align = c('l','r','r','r','r'),
-        caption = 'Komplettheit for variablar registrert ved innlegging i pandemidelen av registeret.',
+        caption = 'Komplettheit for sentrale pandemivariablar registrert ved innlegging.
+        Med unntak av Isolert (som framleis registrerast) er variablane registrerte til og med 11.04.22',
         label = 'tab:pan_kompl_inn'
  )
 
 
 #--------ut
- varNavn <- c('Antifungalbehandling'  ,'AntiviralBehandling','UtsAkuttNyresvikt','UtsAkuttRespirasjonsvikt'
- ,'UtsAkuttSirkulasjonsvikt','UtsAminoglykosid','UtsAndreGencefalosporin','UtsAntibiotika'
- ,'UtsAntibiotikaAnnet' ,'UtsAntibiotikaUkjent','UtsAntifungalbehandling','UtsAntiviralBehandling'
- ,'FirstTimeClosedUt','ImportertUt','UtsKarbapenem','UtsKinolon','UtsMakrolid','UtsPenicillin'
- ,'UtsPenicillinEnzymhemmer','OverfortAnnetSykehusUtskrivning'
- ,'UtsTredjeGencefalosporin','StatusVedUtskriving','Utskrivningsdato')
+ # De fleste variabler er registrert t.o.m. 11.april 2022
+ #"Utskrivningsskjema, fortsatt obligatoriske"
+ # Dato og tidspunkt for utskriving fra denne institusjonen
+ # Pasienten er ferdigbehandlet for covid-19, men fortsatt innlagt for annen sykdom ErFerdigBehandlet v.11
+ #'ErFerdigBehandlet' names(table(KoroUtData$ErFerdigBehandlet, useNA = 'a'))
+  # Pasientens status ved utskriving
 
- KoroUtData <- KoroData1aar[, varNavn]
+ # Antibiotika representeres kun ved fellesvariabel.
+ TrueFalse <-  c('UtsAminoglykosid', 'UtsAndreGencefalosporin', 'UtsAntibiotikaAnnet',
+          'UtsAntibiotikaUkjent', 'UtsKarbapenem', 'UtsKinolon', 'UtsMakrolid', 'UtsPenicillin', 'UtsPenicillinEnzymhemmer',
+          'UtsTredjeGencefalosporin')
 
- Nkoro <- dim(KoroData1aar)[1]
- antNA <- colSums(is.na(KoroUtData)) + colSums(KoroUtData==-1, na.rm = T)
- #Ukjente.
- #AkuttSirkulasjonsvikt og  AkuttRespirasjonsvikt har ukjent kodet 999
- #RontgenThorax har ukjent kodet 5
- antUkj <- colSums(KoroUtData ==3, na.rm = T)
- antUkj[which(names(antUkj) == 'UtsAkuttSirkulasjonsvikt')] <- sum(KoroUtData$UtsAkuttSirkulasjonsvikt == 999, na.rm = T)
- antUkj[which(names(antUkj) == 'UtsAkuttRespirasjonsvikt')] <- sum(KoroUtData$UtsAkuttRespirasjonsvikt == 999, na.rm = T)
+ KoroUtData <- korona::KoronaDataSQL(datoTil = '2022-12-31', koble = 1) #Benytter variablene fra ut-skjema
+ KoroUtData <- KoroUtData[KoroUtData$ArsakInnleggelse == 1, ]
+ KoroUtData <- KoronaPreprosesser(RegData=KoroUtData, aggPers=0, kobleBered=0)
 
- tabUt <- cbind(
-   'Tal tomme' = antNA,
-   'Tal ukjend' = antUkj,
-   'Del tomme' = paste0(sprintf('%.1f', 100*antNA/Nkoro), '%'),
-   'Del ukjend' = paste0(sprintf('%.1f', 100*antUkj/Nkoro), '%')
+ tabKompl <- function(var, ukjKode=3){
+    tomme <- sum(is.na(var)) + sum(var == -1)
+    ukj <- sum(var == ukjKode)
+    Isolert <- c(tomme, ukj, paste0(sprintf('%.1f', 100*c(tomme, ukj)/length(var)), '%'))
+ }
+ #indDatoMai21Apr22 <- which(KoroUtData$InnDato >= '2021-05-01' & KoroUtData$InnDato <= '2022-04-11')
+ indTilApr22 <- which(KoroUtData$InnDato <= '2022-04-11')
+ tabUt <- rbind(
+    # UtsAkuttSirkulasjonsvikt (til 11.04.22)
+    UtsAkuttSirkulasjonsvikt = tabKompl(var=KoroUtData$UtsAkuttSirkulasjonsvikt[indTilApr22], ukjKode=999),
+    # UtsAkuttRespirasjonsvikt (til 11.04.22)
+    UtsAkuttRespirasjonsvikt = tabKompl(var=KoroUtData$UtsAkuttRespirasjonsvikt[indTilApr22], ukjKode=999),
+    #  UtsAkuttNyresvikt (til 11.04.22)
+    UtsAkuttNyresvikt = tabKompl(var=KoroUtData$UtsAkuttNyresvikt[indTilApr22], ukjKode=3),
+    # UtsAntibiotika (til 11.04.22)
+    UtsAntibiotika = tabKompl(var=KoroUtData$UtsAntibiotika[indTilApr22], ukjKode=3),
+    # OverfortAnnetSykehusUtskrivning (til 11.04.22)
+    OverfortAnnetSykehusUtskrivning = tabKompl(var=KoroUtData$OverfortAnnetSykehusUtskrivning[indTilApr22], ukjKode=3),
+    # StatusVedUtskriving (ut 2022)
+    StatusVedUtskriving = tabKompl(var=KoroUtData$StatusVedUtskriving), #-1, 1, 2
+    # Utskrivningsdato (ut 2022)
+    Utskrivningsdato = tabKompl(var=KoroUtData$Utskrivningsdato), #-1, 1, 2
+    #SteroideBehandling  (01.05.21- 11.042022)
+    UtsSteroideBehandling = tabKompl(var=KoroUtData$UtsSteroideBehandling[which(KoroUtData$InnDato >= '2021-05-01' & KoroUtData$InnDato <= '2022-04-11')],
+                                     ukjKode=3),
+    # ImmunmodelerendeBehandling (15.03.21- 11.042022)
+    UtsImmunmodBehandling = tabKompl(var=KoroUtData$UtsImmunmodBehandling[which(KoroUtData$InnDato >= '2021-03-15' & KoroUtData$InnDato <= '2022-04-11')],
+                                     ukjKode=3),
+    # AntiviralBehandling (01.02.22.22-11.04.22)
+    AntiviralBehandling = tabKompl(var=KoroUtData$AntiviralBehandling[which(KoroUtData$InnDato >= '2021-02-01' & KoroUtData$InnDato <= '2022-04-11')],
+                                   ukjKode=3),
+    # Antifungalbehandling (01.05.21-11.04.22)
+    Antifungalbehandling = tabKompl(var=KoroUtData$Antifungalbehandling[which(KoroUtData$InnDato >= '2021-05-01' & KoroUtData$InnDato <= '2022-04-11')],
+                                    ukjKode=3),
+    # UtsMonoklonaleantistoff (fra 01.02.22 11.04.22) -
+    UtsMonoklonaleantistoff = tabKompl(var=KoroUtData$UtsMonoklonaleantistoff[
+       which(KoroUtData$InnDato >= '2022-02-01' & KoroUtData$InnDato <= '2022-04-11')], ukjKode=3)
  )
+ #table(KoroUtData$UtsMonoklonaleantistoff, KoroUtData$Aar, useNA = 'a')
+ # test <- KoroUtData[KoroUtData$InnDato >= '2020-01-01' & KoroUtData$InnDato <= '2022-04-11', ]
+ # dum <- SorterOgNavngiTidsEnhet(test, 'Mnd')
+ # test <- dum$RegData
+ # table(test[ ,c('UtsMonoklonaleantistoff','TidsEnhet')])
 
- tabUt <- tabUt[-which(names(antUkj) %in% 'UtsAntibiotikaUkjent'), ]
+  colnames(tabUt) <- c('Tal tomme', 'Tal ukjend', 'Del tomme', 'Del ukjend' )
 
  xtable::xtable(tabUt,
               digits = 0,
         caption = 'Komplettheit for variablar registrert ved utskriving i pandemidelen av registeret.',
         label = 'tab:pan_kompl_ut'
+ )
+
+
+
+
+
+
+ #----Kvalitetsindikatorer, PANDEMI---------
+ # Nevner er TRUE for alle ferdigstilte pandemiskjema hvor "ArsakInnleggelse" = 1
+ # Teller er alle ferdigstilte pandemiskjema hvor Nevner er TRUE og "Isolert" = 1.
+ # Indikatoren er på oppholdsnivå og ikke pasientnivå.
+
+
+ library(korona)
+ #KvalInd_Pand <- KoronaDataSQL()
+ KvalInd_Pand <- KoronaPreprosesser(RegData = KoronaDataSQL(), aggPers = 0)
+ KvalInd_Pand <- KvalInd_Pand[KvalInd_Pand$ArsakInnleggelse == 1, ]
+ KvalInd_Pand <- KvalInd_Pand[which(KvalInd_Pand$Isolert %in% 1:2), ]
+ #unique(KvalInd_Pand[, c('UnitId', 'HealthUnitShortName')])
+ KvalInd_Pand$orgnr <- as.character(nyIDpand[as.character(KvalInd_Pand$ReshId)]) #nyIDpand SE LENGRE NED
+ KvalInd_Pand$var <- ifelse(KvalInd_Pand$Isolert == 1,1,0)
+ KvalInd_Pand$year <- KvalInd_Pand$Aar
+ KvalInd_Pand_Iso <- KvalInd_Pand[ , c('orgnr', 'var', 'year')]
+ KvalInd_Pand_Iso$ind_id <- 'pandemi_isolasjon'
+ KvalInd_Pand_Iso$denominator <- 1
+ KvalInd_Pand_Iso$context <- 'caregiver'
+ write.table(KvalInd_Pand_Iso, file = 'KvalIndPand.csv', sep = ';', row.names = F)
+ #table(KvalInd_Pand$orgnr, useNA = 'a')
+
+
+ #Pandemi:
+ #Nevner er TRUE for alle ferdigstilte pandemiskjema hvor "ArsakInnleggelse" = 1
+ #Teller er alle ferdigstilte pandemiskjema hvor Nevner er TRUE og "Isolert" = 1.
+ #Indikatoren er på oppholdsnivå og ikke pasientnivå.
+
+ xx <- unique(KvalInd_Pand[, c('ShNavn', 'ReshId')])
+ yy <- xx[order(xx$ShNavn),]
+
+nye <- sort(setdiff(KvalInd_Pand$ReshId, names(nyIDpand)))
+table(KvalInd_Pand$ReshId[KvalInd_Pand$ReshId %in% nye])
+
+  nyIDpand <- c(
+     '102090' = '974706490', #Ahus
+    '111487' = '974588951', #Aker
+    '4211747' = '979873190', #Alta
+    '700263' = '974631091', #Arendal
+    '102919' = '991992677', #Bergen psyk.
+    '4209961' = '974795361', #Bodø
+    '4204083' = '974705788', #Bærum
+    '108897' = '974116804', #Diakonhjemmet
+    '4204082' = '974631326', #Drammen
+    '4204086' = '974631326', #Drammen, psyk. - SLÅR SAMMEN MED DRAMMEN SOMATIKK
+    '705464' = '974631768', #Elverum
+    '700265' = '974595214', #Flekkefjord
+    '700928' = '974744570', #Førde
+    '705476' = '974632535', #Gjøvik
+    '103580' = '874606162', #Hallingdal
+    '705465' = '974724960', #Hamar
+    '4211748' = '974795833', #Hammerfest
+    '100176' = '974316285', #Haraldsplass
+    '700617' = '974795639', #Harstad
+    '102909' = '974724774', #Haugesund
+    '4207827' = '974557746', #Haukeland
+    '100085' =  '983974732', #Helse Førde HF
+    '108595' = '983971709', #Innlandet, psyk. -> Innlandet HF
+    '4209222' = '974633752', #Kalnes
+    '4211750' = '974795930', #Kirkenes
+    '700138' = '974575396', #Klinikk fysikalsk medisin og rehabilitering (Stavern)
+    '4204085' = '974631385', #Kongsberg
+    '700264' = '974733013', #Kristiansand
+    '4216807' = '974746948', #Kristiansund
+    '102250' = '974754118', #Levanger
+    '705467' = '874632562', #Lillehammer
+    '4209963' = '974795558', #Lofoten
+    '108279' = '974207532', #Lovisenberg
+    '103000' = '974745089', #Lærdal
+    '4210647' = '974795515', #Mo i Rana
+    '4216808' = '974745569', #Molde
+    '4210648' = '974795485', #Mosjøen
+    '4208039' = '974633698', #Moss
+    '105893' = '974753898', #Namsos
+    '700618' = '974795396', #Narvik
+    '103001' = '974745364', #Nordfjord
+    '103712' = '974633159', #Notodden 2 reg.
+    '705757' = '974707152', #Radiumhospitalet
+    '705577' = '874716782', #Rikshospitalet
+    '4204084' = '974631407', #Ringerike
+    '114358' = '983974724',  #Rus Bergen -> Bergen HF
+    '4210649' = '974795477', #Sandnessjøen
+    '102026' = '974633191', #Skien
+    '4201313' = '974749025', #St. Olav
+    '100320' =  '883974832', #St. Olavs Hospital HF
+    '114282' = '974703300', #Stavanger
+    '103081' = '974742985', #Stord
+    '4207919' = '914356199', #Sunnaas
+    '700720' = '974795787', #Tromsø
+    '705469' = '974725215', #Tynset
+    '103948' = '974589095', #Tønsberg
+    '109870' = '974589095', #Ullevål
+    '4209964' = '974795574', #Vesterålen
+    '4216810' = '974747545', #Volda
+    '102939' = '974743272', #Voss
+    '4216811' = '974747138' #Ålesund'
  )

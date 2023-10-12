@@ -16,6 +16,33 @@ RegData <- KoronaPreprosesser(RegData = KoroDataRaa[1:1000, ], aggPers = 1, kobl
 t2 <- Sys.time()
 t2-t1
 
+dato <- Sys.Date()
+lubridate::floor_date(dato - months(3), unit = 'month') #"2023-07-01"
+library('lubridate')
+floor_date(dato %m-% months(3), unit = 'month') #"2023-07-01"
+
+#Filer til overvåkning, filtrert på hovedårsak Covid
+test <- korona::lagDatafilerTilFHI(personIDvar='PatientInRegistryGuid',
+                               bered=1, pand=1, influ=0, raa=1, aggP=0)
+table(test$PandemiDataRaaFHI$ArsakInnleggelse)
+
+Filer <- korona::lagDatafilerTilFHI(personIDvar='PatientInRegistryGuid',
+                                    bered=1, pand=1, influ=0,
+                                    raa=1, aggP=0)
+names(Filer)
+
+#Teste mulig feil i liggetid
+data <- KoronaDataSQL(datoTil = '2023-03-01')
+dataN <- data[data$HF == "Nordlandssykehuset HF",]
+dataNpre <- KoronaPreprosesser(RegData = dataN)
+dataNpre2023 <- dataNpre[which(dataNpre$PersonId %in% dataOpphN$PersonId),          #dataNpre$InnDato > as.Date('2023-01-16')),
+                         c('HF',"ShNavn","PersonId",'InnDato', "UtDato", "Liggetid", "LiggetidTot", "AntInnSkjema")]
+
+dataOpph <- KoronaDataSQL(datoFra = '2023-01-25', datoTil = '2023-02-07')
+dataOpphN <- dataOpph[dataOpph$HF == "Nordlandssykehuset HF", c("HelseenhetKortNavn", "FormDate", "FormDateUt", "SkjemaGUID", "PersonId")]
+persN <- dataOpphN$PersonId
+
+data[data$PersonId %in% dataOpphN$PersonId, c("HelseenhetKortNavn", "FormDate", "FormDateUt", "SkjemaGUID", "PersonId")]
 
 remotes::install_github('tidyverse/dplyr', ref = 'd2f79bb') #Versjon 1.1.1
 
@@ -308,7 +335,7 @@ erInneliggende <- function(datoer, regdata){
   # er etter inndato og det ikke finnes utddato. Flere betingelser kan legges til.
 
   auxfunc <- function(x) {(x >  regdata$InnDato & (x <= regdata$UtDato) | is.na( regdata$UtDato))}
-  map_df(datoer, auxfunc)
+  purrr::map_df(datoer, auxfunc)
 }
 
 
@@ -316,20 +343,20 @@ erInneliggende <- function(datoer, regdata){
 if (tidsenhet=='dag') {
   names(datoer) <- format(datoer, '%d.%b')
   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-  RegDataAlle <- bind_cols(RegDataAlle, aux)
+  RegDataAlle <- dplyr::bind_cols(RegDataAlle, aux)
 } else {
   names(datoer) <- datoer
   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-  aux <- bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
-  aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi)
+  aux <- dplyr::bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
+  aux <- aux %>% tidyr::gather(names(aux)[-1], key=Tid, value = verdi)
   aux$Tid <- as.Date(aux$Tid)
   aux$Tid <- switch (tidsenhet,
                      'uke' = paste0('Uke ', format(aux$Tid, "%V")),
                      'maaned' = format(aux$Tid, "%b.%Y")
   )
-  aux <- aux %>% group_by(PasientID, Tid) %>%
-    summarise(er_inne = max(verdi))
-  aux <- aux %>% spread(key=Tid, value = er_inne)
+  aux <- aux %>% dplyr::group_by(PasientID, Tid) %>%
+    dplyr::summarise(er_inne = max(verdi))
+  aux <- aux %>% tidyr::spread(key=Tid, value = er_inne)
   RegDataAlle <- merge(RegDataAlle, aux, by = 'PasientID')
 }
 
@@ -365,10 +392,10 @@ UtData <- KoronaUtvalg(RegData=KoroData, valgtEnhet=valgtEnhet, enhetsNivaa = en
 unique(KoroDataRaa[ ,c("UnitId", "HelseenhetKortNavn", 'HF', 'RHF')])
 unique(KoroData[ ,c("ReshId", "ShNavn", 'HF', 'RHF')])
 Pandemi  <- KoronaUtvalg(RegData=KoroData, aarsakInn = 2)$RegData
-as.data.frame(Pandemi[Pandemi$HF=='',] %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = n()))
-as.data.frame(Pandemi %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = n()))
-Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
-705757
+as.data.frame(Pandemi[Pandemi$HF=='',] %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = dplyr::n()))
+as.data.frame(Pandemi %>% dplyr::group_by(RHF, HF, HF, ShNavn) %>% dplyr::summarise(Antall = dplyr::n()))
+# Test <- KoroData[KoroData$ShNavn == 'Radiumhospitalet', ]
+# 705757
 
 #Samlerapport, sjekk
 
@@ -755,9 +782,9 @@ RegData <- KoronaPreprosesser(RegDataRaa)
 JaNeiUkjVar <- function(x) {ifelse(1 %in% x, 1, ifelse(2 %in% x, 2, 3))}
 # OverfortAnnetSykehusInnleggelse,  #1-ja, 2-nei, 3-ukjent
 # OverfortAnnetSykehusUtskrivning,  #1-ja, 2-nei, 3-ukjent
-# RegDataRed <- RegData %>% group_by(PasientGUID) %>%
+# RegDataRed <- RegData %>% dplyr::group_by(PasientGUID) %>%
 #   summarise(Overf = JaNeiUkjVar(c(OverfortAnnetSykehusInnleggelse, OverfortAnnetSykehusUtskrivning)),
-#             AntInnSkjema = n(),
+#             AntInnSkjema = dplyr::n(),
 #             Reinn = ifelse(AntInnSkjema==1, 0,
 #                            ifelse(sort(difftime(sort(FormDate)[2:AntInnSkjema], #sort hopper over NA
 #                                     FormDateUt[order(FormDate)][1:(AntInnSkjema-1)],
@@ -813,7 +840,7 @@ IntensivData <- read.table('A:/Intensiv/BeredskapPers2020-04-23.csv', sep=';',
                           stringsAsFactors=FALSE, header=T) #, encoding = 'UTF-8')
 var <- c("Fodselsnummer", "SkjemaGUID", 'FormDate', "HealthUnitShortName", "HF", "RHF")
 IntDataPers <- IntensivData %>%
-  group_by(Fodselsnummer) %>%
+  dplyr::group_by(Fodselsnummer) %>%
   summarise(
     SkjemaGUID = first(SkjemaGUID, order_by = FormDate),
     RHF = first(RHF, order_by = FormDate),
@@ -827,7 +854,7 @@ PandemiData <- read.table('A:/Pandemi/PandemiPers2020-04-23.csv', sep=';',
 PanData <- PandemiData[which(PandemiData$Skjematype=='Pandemiskjema'), var]
 
 PanDataPers <- PanData %>%
-  group_by(Fodselsnummer) %>%
+  dplyr::group_by(Fodselsnummer) %>%
   summarise(
     SkjemaGUID = first(SkjemaGUID, order_by = FormDate),
     RHF = first(RHF, order_by = FormDate),
@@ -853,28 +880,28 @@ TabSh <- PanInt %>%
   dplyr::group_by(RHFPan, HFPan, ShNavnPan) %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
-    AntPas = n(),
-    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
+    AntPas = dplyr::n(),
+    AndelPaaInt = round(sum(PaaInt)/dplyr::n()*100, 1)
   )
 TabHF <- PanInt %>%
   dplyr::group_by(RHFPan, HFPan) %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
-    AntPas = n(),
-    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
+    AntPas = dplyr::n(),
+    AndelPaaInt = round(sum(PaaInt)/dplyr::n()*100, 1)
   )
 TabRHF <- PanInt %>%
   dplyr::group_by(RHFPan) %>%
   dplyr::summarise(
     AntPaaInt = sum(PaaInt),
-    AntPas = n(),
-    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
+    AntPas = dplyr::n(),
+    AndelPaaInt = round(sum(PaaInt)/dplyr::n()*100, 1)
   )
 TabNasj <- PanInt %>%
    dplyr::summarise(
     AntPaaInt = sum(PaaInt),
-    AntPas = n(),
-    AndelPaaInt = round(sum(PaaInt)/n()*100, 1)
+    AntPas = dplyr::n(),
+    AndelPaaInt = round(sum(PaaInt)/dplyr::n()*100, 1)
   )
 install.packages(c("xlsx","openxlsx"))
 library(openxlsx)
@@ -1019,8 +1046,8 @@ inneliggende <- function(x) { #Om en pasient/skjema er inneliggende på gitt dat
   (x >  RegData$InnDato & (x <= RegData$UtDato) | is.na( RegData$UtDato))}
 
 RegData$InnDato[is.na( RegData$UtDato)]
-# inneligendeMatr <- as.data.frame(map_df(datoer, inneliggende))
-# RegDataAlleDatoer <- bind_cols(RegData, inneligendeMatr)
+# inneligendeMatr <- as.data.frame(purrr::map_df(datoer, inneliggende))
+# RegDataAlleDatoer <- dplyr::bind_cols(RegData, inneligendeMatr)
 
 #FEIL:
 AntInneliggendeGr <- function(dato) { #Antall inneliggende for gitt dato, gruppert på variabel "gr"
@@ -1037,10 +1064,10 @@ sum(AntInneliggendeGr('2020-07-03'), na.rm = T)
 # RegData <- KoroDataPers
 beregnBelegg <- function(datoer){
   names(datoer) <- format(datoer, '%d.%B')
-  #data <- as.data.frame(map_df(datoer, inneliggende))
+  #data <- as.data.frame(purrr::map_df(datoer, inneliggende))
 
   data <- erInneliggende(datoer = datoer, regdata = RegData)
-  #RegData <- bind_cols(RegData, data)
+  #RegData <- dplyr::bind_cols(RegData, data)
 
 antDager <- length(datoer)
 antPrDagPers <- colSums(data)
@@ -1083,7 +1110,7 @@ names(BeleggLandet) <- mnd
 
 LiggeDogn <-
   RegData[,c('HF', mnd)] %>%
-  group_by(HF) %>%
+  dplyr::group_by(HF) %>%
   summarise_all(sum)
 test <-
 
@@ -1124,7 +1151,7 @@ p <-
 p + facet_grid(rows = vars(drv))
 
 belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
-belegg_rhf <- belegg_ssb %>% group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
+belegg_rhf <- belegg_ssb %>% dplyr::group_by(RHFresh) %>% summarise("Dognplasser.2018" = sum(Dognplasser.2018))
 belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
 
 

@@ -7,14 +7,6 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
-library(shinyjs)
-library(magrittr)
-library(tidyverse)
-library(lubridate)
-library(kableExtra)
-library(sship)
-library(intensivberedskap)
 library(korona)
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
@@ -34,8 +26,7 @@ regTitle <- paste0('Koronaregistreringer, pandemi 2020',
 #Mange av variablene på ut-skjema er med i inn-dumpen
 #Variabler fra utskjema som er med i innskjema i datadump er fra ferdigstilte utregistereringer
 
-   KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa") #Benyttes i appen
-
+   KoroDataRaa <- rapbase::loadStagingData("korona", "KoroDataRaa")
 if (isFALSE(KoroDataRaa)) {
    KoroDataRaa <-  KoronaDataSQL(koble=1)
    rapbase::saveStagingData("korona", "KoroDataRaa", KoroDataRaa)
@@ -100,7 +91,7 @@ ui <- tagList(
 
       #-------------Startside--------------
       tabPanel("Oversikt",
-               useShinyjs(),
+               shinyjs::useShinyjs(),
                sidebarPanel(id = 'brukervalgStartside',
                             width = 3,
                             uiOutput('KoroRappTxt'),
@@ -145,7 +136,7 @@ ui <- tagList(
 
                ),
                mainPanel(width = 9,
-                         appNavbarUserWidget(user = uiOutput("appUserName"),
+                         rapbase::appNavbarUserWidget(user = uiOutput("appUserName"),
                                              organization = uiOutput("appOrgName"),
                                              addUserInfo = TRUE),
                          tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
@@ -233,7 +224,7 @@ ui <- tagList(
                               sliderInput(inputId = 'antTidsenhOpph',
                                           label = 'Velg antall hele måneder/kvartal/år forut for "sluttdato"',
                                           value = 6, step = 1,
-                                          min = 1, max = 13),
+                                          min = 1, max = 20),
                               selectInput(inputId = "aarsakInnOpph", label="Covid-19 hovedårsak til innleggelse?",
                                           choices = c('Alle registreringer' = 0,
                                                       'Ja, alle opphold' = 1,
@@ -500,11 +491,11 @@ ui <- tagList(
                               uiOutput("dispatchmentContent")
                            )
                   ), #tab Utsendinger
-                  tabPanel('Intensivskjema som mangler pandemiskjema',
-                           h3('Ferdigstilte intensivskjema uten matchende pandemiskjema'),
+                  tabPanel('Beredskapsskjema uten pandemiskjema',
+                           h3('Ferdigstilte beredskapsskjema uten tilhørende pandemiskjema'),
                            h4('Koblinga er basert på at opphold er registrert med tidspunketer i følgende rekkefølge:
                             Inn på sykehus -> Inn på intensiv -> Ut fra sykehus'),
-                           h4('I tillegg skal pandemi og intensivskjema tilhøre samme HF.'),
+                           h4('I tillegg skal pandemi- og beredskapsskjema tilhøre samme HF.'),
                            sidebarPanel(
                               dateRangeInput(inputId = "fraDatoBerUpan", label = "Tidsperiode",
                                              start = startDato, end = Sys.Date(),
@@ -555,12 +546,17 @@ ui <- tagList(
                                   br(),
                                   br(),
                                   h4('Data til FHI'),
-                                  selectInput("hvilkeFilerTilFHI", "Data:", c("Pandemi, beredskap og influensa" = "DataFHIPanBeredInflu", #c("Pandemi og beredskap" = "DataFHIPanBered",
-                                                                              "Testfil" = "Testfil")),
+                                  selectInput(inputId = "hvilkeFilerTilFHI", label = "Data:",
+                                              c("Beredt C-19: Pandemi, beredskap og influensa" = "DataFHIPanBeredInflu",
+                                                "Testfil til Beredt C-19" = "Testfil_BerC19",
+                                                "Råfiler til overvåkning" = "DataFHICovMonitor",
+                                                "Testfil til overvåkning" = "Testfil_CovMonitor")),
                                   actionButton("bestillDataTilFHI", "Bestill data til FHI"),
                                   br(),
                                   downloadButton(outputId = 'lastNed_filstiDataNHN',
-                                                 label='Send filer til NHN og last ned filsti', class = "butt"),
+                                                 label='Send filer til NHN og last ned filsti', class = "butt")
+                                  # downloadButton(outputId = 'lastNed_filstiDataNHN_monitor',
+                                  #                label='Send filer til Beredt-C19 (NHN) og last ned filsti', class = "butt")
                                   ),
                      mainPanel(
                         br(),
@@ -618,11 +614,10 @@ server <- function(input, output, session) {
       shinyjs::hide(id = 'KoroRappInt.pdf')
       shinyjs::hide(id = 'KoroRappTxtInt')
    }
-   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon'))){
+   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon', 'eabu'))){
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
-    }
 
 
   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon',
@@ -987,10 +982,10 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
                            , full_width=F
                            , digits = c(0,0,1,0,0,1)[1:antKol]
          ) %>%
-            add_header_above(c(" "=1, 'Egen enhet/gruppe' = 3, 'Resten' = 3)[1:(antKol/3+1)]) %>%
-            column_spec(column = 1, width_min = '7em') %>%
-            column_spec(column = 2:(ncol(tab)+1), width = '7em') %>%
-            row_spec(0, bold = T)
+            kableExtra::add_header_above(c(" "=1, 'Egen enhet/gruppe' = 3, 'Resten' = 3)[1:(antKol/3+1)]) %>%
+            kableExtra::column_spec(column = 1, width_min = '7em') %>%
+            kableExtra::column_spec(column = 2:(ncol(tab)+1), width = '7em') %>%
+            kableExtra::row_spec(0, bold = T)
       }
 
       output$lastNed_tabFord <- downloadHandler(
@@ -1088,7 +1083,7 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
       AntTab <- intensivberedskap::TabTidEnhet(RegData=BeredData, tidsenhet='dag', #valgtRHF= 'Alle',
                                                bekr=as.numeric(input$bekrInt)
       )
-      UtData <- NIRUtvalgBeredsk(RegData=BeredData,
+      UtData <- intensivberedskap::NIRUtvalgBeredsk(RegData=BeredData,
                                  bekr=as.numeric(input$bekrInt)
       )
       utvalg <- UtData$utvalgTxt
@@ -1446,7 +1441,7 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
       filename = function(){
          paste0('Filsti', Sys.time(), '.csv')},
       content = function(file, filename){
-         Filsti <- sendDataFilerFHI(zipFilNavn=input$hvilkeFilerTilFHI) #brukernavn = brukernavn)
+         Filsti <- sendDataFilerFHI(zipFilNavn=input$hvilkeFilerTilFHI)
          write.csv2(x=Filsti, file, row.names = F, na = '') #x - r-objektet
       })
 
@@ -1458,6 +1453,7 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
       interval <- "DSTday"
       intervalName <- "Daglig"
       runDayOfYear <- rapbase::makeRunDayOfYearSequence(interval = interval)
+      #Vi kan utelate recipient som parameter siden den også styres av filpakken som er valgt
       paramNames = c('zipFilNavn', 'brukernavn')
       paramValues = c(input$hvilkeFilerTilFHI, brukernavn)
       rapbase::createAutoReport(synopsis = paste0('Sendt til FHI: ',input$hvilkeFilerTilFHI),
@@ -1471,7 +1467,7 @@ og ', antPasFlereForlCov, ' av disse har mer enn ett smitteforløp hvor Covid-19
                                 interval = interval,
                                 intervalName = intervalName)
 
-      #rv$subscriptionTab <- rapbase::makeUserSubscriptionTab(session)
+
       subscription$tab <-
          rapbase::makeAutoReportTab(session, type = "subscription")
 

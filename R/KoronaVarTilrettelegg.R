@@ -103,6 +103,23 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         tittel <- 'Pandemipasienter med intensivopphold'
         varTxt <- 'intensivinnlagte'
       }
+      # if (valgtVar=='beredMpand') {	#AndelGrVar/Tid FLYTTES TIL BEREDSKAP
+      #    # beredskapsskjema der pasienten er å finne i pandemi.
+      #    indPanMBered <- which(RegData$BeredReg == 1)
+      #    #Basert på opphold - hvordan sjekke?
+      #    KoroDataRaa <- KoronaDataSQL(datoTil = datoTil)
+      #    KoroDataOpph <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=0, kobleBered=1)
+      #    KoroDataPers <- KoronaPreprosesser(RegData=KoroDataRaa, aggPers=1, kobleBered=1, tellFlereForlop=1)
+      #
+      #    BerSkjemaMpand <- RegData$SkjemaGUIDBered
+      #    datoTil <- '2022-12-31'
+      #    BeredData <- intensivberedskap::NIRberedskDataSQL(datoTil = datoTil)
+      #    RegData <- BeredData
+      #    indBeredMPan <- which(BeredData$SkjemaGUID %in% sort(unique(KoroDataOpph$SkjemaGUIDBered)))
+      #    RegData$Variabel[indBeredMPan] <- 1
+      #    tittel <- 'Beredskapspasienter med pandemiregistrering'
+      #    varTxt <- 'med pandemireg.'
+      # }
       if (valgtVar=='dodSh') {	#AndelGrVar/Tid
         RegData <- RegData[which(RegData$StatusVedUtskriving %in% 1:2), ]    #Tar bort ukjente
         RegData$Variabel[RegData$StatusVedUtskriving == 2] <- 1
@@ -112,10 +129,9 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
 
       if (valgtVar == 'liggetid') { #Andeler #GjsnGrVar
             #Liggetid bare >0
-        #indUreinn <- which(RegData$Reinn==0)
-            #RegData$Liggetid  <- as.numeric(RegData$Liggetid)
             RegData <- RegData[which(RegData$Liggetid>0 & RegData$Reinn==0 & RegData$FormStatusUt==2), ]
-            tittel <- 'Liggetid, utskrevne uten reinnlagte'
+            tittel <- 'Liggetid (døgn), utskrevne uten reinnlagte'
+            RegData$Variabel  <- as.numeric(RegData$Liggetid)
             #if (figurtype %in% c('gjsnGrVar', 'gjsnTid')) {tittel <- 'liggetid'}
             gr <- c(0, 2, 4, 6, 8, 10, 12, 14, 21, 1000)  #c(0, 1, 2, 3, 4, 5, 6, 7, 14, 1000)
             RegData$VariabelGr <- cut(RegData$Liggetid, breaks=gr, include.lowest=TRUE, right=FALSE)
@@ -177,13 +193,17 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       }
 
       #
-      if (valgtVar == 'respSviktInn') { #Andeler
+      if (valgtVar == 'respSviktInn') { #Andeler, andelGrVar/Tdid
         #-1 = Velg verdi, 1 = Nei, 2 = Ja, symptomer ved høy aktivitet/anstrengelse
         #3 = Ja, symptomer ved moderat aktivitet, 4 = Ja, symptomer ved lett aktivitet
         #5 = Ja, symptomer i hvile, 999 - Ukjent
         gr <- c(1:5,999)
         retn <- 'H'
         tittel <- 'Akutt respirasjonssvikt ved innleggelse'
+        if (figurtype %in% c('andelTid', 'andelGrVar')) {
+           RegData <- RegData[RegData$AkuttRespirasjonsvikt %in% 1:5,]
+           RegData$Variabel[RegData$AkuttRespirasjonsvikt %in% 2:5] <- 1
+        }
         RegData$VariabelGr <- factor(RegData$AkuttRespirasjonsvikt, levels=gr)
         grtxt <- c('Nei', 'Ja, høy aktivitet', 'Ja, moderat aktivitet',
                    'Ja, lett aktivitet', 'Ja, hvile', 'Ukjent')
@@ -229,7 +249,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
             retn <- 'H'
             flerevar <- 1
             RegData <- RegData[RegData$KjentRisikofaktor %in% 1:2, ]
-            if (figurtype == 'andelGrVar'){
+            if (figurtype %in% c('andelGrVar', 'andelTid')) {
                RegData$Variabel[RegData$KjentRisikofaktor==1] <- 1
             } else {
             RegData$Fedme <- RegData$BMI>30
@@ -251,7 +271,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
         tittel <- 'Antibiotika ved innleggelse'
         retn <- 'H'
         flerevar <- 1
-        RegData <- RegData[RegData$Antibiotika %in% 1:2, ] #1-ja, 2-nei
+        RegData <- RegData[RegData$Antibiotika %in% 1:2, ] #1-ja, 2-nei 3-ukjent
         statusUt <- 2
         variable <- c('Penicillin', 'PenicillinEnzymhemmer', 'Aminoglykosid',
                       'AndreGencefalosporin', 'TredjeGencefalosporin', 'Kinolon',
@@ -302,7 +322,7 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
       }
 
 
-           if (valgtVar == 'tilstandInn' ) {
+           if (valgtVar %in% c('tilstandInn', 'tilstandInnAarsRapp22') ) {
 
             tittel <- 'Tilstand ved innleggelse'
             #AkuttRespirasjonsvikt, AkuttSirkulasjonsvikt, ja:2:5, nei:1
@@ -314,16 +334,25 @@ KoronaVarTilrettelegg  <- function(RegData, valgtVar, grVar='ShNavn', figurtype=
                           'EndretBevissthet','Isolert')
             grtxt <- c('Akutt resp.svikt (alle grader)', 'Akutt sirk.svikt (alle grader)', 'Akutt nyresvikt',
                        'Endret bevissthet','Isolert')
+            if (valgtVar == 'tilstandInnAarsRapp22' ){
+               RegData[RegData$InnDato > as.Date('2022-04-11'), variable[1:4]]  <- NA
+               grtxt[1:4] <- paste(grtxt[1:4], '\n t.o.m. 11.apr. -22')
+            }
+
             RegData$AkuttRespirasjonsvikt <- ifelse(RegData$AkuttRespirasjonsvikt %in% 1:5,
                                                       ifelse(RegData$AkuttRespirasjonsvikt==1, 0, 1), NA)
-            # RegData$AkuttSirkulasjonsvikt <- recode(RegData$AkuttSirkulasjonsvikt,
-            #                                          '1'=0, '2'=1, '3'=1, '4'=1, '5'=1, .default=NULL)
             RegData$AkuttSirkulasjonsvikt <- ifelse(RegData$AkuttSirkulasjonsvikt %in% 1:5,
                                                     ifelse(RegData$AkuttSirkulasjonsvikt==1, 0, 1), NA)
             var <- c('AkuttNyresvikt', 'EndretBevissthet', 'Isolert')
             RegData[, var][which(RegData[ ,var] == -1, arr.ind = T)] <- NA
             RegData[, var][which(RegData[ ,var] == 3, arr.ind = T)] <- NA
             RegData[, var][which(RegData[ ,var] == 2, arr.ind = T)] <- 0
+
+            if (valgtVar == 'tilstandInnAarsRapp'){
+
+            }
+
+
             xAkseTxt <- 'Andel pasienter (%)'
            }
 

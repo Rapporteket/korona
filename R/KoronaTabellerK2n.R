@@ -186,10 +186,10 @@ antallTidUtskrevne <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa
 tr_summarize_output <- function(x, grvarnavn=''){
 
   rekkefolge <- names(x)[-1]
-  x <- x %>% mutate_if(is.factor, as.character)
+  x <- x %>% dplyr::mutate_if(is.factor, as.character)
   rekkefolge_col <- x[[1]]
-  y <- x %>% gather(names(x)[-1], key=nokkel, value = verdi) %>%
-    spread(key=names(x)[1], value = verdi)
+  y <- x %>% tidyr::gather(names(x)[-1], key=nokkel, value = verdi) %>%
+    tidyr::spread(key=names(x)[1], value = verdi)
   y <- y[match(rekkefolge, y$nokkel), ]
   names(y)[1] <- grvarnavn
   y <- y[,  c(1, match(rekkefolge_col, names(y)))]
@@ -245,8 +245,8 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
 
   names(datoer) <- datoer
     aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-    aux <- bind_cols(as_tibble(RegDataAlle)[, 'PasientID'], aux) #"PasientID" #"EnhNivaaVis", 'RHF', 'HF',
-    aux <- aux %>% gather(names(aux)[-1], key=Tid, value = verdi) #-(1:5)
+    aux <- dplyr::bind_cols(tidyr::as_tibble(RegDataAlle)[, 'PasientID'], aux) #"PasientID" #"EnhNivaaVis", 'RHF', 'HF',
+    aux <- aux %>% tidyr::gather(names(aux)[-1], key=Tid, value = verdi) #-(1:5)
     aux$Tid <- as.Date(aux$Tid)
     aux$Tid <- switch (tidsenhet,
                        'dag' = format(aux$Tid, '%d.%m.%y'),
@@ -255,17 +255,17 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
                        'aar' = factor(format(RegDataAlle$UtDato, '%Y'),
                                     levels = format(seq(datoFra, datoTil, by="year"), "%Y"))
     )
-    aux <- aux %>% group_by(PasientID, Tid) %>%
+    aux <- aux %>% dplyr::group_by(PasientID, Tid) %>%
       dplyr::summarise(er_inne = max(verdi) #TRUE/FALSE
                 #,EnhNivaaVis = EnhNivaaVis[1]
-                #,RHF = last(RHF, order_by = InnDato),
-                #HF = last(HF, order_by = InnDato)
+                #,RHF = dplyr::last(RHF, order_by = InnDato),
+                #HF = dplyr::last(HF, order_by = InnDato)
                 )
-    aux <- aux %>% spread(key=Tid, value = er_inne)
-    enh <- RegDataAlle %>% group_by(PasientID) %>%
-      dplyr::summarise(EnhNivaaVis = last(EnhNivaaVis, order_by = InnDato),
-                RHF = last(RHF, order_by = InnDato),
-                HF = last(HF, order_by = InnDato)
+    aux <- aux %>% tidyr::spread(key=Tid, value = er_inne)
+    enh <- RegDataAlle %>% dplyr::group_by(PasientID) %>%
+      dplyr::summarise(EnhNivaaVis = dplyr::last(EnhNivaaVis, order_by = InnDato),
+                RHF = dplyr::last(RHF, order_by = InnDato),
+                HF = dplyr::last(HF, order_by = InnDato)
       )
     RegDataAlle <- merge(enh, aux, by = 'PasientID') #merge(RegDataAlle, aux, by = 'PasientID')
   #}
@@ -294,25 +294,25 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
                         dimnames = list(c(names(datoer), 'Totalt'), valgtEnhet)) #table(RegData$TidsVar)
   }else{
     total <- RegData %>%
-      group_by(EnhNivaaVis) %>%
+      dplyr::group_by(EnhNivaaVis) %>%
       dplyr::summarise(Totalt = length(unique(PasientID))) %>%
       tr_summarize_output(grvarnavn = 'Tid')
 
     TabTidEnh <-
       RegData[,c("EnhNivaaVis", names(datoer))] %>%
-      group_by(EnhNivaaVis) %>%
+      dplyr::group_by(EnhNivaaVis) %>%
       dplyr::summarise_all(sum) %>%
       tr_summarize_output(grvarnavn = 'Tid') %>%
-      bind_rows(total) %>%
-      mutate('Hele landet' = select(., names(.)[-1]) %>% rowSums())
+       dplyr::bind_rows(total) %>%
+       dplyr::mutate('Hele landet' = dplyr::select(., names(.)[-1]) %>% rowSums())
       # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Totalt")))
     colnames(TabTidEnh)[ncol(TabTidEnh)] <- kolNavnSum
   }
 
   if (tilgangsNivaa != 'SC'){
-    aux <- bind_cols(kol1 = 'Hele landet', RegDataAlle[, c(names(datoer))] %>% dplyr::summarise_all(sum)) %>%
+    aux <- dplyr::bind_cols(kol1 = 'Hele landet', RegDataAlle[, c(names(datoer))] %>% dplyr::summarise_all(sum)) %>%
       tr_summarize_output(grvarnavn = 'Tid') %>%
-      bind_rows(tibble(Tid = "Totalt", "Hele landet"=as.integer(length(unique(RegDataAlle$PasientID)))))
+      dplyr::bind_rows(tibble(Tid = "Totalt", "Hele landet"=as.integer(length(unique(RegDataAlle$PasientID)))))
     TabTidEnh[, "Hele landet"] <- aux[, "Hele landet"]
   }
 
@@ -348,28 +348,28 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   names(datoer) <- format(datoer, '%d.%m.%y')
   aux <- erInneliggende(datoer = datoer, regdata = RegData) #Matrise boolske verdier hver pasient/dag om inneliggende
-  RegData <- bind_cols(RegData, aux)
+  RegData <- dplyr::bind_cols(RegData, aux)
 
   TabTidHF <-
     RegData[,c("HFresh", names(datoer))] %>%
-    group_by(HFresh) %>%
+    dplyr::group_by(HFresh) %>%
     dplyr::summarise_all(sum) %>%
     merge(belegg_ssb[, c("HFresh", "Dognplasser.2018", "HF")], by.x = "HFresh", by.y = "HFresh", all.x = T) %>%
-    mutate(HFresh = HF) %>% select(-HF) %>%
-    tr_summarize_output(grvarnavn = 'Tid')
+     dplyr::mutate(HFresh = HF) %>% dplyr::select(-HF) %>%  #tr_summarize_outputmutate
+     tr_summarize_output(grvarnavn = 'Tid')
 
   belegg_ssb$RHFresh <- ReshNivaa$RHFresh[match(belegg_ssb$HFresh, ReshNivaa$HFresh)]
   belegg_rhf <- as.data.frame(belegg_ssb %>%
-                    group_by(RHFresh) %>%
+                    dplyr::group_by(RHFresh) %>%
                       dplyr::summarise("Dognplasser.2018" = sum(Dognplasser.2018)))
   belegg_rhf$RHF <- as.character(RegData$RHF)[match(belegg_rhf$RHFresh, RegData$RHFresh)]
 
     TabTidRHF <-
     RegData[,c("RHFresh", names(datoer))] %>%
-    group_by(RHFresh) %>%
+    dplyr::group_by(RHFresh) %>%
       dplyr::summarise_all(sum) %>%
     merge(belegg_rhf[, c("RHFresh", "Dognplasser.2018", "RHF")], by.x = "RHFresh", by.y = "RHFresh", all.x = T) %>%
-    mutate(RHFresh = RHF) %>% select(-RHF) %>%
+       dplyr::mutate(RHFresh = RHF) %>% dplyr::select(-RHF) %>%
     # bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Hele landet"))) %>% #KAN DENNE FJERNES?
     tr_summarize_output(grvarnavn = 'Tid')
 
@@ -382,31 +382,31 @@ antallTidBelegg <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNivaa='S
 
   senger_Landet <- 11399 #2019-tall
 
-  Samlet <- bind_cols(TabTidHF, TabTidRHF[,-1], 'Hele landet' = t(TabTidLandet))
+  Samlet <- dplyr::bind_cols(TabTidHF, TabTidRHF[,-1], 'Hele landet' = t(TabTidLandet))
   reshID_rhf <- RegData[match(reshID, RegData$HFresh), "RHFresh"]
 
   if (tilgangsNivaa == 'LU'){
     enhet <- c(belegg_ssb$HF[match(reshID, belegg_ssb$HFresh)],
                belegg_rhf$RHF[match(reshID_rhf, belegg_rhf$RHFresh)], "Hele landet")
-    TabTidEnh <- select(Samlet, c("Tid", intersect(enhet, names(Samlet))))
+    TabTidEnh <- dplyr::select(Samlet, c("Tid", intersect(enhet, names(Samlet))))
   }
   if (tilgangsNivaa == 'LC'){
     enhet <- c(belegg_ssb$HF[belegg_ssb$RHFresh %in% reshID_rhf],
                belegg_rhf$RHF[match(reshID_rhf, belegg_rhf$RHFresh)], "Hele landet")
-    TabTidEnh <- select(Samlet, c("Tid", intersect(enhet, names(Samlet))))
+    TabTidEnh <- dplyr::select(Samlet, c("Tid", intersect(enhet, names(Samlet))))
   }
   if (tilgangsNivaa == 'SC'){
     TabTidEnh <- TabTidRHF
   }
 
-  belegg_anslag <- TabTidEnh[,-1] %>% map_df(function(x) {x[-length(x)]/x[length(x)]*100})
-  belegg_anslag <- bind_rows(belegg_anslag, TabTidEnh[dim(TabTidEnh)[1], 2:dim(TabTidEnh)[2]])
+  belegg_anslag <- TabTidEnh[,-1] %>% purrr::map_df(function(x) {x[-length(x)]/x[length(x)]*100})
+  belegg_anslag <- dplyr::bind_rows(belegg_anslag, TabTidEnh[dim(TabTidEnh)[1], 2:dim(TabTidEnh)[2]])
   belegg_anslag$Tid <- TabTidEnh$Tid
   belegg_anslag <- belegg_anslag[, c(dim(belegg_anslag)[2], 1:(dim(belegg_anslag)[2]-1))]
-  belegg_anslag_txt <- belegg_anslag %>% map_df(as.character)
+  belegg_anslag_txt <- belegg_anslag %>% purrr::map_df(as.character)
   belegg_anslag_txt[-dim(belegg_anslag_txt)[1], 2:dim(belegg_anslag_txt)[2]] <-
     belegg_anslag_txt[-dim(belegg_anslag_txt)[1], 2:dim(belegg_anslag_txt)[2]] %>%
-    map_df(function(x) {paste0(round(as.numeric(x),1), ' %')})
+     purrr::map_df(function(x) {paste0(round(as.numeric(x),1), ' %')})
 
   if (valgtEnhet=='Alle'){valgtEnhet<-NULL}
   return(UtData <- list(utvalgTxt=c(valgtEnhet, UtData$utvalgTxt), Ntest=dim(RegData)[1], Tab_tidy=TabTidEnh,
