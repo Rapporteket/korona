@@ -618,7 +618,7 @@ server <- function(input, output, session) {
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
-
+}
 
   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon',
                           'eabu', 'MarianneSaevik', 'eivh', 'anif', 'helkri'))) {
