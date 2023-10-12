@@ -156,13 +156,13 @@ I denne sammenhengen betyr det at pasienten er innlagt på sykehus og har en pos
 i løpet av de siste 3 månedene før innleggelse.
 Datagrunnlaget er oppdatert med alle registreringer gjort dagen før rapporten ble lastet ned.
 Alle innlagte med covid-19 blir registrert i NIPaR, uavhengig av om covid-19 er hovedårsak til innleggelsen.
-I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er Covid-19.
+I tabellene som viser resultater basert på opphold, vises kun opphold hvor hovedårsaken til innleggelsen er covid-19.
 
 For resultater basert på personaggregerte data, er skjema aggregert til ett eller flere smitteforløp per pasient.
 Hvis det er mer enn 3 måneder mellom to opphold, regnes det som to smitteforløp, ellers som ett.
-Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett smitteforløp og \Sexpr{antPasFlereForlCov} av av disse har mer enn ett smitteforløp hvor Covid-19 er hovedårsak til minst ett av oppholdene i smitteforløpet.
+Per i dag er det \Sexpr{antPasFlereForlAlleInn} pasienter som har mer enn ett smitteforløp og \Sexpr{antPasFlereForlCov} av av disse har mer enn ett smitteforløp hvor covid-19 er hovedårsak til minst ett av oppholdene i smitteforløpet.
 For personaggregerte resultater vises pasienter
-hvor Covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
+hvor covid-19 er hovedårsak til siste innleggelse i forløpet. I dokumentet skilles det ikke på om skjema er
 ferdigstilt eller ikke, dersom ikke annet er oppgitt. \\
 \textbf{Fra 2. oktober 2023 er rapportering av sykehusinnlagte covid-19 pasienter frivillig. Nasjonale tall er dermed ikke nødvendigvis representative, da det kan være ulikt hvorvidt Helseforetakene velger å rapportere inn sykehusinnlagte covid-19 pasienter eller ikke. Tabeller over fordeling per helseforetak kan indikere hvilke helseforetak som fortsatt rapporterer.}
 
