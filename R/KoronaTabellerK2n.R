@@ -312,7 +312,7 @@ antallTidInneliggende <- function(RegData, tidsenhet='dag', erMann=9, tilgangsNi
   if (tilgangsNivaa != 'SC'){
     aux <- dplyr::bind_cols(kol1 = 'Hele landet', RegDataAlle[, c(names(datoer))] %>% dplyr::summarise_all(sum)) %>%
       tr_summarize_output(grvarnavn = 'Tid') %>%
-      dplyr::bind_rows(tibble(Tid = "Totalt", "Hele landet"=as.integer(length(unique(RegDataAlle$PasientID)))))
+      dplyr::bind_rows(tidyr::tibble(Tid = "Totalt", "Hele landet"=as.integer(length(unique(RegDataAlle$PasientID)))))
     TabTidEnh[, "Hele landet"] <- aux[, "Hele landet"]
   }
 

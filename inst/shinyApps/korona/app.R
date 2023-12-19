@@ -6,7 +6,7 @@
 #
 #    http://shiny.rstudio.com/
 #
-
+#library(dplyr)
 library(korona)
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:

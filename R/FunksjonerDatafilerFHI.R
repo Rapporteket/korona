@@ -277,10 +277,10 @@ sendDataFilerFHI <- function(zipFilNavn='Testfil', brukernavn = 'testperson'){ #
 
    #Legger på ekstra betingelse for å sikre at ikke data sendes til feil mottager
    if (zipFilNavn == 'DataFHICovMonitor') {
-      #Data til FHIs covid-overvåkning. Kun rådata,
+      #Data til FHIs covid-overvåkning. Kun rådata, Fra 1.1.2024 skal de bare ha beredskapsdata
       recipient <- 'fhi_covmonitor' #For å sikre at ikke sendes feil
       Filer <- korona::lagDatafilerTilFHI(personIDvar='PatientInRegistryGuid',
-                                           bered=1, pand=1, influ=0,
+                                           bered=1, pand=0, influ=0,
                                            raa=1, aggP=0)
       datasett <- names(Filer)
       for (filnr in 1:length(Filer)){
