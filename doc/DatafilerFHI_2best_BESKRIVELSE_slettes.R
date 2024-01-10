@@ -1,4 +1,4 @@
-eksisterendeVar <- varFHIraa
+#eksisterendeVar <- varFHIraa
 
 nyeVarFHIoverv <- c(
    'Fødselsnummer',

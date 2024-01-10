@@ -27,7 +27,7 @@ KoronaFigGjsnTid(
   beredPas = 9,
   valgtMaal = "Gjsn",
   outfile = "",
-  lagFig = 1,
+  lagFigur = 1,
   ...
 )
 }
@@ -77,8 +77,6 @@ vi heller skal basere på variabelen Nir_beredskapsskjema_CoV2}
 
 \item{valgtMaal}{'gjsn': gir middelverdi (standard)
 'med': gir median}
-
-\item{lagFig}{Angir om figur skal lages eller ikke 0-ikke lag, 1-lag}
 }
 \value{
 Linjediagram som viser utvikling over tid for valgt variabel
