@@ -146,7 +146,12 @@ return(UtData)
 #'
 hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash', raa=1, aggP=1){
 
-   RegDataRaa <- intensivberedskap::NIRberedskDataSQL() #BeredskapData #
+   RegDataRaa <- intensivberedskap::NIRberedskDataSQL() #BeredskapData
+
+   dplyr::rename(RegData, Astma=IsAsthmaticPatient )
+   dplyr::rename(RegData, Diabetes=IsDiabeticPatient )
+   dplyr::rename(RegData, Graviditet=IsPregnant )
+   dplyr::rename(RegData, Kreft=IsCancerPatient )
 
       varFHIraa <- c(
        personIDvar
