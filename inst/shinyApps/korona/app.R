@@ -6,7 +6,7 @@
 #
 #    http://shiny.rstudio.com/
 #
-
+#library(dplyr)
 library(korona)
 
 ## Forsikre om at reshNivaa blir lest inn med korrekt encoding:
@@ -142,6 +142,7 @@ ui <- tagList(
                          tags$head(tags$link(rel="shortcut icon", href="rap/favicon.ico")),
                          uiOutput('manglerRegResh'),
                          h3('Resultater fra pandemiregistrering, korona.'),
+                         h4('NB: Fra oktober 2023 er det obligatorisk registrering kun av covid-pasienter på intensiv.'),
                          uiOutput('Advarsel'),
                          uiOutput('antFlereForl'),
                          h5('Merk at resultatene kan inkludere ufullstendige registreringer'),

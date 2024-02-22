@@ -8,7 +8,7 @@ hentPandemiDataFHI(personIDvar = "PersonIdBC19Hash", raa = 1, aggP = 1)
 }
 \arguments{
 \item{personIDvar}{angi variabel for personid
-'PersonIdBC19Hash' - standard, 'PersonId' - alternativ}
+'PersonIdBC19Hash' - standard, 'PersonId' - alternativ, PatientInRegistryGuid - overvåkning}
 
 \item{raa}{hente rådata= 1-ja (standard), 0-nei}
 

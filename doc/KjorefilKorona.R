@@ -21,6 +21,15 @@ lubridate::floor_date(dato - months(3), unit = 'month') #"2023-07-01"
 library('lubridate')
 floor_date(dato %m-% months(3), unit = 'month') #"2023-07-01"
 
+
+#Sjekk av inneliggende
+UtData <- KoronaUtvalg(RegData=RegData, enhetsNivaa = 'RHF', aarsakInn=2)
+RegData <- UtData$RegData
+Inneliggere <- RegData[is.na(RegData$UtDato),]
+Inneliggere <- Inneliggere[Inneliggere$RHFut=='Sør-Øst',]
+Inneliggere <- Inneliggere[Inneliggere$HFut=="Østfold", ]
+sort(Inneliggere$InnDato)
+
 #Filer til overvåkning, filtrert på hovedårsak Covid
 test <- korona::lagDatafilerTilFHI(personIDvar='PatientInRegistryGuid',
                                bered=1, pand=1, influ=0, raa=1, aggP=0)
@@ -347,7 +356,7 @@ if (tidsenhet=='dag') {
 } else {
   names(datoer) <- datoer
   aux <- erInneliggende(datoer = datoer, regdata = RegDataAlle)
-  aux <- dplyr::bind_cols(as_tibble(RegDataAlle)[, "PasientID"], aux)
+  aux <- dplyr::bind_cols(tidyr::as_tibble(RegDataAlle)[, "PasientID"], aux)
   aux <- aux %>% tidyr::gather(names(aux)[-1], key=Tid, value = verdi)
   aux$Tid <- as.Date(aux$Tid)
   aux$Tid <- switch (tidsenhet,

@@ -1,3 +1,61 @@
+#eksisterendeVar <- varFHIraa
+
+nyeVarFHIoverv <- c(
+   'Fødselsnummer',
+   'PatientAge',
+   'PatientGender',
+   'Municipal',
+   'HF',
+   'RHF',
+   'DateAdmittedIntensive',
+   'DateDischargedIntensive',
+   'DaysAdmittedIntensiv',
+   'Diagnosis',
+   'IsRiskFactorKreft',
+   'IsImpairedImmuneSystemIncludingHivPatient',
+   'Diabetes',
+   'IsHeartDiseaseIncludingHypertensionPatient',
+   'IsObesePatient',
+   'Astma',
+   'IsChronicLungDiseasePatient',
+   'IsKidneyDiseaseIncludingFailurePatient',
+   'IsLiverDiseaseIncludingFailurePatient',
+   'IsChronicNeurologicNeuromuscularPatient',
+   'Graviditet',
+   'IsActiveSmoker',
+   'MechanicalRespirator',
+   'MechanicalRespiratorStart',
+   'MechanicalRespiratorEnd',
+   'IsEcmoTreatmentAdministered',
+   'EcmoStart',
+   'EcmoEnd',
+   "Morsdato",
+   "DischargedIntensiveStatus",
+   "FormStatus",
+   "FormDate",
+   'Kreft')
+
+lubridate::setdiff(eksisterendeVar, nyeVarFHIoverv)
+# Fjernes/endres?:
+# ? "AgeAdmitted" - fjernes (PatientAge er fortsatt med)
+# ? "CreationDate" - fjernes
+# ? "FirstTimeClosed" - fjernes
+
+lubridate::setdiff(nyeVarFHIoverv, eksisterendeVar)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #Variabler til FHI, uttrekk annenhver uke.
 #Sender den fullstendige lista selv om mange nå ikke er obligatoriske. Så slipper vi
 # å gjøre endring hvis situasjonen endrer seg.
