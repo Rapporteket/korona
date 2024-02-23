@@ -615,7 +615,7 @@ server <- function(input, output, session) {
       shinyjs::hide(id = 'KoroRappInt.pdf')
       shinyjs::hide(id = 'KoroRappTxtInt')
    }
-   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon', 'eabu'))){
+   if (!(brukernavn %in% c('lenaro', 'kevin.thon', 'eabu', 'helkri'))){
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
@@ -623,8 +623,8 @@ server <- function(input, output, session) {
       #shinyjs::hide(id = 'oppdatStaging')
    }
 
-   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon',
-                           'eabu', 'MarianneSaevik', 'eivh', 'anif', 'helkri'))) {
+   if (!(brukernavn %in% c('lenaro',  'kevin.thon',
+                           'eabu', 'MarianneSaevik', 'eivh', 'anif', 'helkri', 'crbr74'))) {
       hideTab(inputId = "hovedark", target = "Registeradm")
    }
    #})
