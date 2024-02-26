@@ -148,11 +148,6 @@ hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash', raa=1, aggP=1){
 
    RegDataRaa <- intensivberedskap::NIRberedskDataSQL() #BeredskapData
 
-   RegDataRaa <- dplyr::rename(RegDataRaa, Astma=IsAsthmaticPatient )
-   RegDataRaa <- dplyr::rename(RegDataRaa, Diabetes=IsDiabeticPatient )
-   RegDataRaa <- dplyr::rename(RegDataRaa, Graviditet=IsPregnant )
-   RegDataRaa <- dplyr::rename(RegDataRaa, Kreft=IsCancerPatient )
-
       varFHIraa <- c(
        personIDvar
       ,'PatientAge'
@@ -164,17 +159,17 @@ hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash', raa=1, aggP=1){
       ,'DateDischargedIntensive'
       ,'DaysAdmittedIntensiv'
       ,'Diagnosis'
-      ,'Kreft'
+      ,'IsCancerPatient'
       ,'IsImpairedImmuneSystemIncludingHivPatient'
-      ,'Diabetes'
+      ,'IsDiabeticPatient'
       ,'IsHeartDiseaseIncludingHypertensionPatient'
       ,'IsObesePatient'
-      ,'Astma'
+      ,'IsAsthmaticPatient'
       ,'IsChronicLungDiseasePatient'
       ,'IsKidneyDiseaseIncludingFailurePatient'
       ,'IsLiverDiseaseIncludingFailurePatient'
       ,'IsChronicNeurologicNeuromuscularPatient'
-      ,'Graviditet'
+      ,'IsPregnant'
       ,'IsActiveSmoker'
       ,'MechanicalRespirator'
       ,'MechanicalRespiratorStart'
@@ -192,6 +187,11 @@ hentBeredDataFHI <- function(personIDvar='PersonIdBC19Hash', raa=1, aggP=1){
    ) #De nye variablene må enten legges til i varBort, eller FHI må varsles om at de kommer på ny plass i den aggregerte fila
 
       BeredskapDataRaaFHI <- RegDataRaa[,varFHIraa]
+      BeredskapDataRaaFHI <- dplyr::rename(BeredskapDataRaaFHI, Astma=IsAsthmaticPatient )
+      BeredskapDataRaaFHI <- dplyr::rename(BeredskapDataRaaFHI, Diabetes=IsDiabeticPatient )
+      BeredskapDataRaaFHI <- dplyr::rename(BeredskapDataRaaFHI, Graviditet=IsPregnant )
+      BeredskapDataRaaFHI <- dplyr::rename(BeredskapDataRaaFHI, Kreft=IsCancerPatient )
+
 
 
 if (aggP==1) {
@@ -204,6 +204,11 @@ if (aggP==1) {
                  'ReinnRespTid', 'ReinnRespNaar', 'MechanicalRespiratorStartSiste',
                  'AgeAdmitted')
    BeredskapDataPpFHI <- RegData[ ,varFHIpp]
+   BeredskapDataPpFHI <- dplyr::rename(BeredskapDataPpFHI, Astma=IsAsthmaticPatient )
+   BeredskapDataPpFHI <- dplyr::rename(BeredskapDataPpFHI, Diabetes=IsDiabeticPatient )
+   BeredskapDataPpFHI <- dplyr::rename(BeredskapDataPpFHI, Graviditet=IsPregnant )
+   BeredskapDataPpFHI <- dplyr::rename(BeredskapDataPpFHI, Kreft=IsCancerPatient )
+
    #setdiff(varFHIpp, sort(names(RegData)))
    # write.table(BeredskapDataPpFHI, file = paste0('BeredskapDataPpFHI', Sys.Date(), '.csv'),
    #             fileEncoding = 'UTF-8', row.names=F, sep=';', na='')

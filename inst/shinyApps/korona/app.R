@@ -615,16 +615,11 @@ server <- function(input, output, session) {
       shinyjs::hide(id = 'KoroRappInt.pdf')
       shinyjs::hide(id = 'KoroRappTxtInt')
    }
-   if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon', 'eabu'))){
+   if (!(brukernavn %in% c('lenaro', 'kevin.thon', 'eabu', 'helkri'))){
       shinyjs::hide(id = 'bestillDataTilFHI')
       shinyjs::hide(id = 'hvilkeFilerTilFHI')
       shinyjs::hide(id = 'lastNed_filstiDataNHN')
 }
-
-  if (!(brukernavn %in% c('lenaro', 'aed0903unn', 'kevin.thon',
-                          'eabu', 'MarianneSaevik', 'eivh', 'anif', 'helkri'))) {
-    hideTab(inputId = "hovedark", target = "Registeradm")
-  }
 
 
   # SC kan velge blant RHF, Resten kan bare velge EGEN ENHET/ALLE
@@ -633,6 +628,11 @@ server <- function(input, output, session) {
                     choices = enhetsvalg)
   updateSelectInput(session, "valgtEnhetRes",
                     choices = enhetsvalg)
+
+  if (!(brukernavn %in% c('lenaro',  'kevin.thon',
+                           'eabu', 'MarianneSaevik', 'eivh', 'anif', 'helkri', 'crbr74'))) {
+      hideTab(inputId = "hovedark", target = "Registeradm")
+   }
 
 
    #Sjekk av dataoverføring:
